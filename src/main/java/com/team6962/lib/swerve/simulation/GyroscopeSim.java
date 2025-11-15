@@ -1,7 +1,7 @@
 package com.team6962.lib.swerve.simulation;
 
 import com.ctre.phoenix6.sim.Pigeon2SimState;
-import com.team6962.lib.swerve.gyro.Gyroscope;
+import com.team6962.lib.swerve.localization.Gyroscope;
 
 import edu.wpi.first.units.measure.Angle;
 

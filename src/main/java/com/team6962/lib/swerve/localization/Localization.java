@@ -3,7 +3,6 @@ package com.team6962.lib.swerve.localization;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.team6962.lib.math.AngleMath;
-import com.team6962.lib.swerve.gyro.Gyroscope;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;

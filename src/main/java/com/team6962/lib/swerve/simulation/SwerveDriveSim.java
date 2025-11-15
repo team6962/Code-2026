@@ -2,7 +2,7 @@ package com.team6962.lib.swerve.simulation;
 
 import java.util.Arrays;
 
-import com.team6962.lib.swerve.gyro.Gyroscope;
+import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.module.SwerveModule;
 
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;

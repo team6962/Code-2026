@@ -19,6 +19,14 @@ public class GyroscopeConstants {
     public Pigeon2Configuration DeviceConfiguration = new Pigeon2Configuration();
 
     /**
+     * True if latency compensation should be performed on orientation data from
+     * the gyroscope. The latency compensation uses the angular velocity data to
+     * extrapolate the orientation to account for the time delay between when
+     * the orientation was measured and when the control loop runs.
+     */
+    public boolean LatencyCompensation = true;
+
+    /**
      * If false, the gyroscope will be disabled and only the wheel encoder
      * odometry will be used. This value should never be false for competition
      * matches in normal conditions. It's primary use is for running a robot
@@ -57,6 +65,19 @@ public class GyroscopeConstants {
      */
     public GyroscopeConstants withDeviceConfiguration(Pigeon2Configuration deviceConfiguration) {
         DeviceConfiguration = deviceConfiguration;
+        return this;
+    }
+
+    /**
+     * Sets whether latency compensation is enabled for orientation data from
+     * the gyroscope, and returns this GyroscopeConstants for chaining.
+     * 
+     * @param latencyCompensation True if latency compensation is
+     *                            enabled
+     * @return                    This GyroscopeConstants object
+     */
+    public GyroscopeConstants withLatencyCompensation(boolean latencyCompensation) {
+        LatencyCompensation = latencyCompensation;
         return this;
     }
 

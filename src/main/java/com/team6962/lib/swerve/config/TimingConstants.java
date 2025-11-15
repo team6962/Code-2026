@@ -13,7 +13,7 @@ public class TimingConstants {
      * The frequency at which devices should send status signal updates to the
      * robot controller.
      */
-    public Frequency StatusSignalUpdateRate = Hertz.of(100);
+    public Frequency SignalUpdateRate = Hertz.of(100);
 
     /**
      * The frequency at which to run the internal swerve control loop. Only
@@ -33,7 +33,7 @@ public class TimingConstants {
      * Constructs a TimingConstants object with default values.
      */
     public TimingConstants() {
-        StatusSignalUpdateRate = Hertz.of(100);
+        SignalUpdateRate = Hertz.of(100);
         ControlLoopFrequency = Hertz.of(50);
         TimesyncControlRequests = false;
     }
@@ -42,11 +42,11 @@ public class TimingConstants {
      * Sets the status signal update rate, and returns this TimingConstants
      * for chaining.
      * 
-     * @param statusSignalUpdateRate The status signal update rate
-     * @return                       This TimingConstants object
+     * @param signalUpdateRate The status signal update rate
+     * @return                 This TimingConstants object
      */
-    public TimingConstants withStatusSignalUpdateRate(Frequency statusSignalUpdateRate) {
-        StatusSignalUpdateRate = statusSignalUpdateRate;
+    public TimingConstants withSignalUpdateRate(Frequency signalUpdateRate) {
+        SignalUpdateRate = signalUpdateRate;
         return this;
     }
 
