@@ -44,6 +44,76 @@ public class SwerveModuleConstants {
     public Distance WheelRadius = null;
 
     /**
+     * Constructs a SwerveModuleConstants object with default values.
+     */
+    public SwerveModuleConstants() {
+        DriveMotorCANId = -1;
+        SteerMotorCANId = -1;
+        SteerEncoderCANId = -1;
+        SteerEncoderOffset = Radians.of(0);
+        WheelRadius = null;
+    }
+
+    /**
+     * Sets the CAN ID of the drive motor, and returns this SwerveModuleConstants
+     * for chaining.
+     * 
+     * @param driveMotorCANId The CAN ID of the drive motor
+     * @return                This SwerveModuleConstants object
+     */
+    public SwerveModuleConstants withDriveMotorCANId(int driveMotorCANId) {
+        DriveMotorCANId = driveMotorCANId;
+        return this;
+    }
+
+    /**
+     * Sets the CAN ID of the steer motor, and returns this SwerveModuleConstants
+     * for chaining.
+     * 
+     * @param steerMotorCANId The CAN ID of the steer motor
+     * @return                This SwerveModuleConstants object
+     */
+    public SwerveModuleConstants withSteerMotorCANId(int steerMotorCANId) {
+        SteerMotorCANId = steerMotorCANId;
+        return this;
+    }
+
+    /**
+     * Sets the CAN ID of the steer encoder, and returns this SwerveModuleConstants
+     * for chaining.
+     * 
+     * @param steerEncoderCANId The CAN ID of the steer encoder
+     * @return                  This SwerveModuleConstants object
+     */
+    public SwerveModuleConstants withSteerEncoderCANId(int steerEncoderCANId) {
+        SteerEncoderCANId = steerEncoderCANId;
+        return this;
+    }
+
+    /**
+     * Sets the steer encoder offset, and returns this SwerveModuleConstants
+     * for chaining.
+     * 
+     * @param steerEncoderOffset The steer encoder offset
+     * @return                   This SwerveModuleConstants object
+     */
+    public SwerveModuleConstants withSteerEncoderOffset(Angle steerEncoderOffset) {
+        SteerEncoderOffset = steerEncoderOffset;
+        return this;
+    }
+
+    /**
+     * Sets the wheel radius, and returns this SwerveModuleConstants for chaining.
+     * 
+     * @param wheelRadius The wheel radius
+     * @return            This SwerveModuleConstants object
+     */
+    public SwerveModuleConstants withWheelRadius(Distance wheelRadius) {
+        WheelRadius = wheelRadius;
+        return this;
+    }
+
+    /**
      * The corner of a swerve drive that a module is located at.
      */
     public static enum Corner {

@@ -67,4 +67,114 @@ public class DriveMotorConstants {
      * between when the velocity was measured and when the control loop runs.
      */
     public boolean VelocityLatencyCompensation = true;
+
+    /**
+     * Constructs a DriveMotorConstants object with default values.
+     */
+    public DriveMotorConstants() {
+        DeviceConfiguration = new TalonFXConfiguration();
+        GearReduction = 1.0;
+        PositionControl = new ControlMode();
+        PositionSlot = 0;
+        VelocityControl = new ControlMode();
+        VelocitySlot = 1;
+        PositionLatencyCompensation = true;
+        VelocityLatencyCompensation = true;
+    }
+
+    /**
+     * Sets the device configuration for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param deviceConfiguration The TalonFX configuration
+     * @return                    This DriveMotorConstants object
+     */
+    public DriveMotorConstants withDeviceConfiguration(TalonFXConfiguration deviceConfiguration) {
+        DeviceConfiguration = deviceConfiguration;
+        return this;
+    }
+
+    /**
+     * Sets the gear reduction for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param gearReduction The gear reduction
+     * @return              This DriveMotorConstants object
+     */
+    public DriveMotorConstants withGearReduction(double gearReduction) {
+        GearReduction = gearReduction;
+        return this;
+    }
+
+    /**
+     * Sets the position control mode for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param positionControl The position control mode
+     * @return                This DriveMotorConstants object
+     */
+    public DriveMotorConstants withPositionControl(ControlMode positionControl) {
+        PositionControl = positionControl;
+        return this;
+    }
+
+    /**
+     * Sets the position slot index for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param positionSlot The position slot index
+     * @return             This DriveMotorConstants object
+     */
+    public DriveMotorConstants withPositionSlot(int positionSlot) {
+        PositionSlot = positionSlot;
+        return this;
+    }
+
+    /**
+     * Sets the velocity control mode for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param velocityControl The velocity control mode
+     * @return                This DriveMotorConstants object
+     */
+    public DriveMotorConstants withVelocityControl(ControlMode velocityControl) {
+        VelocityControl = velocityControl;
+        return this;
+    }
+
+    /**
+     * Sets the velocity slot index for the drive motor, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param velocitySlot The velocity slot index
+     * @return             This DriveMotorConstants object
+     */
+    public DriveMotorConstants withVelocitySlot(int velocitySlot) {
+        VelocitySlot = velocitySlot;
+        return this;
+    }
+
+    /**
+     * Sets whether position latency compensation is enabled, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param positionLatencyCompensation True if enabled
+     * @return                            This DriveMotorConstants object
+     */
+    public DriveMotorConstants withPositionLatencyCompensation(boolean positionLatencyCompensation) {
+        PositionLatencyCompensation = positionLatencyCompensation;
+        return this;
+    }
+
+    /**
+     * Sets whether velocity latency compensation is enabled, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param velocityLatencyCompensation True if enabled
+     * @return                            This DriveMotorConstants object
+     */
+    public DriveMotorConstants withVelocityLatencyCompensation(boolean velocityLatencyCompensation) {
+        VelocityLatencyCompensation = velocityLatencyCompensation;
+        return this;
+    }
 }

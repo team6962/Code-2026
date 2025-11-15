@@ -56,4 +56,88 @@ public class SteerMotorConstants {
      * between when the velocity was measured and when the control loop runs.
      */
     public boolean VelocityLatencyCompensation = true;
+
+    /**
+     * Constructs a SteerMotorConstants object with default values.
+     */
+    public SteerMotorConstants() {
+        DeviceConfiguration = new TalonFXConfiguration();
+        GearReduction = 1.0;
+        PositionControl = new ControlMode();
+        PositionSlot = 0;
+        PositionLatencyCompensation = true;
+        VelocityLatencyCompensation = true;
+    }
+
+    /**
+     * Sets the device configuration for the steer motor, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param deviceConfiguration The TalonFX configuration
+     * @return                    This SteerMotorConstants object
+     */
+    public SteerMotorConstants withDeviceConfiguration(TalonFXConfiguration deviceConfiguration) {
+        DeviceConfiguration = deviceConfiguration;
+        return this;
+    }
+
+    /**
+     * Sets the gear reduction for the steer motor, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param gearReduction The gear reduction
+     * @return              This SteerMotorConstants object
+     */
+    public SteerMotorConstants withGearReduction(double gearReduction) {
+        GearReduction = gearReduction;
+        return this;
+    }
+
+    /**
+     * Sets the position control mode for the steer motor, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param positionControl The position control mode
+     * @return                This SteerMotorConstants object
+     */
+    public SteerMotorConstants withPositionControl(ControlMode positionControl) {
+        PositionControl = positionControl;
+        return this;
+    }
+
+    /**
+     * Sets the position slot index for the steer motor, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param positionSlot The position slot index
+     * @return             This SteerMotorConstants object
+     */
+    public SteerMotorConstants withPositionSlot(int positionSlot) {
+        PositionSlot = positionSlot;
+        return this;
+    }
+
+    /**
+     * Sets whether position latency compensation is enabled, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param positionLatencyCompensation True if enabled
+     * @return                            This SteerMotorConstants object
+     */
+    public SteerMotorConstants withPositionLatencyCompensation(boolean positionLatencyCompensation) {
+        PositionLatencyCompensation = positionLatencyCompensation;
+        return this;
+    }
+
+    /**
+     * Sets whether velocity latency compensation is enabled, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param velocityLatencyCompensation True if enabled
+     * @return                            This SteerMotorConstants object
+     */
+    public SteerMotorConstants withVelocityLatencyCompensation(boolean velocityLatencyCompensation) {
+        VelocityLatencyCompensation = velocityLatencyCompensation;
+        return this;
+    }
 }

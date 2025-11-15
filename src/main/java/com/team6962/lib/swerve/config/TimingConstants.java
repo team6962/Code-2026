@@ -28,4 +28,49 @@ public class TimingConstants {
      * improve accuracy.
      */
     public boolean TimesyncControlRequests = false;
+
+    /**
+     * Constructs a TimingConstants object with default values.
+     */
+    public TimingConstants() {
+        StatusSignalUpdateRate = Hertz.of(100);
+        ControlLoopFrequency = Hertz.of(50);
+        TimesyncControlRequests = false;
+    }
+
+    /**
+     * Sets the status signal update rate, and returns this TimingConstants
+     * for chaining.
+     * 
+     * @param statusSignalUpdateRate The status signal update rate
+     * @return                       This TimingConstants object
+     */
+    public TimingConstants withStatusSignalUpdateRate(Frequency statusSignalUpdateRate) {
+        StatusSignalUpdateRate = statusSignalUpdateRate;
+        return this;
+    }
+
+    /**
+     * Sets the control loop frequency, and returns this TimingConstants
+     * for chaining.
+     * 
+     * @param controlLoopFrequency The control loop frequency
+     * @return                     This TimingConstants object
+     */
+    public TimingConstants withControlLoopFrequency(Frequency controlLoopFrequency) {
+        ControlLoopFrequency = controlLoopFrequency;
+        return this;
+    }
+
+    /**
+     * Sets whether to use timesync for control requests, and returns this
+     * TimingConstants for chaining.
+     * 
+     * @param timesyncControlRequests True if timesync is enabled
+     * @return                        This TimingConstants object
+     */
+    public TimingConstants withTimesyncControlRequests(boolean timesyncControlRequests) {
+        TimesyncControlRequests = timesyncControlRequests;
+        return this;
+    }
 }

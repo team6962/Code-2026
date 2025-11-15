@@ -78,5 +78,75 @@ public class DrivetrainConstants {
         return this;
     }
 
-    
+    /**
+     * Sets the gyroscope constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param gyroscope The gyroscope constants
+     * @return          This DrivetrainConstants object
+     */
+    public DrivetrainConstants withGyroscope(GyroscopeConstants gyroscope) {
+        Gyroscope = gyroscope;
+        return this;
+    }
+
+    /**
+     * Sets the timing constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param timing The timing constants
+     * @return       This DrivetrainConstants object
+     */
+    public DrivetrainConstants withTiming(TimingConstants timing) {
+        Timing = timing;
+        return this;
+    }
+
+    /**
+     * Sets the drive motor constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param driveMotor The drive motor constants
+     * @return           This DrivetrainConstants object
+     */
+    public DrivetrainConstants withDriveMotor(DriveMotorConstants driveMotor) {
+        DriveMotor = driveMotor;
+        return this;
+    }
+
+    /**
+     * Sets the steer motor constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param steerMotor The steer motor constants
+     * @return           This DrivetrainConstants object
+     */
+    public DrivetrainConstants withSteerMotor(SteerMotorConstants steerMotor) {
+        SteerMotor = steerMotor;
+        return this;
+    }
+
+    /**
+     * Sets the steer encoder constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param steerEncoder The steer encoder constants
+     * @return             This DrivetrainConstants object
+     */
+    public DrivetrainConstants withSteerEncoder(SteerEncoderConstants steerEncoder) {
+        SteerEncoder = steerEncoder;
+        return this;
+    }
+
+    /**
+     * Sets the swerve module constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @param swerveModules The swerve module constants
+     * @return              This DrivetrainConstants object
+     */
+    public DrivetrainConstants withSwerveModules(SwerveModuleConstants[] swerveModules) {
+        SwerveModules = swerveModules;
+        return this;
+    }
 }

@@ -26,4 +26,49 @@ public class GyroscopeConstants {
      * good way to test an autonomous routine in the pit.
      */
     public boolean Enabled = true;
+
+    /**
+     * Constructs a GyroscopeConstants object with default values.
+     */
+    public GyroscopeConstants() {
+        CANId = -1;
+        DeviceConfiguration = new Pigeon2Configuration();
+        Enabled = true;
+    }
+
+    /**
+     * Sets the CAN ID of the gyroscope, and returns this GyroscopeConstants
+     * for chaining.
+     * 
+     * @param canId The CAN ID
+     * @return      This GyroscopeConstants object
+     */
+    public GyroscopeConstants withCANId(int canId) {
+        CANId = canId;
+        return this;
+    }
+
+    /**
+     * Sets the device configuration for the gyroscope, and returns this
+     * GyroscopeConstants for chaining.
+     * 
+     * @param deviceConfiguration The Pigeon2 configuration
+     * @return                    This GyroscopeConstants object
+     */
+    public GyroscopeConstants withDeviceConfiguration(Pigeon2Configuration deviceConfiguration) {
+        DeviceConfiguration = deviceConfiguration;
+        return this;
+    }
+
+    /**
+     * Sets whether the gyroscope is enabled, and returns this GyroscopeConstants
+     * for chaining.
+     * 
+     * @param enabled True if the gyroscope is enabled
+     * @return        This GyroscopeConstants object
+     */
+    public GyroscopeConstants withEnabled(boolean enabled) {
+        Enabled = enabled;
+        return this;
+    }
 }
