@@ -117,17 +117,19 @@ public class SwerveModuleConstants {
      * The corner of a swerve drive that a module is located at.
      */
     public static enum Corner {
-        FrontLeft(0, Degrees.of(0)),
-        FrontRight(1, Degrees.of(-90)),
-        BackLeft(2, Degrees.of(90)),
-        BackRight(3, Degrees.of(180));
+        FrontLeft(0, Degrees.of(0), "Front Left"),
+        FrontRight(1, Degrees.of(-90), "Front Right"),
+        BackLeft(2, Degrees.of(90), "Back Left"),
+        BackRight(3, Degrees.of(180), "Back Right");
 
         private final int index;
         private final Angle rotation;
+        private final String name;
 
-        private Corner(int index, Angle rotation) {
+        private Corner(int index, Angle rotation, String name) {
             this.index = index;
             this.rotation = rotation;
+            this.name = name;
         }
 
         /**
@@ -152,6 +154,33 @@ public class SwerveModuleConstants {
          */
         public Angle getRotation() {
             return rotation;
+        }
+
+        /**
+         * Gets the name of this corner.
+         * 
+         * @return The name of this corner
+         */
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        /**
+         * Gets the Corner enum value for a given index.
+         */
+        public static Corner fromIndex(int index) {
+            for (Corner corner : Corner.values()) {
+                if (corner.index == index) {
+                    return corner;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid corner index: " + index);
         }
     }
 }

@@ -28,10 +28,12 @@ public class GyroscopeConstants {
 
     /**
      * If false, the gyroscope will be disabled and only the wheel encoder
-     * odometry will be used. This value should never be false for competition
-     * matches in normal conditions. It's primary use is for running a robot
-     * that is placed on a stand or cart so it doesn't actually move, which is a
-     * good way to test an autonomous routine in the pit.
+     * odometry will be used. It's primary use is for running a robot that is
+     * placed on a stand or cart so it doesn't actually move, which is a good
+     * way to test an autonomous routine in the pit.
+     * <p>
+     * When connected to an FMS, this value will be ignored and the gyroscope
+     * will always be used (as long as it's connected).
      */
     public boolean Enabled = true;
 

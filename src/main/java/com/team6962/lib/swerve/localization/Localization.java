@@ -1,22 +1,33 @@
 package com.team6962.lib.swerve.localization;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.core.SwerveComponent;
 
+import dev.doglog.DogLog;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 
 /**
  * Fuses gyroscope, odometry, and vision data to estimate the robot's position
  * and velocity on the field.
  */
-public class Localization {
+public class Localization implements SwerveComponent {
     /**
      * The pose estimator that fuses gyroscope, odometry, and vision data to
      * estimate the robot's position on the field.
@@ -60,7 +71,7 @@ public class Localization {
      */
     private Angle yaw = Radians.of(0);
 
-    public Localization(SwerveDriveKinematics kinematics, Pose2d initialPose, Gyroscope gyroscope, Odometry odometry) {
+    public Localization(DrivetrainConstants constants, SwerveDriveKinematics kinematics, Pose2d initialPose, Odometry odometry) {
         this.poseEstimator = new SwerveDrivePoseEstimator(
             kinematics,
             new Rotation2d(gyroscope.getYaw()),
@@ -68,20 +79,14 @@ public class Localization {
             initialPose
         );
 
-        this.gyroscope = gyroscope;
         this.odometry = odometry;
+        this.gyroscope = new Gyroscope(constants, odometry);
     }
 
-    /**
-     * Updates the localization estimates by fusing new gyroscope and odometry
-     * data. This method should be called periodically to refresh the
-     * localization data.
-     * 
-     * @param deltaTime The time elapsed since the last update, in seconds.
-     */
-    public void update(double deltaTime) {
-        gyroscope.update();
-        odometry.update();
+    @Override
+    public void update(double deltaTimeSeconds) {
+        gyroscope.update(deltaTimeSeconds);
+        odometry.update(deltaTimeSeconds);
 
         // Update the pose estimator with new gyroscope and odometry data
         poseEstimator.update(new Rotation2d(gyroscope.getYaw()), odometry.getPositions());
@@ -93,17 +98,63 @@ public class Localization {
 
         // Compute the chassis velocity based on the twist and delta time
         velocity = ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(
-            twist.dx / deltaTime,
-            twist.dy / deltaTime,
-            twist.dtheta / deltaTime
+            twist.dx / deltaTimeSeconds,
+            twist.dy / deltaTimeSeconds,
+            twist.dtheta / deltaTimeSeconds
         ), poseEstimator.getEstimatedPosition().getRotation());
 
         // Compute the arc velocity as a Twist2d
         arcVelocity = new Twist2d(
-            twist.dx / deltaTime,
-            twist.dy / deltaTime,
-            twist.dtheta / deltaTime
+            twist.dx / deltaTimeSeconds,
+            twist.dy / deltaTimeSeconds,
+            twist.dtheta / deltaTimeSeconds
         );
+    }
+
+    @Override
+    public BaseStatusSignal[] getStatusSignals() {
+        return SwerveComponent.combineStatusSignals(gyroscope, odometry);
+    }
+
+    @Override
+    public void logTelemetry(String basePath) {
+        basePath = LoggingUtil.ensureEndsWithSlash(basePath);
+
+        gyroscope.logTelemetry(basePath + "/Gyroscope");
+        odometry.logTelemetry(basePath + "/Odometry");
+
+        Pose2d position = getPosition();
+
+        DogLog.log(basePath + "Localization/PositionX", position.getX(), Meters);
+        DogLog.log(basePath + "Localization/PositionY", position.getY(), Meters);
+        DogLog.log(basePath + "Localization/Heading", getHeading().in(Radians), Radians);
+
+        DogLog.log(basePath + "Localization/VelocityX", velocity.vxMetersPerSecond, MetersPerSecond);
+        DogLog.log(basePath + "Localization/VelocityY", velocity.vyMetersPerSecond, MetersPerSecond);
+        DogLog.log(basePath + "Localization/AngularVelocity", velocity.omegaRadiansPerSecond, RadiansPerSecond);
+
+        DogLog.log(basePath + "Localization/TwistDX", twist.dx, Meters);
+        DogLog.log(basePath + "Localization/TwistDY", twist.dy, Meters);
+        DogLog.log(basePath + "Localization/TwistDTheta", twist.dtheta, Radians);
+
+        DogLog.log(basePath + "Localization/ArcVelocityDX", arcVelocity.dx, MetersPerSecond);
+        DogLog.log(basePath + "Localization/ArcVelocityDY", arcVelocity.dy, MetersPerSecond);
+        DogLog.log(basePath + "Localization/ArcVelocityDTheta", arcVelocity.dtheta, RadiansPerSecond);
+    }
+
+    public void addVisionEstimate(
+        Pose2d pose,
+        double timestampSeconds,
+        Matrix<N3, N1> stdDevs
+    ) {
+        poseEstimator.addVisionMeasurement(pose, timestampSeconds, stdDevs);
+    }
+
+    public void addVisionEstimate(
+        Pose2d pose,
+        double timestampSeconds
+    ) {
+        poseEstimator.addVisionMeasurement(pose, timestampSeconds);
     }
 
     /**

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.phoenix.TimestampUtil;
+import com.team6962.lib.swerve.core.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -29,7 +30,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
-public class DriveMotor {
+public class DriveMotor implements SwerveComponent {
     private SwerveModuleConfig config;
 
     private TalonFX motor;
@@ -66,6 +67,7 @@ public class DriveMotor {
         return motor;
     }
 
+    @Override
     public BaseStatusSignal[] getStatusSignals() {
         return new BaseStatusSignal[] {
             positionSignal,
@@ -77,6 +79,7 @@ public class DriveMotor {
         };
     }
 
+    @Override
     public void logTelemetry(String basePath) {
         if (!basePath.endsWith("/")) {
             basePath += "/";

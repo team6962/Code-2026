@@ -2,6 +2,7 @@ package com.team6962.lib.swerve.simulation;
 
 import java.util.Arrays;
 
+import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.module.SwerveModule;
 
@@ -13,6 +14,7 @@ public class SwerveDriveSim {
     private GyroscopeSim gyroscopeSim;
 
     public SwerveDriveSim(
+        DrivetrainConstants constants,
         SimulationConfig simulationConfig,
         SwerveDriveKinematics kinematics,
         SwerveModule[] modules,
@@ -20,7 +22,7 @@ public class SwerveDriveSim {
     ) {
         this.moduleSims = Arrays.stream(modules).map(module -> new SwerveModuleSim(simulationConfig, module)).toArray(SwerveModuleSim[]::new);
         this.odometrySim = new OdometrySim(kinematics, moduleSims);
-        this.gyroscopeSim = new GyroscopeSim(gyroscope);
+        this.gyroscopeSim = new GyroscopeSim(constants, gyroscope);
     }
 
     public void update(double deltaTimeSeconds) {
@@ -33,6 +35,6 @@ public class SwerveDriveSim {
         odometrySim.update();
 
         // Update gyroscope simulation based on odometry change
-        gyroscopeSim.update(odometrySim.getDeltaYaw());
+        gyroscopeSim.addYaw(odometrySim.getDeltaYaw());
     }
 }

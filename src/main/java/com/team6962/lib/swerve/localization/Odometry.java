@@ -1,7 +1,14 @@
 package com.team6962.lib.swerve.localization;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+
+import com.team6962.lib.logging.LoggingUtil;
+import com.team6962.lib.swerve.core.SwerveComponent;
 import com.team6962.lib.swerve.module.SwerveModule;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -11,7 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * Odometry class for tracking the positions and states of swerve modules and
  * the changes in position of the robot over time.
  */
-public class Odometry {
+public class Odometry implements SwerveComponent {
     /**
      * Kinematics object for converting between module states/positions and
      * robot motion.
@@ -171,11 +178,26 @@ public class Odometry {
         return twist;
     }
 
-    /**
-     * Updates the odometry calculations. This should be called periodically to
-     * refresh the odometry data.
-     */
-    public void update() {
+    @Override
+    public void logTelemetry(String basePath) {
+        basePath = LoggingUtil.ensureEndsWithSlash(basePath);
+
+        for (int i = 0; i < modules.length; i++) {
+            DogLog.log(basePath + "Module Positions/" + i + "/distanceMeters", currentPostions[i].distanceMeters, Meters);
+            DogLog.log(basePath + "Module Positions/" + i + "/angleRadians", currentPostions[i].angle.getRadians(), Radians);
+            DogLog.log(basePath + "Module States/" + i + "/speedMetersPerSecond", currentStates[i].speedMetersPerSecond, MetersPerSecond);
+            DogLog.log(basePath + "Module States/" + i + "/angleRadians", currentStates[i].angle.getRadians(), Radians);
+            DogLog.log(basePath + "Position Deltas/" + i + "/distanceMeters", positionDeltas[i].distanceMeters, Meters);
+            DogLog.log(basePath + "Position Deltas/" + i + "/angleRadians", positionDeltas[i].angle.getRadians(), Radians);
+        }
+
+        DogLog.log(basePath + "Twist/dx", twist.dx, Meters);
+        DogLog.log(basePath + "Twist/dy", twist.dy, Meters);
+        DogLog.log(basePath + "Twist/dtheta", twist.dtheta, Radians);
+    }
+
+    @Override
+    public void update(double deltaTimeSeconds) {
         lastPositions = currentPostions;
         currentPostions = computePositions();
         currentStates = computeStates();

@@ -16,10 +16,17 @@ public class TimingConstants {
     public Frequency SignalUpdateRate = Hertz.of(100);
 
     /**
-     * The frequency at which to run the internal swerve control loop. Only
-     * 50 Hz is supported at this time, so this field is ignored.
+     * The frequency at which to run the internal swerve control loop. If the
+     * control loop is not threaded, this value is ignored and 50 Hz is always
+     * used.
      */
     public Frequency ControlLoopFrequency = Hertz.of(50);
+
+    /**
+     * Whether to run the control loop in a separate thread from the main
+     * robot code. Enabling this may improve performance.
+     */
+    public boolean UseThreadedControlLoop = false;
 
     /**
      * Whether to use time synchronization for control requests. Enabling this
