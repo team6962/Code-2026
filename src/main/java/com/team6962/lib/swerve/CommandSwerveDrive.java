@@ -3,6 +3,7 @@ package com.team6962.lib.swerve;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 
@@ -61,7 +62,19 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
         return runRotation(() -> applyVelocityMotion(angularVelocity.get()));
     }
 
-    public Command stop() {
-        return driveVelocity(() -> new ChassisSpeeds(0.0, 0.0, 0.0));
+    public Command neutral() {
+        return runMotion(() -> applyNeutralMotion(null));
+    }
+
+    public Command brake() {
+        return runMotion(() -> applyNeutralMotion(NeutralModeValue.Brake));
+    }
+
+    public Command coast() {
+        return runMotion(() -> applyNeutralMotion(NeutralModeValue.Coast));
+    }
+
+    public Command lock() {
+        return runMotion(() -> applyLockMotion());
     }
 }

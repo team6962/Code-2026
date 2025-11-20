@@ -1,10 +1,13 @@
 package com.team6962.lib.swerve;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
@@ -14,6 +17,8 @@ import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.localization.Localization;
 import com.team6962.lib.swerve.localization.Odometry;
 import com.team6962.lib.swerve.module.SwerveModule;
+import com.team6962.lib.swerve.motion.LockMotion;
+import com.team6962.lib.swerve.motion.NeutralMotion;
 import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.motion.SwerveMotionManager;
 import com.team6962.lib.swerve.motion.VelocityMotion;
@@ -30,6 +35,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -184,6 +190,16 @@ public class MotionSwerveDrive implements AutoCloseable {
         return localization.getPosition();
     }
 
+    public boolean isNear(Pose2d target, Distance linearTolerance, Angle angularTolerance) {
+        Pose2d current = getPosition();
+
+        double linearError = current.getTranslation().getDistance(target.getTranslation());
+        double angularError = Math.abs(current.getRotation().minus(target.getRotation()).getRadians());
+
+        return linearError <= linearTolerance.in(Meters) &&
+               angularError <= angularTolerance.in(Radians);
+    }
+
     public ChassisSpeeds getVelocity() {
         return localization.getVelocity();
     }
@@ -265,5 +281,13 @@ public class MotionSwerveDrive implements AutoCloseable {
             0,
             angularVelocity.in(RadiansPerSecond)
         ), false, true, this));
+    }
+
+    public void applyNeutralMotion(NeutralModeValue neutralMode) {
+        applyMotion(new NeutralMotion(this, neutralMode));
+    }
+
+    public void applyLockMotion() {
+        applyMotion(new LockMotion(this));
     }
 }
