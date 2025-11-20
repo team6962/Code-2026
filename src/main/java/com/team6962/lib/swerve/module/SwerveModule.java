@@ -1,58 +1,91 @@
 package com.team6962.lib.swerve.module;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
+import com.team6962.lib.swerve.core.SwerveComponent;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Current;
 
-public class SwerveModule {
-    private SwerveModuleConfig config;
-    private DriveMotor driveMotor;
-    private SteerMotor steerMotor;
+public class SwerveModule implements SwerveComponent, AutoCloseable {
+    private Corner corner;
+    private DrivetrainConstants constants;
+    private DriveMechanism driveMechanism;
+    private SteerMechanism steerMechanism;
 
-    public SwerveModule(SwerveModuleConfig config) {
-        this.config = config;
-        driveMotor = new DriveMotor(config);
-        steerMotor = new SteerMotor(config);
+    public SwerveModule(Corner corner, DrivetrainConstants constants) {
+        this.corner = corner;
+        this.constants = constants;
+
+        driveMechanism = new DriveMechanism(corner, constants);
+        steerMechanism = new SteerMechanism(corner, constants);
     }
 
-    public SwerveModuleConfig getConfig() {
-        return config;
+    @Override
+    public BaseStatusSignal[] getStatusSignals() {
+        return SwerveComponent.combineStatusSignals(driveMechanism, steerMechanism);
     }
 
-    public DriveMotor getDriveMotor() {
-        return driveMotor;
+    @Override
+    public void update(double deltaTimeSeconds) {
+        driveMechanism.update(deltaTimeSeconds);
+        steerMechanism.update(deltaTimeSeconds);
     }
 
-    public SteerMotor getSteerMotor() {
-        return steerMotor;
+    public Corner getCorner() {
+        return corner;
     }
 
+    public int getIndex() {
+        return corner.getIndex();
+    }
+
+    public DrivetrainConstants getConstants() {
+        return constants;
+    }
+
+    public DriveMechanism getDriveMechanism() {
+        return driveMechanism;
+    }
+
+    public SteerMechanism getSteerMechanism() {
+        return steerMechanism;
+    }
+
+    @Override
     public void logTelemetry(String basePath) {
         if (!basePath.endsWith("/")) {
             basePath += "/";
         }
 
-        driveMotor.logTelemetry(basePath + "Drive/");
-        steerMotor.logTelemetry(basePath + "Steer/");
+        driveMechanism.logTelemetry(basePath + "Drive/");
+        steerMechanism.logTelemetry(basePath + "Steer/");
     }
 
     public SwerveModuleState getState() {
-        return new SwerveModuleState(driveMotor.getVelocity(), new Rotation2d(steerMotor.getPosition()));
+        return new SwerveModuleState(driveMechanism.getVelocity(), new Rotation2d(steerMechanism.getPosition()));
     }
 
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(driveMotor.getPosition(), new Rotation2d(steerMotor.getPosition()));
+        return new SwerveModulePosition(driveMechanism.getPosition(), new Rotation2d(steerMechanism.getPosition()));
     }
 
     public Current getSupplyCurrent() {
-        return driveMotor.getSupplyCurrent().plus(steerMotor.getSupplyCurrent());
+        return driveMechanism.getSupplyCurrent().plus(steerMechanism.getSupplyCurrent());
     }
 
     public void setControl(ControlRequest driveRequest, ControlRequest steerRequest) {
-        driveMotor.setControl(driveRequest);
-        steerMotor.setControl(steerRequest);
+        driveMechanism.setControl(driveRequest);
+        steerMechanism.setControl(steerRequest);
+    }
+
+    @Override
+    public void close() {
+        driveMechanism.close();
+        steerMechanism.close();
     }
 }

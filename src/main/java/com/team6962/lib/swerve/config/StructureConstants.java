@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Pounds;
 
 import com.team6962.lib.math.MeasureUtil;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -154,5 +156,20 @@ public class StructureConstants {
     public StructureConstants estimateMomentOfInertia() {
         RobotMomentOfInertia = MeasureUtil.toMomentOfInertia(OuterWidth.times(OuterLength).times(RobotMass).div(12));
         return this;
+    }
+
+    /**
+     * Gets the swerve drive kinematics for the drivetrain based on the
+     * configured wheelbase and track width.
+     * 
+     * @return The swerve drive kinematics
+     */
+    public SwerveDriveKinematics getKinematics() {
+        return new SwerveDriveKinematics(
+            new Translation2d(WheelBase.div(2), TrackWidth.div(2)),
+            new Translation2d(WheelBase.div(2), TrackWidth.div(-2)),
+            new Translation2d(WheelBase.div(-2), TrackWidth.div(2)),
+            new Translation2d(WheelBase.div(-2), TrackWidth.div(-2))
+        );
     }
 }

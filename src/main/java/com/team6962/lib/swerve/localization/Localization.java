@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
@@ -71,9 +70,9 @@ public class Localization implements SwerveComponent {
      */
     private Angle yaw = Radians.of(0);
 
-    public Localization(DrivetrainConstants constants, SwerveDriveKinematics kinematics, Pose2d initialPose, Odometry odometry) {
+    public Localization(DrivetrainConstants constants, Pose2d initialPose, Odometry odometry) {
         this.poseEstimator = new SwerveDrivePoseEstimator(
-            kinematics,
+            constants.Structure.getKinematics(),
             new Rotation2d(gyroscope.getYaw()),
             odometry.getPositions(),
             initialPose
@@ -84,10 +83,7 @@ public class Localization implements SwerveComponent {
     }
 
     @Override
-    public void update(double deltaTimeSeconds) {
-        gyroscope.update(deltaTimeSeconds);
-        odometry.update(deltaTimeSeconds);
-
+    public synchronized void update(double deltaTimeSeconds) {
         // Update the pose estimator with new gyroscope and odometry data
         poseEstimator.update(new Rotation2d(gyroscope.getYaw()), odometry.getPositions());
 
@@ -117,7 +113,7 @@ public class Localization implements SwerveComponent {
     }
 
     @Override
-    public void logTelemetry(String basePath) {
+    public synchronized void logTelemetry(String basePath) {
         basePath = LoggingUtil.ensureEndsWithSlash(basePath);
 
         gyroscope.logTelemetry(basePath + "/Gyroscope");
@@ -142,7 +138,7 @@ public class Localization implements SwerveComponent {
         DogLog.log(basePath + "Localization/ArcVelocityDTheta", arcVelocity.dtheta, RadiansPerSecond);
     }
 
-    public void addVisionEstimate(
+    public synchronized void addVisionEstimate(
         Pose2d pose,
         double timestampSeconds,
         Matrix<N3, N1> stdDevs
@@ -150,7 +146,7 @@ public class Localization implements SwerveComponent {
         poseEstimator.addVisionMeasurement(pose, timestampSeconds, stdDevs);
     }
 
-    public void addVisionEstimate(
+    public synchronized void addVisionEstimate(
         Pose2d pose,
         double timestampSeconds
     ) {
@@ -162,7 +158,7 @@ public class Localization implements SwerveComponent {
      * 
      * @return The current estimated Pose2d of the robot.
      */
-    public Pose2d getPosition() {
+    public synchronized Pose2d getPosition() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -172,7 +168,7 @@ public class Localization implements SwerveComponent {
      * 
      * @return
      */
-    public Angle getHeading() {
+    public synchronized Angle getHeading() {
         return AngleMath.toContinuous(poseEstimator.getEstimatedPosition().getRotation().getMeasure(), gyroscope.getYaw());
     }
 
@@ -181,7 +177,7 @@ public class Localization implements SwerveComponent {
      * 
      * @return The current field-relative velocity of the robot.
      */
-    public ChassisSpeeds getVelocity() {
+    public synchronized ChassisSpeeds getVelocity() {
         return velocity;
     }
 
@@ -191,7 +187,7 @@ public class Localization implements SwerveComponent {
      * 
      * @return The current arc velocity of the robot.
      */
-    public Twist2d getArcVelocity() {
+    public synchronized Twist2d getArcVelocity() {
         return arcVelocity;
     }
 
@@ -202,7 +198,7 @@ public class Localization implements SwerveComponent {
      * @return The most recent Twist2d representing the change in position of
      * the robot.
      */
-    public Twist2d getTwist() {
+    public synchronized Twist2d getTwist() {
         return twist;
     }
 }

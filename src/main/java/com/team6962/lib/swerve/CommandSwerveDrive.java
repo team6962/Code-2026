@@ -1,0 +1,67 @@
+package com.team6962.lib.swerve;
+
+import java.util.Set;
+import java.util.function.Supplier;
+
+import com.team6962.lib.math.TranslationalVelocity;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class CommandSwerveDrive extends MotionSwerveDrive {
+    private Subsystem translation = new SubsystemBase() {};
+    private Subsystem rotation = new SubsystemBase() {};
+
+    public CommandSwerveDrive(DrivetrainConstants constants) {
+        super(constants);
+    }
+
+    public Subsystem useTranslation() {
+        return translation;
+    }
+
+    public Subsystem useRotation() {
+        return rotation;
+    }
+
+    public Subsystem[] useMotion() {
+        return new Subsystem[] {translation, rotation};
+    }
+
+    public Set<Subsystem> useMotionSet() {
+        return Set.of(translation, rotation);
+    }
+
+    public Command runTranslation(Runnable toRun) {
+        return Commands.run(toRun, translation);
+    }
+
+    public Command runRotation(Runnable toRun) {
+        return Commands.run(toRun, rotation);
+    }
+
+    public Command runMotion(Runnable toRun) {
+        return Commands.run(toRun, translation, rotation);
+    }
+
+    public Command driveVelocity(Supplier<ChassisSpeeds> velocity) {
+        return runMotion(() -> applyVelocityMotion(velocity.get()));
+    }
+
+    public Command driveTranslation(Supplier<TranslationalVelocity> velocity) {
+        return runTranslation(() -> applyVelocityMotion(velocity.get()));
+    }
+
+    public Command driveRotation(Supplier<AngularVelocity> angularVelocity) {
+        return runRotation(() -> applyVelocityMotion(angularVelocity.get()));
+    }
+
+    public Command stop() {
+        return driveVelocity(() -> new ChassisSpeeds(0.0, 0.0, 0.0));
+    }
+}

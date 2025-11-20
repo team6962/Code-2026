@@ -6,23 +6,25 @@ import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.module.SwerveModule;
 
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-
 public class SwerveDriveSim {
     private SwerveModuleSim[] moduleSims;
-    private OdometrySim odometrySim;
     private GyroscopeSim gyroscopeSim;
 
     public SwerveDriveSim(
         DrivetrainConstants constants,
-        SimulationConfig simulationConfig,
-        SwerveDriveKinematics kinematics,
         SwerveModule[] modules,
         Gyroscope gyroscope
     ) {
-        this.moduleSims = Arrays.stream(modules).map(module -> new SwerveModuleSim(simulationConfig, module)).toArray(SwerveModuleSim[]::new);
-        this.odometrySim = new OdometrySim(kinematics, moduleSims);
-        this.gyroscopeSim = new GyroscopeSim(constants, gyroscope);
+        this.moduleSims = Arrays.stream(modules).map(module -> new SwerveModuleSim(module)).toArray(SwerveModuleSim[]::new);
+        this.gyroscopeSim = new GyroscopeSim(constants, gyroscope, moduleSims);
+    }
+
+    public SwerveModuleSim[] getModules() {
+        return moduleSims;
+    }
+
+    public GyroscopeSim getGyroscope() {
+        return gyroscopeSim;
     }
 
     public void update(double deltaTimeSeconds) {
@@ -31,10 +33,7 @@ public class SwerveDriveSim {
             moduleSim.update(deltaTimeSeconds);
         }
 
-        // Update odometry simulation
-        odometrySim.update();
-
-        // Update gyroscope simulation based on odometry change
-        gyroscopeSim.addYaw(odometrySim.getDeltaYaw());
+        // Update gyroscope simulation
+        gyroscopeSim.update();
     }
 }

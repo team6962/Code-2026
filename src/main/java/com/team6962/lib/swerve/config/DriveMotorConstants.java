@@ -1,7 +1,12 @@
 package com.team6962.lib.swerve.config;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.team6962.lib.swerve.config.control.ControlMode;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
  * The constants that define the drive motor behavior.
@@ -21,7 +26,7 @@ public class DriveMotorConstants {
      * <li>Slot Configs</li>
      * </ul>
      */
-    public TalonFXConfiguration DeviceConfiguration;
+    public TalonFXConfiguration DeviceConfiguration = new TalonFXConfiguration();
 
     /**
      * The gear reduction from the drive motor to the wheel.
@@ -31,7 +36,7 @@ public class DriveMotorConstants {
     /**
      * Control mode for position control of the drive motor.
      */
-    public ControlMode PositionControl = new ControlMode();
+    public ControlMode.Position PositionControl = new ControlMode.Position();
 
     /**
      * The slot index for position control of the drive motor. This should be
@@ -43,7 +48,7 @@ public class DriveMotorConstants {
     /**
      * Control mode for velocity control of the drive motor.
      */
-    public ControlMode VelocityControl = new ControlMode();
+    public ControlMode.Velocity VelocityControl = new ControlMode.Velocity();
 
     /**
      * The slot index for velocity control of the drive motor. This should be
@@ -51,6 +56,11 @@ public class DriveMotorConstants {
      * PID and feedforward constants configured.
      */
     public int VelocitySlot = 1;
+
+    /**
+     * Control mode for dynamically-constrained position control of the drive motor.
+     */
+    public ControlMode.DynamicallyConstrainedPosition DynamicallyConstraintedPositionControl = new ControlMode.DynamicallyConstrainedPosition();
 
     /**
      * True if latency compensation should be performed on position data from
@@ -68,18 +78,14 @@ public class DriveMotorConstants {
      */
     public boolean VelocityLatencyCompensation = true;
 
+    public DCMotor SimulatedMotor = DCMotor.getKrakenX60Foc(1);
+    public MomentOfInertia SimulatedMomentOfInertia = KilogramSquareMeters.of(0.00032);
+    public LinearVelocity MaxVelocity;
+
     /**
      * Constructs a DriveMotorConstants object with default values.
      */
     public DriveMotorConstants() {
-        DeviceConfiguration = new TalonFXConfiguration();
-        GearReduction = 1.0;
-        PositionControl = new ControlMode();
-        PositionSlot = 0;
-        VelocityControl = new ControlMode();
-        VelocitySlot = 1;
-        PositionLatencyCompensation = true;
-        VelocityLatencyCompensation = true;
     }
 
     /**
@@ -113,7 +119,7 @@ public class DriveMotorConstants {
      * @param positionControl The position control mode
      * @return                This DriveMotorConstants object
      */
-    public DriveMotorConstants withPositionControl(ControlMode positionControl) {
+    public DriveMotorConstants withPositionControl(ControlMode.Position positionControl) {
         PositionControl = positionControl;
         return this;
     }
@@ -137,7 +143,7 @@ public class DriveMotorConstants {
      * @param velocityControl The velocity control mode
      * @return                This DriveMotorConstants object
      */
-    public DriveMotorConstants withVelocityControl(ControlMode velocityControl) {
+    public DriveMotorConstants withVelocityControl(ControlMode.Velocity velocityControl) {
         VelocityControl = velocityControl;
         return this;
     }
@@ -151,6 +157,21 @@ public class DriveMotorConstants {
      */
     public DriveMotorConstants withVelocitySlot(int velocitySlot) {
         VelocitySlot = velocitySlot;
+        return this;
+    }
+
+    /**
+     * Sets the dynamically-constrained position control mode for the drive
+     * motor, and returns this DriveMotorConstants for chaining.
+     * 
+     * @param dynamicallyConstraintedPositionControl The dynamically-constrained
+     *                                               position control mode
+     * @return                                       This DriveMotorConstants
+     *                                               object
+     */
+    public DriveMotorConstants withDynamicallyConstraintedPositionControl(
+            ControlMode.DynamicallyConstrainedPosition dynamicallyConstraintedPositionControl) {
+        DynamicallyConstraintedPositionControl = dynamicallyConstraintedPositionControl;
         return this;
     }
 

@@ -1,5 +1,9 @@
 package com.team6962.lib.swerve.config;
 
+import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
+
+import edu.wpi.first.units.measure.Distance;
+
 /**
  * A set of constants that configure the behavior of a swerve drivetrain.
  */
@@ -45,6 +49,8 @@ public class DrivetrainConstants {
      * optional wheel radii.
      */
     public SwerveModuleConstants[] SwerveModules = new SwerveModuleConstants[4];
+
+    public DrivingConstants Driving = new DrivingConstants();
 
     /**
      * The constants that define the physical structure of the drivetrain.
@@ -148,5 +154,65 @@ public class DrivetrainConstants {
     public DrivetrainConstants withSwerveModules(SwerveModuleConstants[] swerveModules) {
         SwerveModules = swerveModules;
         return this;
+    }
+
+    /**
+     * Sets the driving constants for the drivetrain, and returns this
+     * DrivetrainConstants for chaining.
+     * 
+     * @return This DrivetrainConstants object
+     */
+    public DrivetrainConstants withDriving(DrivingConstants driving) {
+        Driving = driving;
+        return this;
+    }
+
+    /**
+     * Gets the swerve module constants for the specified module index.
+     * 
+     * @param index The index of the swerve module
+     * @return      The swerve module constants
+     */
+    public SwerveModuleConstants getSwerveModule(int index) {
+        return SwerveModules[index];
+    }
+
+    /**
+     * Gets the swerve module constants for the specified module corner.
+     * 
+     * @param corner The corner of the swerve drive
+     * @return       The swerve module constants
+     */
+    public SwerveModuleConstants getSwerveModule(Corner corner) {
+        return SwerveModules[corner.getIndex()];
+    }
+
+    /**
+     * Gets the wheel radius of the specified swerve module. If the module has
+     * a specific wheel radius configured, that radius is returned. Otherwise,
+     * the default wheel radius from the StructureConstants is returned.
+     * 
+     * @param index The index of the swerve module
+     * @return      The wheel radius of the swerve module
+     */
+    public Distance getWheelRadius(int index) {
+        SwerveModuleConstants module = SwerveModules[index];
+        if (module.WheelRadius != null) {
+            return module.WheelRadius;
+        } else {
+            return Structure.WheelRadius;
+        }
+    }
+
+    /**
+     * Gets the wheel radius of the specified swerve module. If the module has
+     * a specific wheel radius configured, that radius is returned. Otherwise,
+     * the default wheel radius from the StructureConstants is returned.
+     * 
+     * @param corner The corner of the swerve drive
+     * @return       The wheel radius of the swerve module
+     */
+    public Distance getWheelRadius(Corner corner) {
+        return getWheelRadius(corner.getIndex());
     }
 }

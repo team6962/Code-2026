@@ -1,29 +1,42 @@
 package com.team6962.lib.swerve.simulation;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.team6962.lib.swerve.module.SwerveModuleConfig;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class SteerMotorSim {
-    private SwerveModuleConfig moduleConfig;
+public class SteerMechanismSim {
+    private DrivetrainConstants constants;
 
     private TalonFXSimState motorControllerSimulation;
     private CANcoderSimState encoderSimulation;
     private DCMotorSim physicsSimulation;
 
-    public SteerMotorSim(SwerveModuleConfig moduleConfig, SimulationConfig simConfig, TalonFX motorController, CANcoder encoder) {
-        this.moduleConfig = moduleConfig;
+    public SteerMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController, CANcoder encoder) {
+        this.constants = constants;
+
         this.motorControllerSimulation = motorController.getSimState();
         this.encoderSimulation = encoder.getSimState();
-        this.physicsSimulation = new DCMotorSim(simConfig.steerSimulationPlant, simConfig.steerSimulationGearbox);
+
+        this.physicsSimulation = new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                constants.SteerMotor.SimulatedMotor,
+                constants.SteerMotor.SimulatedMomentOfInertia.in(KilogramSquareMeters),
+                constants.SteerMotor.GearReduction
+            ),
+            constants.SteerMotor.SimulatedMotor
+        );
     }
 
     public Angle getAngularPosition() {
@@ -53,9 +66,9 @@ public class SteerMotorSim {
 
         // Update the motor controller simulation with the new position,
         // velocity, and acceleration from the physics simulation
-        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(moduleConfig.steerMotorConfiguration.Feedback.RotorToSensorRatio));
-        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(moduleConfig.steerMotorConfiguration.Feedback.RotorToSensorRatio));
-        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(moduleConfig.steerMotorConfiguration.Feedback.RotorToSensorRatio));
+        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.SteerMotor.GearReduction));
+        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.SteerMotor.GearReduction));
+        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.SteerMotor.GearReduction));
 
         // Update the encoder simulation with the new position and velocity from
         // the physics simulation

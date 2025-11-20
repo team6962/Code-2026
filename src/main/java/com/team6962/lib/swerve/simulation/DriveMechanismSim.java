@@ -1,10 +1,14 @@
 package com.team6962.lib.swerve.simulation;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.math.WheelMath;
-import com.team6962.lib.swerve.module.SwerveModuleConfig;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -14,16 +18,27 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class DriveMotorSim {
-    private SwerveModuleConfig moduleConfig;
+public class DriveMechanismSim {
+    private Corner corner;
+    private DrivetrainConstants constants;
 
     private TalonFXSimState motorControllerSimulation;
     private DCMotorSim physicsSimulation;
 
-    public DriveMotorSim(SwerveModuleConfig moduleConfig, SimulationConfig simConfig, TalonFX motorController) {
-        this.moduleConfig = moduleConfig;
+    public DriveMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController) {
+        this.corner = corner;
+        this.constants = constants;
+
         this.motorControllerSimulation = motorController.getSimState();
-        this.physicsSimulation = new DCMotorSim(simConfig.driveSimulationPlant, simConfig.driveSimulationGearbox);
+
+        this.physicsSimulation = new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                constants.DriveMotor.SimulatedMotor,
+                constants.DriveMotor.SimulatedMomentOfInertia.in(KilogramSquareMeters),
+                constants.DriveMotor.GearReduction
+            ),
+            constants.DriveMotor.SimulatedMotor
+        );
     }
 
     public Angle getAngularPosition() {
@@ -39,15 +54,15 @@ public class DriveMotorSim {
     }
 
     public Distance getPosition() {
-        return WheelMath.toLinear(physicsSimulation.getAngularPosition(), moduleConfig.wheelRadius);
+        return WheelMath.toLinear(physicsSimulation.getAngularPosition(), constants.getWheelRadius(corner));
     }
 
     public LinearVelocity getVelocity() {
-        return WheelMath.toLinear(physicsSimulation.getAngularVelocity(), moduleConfig.wheelRadius);
+        return WheelMath.toLinear(physicsSimulation.getAngularVelocity(), constants.getWheelRadius(corner));
     }
 
     public LinearAcceleration getAcceleration() {
-        return WheelMath.toLinear(physicsSimulation.getAngularAcceleration(), moduleConfig.wheelRadius);
+        return WheelMath.toLinear(physicsSimulation.getAngularAcceleration(), constants.getWheelRadius(corner));
     }
 
     public void update(double deltaTimeSeconds) {
@@ -64,8 +79,8 @@ public class DriveMotorSim {
 
         // Update the motor controller simulation with the new position,
         // velocity, and acceleration from the physics simulation
-        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(moduleConfig.driveMotorConfiguration.Feedback.RotorToSensorRatio));
-        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(moduleConfig.driveMotorConfiguration.Feedback.RotorToSensorRatio));
-        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(moduleConfig.driveMotorConfiguration.Feedback.RotorToSensorRatio));
+        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.DriveMotor.GearReduction));
+        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.DriveMotor.GearReduction));
+        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.DriveMotor.GearReduction));
     }
 }

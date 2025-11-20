@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.team6962.lib.logging.LoggingUtil;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.core.SwerveComponent;
 import com.team6962.lib.swerve.module.SwerveModule;
 
@@ -59,13 +60,12 @@ public class Odometry implements SwerveComponent {
      * Constructs a new Odometry object with the specified kinematics and swerve
      * modules.
      * 
-     * @param kinematics The SwerveDriveKinematics object for the robot, which
-     * is used to compute twists from module position changes.
-     * @param modules    An array of SwerveModule objects representing the
-     * swerve modules being tracked.
+     * @param constants The DrivetrainConstants object for the swerve drivetrain
+     * @param modules   An array of SwerveModule objects representing the swerve
+     * modules being tracked.
      */
-    public Odometry(SwerveDriveKinematics kinematics, SwerveModule[] modules) {
-        this.kinematics = kinematics;
+    public Odometry(DrivetrainConstants constants, SwerveModule[] modules) {
+        this.kinematics = constants.Structure.getKinematics();
         this.modules = modules;
         lastPositions = computePositions();
         currentPostions = computePositions();
@@ -98,7 +98,7 @@ public class Odometry implements SwerveComponent {
      * @return An array of SwerveModulePosition objects representing the current
      * positions of the swerve modules.
      */
-    public SwerveModulePosition[] getPositions() {
+    public synchronized SwerveModulePosition[] getPositions() {
         return currentPostions;
     }
 
@@ -126,7 +126,7 @@ public class Odometry implements SwerveComponent {
      * @return An array of SwerveModuleState objects representing the current
      * states of the swerve modules.
      */
-    public SwerveModuleState[] getStates() {
+    public synchronized SwerveModuleState[] getStates() {
         return currentStates;
     }
 
@@ -153,7 +153,7 @@ public class Odometry implements SwerveComponent {
      * @return An array of SwerveModulePosition objects representing the change
      * in position of the swerve modules.
      */
-    public SwerveModulePosition[] getPositionDeltas() {
+    public synchronized SwerveModulePosition[] getPositionDeltas() {
         return positionDeltas;
     }
 
@@ -174,12 +174,12 @@ public class Odometry implements SwerveComponent {
      * @return A Twist2d object representing the change in position and
      * orientation of the robot.
      */
-    public Twist2d getTwist() {
+    public synchronized Twist2d getTwist() {
         return twist;
     }
 
     @Override
-    public void logTelemetry(String basePath) {
+    public synchronized void logTelemetry(String basePath) {
         basePath = LoggingUtil.ensureEndsWithSlash(basePath);
 
         for (int i = 0; i < modules.length; i++) {
@@ -197,7 +197,7 @@ public class Odometry implements SwerveComponent {
     }
 
     @Override
-    public void update(double deltaTimeSeconds) {
+    public synchronized void update(double deltaTimeSeconds) {
         lastPositions = currentPostions;
         currentPostions = computePositions();
         currentStates = computeStates();

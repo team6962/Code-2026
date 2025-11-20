@@ -1,7 +1,11 @@
 package com.team6962.lib.swerve.config;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.team6962.lib.swerve.config.control.ControlMode;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
  * The constants that define the steer motor behavior.
@@ -21,7 +25,7 @@ public class SteerMotorConstants {
      * <li>Slot Configs</li>
      * </ul>
      */
-    public TalonFXConfiguration DeviceConfiguration;
+    public TalonFXConfiguration DeviceConfiguration = new TalonFXConfiguration();
 
     /**
      * The gear reduction from the steer motor to the orientation of the wheel
@@ -32,7 +36,7 @@ public class SteerMotorConstants {
     /**
      * Control mode for position control of the steer motor.
      */
-    public ControlMode PositionControl = new ControlMode();
+    public ControlMode.Position PositionControl = new ControlMode.Position();
 
     /**
      * The slot index for position control of the steer motor. This should be
@@ -57,16 +61,13 @@ public class SteerMotorConstants {
      */
     public boolean VelocityLatencyCompensation = true;
 
+    public DCMotor SimulatedMotor = DCMotor.getKrakenX60Foc(1);
+    public MomentOfInertia SimulatedMomentOfInertia = KilogramSquareMeters.of(0.000174);
+
     /**
      * Constructs a SteerMotorConstants object with default values.
      */
     public SteerMotorConstants() {
-        DeviceConfiguration = new TalonFXConfiguration();
-        GearReduction = 1.0;
-        PositionControl = new ControlMode();
-        PositionSlot = 0;
-        PositionLatencyCompensation = true;
-        VelocityLatencyCompensation = true;
     }
 
     /**
@@ -100,7 +101,7 @@ public class SteerMotorConstants {
      * @param positionControl The position control mode
      * @return                This SteerMotorConstants object
      */
-    public SteerMotorConstants withPositionControl(ControlMode positionControl) {
+    public SteerMotorConstants withPositionControl(ControlMode.Position positionControl) {
         PositionControl = positionControl;
         return this;
     }

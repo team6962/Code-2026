@@ -3,21 +3,14 @@ package com.team6962.lib.swerve.core;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Seconds;
 
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public interface SwerveControlLoop extends Subsystem, AutoCloseable {
-    public default void lockResources() {
-    }
-
-    public default void unlockResources() {
-    }
-
+public interface SwerveControlLoop extends AutoCloseable {
     public default void start(Consumer<Double> updateFunction, Frequency updateFrequency) {
     }
 
@@ -25,7 +18,7 @@ public interface SwerveControlLoop extends Subsystem, AutoCloseable {
     public default void close() {
     }
 
-    public static class RobotPeriodic implements SwerveControlLoop {
+    public static class SubsystemPeriodic extends SubsystemBase implements SwerveControlLoop {
         private Consumer<Double> updateFunction;
         private double lastUpdateTimestamp = -1;
 
@@ -55,7 +48,6 @@ public interface SwerveControlLoop extends Subsystem, AutoCloseable {
 
     public static class Threaded implements SwerveControlLoop {
         private Consumer<Double> updateFunction;
-        private ReentrantLock resourceLock = new ReentrantLock();
         private Notifier notifier;
         private double updatePeriodSeconds;
         private double lastUpdateTimestamp = -1;
@@ -102,20 +94,9 @@ public interface SwerveControlLoop extends Subsystem, AutoCloseable {
 
         @Override
         public void close() {
-            notifier.close();
-            resourceLock.unlock();
             lastUpdateTimestamp = -1;
             goalUpdateTimestamp = -1;
-        }
-
-        @Override
-        public void lockResources() {
-            resourceLock.lock();
-        }
-
-        @Override
-        public void unlockResources() {
-            resourceLock.unlock();
+            notifier.close();
         }
     }
 }

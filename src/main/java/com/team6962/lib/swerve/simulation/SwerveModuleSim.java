@@ -7,38 +7,38 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveModuleSim {
-    private DriveMotorSim driveMotorSim;
-    private SteerMotorSim steerMotorSim;
+    private DriveMechanismSim driveMechanismSim;
+    private SteerMechanismSim steerMechanismSim;
 
-    public SwerveModuleSim(SimulationConfig simulationConfig, SwerveModule module) {
-        driveMotorSim = new DriveMotorSim(module.getConfig(), simulationConfig, module.getDriveMotor().getMotorController());
-        steerMotorSim = new SteerMotorSim(module.getConfig(), simulationConfig, module.getSteerMotor().getMotorController(), module.getSteerMotor().getEncoder());
+    public SwerveModuleSim(SwerveModule module) {
+        driveMechanismSim = new DriveMechanismSim(module.getCorner(), module.getConstants(), module.getDriveMechanism().getMotorController());
+        steerMechanismSim = new SteerMechanismSim(module.getCorner(), module.getConstants(), module.getSteerMechanism().getMotorController(), module.getSteerMechanism().getEncoder());
     }
 
-    public DriveMotorSim getDriveMotorSim() {
-        return driveMotorSim;
+    public DriveMechanismSim getDriveMechanism() {
+        return driveMechanismSim;
     }
 
-    public SteerMotorSim getSteerMotorSim() {
-        return steerMotorSim;
+    public SteerMechanismSim getSteerMechanism() {
+        return steerMechanismSim;
     }
 
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            driveMotorSim.getPosition(),
-            new Rotation2d(steerMotorSim.getAngularPosition())
+            driveMechanismSim.getPosition(),
+            new Rotation2d(steerMechanismSim.getAngularPosition())
         );
     }
 
     public SwerveModuleState getState() {
         return new SwerveModuleState(
-            driveMotorSim.getVelocity(),
-            new Rotation2d(steerMotorSim.getAngularPosition())
+            driveMechanismSim.getVelocity(),
+            new Rotation2d(steerMechanismSim.getAngularPosition())
         );
     }
 
     public void update(double deltaTimeSeconds) {
-        driveMotorSim.update(deltaTimeSeconds);
-        steerMotorSim.update(deltaTimeSeconds);
+        driveMechanismSim.update(deltaTimeSeconds);
+        steerMechanismSim.update(deltaTimeSeconds);
     }
 }

@@ -1,25 +1,50 @@
 package com.team6962.lib.swerve.simulation;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+
+import java.util.Arrays;
 
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.localization.Gyroscope;
 
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class GyroscopeSim {
     private DrivetrainConstants constants;
     private Pigeon2SimState gyroSim;
+    private SwerveModuleSim[] moduleSims;
+    private SwerveDriveKinematics kinematics;
+    private SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
 
-    public GyroscopeSim(DrivetrainConstants constants, Gyroscope gyro) {
+    public GyroscopeSim(DrivetrainConstants constants, Gyroscope gyro, SwerveModuleSim[] modulesSims) {
         this.constants = constants;
         this.gyroSim = gyro.getPigeon().getSimState();
+        this.kinematics = constants.Structure.getKinematics();
+        this.moduleSims = modulesSims;
+
+        refreshModulePositions();
     }
 
-    public void addYaw(Angle deltaYaw) {
-        gyroSim.addYaw(deltaYaw);
+    private void refreshModulePositions() {
+        for (int i = 0; i < moduleSims.length; i++) {
+            modulePositions[i] = moduleSims[i].getPosition();
+        }
+    }
+
+    public void update() {
+        SwerveModulePosition[] previousPositions = Arrays.copyOf(modulePositions, modulePositions.length);
+
+        refreshModulePositions();
+
+        Twist2d twist = kinematics.toTwist2d(previousPositions, modulePositions);
+
+        gyroSim.addYaw(Radians.of(twist.dtheta));
     }
 
     // TODO: Check mount pose adjustment
