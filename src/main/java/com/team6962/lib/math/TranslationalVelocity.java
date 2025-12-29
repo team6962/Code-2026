@@ -3,9 +3,14 @@ package com.team6962.lib.math;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
 
@@ -38,6 +43,11 @@ public class TranslationalVelocity {
     public TranslationalVelocity(double vxMetersPerSecond, double vyMetersPerSecond) {
         this.x = MetersPerSecond.of(vxMetersPerSecond);
         this.y = MetersPerSecond.of(vyMetersPerSecond);
+    }
+
+    public TranslationalVelocity(Matrix<?, N1> vector) {
+        this.x = MetersPerSecond.of(vector.get(0, 0));
+        this.y = MetersPerSecond.of(vector.get(1, 0));
     }
 
     public TranslationalVelocity() {
@@ -111,6 +121,15 @@ public class TranslationalVelocity {
 
     public TranslationalVelocity rotateBy(Rotation2d angle) {
         return rotateBy(angle.getMeasure());
+    }
+
+    public Vector<N2> toVector() {
+        Vector<N2> vector = new Vector<N2>(Nat.N2());
+
+        vector.set(0, 0, x.in(MetersPerSecond));
+        vector.set(1, 0, y.in(MetersPerSecond));
+
+        return vector;
     }
 
     @Override
