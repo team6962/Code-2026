@@ -279,7 +279,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
     }
 
     public void applyVelocityMotion(ChassisSpeeds velocity) {
-        applyMotion(new VelocityMotion(velocity, true, true, this));
+        applyMotion(new VelocityMotion(velocity, this));
     }
 
     public void applyVelocityMotion(LinearVelocity xVelocity, LinearVelocity yVelocity) {
@@ -287,7 +287,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
             xVelocity.in(MetersPerSecond),
             yVelocity.in(MetersPerSecond),
             0
-        ), true, false, this));
+        ), this));
     }
 
     public void applyVelocityMotion(TranslationalVelocity translationalVelocity) {
@@ -299,7 +299,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
             0,
             0,
             angularVelocity.in(RadiansPerSecond)
-        ), false, true, this));
+        ), this));
     }
 
     public void applyNeutralMotion(NeutralModeValue neutralMode) {

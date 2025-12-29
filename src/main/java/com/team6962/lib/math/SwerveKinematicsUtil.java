@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
@@ -66,5 +67,13 @@ public class SwerveKinematicsUtil {
 
     public static double getCosineError(SwerveModulePosition target, Angle steerAngle) {
         return Math.cos(target.angle.getMeasure().minus(steerAngle).in(Radians));
+    }
+
+    public static ChassisSpeeds sum(ChassisSpeeds a, ChassisSpeeds b) {
+        return new ChassisSpeeds(
+            a.vxMetersPerSecond + b.vxMetersPerSecond,
+            a.vyMetersPerSecond + b.vyMetersPerSecond,
+            a.omegaRadiansPerSecond + b.omegaRadiansPerSecond
+        );
     }
 }

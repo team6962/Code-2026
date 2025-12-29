@@ -26,46 +26,30 @@ public class VelocityMotion implements SwerveMotion {
     private final boolean hasTranslation;
     private final boolean hasRotation;
 
-    public VelocityMotion(ChassisSpeeds velocity, boolean hasTranslation, boolean hasRotation, MotionSwerveDrive swerveDrive) {
+    public VelocityMotion(ChassisSpeeds velocity, MotionSwerveDrive swerveDrive) {
         this.velocity = velocity;
-        this.hasTranslation = hasTranslation && (Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01);
-        this.hasRotation = hasRotation && Math.abs(velocity.omegaRadiansPerSecond) > 0.01;
+        this.hasTranslation = Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01;
+        this.hasRotation = Math.abs(velocity.omegaRadiansPerSecond) > 0.01;
         this.swerveDrive = swerveDrive;
     }
 
     @Override
     public SwerveMotion fuseWith(SwerveMotion other) {
         if (other instanceof VelocityMotion otherVelocityMotion) {
-            if (otherVelocityMotion.hasRotation && !hasRotation) {
-                return new VelocityMotion(
-                    new ChassisSpeeds(
-                        velocity.vxMetersPerSecond,
-                        velocity.vyMetersPerSecond,
-                        otherVelocityMotion.velocity.omegaRadiansPerSecond
-                    ),
-                    hasTranslation,
-                    true,
-                    swerveDrive
-                );
-            } else if (otherVelocityMotion.hasTranslation && !hasTranslation) {
-                return new VelocityMotion(
-                    new ChassisSpeeds(
-                        otherVelocityMotion.velocity.vxMetersPerSecond,
-                        otherVelocityMotion.velocity.vyMetersPerSecond,
-                        velocity.omegaRadiansPerSecond
-                    ),
-                    true,
-                    hasRotation,
-                    swerveDrive
-                );
-            } else if (!otherVelocityMotion.hasTranslation && !otherVelocityMotion.hasRotation) {
-                return this;
-            } else if (!hasTranslation && !hasRotation) {
-                return otherVelocityMotion;
+            if (hasTranslation && otherVelocityMotion.hasTranslation || hasRotation && otherVelocityMotion.hasRotation) {
+                throw new IllegalArgumentException("Cannot fuse two VelocityMotions with overlapping translation or rotation components.");
             }
+
+            return new VelocityMotion(
+                SwerveKinematicsUtil.sum(
+                    velocity,
+                    otherVelocityMotion.velocity
+                ),
+                swerveDrive
+            );
         }
 
-        return null;
+        throw new IllegalArgumentException("Cannot fuse a " + getClass().getSimpleName() + " with a " + other.getClass().getSimpleName());
     }
 
     @Override

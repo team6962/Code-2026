@@ -8,7 +8,7 @@ public interface SwerveMotion extends AutoCloseable {
     }
 
     public default SwerveMotion fuseWith(SwerveMotion other) {
-        return null;
+        throw new IllegalArgumentException("Cannot fuse a " + getClass().getSimpleName() + " with a " + other.getClass().getSimpleName());
     }
 
     @Override
