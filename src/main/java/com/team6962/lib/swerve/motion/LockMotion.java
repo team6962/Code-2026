@@ -44,9 +44,9 @@ public class LockMotion implements SwerveMotion {
             Angle steerAngle = targetPositions[i].angle.getMeasure();
 
             module.setControl(
-                swerveDrive.getConstants().DriveMotor.VelocityControl.createRequest(
+                swerveDrive.getConstants().DriveMotor.PositionControl.createRequest(
                     WheelMath.toAngular(drivePosition, swerveDrive.getConstants().getWheelRadius(i)).in(Rotations),
-                    swerveDrive.getConstants().DriveMotor.VelocitySlot,
+                    swerveDrive.getConstants().DriveMotor.PositionSlot,
                     updateFrequencyHz,
                     useTimesync
                 ),
