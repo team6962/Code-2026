@@ -4,7 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
-import com.team6962.lib.swerve.core.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;

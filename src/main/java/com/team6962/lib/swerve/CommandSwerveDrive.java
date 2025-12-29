@@ -1,11 +1,13 @@
 package com.team6962.lib.swerve;
 
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.motion.SwerveMotion;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -38,6 +40,14 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
         return Set.of(translation, rotation);
     }
 
+    public boolean hasTranslationCommand() {
+        return translation.getCurrentCommand() == null || translation.getCurrentCommand() == translation.getDefaultCommand();
+    }
+
+    public boolean hasRotationCommand() {
+        return rotation.getCurrentCommand() == null || rotation.getCurrentCommand() == rotation.getDefaultCommand();
+    }
+
     public Command runTranslation(Runnable toRun) {
         return Commands.run(toRun, translation);
     }
@@ -62,6 +72,14 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
         return runRotation(() -> applyVelocityMotion(angularVelocity.get()));
     }
 
+    public Command driveMotion(SwerveMotion motion, Function<SwerveMotion, SwerveMotion> update) {
+        return runMotion(() -> applyMotion(update.apply(motion)));
+    }
+
+    public Command driveMotion(SwerveMotion motion) {
+        return runMotion(() -> applyMotion(motion));
+    }
+
     public Command neutral() {
         return runMotion(() -> applyNeutralMotion(null));
     }
@@ -76,5 +94,9 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
 
     public Command lock() {
         return runMotion(() -> applyLockMotion());
+    }
+
+    public void latePeriodic() {
+        clearMotion();
     }
 }

@@ -17,6 +17,10 @@ public class NeutralMotion implements SwerveMotion {
     private final NeutralModeValue neutralMode;
     private final ControlRequest request;
 
+    public NeutralMotion(MotionSwerveDrive swerveDrive) {
+        this(swerveDrive, null);
+    }
+
     public NeutralMotion(MotionSwerveDrive swerveDrive, NeutralModeValue neutralMode) {
         this.swerveDrive = swerveDrive;
         this.neutralMode = neutralMode;

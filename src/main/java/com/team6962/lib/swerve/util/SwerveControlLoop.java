@@ -1,4 +1,4 @@
-package com.team6962.lib.swerve.core;
+package com.team6962.lib.swerve.util;
 
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Seconds;

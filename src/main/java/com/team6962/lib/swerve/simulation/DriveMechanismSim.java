@@ -1,6 +1,7 @@
 package com.team6962.lib.swerve.simulation;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -8,6 +9,7 @@ import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -82,5 +84,7 @@ public class DriveMechanismSim {
         motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.DriveMotor.GearReduction));
         motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.DriveMotor.GearReduction));
         motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.DriveMotor.GearReduction));
+
+        DogLog.log("Drivetrain/Simulation/" + corner.name() + "Drive/Position", getPosition().in(Meters));
     }
 }

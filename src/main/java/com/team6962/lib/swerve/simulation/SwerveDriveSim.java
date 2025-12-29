@@ -34,6 +34,6 @@ public class SwerveDriveSim {
         }
 
         // Update gyroscope simulation
-        gyroscopeSim.update();
+        gyroscopeSim.update(deltaTimeSeconds);
     }
 }

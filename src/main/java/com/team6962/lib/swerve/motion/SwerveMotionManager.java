@@ -1,44 +1,55 @@
 package com.team6962.lib.swerve.motion;
 
 public class SwerveMotionManager implements AutoCloseable {
-    private SwerveMotion motion = null;
+    private SwerveMotion nextMotion = null;
+    private SwerveMotion activeMotion;
+    private SwerveMotion defaultMotion;
+
+    public SwerveMotionManager(SwerveMotion defaultMotion) {
+        this.defaultMotion = defaultMotion;
+    }
 
     public synchronized void clear() {
-        if (motion != null) {
-            motion.close();
+        if (activeMotion != null) {
+            activeMotion.close();
         }
 
-        motion = null;
+        activeMotion = nextMotion;
+        nextMotion = null;
     }
 
     public synchronized void apply(SwerveMotion newMotion) {
-        if (motion != null) {
-            motion.close();
+        if (nextMotion != null) {
+            nextMotion.close();
         }
 
-        if (motion == null) {
-            motion = newMotion;
+        if (nextMotion == null) {
+            nextMotion = newMotion;
         } else if (newMotion == null) {
-            motion = newMotion;
+            nextMotion = newMotion;
         } else {
-            SwerveMotion fusedMotion = motion.fuseWith(newMotion);
+            SwerveMotion fusedMotion = nextMotion.fuseWith(newMotion);
 
             if (fusedMotion != null) {
-                motion = fusedMotion;
+                nextMotion = fusedMotion;
             } else {
-                motion = newMotion;
+                nextMotion = newMotion;
             }
         }
     }
 
-    public synchronized SwerveMotion getMotion() {
-        return motion;
+    public synchronized SwerveMotion getNextMotion() {
+        if (activeMotion != null) {
+            return activeMotion;
+        } else {
+            return defaultMotion;
+        }
     }
 
     @Override
     public synchronized void close() {
-        if (motion != null) {
-            motion.close();
+        if (nextMotion != null) {
+            nextMotion.close();
         }
     }
 }

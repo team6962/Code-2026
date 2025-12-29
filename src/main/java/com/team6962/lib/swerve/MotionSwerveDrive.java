@@ -11,8 +11,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
-import com.team6962.lib.swerve.core.SwerveComponent;
-import com.team6962.lib.swerve.core.SwerveControlLoop;
 import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.localization.Localization;
 import com.team6962.lib.swerve.localization.Odometry;
@@ -23,6 +21,9 @@ import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.motion.SwerveMotionManager;
 import com.team6962.lib.swerve.motion.VelocityMotion;
 import com.team6962.lib.swerve.simulation.SwerveDriveSim;
+import com.team6962.lib.swerve.util.FieldLogger;
+import com.team6962.lib.swerve.util.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveControlLoop;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -38,18 +39,20 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class MotionSwerveDrive implements AutoCloseable {
+public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
     private DrivetrainConstants constants;
     private SwerveControlLoop controlLoop;
     private SwerveModule[] modules;
     private Odometry odometry;
     private Gyroscope gyroscope;
     private Localization localization;
+    private FieldLogger fieldLogger;
     private SwerveDriveSim simulation;
     private BaseStatusSignal[] statusSignals;
     private SwerveDriveKinematics kinematics;
-    private SwerveMotionManager motionManager = new SwerveMotionManager();
+    private SwerveMotionManager motionManager;
 
     public MotionSwerveDrive(DrivetrainConstants constants) {
         // Store the drivetrain constants for later use
@@ -66,7 +69,7 @@ public class MotionSwerveDrive implements AutoCloseable {
 
         odometry = new Odometry(constants, modules);
         gyroscope = new Gyroscope(constants, odometry);
-        localization = new Localization(constants, new Pose2d(), odometry);
+        localization = new Localization(constants, new Pose2d(), odometry, gyroscope);
 
         // Initialize the kinematics object for converting between chassis
         // speeds and module states
@@ -83,7 +86,7 @@ public class MotionSwerveDrive implements AutoCloseable {
             new SwerveControlLoop.Threaded() :
             new SwerveControlLoop.SubsystemPeriodic();
 
-        controlLoop.start(this::update, constants.Timing.ControlLoopFrequency);
+        fieldLogger = new FieldLogger(constants, this::getPosition, this::getModuleStates);
 
         // Build the array of status signals that will be refreshed in parallel
         SwerveComponent[] components = new SwerveComponent[3 + modules.length];
@@ -97,6 +100,10 @@ public class MotionSwerveDrive implements AutoCloseable {
         }
 
         statusSignals = SwerveComponent.combineStatusSignals(components);
+
+        motionManager = new SwerveMotionManager(new NeutralMotion(this));
+
+        controlLoop.start(this::update, constants.Timing.ControlLoopFrequency);
     }
 
     private void update(double deltaTimeSeconds) {
@@ -118,12 +125,20 @@ public class MotionSwerveDrive implements AutoCloseable {
         gyroscope.update(deltaTimeSeconds);
         odometry.update(deltaTimeSeconds);
         localization.update(deltaTimeSeconds);
+        fieldLogger.update(deltaTimeSeconds);
 
-        SwerveMotion motion = motionManager.getMotion();
+        SwerveMotion motion = motionManager.getNextMotion();
 
         if (motion != null) {
             motion.update(deltaTimeSeconds);
         }
+
+        for (SwerveModule module : modules) {
+            module.logTelemetry("Drivetrain/Modules/" + module.getCorner().getName());
+        }
+
+        localization.logTelemetry("Drivetrain/Localization");
+        fieldLogger.logTelemetry("Drivetrain/Field");
 
         if (!constants.Timing.UseThreadedControlLoop) {
             BaseStatusSignal.refreshAll(statusSignals);
@@ -202,6 +217,10 @@ public class MotionSwerveDrive implements AutoCloseable {
 
     public ChassisSpeeds getVelocity() {
         return localization.getVelocity();
+    }
+
+    public TranslationalVelocity getTranslationalVelocity() {
+        return localization.getTranslationalVelocity();
     }
 
     public Twist2d getArcVelocity() {
@@ -285,6 +304,10 @@ public class MotionSwerveDrive implements AutoCloseable {
 
     public void applyNeutralMotion(NeutralModeValue neutralMode) {
         applyMotion(new NeutralMotion(this, neutralMode));
+    }
+
+    public void applyNeutralMotion() {
+        applyMotion(new NeutralMotion(this, null));
     }
 
     public void applyLockMotion() {

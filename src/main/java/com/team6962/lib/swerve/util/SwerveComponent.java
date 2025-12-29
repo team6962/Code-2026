@@ -1,4 +1,4 @@
-package com.team6962.lib.swerve.core;
+package com.team6962.lib.swerve.util;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -70,6 +70,18 @@ public class TimingConstants {
     }
 
     /**
+     * Sets whether to use a threaded control loop, and returns this
+     * TimingConstants for chaining.
+     * 
+     * @param useThreadedControlLoop True if a threaded control loop is used
+     * @return                       This TimingConstants object
+     */
+    public TimingConstants withUseThreadedControlLoop(boolean useThreadedControlLoop) {
+        UseThreadedControlLoop = useThreadedControlLoop;
+        return this;
+    }
+
+    /**
      * Sets whether to use timesync for control requests, and returns this
      * TimingConstants for chaining.
      * 

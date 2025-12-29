@@ -13,12 +13,13 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.phoenix.TimestampUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
-import com.team6962.lib.swerve.core.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -49,12 +50,15 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
 
     public SteerMechanism(Corner corner, DrivetrainConstants constants) {
         motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, constants.CANBusName);
-
-        StatusUtil.check(motor.getConfigurator().apply(constants.SteerMotor.DeviceConfiguration));
-
         encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId);
 
-        encoder.getConfigurator().apply(constants.SteerEncoder.DeviceConfiguration);
+        constants.SteerMotor.DeviceConfiguration.Feedback.RotorToSensorRatio = constants.SteerMotor.GearReduction;
+        constants.SteerMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = 1.0;
+        constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackRemoteSensorID = constants.getSwerveModule(corner).SteerEncoderCANId;
+
+        StatusUtil.check(motor.getConfigurator().apply(constants.SteerMotor.DeviceConfiguration));
+        StatusUtil.check(encoder.getConfigurator().apply(constants.SteerEncoder.DeviceConfiguration));
 
         positionSignal = motor.getPosition(false);
         velocitySignal = motor.getVelocity(false);

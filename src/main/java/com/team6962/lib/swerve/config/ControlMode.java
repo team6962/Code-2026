@@ -38,6 +38,14 @@ public final class ControlMode {
         public PositionMotionProfileValue MotionProfile = PositionMotionProfileValue.None;
         public OutputTypeValue OutputType = OutputTypeValue.VoltageFOC;
 
+        public Position(PositionMotionProfileValue motionProfile, OutputTypeValue outputType) {
+            MotionProfile = motionProfile;
+            OutputType = outputType;
+        }
+
+        public Position() {
+        }
+
         public ControlRequest createRequest(double position, int slot, double updateFreqHz, boolean useTimesync) {
             switch (MotionProfile) {
                 case None:
@@ -109,6 +117,14 @@ public final class ControlMode {
     public static class Velocity {
         public VelocityMotionProfileValue MotionProfile = VelocityMotionProfileValue.None;
         public OutputTypeValue OutputType = OutputTypeValue.VoltageFOC;
+
+        public Velocity(VelocityMotionProfileValue motionProfile, OutputTypeValue outputType) {
+            MotionProfile = motionProfile;
+            OutputType = outputType;
+        }
+
+        public Velocity() {
+        }
 
         public ControlRequest createRequest(double velocity, int slot, double updateFreqHz, boolean useTimesync) {
             switch (MotionProfile) {

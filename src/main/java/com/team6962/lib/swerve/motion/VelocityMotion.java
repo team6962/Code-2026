@@ -12,6 +12,7 @@ import com.team6962.lib.swerve.MotionSwerveDrive;
 import com.team6962.lib.swerve.module.SwerveModule;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -27,7 +28,7 @@ public class VelocityMotion implements SwerveMotion {
 
     public VelocityMotion(ChassisSpeeds velocity, boolean hasTranslation, boolean hasRotation, MotionSwerveDrive swerveDrive) {
         this.velocity = velocity;
-        this.hasTranslation = hasTranslation && (velocity.vxMetersPerSecond > 0.01 || velocity.vyMetersPerSecond > 0.01);
+        this.hasTranslation = hasTranslation && (Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01);
         this.hasRotation = hasRotation && Math.abs(velocity.omegaRadiansPerSecond) > 0.01;
         this.swerveDrive = swerveDrive;
     }
@@ -43,7 +44,7 @@ public class VelocityMotion implements SwerveMotion {
                         otherVelocityMotion.velocity.omegaRadiansPerSecond
                     ),
                     hasTranslation,
-                    otherVelocityMotion.hasRotation,
+                    true,
                     swerveDrive
                 );
             } else if (otherVelocityMotion.hasTranslation && !hasTranslation) {
@@ -53,7 +54,7 @@ public class VelocityMotion implements SwerveMotion {
                         otherVelocityMotion.velocity.vyMetersPerSecond,
                         velocity.omegaRadiansPerSecond
                     ),
-                    otherVelocityMotion.hasTranslation,
+                    true,
                     hasRotation,
                     swerveDrive
                 );
@@ -69,12 +70,14 @@ public class VelocityMotion implements SwerveMotion {
 
     @Override
     public void update(double deltaTimeSeconds) {
-        if (Math.abs(velocity.omegaRadiansPerSecond) < 0.01 && velocity.vxMetersPerSecond < 0.01 && velocity.vyMetersPerSecond < 0.01) {
+        if (Math.abs(velocity.omegaRadiansPerSecond) < 0.01 && Math.abs(velocity.vxMetersPerSecond) < 0.01 && Math.abs(velocity.vyMetersPerSecond) < 0.01) {
             brake();
             return;
         }
 
-        SwerveModuleState[] states = swerveDrive.getKinematics().toSwerveModuleStates(velocity);
+        ChassisSpeeds robotRelativeVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(velocity, new Rotation2d(swerveDrive.getHeading()));
+
+        SwerveModuleState[] states = swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(states, swerveDrive.getConstants().DriveMotor.MaxVelocity.in(MetersPerSecond));
 

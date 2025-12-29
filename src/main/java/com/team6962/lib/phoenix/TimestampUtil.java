@@ -1,9 +1,11 @@
 package com.team6962.lib.phoenix;
 
+import com.ctre.phoenix6.Utils;
+
 import edu.wpi.first.wpilibj.Timer;
 
 public class TimestampUtil {
     public static double phoenixTimestampToFPGA(double timestamp) {
-        return timestamp - System.currentTimeMillis() / 1000.0 + Timer.getFPGATimestamp();
+        return timestamp + Timer.getFPGATimestamp() - Utils.getCurrentTimeSeconds();
     }
 }

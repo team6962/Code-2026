@@ -1,6 +1,7 @@
 package com.team6962.lib.swerve.simulation;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -9,6 +10,7 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -17,6 +19,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class SteerMechanismSim {
+    private Corner corner;
     private DrivetrainConstants constants;
 
     private TalonFXSimState motorControllerSimulation;
@@ -24,6 +27,7 @@ public class SteerMechanismSim {
     private DCMotorSim physicsSimulation;
 
     public SteerMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController, CANcoder encoder) {
+        this.corner = corner;
         this.constants = constants;
 
         this.motorControllerSimulation = motorController.getSimState();
@@ -74,5 +78,7 @@ public class SteerMechanismSim {
         // the physics simulation
         encoderSimulation.setRawPosition(physicsSimulation.getAngularPosition());
         encoderSimulation.setVelocity(physicsSimulation.getAngularVelocity());
+
+        DogLog.log("Drivetrain/Simulation/" + corner.name() + "Steer/Position", getAngularPosition().in(Radians));
     }
 }

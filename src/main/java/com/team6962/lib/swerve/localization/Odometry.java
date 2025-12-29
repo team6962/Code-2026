@@ -6,8 +6,8 @@ import static edu.wpi.first.units.Units.Radians;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.core.SwerveComponent;
 import com.team6962.lib.swerve.module.SwerveModule;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Twist2d;

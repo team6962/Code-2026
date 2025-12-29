@@ -1,8 +1,8 @@
 package com.team6962.lib.swerve.localization;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -11,7 +11,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.core.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -165,17 +165,17 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
             // refreshes the signals while getYaw() or other getter methods are
             // called.
             if (constants.Gyroscope.LatencyCompensation) {
-                yaw = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                yaw = Degrees.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
                     yawSignal,
                     yawVelocitySignal
                 ));
 
-                pitch = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                pitch = Degrees.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
                     pitchSignal,
                     pitchVelocitySignal
                 ));
 
-                roll = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                roll = Degrees.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
                     rollSignal,
                     rollVelocitySignal
                 ));

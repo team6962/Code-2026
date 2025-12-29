@@ -3,12 +3,15 @@ package com.team6962.lib.math;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 public class TranslationalVelocity {
+    public static final TranslationalVelocity ZERO = new TranslationalVelocity();
+    
     public final LinearVelocity x;
     public final LinearVelocity y;
 
@@ -30,6 +33,16 @@ public class TranslationalVelocity {
     public TranslationalVelocity(Translation2d translationalVelocity) {
         this.x = MetersPerSecond.of(translationalVelocity.getX());
         this.y = MetersPerSecond.of(translationalVelocity.getY());
+    }
+
+    public TranslationalVelocity(double vxMetersPerSecond, double vyMetersPerSecond) {
+        this.x = MetersPerSecond.of(vxMetersPerSecond);
+        this.y = MetersPerSecond.of(vyMetersPerSecond);
+    }
+
+    public TranslationalVelocity() {
+        this.x = MetersPerSecond.of(0);
+        this.y = MetersPerSecond.of(0);
     }
 
     public LinearVelocity getMagnitude() {
@@ -81,6 +94,23 @@ public class TranslationalVelocity {
                 MetersPerSecond.of(this.y.in(MetersPerSecond) / magnitude.in(MetersPerSecond))
             );
         }
+    }
+
+    public TranslationalVelocity rotateBy(Angle angle) {
+        double cosAngle = Math.cos(angle.in(Radians));
+        double sinAngle = Math.sin(angle.in(Radians));
+
+        double rotatedX = this.x.in(MetersPerSecond) * cosAngle - this.y.in(MetersPerSecond) * sinAngle;
+        double rotatedY = this.x.in(MetersPerSecond) * sinAngle + this.y.in(MetersPerSecond) * cosAngle;
+
+        return new TranslationalVelocity(
+            MetersPerSecond.of(rotatedX),
+            MetersPerSecond.of(rotatedY)
+        );
+    }
+
+    public TranslationalVelocity rotateBy(Rotation2d angle) {
+        return rotateBy(angle.getMeasure());
     }
 
     @Override

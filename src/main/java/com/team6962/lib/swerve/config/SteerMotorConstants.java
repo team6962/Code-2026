@@ -141,4 +141,14 @@ public class SteerMotorConstants {
         VelocityLatencyCompensation = velocityLatencyCompensation;
         return this;
     }
+
+    public SteerMotorConstants withSimulatedMotor(DCMotor simulatedMotor) {
+        SimulatedMotor = simulatedMotor;
+        return this;
+    }
+
+    public SteerMotorConstants withSimulatedMomentOfInertia(MomentOfInertia simulatedMomentOfInertia) {
+        SimulatedMomentOfInertia = simulatedMomentOfInertia;
+        return this;
+    }
 }

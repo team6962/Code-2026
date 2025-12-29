@@ -8,8 +8,9 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
+import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.core.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
@@ -51,6 +52,12 @@ public class Localization implements SwerveComponent {
     private ChassisSpeeds velocity;
 
     /**
+     * The current field-relative translation velocity of the robot as a
+     * TranslationalVelocity object.
+     */
+    private TranslationalVelocity translationalVelocity;
+
+    /**
      * The most recent twist (change in position along a circular arc) computed
      * by the odometry.
      */
@@ -70,16 +77,16 @@ public class Localization implements SwerveComponent {
      */
     private Angle yaw = Radians.of(0);
 
-    public Localization(DrivetrainConstants constants, Pose2d initialPose, Odometry odometry) {
+    public Localization(DrivetrainConstants constants, Pose2d initialPose, Odometry odometry, Gyroscope gyroscope) {
+        this.gyroscope = gyroscope;
+        this.odometry = odometry;
+        
         this.poseEstimator = new SwerveDrivePoseEstimator(
             constants.Structure.getKinematics(),
             new Rotation2d(gyroscope.getYaw()),
             odometry.getPositions(),
             initialPose
         );
-
-        this.odometry = odometry;
-        this.gyroscope = new Gyroscope(constants, odometry);
     }
 
     @Override
@@ -98,6 +105,12 @@ public class Localization implements SwerveComponent {
             twist.dy / deltaTimeSeconds,
             twist.dtheta / deltaTimeSeconds
         ), poseEstimator.getEstimatedPosition().getRotation());
+
+        // Update the translational velocity
+        translationalVelocity = new TranslationalVelocity(
+            MetersPerSecond.of(velocity.vxMetersPerSecond),
+            MetersPerSecond.of(velocity.vyMetersPerSecond)
+        );
 
         // Compute the arc velocity as a Twist2d
         arcVelocity = new Twist2d(
@@ -179,6 +192,16 @@ public class Localization implements SwerveComponent {
      */
     public synchronized ChassisSpeeds getVelocity() {
         return velocity;
+    }
+
+    /**
+     * Gets the field-relative translational velocity of the robot as a
+     * TranslationalVelocity object.
+     * 
+     * @return The current field-relative translational velocity of the robot.
+     */
+    public synchronized TranslationalVelocity getTranslationalVelocity() {
+        return translationalVelocity;
     }
 
     /**

@@ -198,4 +198,19 @@ public class DriveMotorConstants {
         VelocityLatencyCompensation = velocityLatencyCompensation;
         return this;
     }
+
+    public DriveMotorConstants withSimulatedMotor(DCMotor simulatedMotor) {
+        SimulatedMotor = simulatedMotor;
+        return this;
+    }
+
+    public DriveMotorConstants withSimulatedMomentOfInertia(MomentOfInertia simulatedMomentOfInertia) {
+        SimulatedMomentOfInertia = simulatedMomentOfInertia;
+        return this;
+    }
+
+    public DriveMotorConstants withMaxVelocity(LinearVelocity maxVelocity) {
+        MaxVelocity = maxVelocity;
+        return this;
+    }
 }

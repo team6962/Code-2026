@@ -21,7 +21,7 @@ import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.phoenix.TimestampUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
-import com.team6962.lib.swerve.core.SwerveComponent;
+import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -63,6 +63,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
         this.constants = constants;
         
         motor = new TalonFX(constants.getSwerveModule(corner.getIndex()).DriveMotorCANId, constants.CANBusName);
+
+        constants.DriveMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = constants.DriveMotor.GearReduction;
 
         StatusUtil.check(motor.getConfigurator().apply(constants.DriveMotor.DeviceConfiguration));
 

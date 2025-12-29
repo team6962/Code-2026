@@ -26,7 +26,13 @@ public class LoggingUtil {
         Map<String, String> controlInfo = controlRequest.getControlInfo();
 
         for (String field : controlRequest.getControlInfo().keySet()) {
-            DogLog.log(path + field, controlInfo.get(field));
+            String value = controlInfo.get(field);
+
+            if (value.matches("-?\\d+(\\.\\d+)?")) {
+                DogLog.log(path + field, Double.parseDouble(value));
+            } else {
+                DogLog.log(path + field, controlInfo.get(field));
+            }
         }
     }
 
