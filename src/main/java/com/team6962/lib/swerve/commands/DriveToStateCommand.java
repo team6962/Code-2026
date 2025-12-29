@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.team6962.lib.control.TranslationController;
 import com.team6962.lib.control.TrapezoidalController;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;

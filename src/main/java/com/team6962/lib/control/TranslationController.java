@@ -1,9 +1,8 @@
-package com.team6962.lib.swerve.commands;
+package com.team6962.lib.control;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.team6962.lib.control.TrapezoidalController;
 import com.team6962.lib.math.TranslationalVelocity;
 
 import edu.wpi.first.math.geometry.Pose2d;

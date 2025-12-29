@@ -23,7 +23,7 @@ import com.team6962.lib.swerve.motion.VelocityMotion;
 import com.team6962.lib.swerve.simulation.SwerveDriveSim;
 import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
-import com.team6962.lib.swerve.util.SwerveControlLoop;
+import com.team6962.lib.swerve.util.ControlLoop;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,7 +43,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
     private DrivetrainConstants constants;
-    private SwerveControlLoop controlLoop;
+    private ControlLoop controlLoop;
     private SwerveModule[] modules;
     private Odometry odometry;
     private Gyroscope gyroscope;
@@ -83,8 +83,8 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
         // Initialize the control loop, which will periodically call the
         // update() method, either in a thread or during the subsystem periodic
         controlLoop = constants.Timing.UseThreadedControlLoop ?
-            new SwerveControlLoop.Threaded() :
-            new SwerveControlLoop.SubsystemPeriodic();
+            new ControlLoop.Threaded() :
+            new ControlLoop.SubsystemPeriodic();
 
         fieldLogger = new FieldLogger(constants, this::getPosition, this::getModuleStates);
 
@@ -127,7 +127,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
         localization.update(deltaTimeSeconds);
         fieldLogger.update(deltaTimeSeconds);
 
-        SwerveMotion motion = motionManager.getNextMotion();
+        SwerveMotion motion = motionManager.getActiveMotion();
 
         if (motion != null) {
             motion.update(deltaTimeSeconds);
@@ -271,7 +271,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
     }
 
     public void clearMotion() {
-        motionManager.clear();
+        motionManager.update();
     }
 
     public void applyMotion(SwerveMotion motion) {

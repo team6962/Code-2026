@@ -9,7 +9,7 @@ public class SwerveMotionManager implements AutoCloseable {
         this.defaultMotion = defaultMotion;
     }
 
-    public synchronized void clear() {
+    public synchronized void update() {
         if (activeMotion != null) {
             activeMotion.close();
         }
@@ -38,7 +38,7 @@ public class SwerveMotionManager implements AutoCloseable {
         }
     }
 
-    public synchronized SwerveMotion getNextMotion() {
+    public synchronized SwerveMotion getActiveMotion() {
         if (activeMotion != null) {
             return activeMotion;
         } else {

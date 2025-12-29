@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public interface SwerveControlLoop extends AutoCloseable {
+public interface ControlLoop extends AutoCloseable {
     public default void start(Consumer<Double> updateFunction, Frequency updateFrequency) {
     }
 
@@ -18,7 +18,7 @@ public interface SwerveControlLoop extends AutoCloseable {
     public default void close() {
     }
 
-    public static class SubsystemPeriodic extends SubsystemBase implements SwerveControlLoop {
+    public static class SubsystemPeriodic extends SubsystemBase implements ControlLoop {
         private Consumer<Double> updateFunction;
         private double lastUpdateTimestamp = -1;
 
@@ -46,7 +46,7 @@ public interface SwerveControlLoop extends AutoCloseable {
         }
     }
 
-    public static class Threaded implements SwerveControlLoop {
+    public static class Threaded implements ControlLoop {
         private Consumer<Double> updateFunction;
         private Notifier notifier;
         private double updatePeriodSeconds;
