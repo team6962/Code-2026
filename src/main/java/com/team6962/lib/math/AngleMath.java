@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.units.measure.Angle;
 
+/**
+ * Utility methods for working with angles.
+ */
 public class AngleMath {
     /**
      * Converts a continuous angle (which can go past 360° to 361° and beyond)

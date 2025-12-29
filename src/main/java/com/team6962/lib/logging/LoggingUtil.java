@@ -6,6 +6,9 @@ import com.ctre.phoenix6.controls.ControlRequest;
 
 import dev.doglog.DogLog;
 
+/**
+ * Utility methods for logging telemetry.
+ */
 public class LoggingUtil {
     /**
      * Logs all fields from the given ControlRequest under the specified path.
@@ -15,9 +18,7 @@ public class LoggingUtil {
      * @param controlRequest The ControlRequest whose fields are to be logged.
      */
     public static void log(String path, ControlRequest controlRequest) {
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
+        path = ensureEndsWithSlash(path);
         
         if (controlRequest == null) {
             return;
