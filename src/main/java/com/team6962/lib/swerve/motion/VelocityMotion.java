@@ -63,7 +63,21 @@ public class VelocityMotion implements SwerveMotion {
 
         SwerveModuleState[] states = swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, swerveDrive.getConstants().DriveMotor.MaxVelocity.in(MetersPerSecond));
+        if (!swerveDrive.getConstants().Driving.MaxLinearVelocity.isEquivalent(MetersPerSecond.of(0)) &&
+            !swerveDrive.getConstants().Driving.MaxAngularVelocity.isEquivalent(MetersPerSecond.of(0))) {
+            SwerveDriveKinematics.desaturateWheelSpeeds(
+                states,
+                robotRelativeVelocity,
+                swerveDrive.getConstants().DriveMotor.MaxVelocity,
+                swerveDrive.getConstants().Driving.MaxLinearVelocity,
+                swerveDrive.getConstants().Driving.MaxAngularVelocity
+            );
+        } else {
+            SwerveDriveKinematics.desaturateWheelSpeeds(
+                states,
+                swerveDrive.getConstants().DriveMotor.MaxVelocity
+            );
+        }
 
         double updateFrequencyHz = swerveDrive.getConstants().Timing.ControlLoopFrequency.in(Hertz);
         boolean useTimesync = swerveDrive.getConstants().Timing.TimesyncControlRequests;
