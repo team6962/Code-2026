@@ -18,7 +18,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.StatusUtil;
-import com.team6962.lib.phoenix.TimestampUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import com.team6962.lib.swerve.util.SwerveComponent;
@@ -111,7 +110,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
         DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
         DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
         DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
-        DogLog.log(basePath + "DataTimestamp", TimestampUtil.phoenixTimestampToFPGA(positionSignal.getTimestamp().getTime()));
+        DogLog.log(basePath + "DataTimestamp", StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
 
         LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
     }
