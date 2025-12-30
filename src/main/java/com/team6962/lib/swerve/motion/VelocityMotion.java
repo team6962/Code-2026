@@ -41,7 +41,7 @@ public class VelocityMotion implements SwerveMotion {
             }
 
             return new VelocityMotion(
-                SwerveKinematicsUtil.sum(
+                SwerveKinematicsUtil.addChassisSpeeds(
                     velocity,
                     otherVelocityMotion.velocity
                 ),
@@ -88,7 +88,7 @@ public class VelocityMotion implements SwerveMotion {
             Angle currentAngle = module.getSteerMechanism().getPosition();
 
             state = SwerveKinematicsUtil.optimize(state, currentAngle);
-            state = SwerveKinematicsUtil.cosineCorrect(state, currentAngle);
+            state = SwerveKinematicsUtil.decreaseVelocityIfMisaligned(state, currentAngle);
 
             LinearVelocity driveVelocity = MetersPerSecond.of(state.speedMetersPerSecond);
             Angle steerAngle = state.angle.getMeasure();

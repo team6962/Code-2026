@@ -30,7 +30,7 @@ public class LockMotion implements SwerveMotion {
 
             for (int i = 0; i < targetPositions.length; i++) {
                 targetPositions[i].angle = Rotation2d.fromDegrees(-45 + i * 90);
-                targetPositions[i] = SwerveKinematicsUtil.optimize(targetPositions[i], targetPositions[i].angle.getMeasure());
+                targetPositions[i] = SwerveKinematicsUtil.optimizeRelativePosition(targetPositions[i], targetPositions[i].angle.getMeasure());
             }
         }
 

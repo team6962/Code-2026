@@ -97,7 +97,7 @@ public class TwistToTargetMotion implements SwerveMotion {
 
             Angle steerAngle = module.getSteerMechanism().getPosition();
 
-            positionDeltas[i] = SwerveKinematicsUtil.optimize(positionDeltas[i], steerAngle);
+            positionDeltas[i] = SwerveKinematicsUtil.optimizeRelativePosition(positionDeltas[i], steerAngle);
 
             targetPositions[i] = new SwerveModulePosition(
                 currentPositions[i].distanceMeters + positionDeltas[i].distanceMeters,
@@ -105,7 +105,7 @@ public class TwistToTargetMotion implements SwerveMotion {
             );
 
             // Reduce maximum velocities of wheels that are oriented badly
-            double cosineError = SwerveKinematicsUtil.getCosineError(positionDeltas[i], steerAngle);
+            double cosineError = SwerveKinematicsUtil.getCosineOfSteerError(positionDeltas[i], steerAngle);
 
             velocityConstraints[i] *= cosineError;
         }
