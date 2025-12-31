@@ -49,7 +49,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
 
     public SteerMechanism(Corner corner, DrivetrainConstants constants) {
         motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, constants.CANBusName);
-        encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId);
+        encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId, constants.CANBusName);
 
         constants.SteerMotor.DeviceConfiguration.Feedback.RotorToSensorRatio = constants.SteerMotor.GearReduction;
         constants.SteerMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = 1.0;
