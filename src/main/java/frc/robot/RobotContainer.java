@@ -201,7 +201,7 @@ public class RobotContainer {
       new TranslationalVelocity(),
       Radians.of(0),
       RadiansPerSecond.of(0)
-    ));
+    )).withFinishWhenReached(false);
   }
 
   public void latePeriodic() {
