@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.team6962.lib.control.TranslationController;
 import com.team6962.lib.control.TrapezoidalController;
+import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
@@ -46,6 +47,11 @@ public class DriveToStateCommand extends Command {
      * Whether to finish automatically when the target is reached.
      */
     private boolean finishWhenReached = true;
+
+    /**
+     * Whether the motion profiles have finished at least once.
+     */
+    private boolean motionProfilesFinished = false;
 
     /**
      * Class representing the target state for the drive command.
@@ -188,7 +194,17 @@ public class DriveToStateCommand extends Command {
 
     @Override
     public void initialize() {
-        // Create motion profiles for translation and rotation controllers
+        // Reset state
+        motionProfilesFinished = false;
+
+        // Generate initial motion profiles
+        createMotionProfiles();
+    }
+
+    /**
+     * Creates motion profiles for translation and rotation controllers.
+     */
+    private void createMotionProfiles() {
         if (translationController != null) {
             translationController.setProfile(
                 swerveDrive.getPosition().getTranslation(),
@@ -199,13 +215,19 @@ public class DriveToStateCommand extends Command {
         }
 
         if (headingController != null) {
+            // Ensure the robot doesn't try to rotate more than 180 degrees
+            Angle targetAngle = target.angle;
+
+            targetAngle = AngleMath.toDiscrete(targetAngle);
+            targetAngle = AngleMath.toContinuous(targetAngle, swerveDrive.getYaw());
+
             headingController.setProfile(
                 new TrapezoidProfile.State(
                     swerveDrive.getYaw().in(Radians),
                     swerveDrive.getYawVelocity().in(RadiansPerSecond)
                 ),
                 new TrapezoidProfile.State(
-                    target.angle.in(Radians),
+                    targetAngle.in(Radians),
                     target.angularVelocity.in(RadiansPerSecond)
                 )
             );
@@ -214,6 +236,15 @@ public class DriveToStateCommand extends Command {
 
     @Override
     public void execute() {
+        // Check if motion profiles have finished
+        if ((translationController == null || translationController.isFinished()) &&
+            (headingController == null || headingController.isFinished())) {
+            motionProfilesFinished = true;
+            
+            // Generate new motion profiles to move closer to the target
+            createMotionProfiles();
+        }
+
         // Calculate and apply velocity commands for translation and rotation
         if (translationController != null) {
             TranslationalVelocity outputTranslationalVelocity = translationController.calculate(
@@ -236,9 +267,7 @@ public class DriveToStateCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return finishWhenReached &&
-               (translationController == null || translationController.isFinished()) &&
-               (headingController == null || headingController.isFinished());
+        return finishWhenReached && motionProfilesFinished;
     }
 
     /**
