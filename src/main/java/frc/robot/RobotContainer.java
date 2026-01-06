@@ -22,6 +22,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.phoenix.control.ControlOutputType;
@@ -141,7 +142,7 @@ public class RobotContainer {
               new TalonFXConfiguration()
                 .withMotorOutput(
                   new MotorOutputConfigs()
-                    // .withInverted(InvertedValue.Clockwise_Positive)
+                    .withInverted(InvertedValue.Clockwise_Positive)
                 )
                 .withCurrentLimits(
                   new CurrentLimitsConfigs()

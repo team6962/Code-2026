@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
@@ -72,18 +73,25 @@ public class DriveMechanismSim {
         // reported by RobotController, which can be overriden in simulation
         motorControllerSimulation.setSupplyVoltage(RobotController.getBatteryVoltage());
 
+        // Sign multiplier to account for motor inversion setting. The motor
+        // controller reports values in its configured positive direction, but
+        // the physics simulation always uses counter-clockwise-positive, so we
+        // need to negate values when the motor is configured as
+        // clockwise-positive.
+        double motorSign = constants.DriveMotor.DeviceConfiguration.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0;
+
         // Set the physics simulation input voltage to the motor controller's
         // applied output voltage
-        physicsSimulation.setInputVoltage(motorControllerSimulation.getMotorVoltage());
+        physicsSimulation.setInputVoltage(motorControllerSimulation.getMotorVoltage() * motorSign);
 
         // Update the physics simulation
         physicsSimulation.update(deltaTimeSeconds);
 
         // Update the motor controller simulation with the new position,
         // velocity, and acceleration from the physics simulation
-        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.DriveMotor.GearReduction));
-        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.DriveMotor.GearReduction));
-        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.DriveMotor.GearReduction));
+        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.DriveMotor.GearReduction * motorSign));
+        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.DriveMotor.GearReduction * motorSign));
+        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.DriveMotor.GearReduction * motorSign));
 
         DogLog.log("Drivetrain/Simulation/" + corner.name() + "Drive/Position", getPosition().in(Meters));
     }
