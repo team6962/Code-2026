@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.team6962.lib.logging.LoggingUtil;
@@ -72,7 +73,7 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
         this.odometry = odometry;
 
         // Create the Pigeon2 gyroscope instance
-        gyro = new Pigeon2(constants.Gyroscope.CANId, constants.CANBusName);
+        gyro = new Pigeon2(constants.Gyroscope.CANId, new CANBus(constants.CANBusName));
 
         // Apply the Pigeon2Configuration in the DrivetrainConstants to the gyroscope
         StatusUtil.check(gyro.getConfigurator().apply(constants.Gyroscope.DeviceConfiguration));
