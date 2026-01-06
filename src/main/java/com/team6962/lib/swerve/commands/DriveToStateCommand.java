@@ -58,6 +58,8 @@ public class DriveToStateCommand extends Command {
                 Hertz.of(50)
             );
         }
+
+        addRequirements(swerveDrive.useMotion());
     }
 
     @Override
