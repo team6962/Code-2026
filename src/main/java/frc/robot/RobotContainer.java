@@ -91,9 +91,10 @@ public class RobotContainer {
         )
         .withTiming(
           new TimingConstants()
-            .withControlLoopFrequency(Hertz.of(50))
-            .withUseThreadedControlLoop(false)
+            .withControlLoopFrequency(Hertz.of(100))
             .withSignalUpdateRate(Hertz.of(100))
+            .withTimesyncControlRequests(true)
+            .withUseThreadedControlLoop(true)
         )
         .withDriving(
           new DrivingConstants()
