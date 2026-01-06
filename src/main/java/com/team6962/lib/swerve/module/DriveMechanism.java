@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -58,11 +59,12 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     private ControlRequest lastControlRequest;
 
     public DriveMechanism(Corner corner, DrivetrainConstants constants) {
+        CANBus bus = new CANBus(constants.CANBusName);
+        
         this.corner = corner;
         this.constants = constants;
         
-        motor = new TalonFX(constants.getSwerveModule(corner.getIndex()).DriveMotorCANId, constants.CANBusName);
-
+        motor = new TalonFX(constants.getSwerveModule(corner.getIndex()).DriveMotorCANId, bus);
         constants.DriveMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = constants.DriveMotor.GearReduction;
 
         StatusUtil.check(motor.getConfigurator().apply(constants.DriveMotor.DeviceConfiguration));

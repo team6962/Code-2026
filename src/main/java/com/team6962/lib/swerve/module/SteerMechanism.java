@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -48,8 +49,10 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     private ControlRequest lastControlRequest;
 
     public SteerMechanism(Corner corner, DrivetrainConstants constants) {
-        motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, constants.CANBusName);
-        encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId, constants.CANBusName);
+        CANBus bus = new CANBus(constants.CANBusName);
+
+        motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, bus);
+        encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId, bus);
 
         constants.SteerMotor.DeviceConfiguration.Feedback.RotorToSensorRatio = constants.SteerMotor.GearReduction;
         constants.SteerMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = 1.0;
