@@ -3,6 +3,7 @@ package com.team6962.lib.phoenix.control;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,10 @@ import com.ctre.phoenix6.controls.DynamicMotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.TimeUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -108,6 +113,17 @@ class DynamicPositionControlRequestTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void withJerkMeasure() {
+        // Jerk is in rotations per second cubed, which is (rotations per second squared) per second
+        Measure<PerUnit<AngularAccelerationUnit, TimeUnit>> jerk = 
+            (Measure<PerUnit<AngularAccelerationUnit, TimeUnit>>) (Measure<?>) RotationsPerSecondPerSecond.per(Second).of(42.5);
+        DynamicPositionControlRequest request = new DynamicPositionControlRequest(0.0)
+            .withJerk(jerk);
+        assertEquals(42.5, request.Jerk, 0.0001);
+    }
+
+    @Test
     void withSlot() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(0.0)
             .withSlot(2);
@@ -171,64 +187,153 @@ class DynamicPositionControlRequestTest {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
             .withVelocity(10.0)
             .withAcceleration(20.0)
+            .withJerk(30.0)
+            .withSlot(1)
+            .withUpdateFreqHz(100.0)
+            .withUseTimesync(true)
             .withMotionProfileType(DynamicPositionMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.Voltage);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicVoltage.class, result);
+        DynamicMotionMagicVoltage typed = (DynamicMotionMagicVoltage) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(10.0, typed.Velocity);
+        assertEquals(20.0, typed.Acceleration);
+        assertEquals(30.0, typed.Jerk);
+        assertEquals(1, typed.Slot);
+        assertEquals(100.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
+        assertFalse(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_TrapezoidalVoltageFOC() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
-            .withVelocity(10.0)
-            .withAcceleration(20.0)
+            .withVelocity(15.0)
+            .withAcceleration(25.0)
+            .withJerk(35.0)
+            .withSlot(2)
+            .withUpdateFreqHz(200.0)
+            .withUseTimesync(false)
             .withMotionProfileType(DynamicPositionMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.VoltageFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicVoltage.class, result);
+        DynamicMotionMagicVoltage typed = (DynamicMotionMagicVoltage) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(15.0, typed.Velocity);
+        assertEquals(25.0, typed.Acceleration);
+        assertEquals(35.0, typed.Jerk);
+        assertEquals(2, typed.Slot);
+        assertEquals(200.0, typed.UpdateFreqHz);
+        assertFalse(typed.UseTimesync);
+        assertTrue(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_TrapezoidalTorqueCurrentFOC() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
-            .withVelocity(10.0)
-            .withAcceleration(20.0)
+            .withVelocity(12.0)
+            .withAcceleration(22.0)
+            .withJerk(32.0)
+            .withSlot(0)
+            .withUpdateFreqHz(150.0)
+            .withUseTimesync(true)
             .withMotionProfileType(DynamicPositionMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.TorqueCurrentFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicTorqueCurrentFOC.class, result);
+        DynamicMotionMagicTorqueCurrentFOC typed = (DynamicMotionMagicTorqueCurrentFOC) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(12.0, typed.Velocity);
+        assertEquals(22.0, typed.Acceleration);
+        assertEquals(32.0, typed.Jerk);
+        assertEquals(0, typed.Slot);
+        assertEquals(150.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
     }
 
     @Test
     void toControlRequest_ExponentialVoltage() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
+            .withSlot(1)
+            .withUpdateFreqHz(80.0)
+            .withUseTimesync(true)
             .withMotionProfileType(DynamicPositionMotionProfileType.Exponential)
             .withOutputType(ControlOutputType.Voltage);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicExpoVoltage.class, result);
+        DynamicMotionMagicExpoVoltage typed = (DynamicMotionMagicExpoVoltage) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(1, typed.Slot);
+        assertEquals(80.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
+        assertFalse(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_ExponentialVoltageFOC() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
+            .withSlot(0)
+            .withUpdateFreqHz(60.0)
+            .withUseTimesync(false)
             .withMotionProfileType(DynamicPositionMotionProfileType.Exponential)
             .withOutputType(ControlOutputType.VoltageFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicExpoVoltage.class, result);
+        DynamicMotionMagicExpoVoltage typed = (DynamicMotionMagicExpoVoltage) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(0, typed.Slot);
+        assertEquals(60.0, typed.UpdateFreqHz);
+        assertFalse(typed.UseTimesync);
+        assertTrue(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_ExponentialTorqueCurrentFOC() {
         DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0)
+            .withSlot(2)
+            .withUpdateFreqHz(120.0)
+            .withUseTimesync(true)
             .withMotionProfileType(DynamicPositionMotionProfileType.Exponential)
             .withOutputType(ControlOutputType.TorqueCurrentFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(DynamicMotionMagicExpoTorqueCurrentFOC.class, result);
+        DynamicMotionMagicExpoTorqueCurrentFOC typed = (DynamicMotionMagicExpoTorqueCurrentFOC) result;
+        assertEquals(5.0, typed.Position);
+        assertEquals(2, typed.Slot);
+        assertEquals(120.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
+    }
+
+    @Test
+    void toControlRequest_NullMotionProfileType_ThrowsException() {
+        DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0);
+        request.MotionProfileType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
+    }
+
+    @Test
+    void toControlRequest_NullOutputType_ThrowsException() {
+        DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0);
+        request.OutputType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
+    }
+
+    @Test
+    void toControlRequest_BothNull_ThrowsException() {
+        DynamicPositionControlRequest request = new DynamicPositionControlRequest(5.0);
+        request.MotionProfileType = null;
+        request.OutputType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
     }
 }

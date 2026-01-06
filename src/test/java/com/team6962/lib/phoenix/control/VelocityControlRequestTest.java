@@ -108,60 +108,137 @@ class VelocityControlRequestTest {
     @Test
     void toControlRequest_NoneVoltage() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(1)
+            .withUpdateFreqHz(100.0)
+            .withUseTimesync(true)
             .withMotionProfileType(VelocityMotionProfileType.None)
             .withOutputType(ControlOutputType.Voltage);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(VelocityVoltage.class, result);
+        VelocityVoltage typed = (VelocityVoltage) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(1, typed.Slot);
+        assertEquals(100.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
+        assertFalse(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_NoneVoltageFOC() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(2)
+            .withUpdateFreqHz(200.0)
+            .withUseTimesync(false)
             .withMotionProfileType(VelocityMotionProfileType.None)
             .withOutputType(ControlOutputType.VoltageFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(VelocityVoltage.class, result);
+        VelocityVoltage typed = (VelocityVoltage) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(2, typed.Slot);
+        assertEquals(200.0, typed.UpdateFreqHz);
+        assertFalse(typed.UseTimesync);
+        assertTrue(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_NoneTorqueCurrentFOC() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(1)
+            .withUpdateFreqHz(150.0)
+            .withUseTimesync(true)
             .withMotionProfileType(VelocityMotionProfileType.None)
             .withOutputType(ControlOutputType.TorqueCurrentFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(VelocityTorqueCurrentFOC.class, result);
+        VelocityTorqueCurrentFOC typed = (VelocityTorqueCurrentFOC) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(1, typed.Slot);
+        assertEquals(150.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
     }
 
     @Test
     void toControlRequest_TrapezoidalVoltage() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(0)
+            .withUpdateFreqHz(50.0)
+            .withUseTimesync(false)
             .withMotionProfileType(VelocityMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.Voltage);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(MotionMagicVelocityVoltage.class, result);
+        MotionMagicVelocityVoltage typed = (MotionMagicVelocityVoltage) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(0, typed.Slot);
+        assertEquals(50.0, typed.UpdateFreqHz);
+        assertFalse(typed.UseTimesync);
+        assertFalse(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_TrapezoidalVoltageFOC() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(1)
+            .withUpdateFreqHz(75.0)
+            .withUseTimesync(true)
             .withMotionProfileType(VelocityMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.VoltageFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(MotionMagicVelocityVoltage.class, result);
+        MotionMagicVelocityVoltage typed = (MotionMagicVelocityVoltage) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(1, typed.Slot);
+        assertEquals(75.0, typed.UpdateFreqHz);
+        assertTrue(typed.UseTimesync);
+        assertTrue(typed.EnableFOC);
     }
 
     @Test
     void toControlRequest_TrapezoidalTorqueCurrentFOC() {
         VelocityControlRequest request = new VelocityControlRequest(5.0)
+            .withSlot(2)
+            .withUpdateFreqHz(100.0)
+            .withUseTimesync(false)
             .withMotionProfileType(VelocityMotionProfileType.Trapezoidal)
             .withOutputType(ControlOutputType.TorqueCurrentFOC);
         
         ControlRequest result = request.toControlRequest();
         assertInstanceOf(MotionMagicVelocityTorqueCurrentFOC.class, result);
+        MotionMagicVelocityTorqueCurrentFOC typed = (MotionMagicVelocityTorqueCurrentFOC) result;
+        assertEquals(5.0, typed.Velocity);
+        assertEquals(2, typed.Slot);
+        assertEquals(100.0, typed.UpdateFreqHz);
+        assertFalse(typed.UseTimesync);
+    }
+
+    @Test
+    void toControlRequest_NullMotionProfileType_ThrowsException() {
+        VelocityControlRequest request = new VelocityControlRequest(5.0);
+        request.MotionProfileType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
+    }
+
+    @Test
+    void toControlRequest_NullOutputType_ThrowsException() {
+        VelocityControlRequest request = new VelocityControlRequest(5.0);
+        request.OutputType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
+    }
+
+    @Test
+    void toControlRequest_BothNull_ThrowsException() {
+        VelocityControlRequest request = new VelocityControlRequest(5.0);
+        request.MotionProfileType = null;
+        request.OutputType = null;
+        
+        assertThrows(IllegalStateException.class, () -> request.toControlRequest());
     }
 }

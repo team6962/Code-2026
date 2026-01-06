@@ -156,6 +156,14 @@ public class VelocityControlRequest {
      * Converts this control request object to a {@link ControlRequest} object.
      */
     public ControlRequest toControlRequest() {
+        if (MotionProfileType == null) {
+            throw new IllegalStateException("MotionProfileType cannot be null");
+        }
+
+        if (OutputType == null) {
+            throw new IllegalStateException("OutputType cannot be null");
+        }
+
         switch (MotionProfileType) {
             case None:
                 switch (OutputType) {
@@ -197,14 +205,6 @@ public class VelocityControlRequest {
                             .withUpdateFreqHz(UpdateFreqHz)
                             .withUseTimesync(UseTimesync);
                 }
-        }
-        
-        if (MotionProfileType == null) {
-            throw new IllegalArgumentException("MotionProfileType cannot be null");
-        }
-
-        if (OutputType == null) {
-            throw new IllegalArgumentException("OutputType cannot be null");
         }
 
         throw new IllegalArgumentException("Unsupported MotionProfileType (" +
