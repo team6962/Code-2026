@@ -9,7 +9,9 @@ import com.team6962.lib.control.TrapezoidalController;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -86,6 +88,32 @@ public class DriveToStateCommand extends Command {
         }
 
         /**
+         * Constructs a State object with the specified parameters.
+         * 
+         * @param pose The target pose containing translation and angle
+         * @param velocity The target chassis speeds containing translational
+         *                 and angular velocity
+         */
+        public State(Pose2d pose, ChassisSpeeds velocity) {
+            this(
+                pose.getTranslation(),
+                new TranslationalVelocity(velocity),
+                pose.getRotation().getMeasure(),
+                RadiansPerSecond.of(velocity.omegaRadiansPerSecond)
+            );
+        }
+
+        /**
+         * Constructs a State object that stops the robot at the specified
+         * pose.
+         * 
+         * @param pose The target pose containing translation and angle
+         */
+        public State(Pose2d pose) {
+            this(pose, new ChassisSpeeds(0, 0, 0));
+        }
+
+        /**
          * Constructs a State object with no rotation control.
          * @param translation           The target translation position
          * @param translationalVelocity The target translational velocity
@@ -95,12 +123,30 @@ public class DriveToStateCommand extends Command {
         }
 
         /**
+         * Constructs a State object that stops the robot at the specified
+         * translation.
+         * @param translation The target translation position
+         */
+        public State(Translation2d translation) {
+            this(translation, new TranslationalVelocity(0, 0));
+        }
+
+        /**
          * Constructs a State object with no translation control.
          * @param angle           The target heading angle
          * @param angularVelocity The target angular velocity
          */
         public State(Angle angle, AngularVelocity angularVelocity) {
             this(null, null, angle, angularVelocity);
+        }
+
+        /**
+         * Constructs a State object that stops the robot at the specified
+         * heading.
+         * @param angle The target heading angle
+         */
+        public State(Angle angle) {
+            this(angle, RadiansPerSecond.of(0));
         }
     }
 

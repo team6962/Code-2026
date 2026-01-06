@@ -6,10 +6,14 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
+import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.motion.SwerveMotion;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -94,6 +98,34 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
 
     public Command lock() {
         return runMotion(() -> applyLockMotion());
+    }
+
+    public DriveToStateCommand driveTo(DriveToStateCommand.State target) {
+        return new DriveToStateCommand(this, target);
+    }
+
+    public DriveToStateCommand driveTo(Pose2d pose, ChassisSpeeds velocity) {
+        return driveTo(new DriveToStateCommand.State(pose, velocity));
+    }
+
+    public DriveToStateCommand driveTo(Pose2d pose) {
+        return driveTo(new DriveToStateCommand.State(pose));
+    }
+
+    public DriveToStateCommand driveTo(Translation2d translation, TranslationalVelocity translationalVelocity) {
+        return driveTo(new DriveToStateCommand.State(translation, translationalVelocity));
+    }
+
+    public DriveToStateCommand driveTo(Translation2d translation) {
+        return driveTo(new DriveToStateCommand.State(translation));
+    }
+
+    public DriveToStateCommand driveTo(Angle angle, AngularVelocity angularVelocity) {
+        return driveTo(new DriveToStateCommand.State(angle, angularVelocity));
+    }
+
+    public DriveToStateCommand driveTo(Angle angle) {
+        return driveTo(new DriveToStateCommand.State(angle));
     }
 
     public void latePeriodic() {
