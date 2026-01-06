@@ -6,7 +6,10 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.team6962.lib.math.SwerveKinematicsUtil;
 import com.team6962.lib.math.WheelMath;
+import com.team6962.lib.phoenix.control.PositionControlRequest;
 import com.team6962.lib.swerve.MotionSwerveDrive;
+import com.team6962.lib.swerve.config.DriveMotorConstants;
+import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
 
 import dev.doglog.DogLog;
@@ -43,19 +46,24 @@ public class LockMotion implements SwerveMotion {
             Distance drivePosition = Meters.of(targetPositions[i].distanceMeters);
             Angle steerAngle = targetPositions[i].angle.getMeasure();
 
+            DriveMotorConstants driveConstants = swerveDrive.getConstants().DriveMotor;
+            SteerMotorConstants steerConstants = swerveDrive.getConstants().SteerMotor;
+
             module.setControl(
-                swerveDrive.getConstants().DriveMotor.PositionControl.createRequest(
-                    WheelMath.toAngular(drivePosition, swerveDrive.getConstants().getWheelRadius(i)).in(Rotations),
-                    swerveDrive.getConstants().DriveMotor.PositionSlot,
-                    updateFrequencyHz,
-                    useTimesync
-                ),
-                swerveDrive.getConstants().SteerMotor.PositionControl.createRequest(
-                    steerAngle.in(Rotations),
-                    swerveDrive.getConstants().SteerMotor.PositionSlot,
-                    updateFrequencyHz,
-                    useTimesync
-                )
+                new PositionControlRequest(WheelMath.toAngular(drivePosition, swerveDrive.getConstants().getWheelRadius(i)).in(Rotations))
+                    .withMotionProfileType(driveConstants.PositionControlMotionProfile)
+                    .withOutputType(driveConstants.OutputType)
+                    .withSlot(driveConstants.PositionSlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest(),
+                new PositionControlRequest(steerAngle.in(Rotations))
+                    .withMotionProfileType(steerConstants.PositionControlMotionProfile)
+                    .withOutputType(steerConstants.OutputType)
+                    .withSlot(steerConstants.PositionSlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest()
             );
         }
     }

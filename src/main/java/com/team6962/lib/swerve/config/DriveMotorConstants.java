@@ -3,6 +3,10 @@ package com.team6962.lib.swerve.config;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.team6962.lib.phoenix.control.ControlOutputType;
+import com.team6962.lib.phoenix.control.DynamicPositionMotionProfileType;
+import com.team6962.lib.phoenix.control.PositionMotionProfileType;
+import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -34,9 +38,14 @@ public class DriveMotorConstants {
     public double GearReduction = 1.0;
 
     /**
-     * Control mode for position control of the drive motor.
+     * The output units for control of the drive motor.
      */
-    public ControlMode.Position PositionControl = new ControlMode.Position();
+    public ControlOutputType OutputType = ControlOutputType.VoltageFOC;
+
+    /**
+     * Motion profile type for position control of the drive motor.
+     */
+    public PositionMotionProfileType PositionControlMotionProfile = PositionMotionProfileType.Trapezoidal;
 
     /**
      * The slot index for position control of the drive motor. This should be
@@ -46,9 +55,9 @@ public class DriveMotorConstants {
     public int PositionSlot = 0;
 
     /**
-     * Control mode for velocity control of the drive motor.
+     * Motion profile type for velocity control of the drive motor.
      */
-    public ControlMode.Velocity VelocityControl = new ControlMode.Velocity();
+    public VelocityMotionProfileType VelocityControlMotionProfile = VelocityMotionProfileType.Trapezoidal;
 
     /**
      * The slot index for velocity control of the drive motor. This should be
@@ -58,9 +67,9 @@ public class DriveMotorConstants {
     public int VelocitySlot = 1;
 
     /**
-     * Control mode for dynamically-constrained position control of the drive motor.
+     * Motion profile type for dynamically-constrained position control of the drive motor.
      */
-    public ControlMode.DynamicallyConstrainedPosition DynamicallyConstraintedPositionControl = new ControlMode.DynamicallyConstrainedPosition();
+    public DynamicPositionMotionProfileType DynamicPositionControlMotionProfile = DynamicPositionMotionProfileType.Trapezoidal;
 
     /**
      * True if latency compensation should be performed on position data from
@@ -78,8 +87,23 @@ public class DriveMotorConstants {
      */
     public boolean VelocityLatencyCompensation = true;
 
+    /**
+     * The motor model to use for simulation. This should match the physical
+     * motor used on the robot.
+     */
     public DCMotor SimulatedMotor = DCMotor.getKrakenX60Foc(1);
+
+    /**
+     * The moment of inertia of the drive mechanism for simulation. This
+     * includes the rotor inertia plus any additional inertia from the wheel
+     * and gearing.
+     */
     public MomentOfInertia SimulatedMomentOfInertia = KilogramSquareMeters.of(0.00032);
+
+    /**
+     * The maximum linear velocity of the drive wheel. This is used for wheel
+     * velocity desaturation.
+     */
     public LinearVelocity MaxVelocity;
 
     /**
@@ -113,14 +137,26 @@ public class DriveMotorConstants {
     }
 
     /**
-     * Sets the position control mode for the drive motor, and returns this
+     * Sets the output type for control of the drive motor, and returns this
      * DriveMotorConstants for chaining.
      * 
-     * @param positionControl The position control mode
-     * @return                This DriveMotorConstants object
+     * @param outputType The output type for control
+     * @return           This DriveMotorConstants object
      */
-    public DriveMotorConstants withPositionControl(ControlMode.Position positionControl) {
-        PositionControl = positionControl;
+    public DriveMotorConstants withOutputType(ControlOutputType outputType) {
+        OutputType = outputType;
+        return this;
+    }
+
+    /**
+     * Sets the motion profile type to use for position control of the drive
+     * motor, and returns this DriveMotorConstants for chaining.
+     * 
+     * @param profile The motion profile type for position control
+     * @return        This DriveMotorConstants object
+     */
+    public DriveMotorConstants withPositionControlMotionProfile(PositionMotionProfileType profile) {
+        PositionControlMotionProfile = profile;
         return this;
     }
 
@@ -137,14 +173,14 @@ public class DriveMotorConstants {
     }
 
     /**
-     * Sets the velocity control mode for the drive motor, and returns this
-     * DriveMotorConstants for chaining.
+     * Sets the motion profile type to use for velocity control of the drive
+     * motor, and returns this DriveMotorConstants for chaining.
      * 
-     * @param velocityControl The velocity control mode
-     * @return                This DriveMotorConstants object
+     * @param profile The motion profile type for velocity control
+     * @return        This DriveMotorConstants object
      */
-    public DriveMotorConstants withVelocityControl(ControlMode.Velocity velocityControl) {
-        VelocityControl = velocityControl;
+    public DriveMotorConstants withVelocityControlMotionProfile(VelocityMotionProfileType profile) {
+        VelocityControlMotionProfile = profile;
         return this;
     }
 
@@ -161,17 +197,16 @@ public class DriveMotorConstants {
     }
 
     /**
-     * Sets the dynamically-constrained position control mode for the drive
-     * motor, and returns this DriveMotorConstants for chaining.
+     * Sets the motion profile type to use for dynamically-constrained position
+     * control of the drive motor, and returns this DriveMotorConstants for
+     * chaining.
      * 
-     * @param dynamicallyConstraintedPositionControl The dynamically-constrained
-     *                                               position control mode
-     * @return                                       This DriveMotorConstants
-     *                                               object
+     * @param profile The motion profile type for dynamically-constrained
+     *                position control
+     * @return        This DriveMotorConstants object
      */
-    public DriveMotorConstants withDynamicallyConstraintedPositionControl(
-            ControlMode.DynamicallyConstrainedPosition dynamicallyConstraintedPositionControl) {
-        DynamicallyConstraintedPositionControl = dynamicallyConstraintedPositionControl;
+    public DriveMotorConstants withDynamicPositionControlMotionProfile(DynamicPositionMotionProfileType profile) {
+        DynamicPositionControlMotionProfile = profile;
         return this;
     }
 
@@ -199,16 +234,37 @@ public class DriveMotorConstants {
         return this;
     }
 
+    /**
+     * Sets the motor model to use for simulation, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param simulatedMotor The motor model for simulation
+     * @return               This DriveMotorConstants object
+     */
     public DriveMotorConstants withSimulatedMotor(DCMotor simulatedMotor) {
         SimulatedMotor = simulatedMotor;
         return this;
     }
 
+    /**
+     * Sets the moment of inertia of the drive mechanism for simulation, and
+     * returns this DriveMotorConstants for chaining.
+     * 
+     * @param simulatedMomentOfInertia The moment of inertia for simulation
+     * @return                         This DriveMotorConstants object
+     */
     public DriveMotorConstants withSimulatedMomentOfInertia(MomentOfInertia simulatedMomentOfInertia) {
         SimulatedMomentOfInertia = simulatedMomentOfInertia;
         return this;
     }
 
+    /**
+     * Sets the maximum linear velocity of the drive wheel, and returns this
+     * DriveMotorConstants for chaining.
+     * 
+     * @param maxVelocity The maximum linear velocity
+     * @return            This DriveMotorConstants object
+     */
     public DriveMotorConstants withMaxVelocity(LinearVelocity maxVelocity) {
         MaxVelocity = maxVelocity;
         return this;

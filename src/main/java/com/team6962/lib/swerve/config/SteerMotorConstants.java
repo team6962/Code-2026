@@ -3,6 +3,8 @@ package com.team6962.lib.swerve.config;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.team6962.lib.phoenix.control.ControlOutputType;
+import com.team6962.lib.phoenix.control.PositionMotionProfileType;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -34,9 +36,14 @@ public class SteerMotorConstants {
     public double GearReduction = 1.0;
 
     /**
-     * Control mode for position control of the steer motor.
+     * The output units for control of the steer motor.
      */
-    public ControlMode.Position PositionControl = new ControlMode.Position();
+    public ControlOutputType OutputType = ControlOutputType.VoltageFOC;
+
+    /**
+     * Motion profile type for position control of the steer motor.
+     */
+    public PositionMotionProfileType PositionControlMotionProfile = PositionMotionProfileType.Exponential;
 
     /**
      * The slot index for position control of the steer motor. This should be
@@ -61,7 +68,17 @@ public class SteerMotorConstants {
      */
     public boolean VelocityLatencyCompensation = true;
 
+    /**
+     * The motor model to use for simulation. This should match the physical
+     * motor used on the robot.
+     */
     public DCMotor SimulatedMotor = DCMotor.getKrakenX60Foc(1);
+
+    /**
+     * The moment of inertia of the steer mechanism for simulation. This
+     * includes the rotor inertia plus any additional inertia from the
+     * gearing.
+     */
     public MomentOfInertia SimulatedMomentOfInertia = KilogramSquareMeters.of(0.000174);
 
     /**
@@ -95,14 +112,26 @@ public class SteerMotorConstants {
     }
 
     /**
-     * Sets the position control mode for the steer motor, and returns this
+     * Sets the output type for control of the steer motor, and returns this
      * SteerMotorConstants for chaining.
      * 
-     * @param positionControl The position control mode
-     * @return                This SteerMotorConstants object
+     * @param outputType The output type for control
+     * @return           This SteerMotorConstants object
      */
-    public SteerMotorConstants withPositionControl(ControlMode.Position positionControl) {
-        PositionControl = positionControl;
+    public SteerMotorConstants withOutputType(ControlOutputType outputType) {
+        OutputType = outputType;
+        return this;
+    }
+
+    /**
+     * Sets the motion profile type to use for position control of the steer
+     * motor, and returns this SteerMotorConstants for chaining.
+     * 
+     * @param profile The motion profile type for position control
+     * @return        This SteerMotorConstants object
+     */
+    public SteerMotorConstants withPositionControlMotionProfile(PositionMotionProfileType profile) {
+        PositionControlMotionProfile = profile;
         return this;
     }
 
@@ -142,11 +171,25 @@ public class SteerMotorConstants {
         return this;
     }
 
+    /**
+     * Sets the motor model to use for simulation, and returns this
+     * SteerMotorConstants for chaining.
+     * 
+     * @param simulatedMotor The motor model for simulation
+     * @return               This SteerMotorConstants object
+     */
     public SteerMotorConstants withSimulatedMotor(DCMotor simulatedMotor) {
         SimulatedMotor = simulatedMotor;
         return this;
     }
 
+    /**
+     * Sets the moment of inertia of the steer mechanism for simulation, and
+     * returns this SteerMotorConstants for chaining.
+     * 
+     * @param simulatedMomentOfInertia The moment of inertia for simulation
+     * @return                         This SteerMotorConstants object
+     */
     public SteerMotorConstants withSimulatedMomentOfInertia(MomentOfInertia simulatedMomentOfInertia) {
         SimulatedMomentOfInertia = simulatedMomentOfInertia;
         return this;

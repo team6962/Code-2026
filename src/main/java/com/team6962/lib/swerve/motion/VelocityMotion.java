@@ -8,7 +8,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.team6962.lib.math.SwerveKinematicsUtil;
 import com.team6962.lib.math.WheelMath;
+import com.team6962.lib.phoenix.control.PositionControlRequest;
+import com.team6962.lib.phoenix.control.VelocityControlRequest;
 import com.team6962.lib.swerve.MotionSwerveDrive;
+import com.team6962.lib.swerve.config.DriveMotorConstants;
+import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
 
 import dev.doglog.DogLog;
@@ -81,6 +85,8 @@ public class VelocityMotion implements SwerveMotion {
 
         double updateFrequencyHz = swerveDrive.getConstants().Timing.ControlLoopFrequency.in(Hertz);
         boolean useTimesync = swerveDrive.getConstants().Timing.TimesyncControlRequests;
+        DriveMotorConstants driveConstants = swerveDrive.getConstants().DriveMotor;
+        SteerMotorConstants steerConstants = swerveDrive.getConstants().SteerMotor;
 
         for (int i = 0; i < swerveDrive.getModules().length; i++) {
             SwerveModule module = swerveDrive.getModules()[i];
@@ -94,18 +100,21 @@ public class VelocityMotion implements SwerveMotion {
             Angle steerAngle = state.angle.getMeasure();
 
             module.setControl(
-                swerveDrive.getConstants().DriveMotor.VelocityControl.createRequest(
-                    WheelMath.toAngular(driveVelocity, swerveDrive.getConstants().getWheelRadius(i)).in(RotationsPerSecond),
-                    swerveDrive.getConstants().DriveMotor.VelocitySlot,
-                    updateFrequencyHz,
-                    useTimesync
-                ),
-                swerveDrive.getConstants().SteerMotor.PositionControl.createRequest(
-                    steerAngle.in(Rotations),
-                    swerveDrive.getConstants().SteerMotor.PositionSlot,
-                    updateFrequencyHz,
-                    useTimesync
-                )
+                new VelocityControlRequest(
+                        WheelMath.toAngular(driveVelocity, swerveDrive.getConstants().getWheelRadius(i)).in(RotationsPerSecond))
+                    .withMotionProfileType(driveConstants.VelocityControlMotionProfile)
+                    .withOutputType(driveConstants.OutputType)
+                    .withSlot(driveConstants.VelocitySlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest(),
+                new PositionControlRequest(steerAngle.in(Rotations))
+                    .withMotionProfileType(steerConstants.PositionControlMotionProfile)
+                    .withOutputType(steerConstants.OutputType)
+                    .withSlot(steerConstants.PositionSlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest()
             );
         }
     }

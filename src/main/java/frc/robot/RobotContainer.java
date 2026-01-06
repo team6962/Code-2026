@@ -24,13 +24,12 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.math.TranslationalVelocity;
+import com.team6962.lib.phoenix.control.ControlOutputType;
+import com.team6962.lib.phoenix.control.PositionMotionProfileType;
+import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-import com.team6962.lib.swerve.config.ControlMode;
-import com.team6962.lib.swerve.config.ControlMode.OutputTypeValue;
-import com.team6962.lib.swerve.config.ControlMode.PositionMotionProfileValue;
-import com.team6962.lib.swerve.config.ControlMode.VelocityMotionProfileValue;
 import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.DrivingConstants;
@@ -129,10 +128,8 @@ public class RobotContainer {
                 )
             )
             .withGearReduction(5.9)
-            .withVelocityControl(new ControlMode.Velocity(
-              VelocityMotionProfileValue.Trapezoidal,
-              OutputTypeValue.Voltage
-            ))
+            .withOutputType(ControlOutputType.Voltage)
+            .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
             .withVelocitySlot(0)
             .withSimulatedMotor(DCMotor.getKrakenX60(1))
             .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))
@@ -168,10 +165,8 @@ public class RobotContainer {
                 )
             )
             .withGearReduction(150.0 / 7.0)
-            .withPositionControl(new ControlMode.Position(
-              PositionMotionProfileValue.Exponential,
-              OutputTypeValue.Voltage
-            ))
+            .withOutputType(ControlOutputType.Voltage)
+            .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
             .withPositionSlot(0)
             .withSimulatedMotor(DCMotor.getKrakenX60(1))
             .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184))

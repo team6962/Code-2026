@@ -8,7 +8,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.math.SwerveKinematicsUtil;
 import com.team6962.lib.math.WheelMath;
+import com.team6962.lib.phoenix.control.DynamicPositionControlRequest;
+import com.team6962.lib.phoenix.control.PositionControlRequest;
 import com.team6962.lib.swerve.MotionSwerveDrive;
+import com.team6962.lib.swerve.config.DriveMotorConstants;
+import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
 
 import dev.doglog.DogLog;
@@ -112,29 +116,33 @@ public class TwistToTargetMotion implements SwerveMotion {
 
         double updateFrequencyHz = swerveDrive.getConstants().Timing.ControlLoopFrequency.in(Hertz);
         boolean useTimesync = swerveDrive.getConstants().Timing.TimesyncControlRequests;
+        DriveMotorConstants driveConstants = swerveDrive.getConstants().DriveMotor;
+        SteerMotorConstants steerConstants = swerveDrive.getConstants().SteerMotor;
 
         for (int i = 0; i < moduleCount; i++) {
             SwerveModule module = swerveDrive.getModules()[i];
 
             module.setControl(
-                swerveDrive.getConstants().DriveMotor.DynamicallyConstraintedPositionControl.createRequest(
-                    WheelMath.toAngular(
-                        Meters.of(targetPositions[i].distanceMeters),
-                        swerveDrive.getConstants().getWheelRadius(i)
-                    ).in(Rotations),
-                    velocityConstraints[i],
-                    accelerationConstraints[i],
-                    0.0, // Jerk constraint is not supported.
-                    swerveDrive.getConstants().DriveMotor.PositionSlot,
-                    updateFrequencyHz,
-                    useTimesync
-                ),
-                swerveDrive.getConstants().SteerMotor.PositionControl.createRequest(
-                    targetPositions[i].angle.getRotations(),
-                    swerveDrive.getConstants().SteerMotor.PositionSlot,
-                    updateFrequencyHz,
-                    useTimesync
-                )
+                new DynamicPositionControlRequest(
+                        WheelMath.toAngular(
+                            Meters.of(targetPositions[i].distanceMeters),
+                            swerveDrive.getConstants().getWheelRadius(i)
+                        ).in(Rotations))
+                    .withMotionProfileType(driveConstants.DynamicPositionControlMotionProfile)
+                    .withOutputType(driveConstants.OutputType)
+                    .withVelocity(velocityConstraints[i])
+                    .withAcceleration(accelerationConstraints[i])
+                    .withSlot(driveConstants.PositionSlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest(),
+                new PositionControlRequest(targetPositions[i].angle.getRotations())
+                    .withMotionProfileType(steerConstants.PositionControlMotionProfile)
+                    .withOutputType(steerConstants.OutputType)
+                    .withSlot(steerConstants.PositionSlot)
+                    .withUpdateFreqHz(updateFrequencyHz)
+                    .withUseTimesync(useTimesync)
+                    .toControlRequest()
             );
         }
     }
