@@ -1,6 +1,7 @@
 package com.team6962.lib.logging;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 
@@ -28,12 +29,28 @@ public class LoggingUtil {
 
         for (String field : controlRequest.getControlInfo().keySet()) {
             String value = controlInfo.get(field);
+            Optional<Double> doubleValue = getDouble(value);
 
-            if (value.matches("-?\\d+(\\.\\d+)?")) {
-                DogLog.log(path + field, Double.parseDouble(value));
+            if (doubleValue.isPresent()) {
+                DogLog.log(path + field, doubleValue.get());
             } else {
-                DogLog.log(path + field, controlInfo.get(field));
+                DogLog.log(path + field, value);
             }
+        }
+    }
+
+    /**
+     * Converts the given string to an Optional Double.
+     * 
+     * @param str The string to convert.
+     * @return    An Optional containing the Double value if conversion is
+     *            successful, or an empty Optional if conversion fails.
+     */
+    public static Optional<Double> getDouble(String str) {
+        try {
+            return Optional.of(Double.parseDouble(str));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
         }
     }
 
