@@ -28,8 +28,8 @@ public class NeutralMotion implements SwerveMotion {
         double updateFreqHz = swerveDrive.getConstants().Timing.ControlLoopFrequency.in(Hertz);
         boolean useTimesync = swerveDrive.getConstants().Timing.TimesyncControlRequests;
 
-        if (neutralMode == null) {
-            request = new NeutralOut()
+        if (neutralMode == NeutralModeValue.Coast) {
+            request = new CoastOut()
                 .withUpdateFreqHz(updateFreqHz)
                 .withUseTimesync(useTimesync);
         } else if (neutralMode == NeutralModeValue.Brake) {
@@ -37,7 +37,7 @@ public class NeutralMotion implements SwerveMotion {
                 .withUpdateFreqHz(updateFreqHz)
                 .withUseTimesync(useTimesync);
         } else {
-            request = new CoastOut()
+            request = new NeutralOut()
                 .withUpdateFreqHz(updateFreqHz)
                 .withUseTimesync(useTimesync);
         }
