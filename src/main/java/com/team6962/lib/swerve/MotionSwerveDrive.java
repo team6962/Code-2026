@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,10 +20,11 @@ import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.motion.SwerveMotionManager;
 import com.team6962.lib.swerve.motion.VelocityMotion;
 import com.team6962.lib.swerve.simulation.SwerveDriveSim;
+import com.team6962.lib.swerve.util.ControlLoop;
 import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
-import com.team6962.lib.swerve.util.ControlLoop;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -112,11 +112,23 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
         }
 
         if (constants.Timing.UseThreadedControlLoop) {
-            BaseStatusSignal.waitForAll(
-                constants.Timing.SignalUpdateRate.asPeriod().in(Seconds),
-                statusSignals
-            );
+            BaseStatusSignal.refreshAll(statusSignals);
         }
+
+        // Compute and log the maximum latency of the status signals
+
+        double signalLatencySeconds = 0.0;
+
+        for (BaseStatusSignal signal : statusSignals) {
+            double latency = signal.getTimestamp().getLatency();
+
+            if (latency > signalLatencySeconds) {
+                signalLatencySeconds = latency;
+            }
+        }
+
+
+        DogLog.log("Drivetrain/SignalLatency", signalLatencySeconds);
 
         for (SwerveModule module : modules) {
             module.update(deltaTimeSeconds);
