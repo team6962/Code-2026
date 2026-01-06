@@ -180,19 +180,22 @@ public final class ControlMode {
         public ControlRequest createRequest(double position, double velocity, double acceleration, double jerk, int slot, double updateFreqHz, boolean useTimesync) {
             switch (OutputType) {
                 case Voltage:
-                    return new DynamicMotionMagicVoltage(position, velocity, acceleration, jerk)
+                    return new DynamicMotionMagicVoltage(position, velocity, acceleration)
+                        .withJerk(jerk)
                         .withSlot(slot)
                         .withUpdateFreqHz(updateFreqHz)
                         .withUseTimesync(useTimesync)
                         .withEnableFOC(false);
                 case VoltageFOC:
-                    return new DynamicMotionMagicVoltage(position, velocity, acceleration, jerk)
+                    return new DynamicMotionMagicVoltage(position, velocity, acceleration)
+                        .withJerk(jerk)
                         .withSlot(slot)
                         .withUpdateFreqHz(updateFreqHz)
                         .withUseTimesync(useTimesync)
                         .withEnableFOC(true);
                 case TorqueCurrentFOC:
-                    return new DynamicMotionMagicTorqueCurrentFOC(position, velocity, acceleration, jerk)
+                    return new DynamicMotionMagicTorqueCurrentFOC(position, velocity, acceleration)
+                        .withJerk(jerk)
                         .withSlot(slot)
                         .withUpdateFreqHz(updateFreqHz)
                         .withUseTimesync(useTimesync);
