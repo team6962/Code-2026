@@ -232,6 +232,16 @@ public class DriveToStateCommand extends Command {
                 )
             );
         }
+
+        if (headingController != null && translationController != null) {
+            double maxDuration = Math.max(
+                headingController.getDuration(),
+                translationController.getDuration()
+            );
+
+            headingController.setDuration(maxDuration);
+            translationController.setDuration(maxDuration);
+        }
     }
 
     @Override
