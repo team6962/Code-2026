@@ -198,7 +198,7 @@ public class TrapezoidalController {
      * @return The remaining time in seconds
      */
     public double getRemainingTime() {
-        double time = (Timer.getFPGATimestamp() - initialTime) / timeScale;
+        double time = (Timer.getFPGATimestamp() - initialTime) * timeScale;
         return Math.max(0, getDuration() - time);
     }
 
