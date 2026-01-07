@@ -111,9 +111,7 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
             simulation.update(deltaTimeSeconds);
         }
 
-        if (constants.Timing.UseThreadedControlLoop) {
-            BaseStatusSignal.refreshAll(statusSignals);
-        }
+        BaseStatusSignal.refreshAll(statusSignals);
 
         // Compute and log the maximum latency of the status signals
 
@@ -151,10 +149,6 @@ public class MotionSwerveDrive extends SubsystemBase implements AutoCloseable {
 
         localization.logTelemetry("Drivetrain/Localization");
         fieldLogger.logTelemetry("Drivetrain/Field");
-
-        if (!constants.Timing.UseThreadedControlLoop) {
-            BaseStatusSignal.refreshAll(statusSignals);
-        }
     }
 
     @Override
