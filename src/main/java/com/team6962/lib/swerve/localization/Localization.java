@@ -129,8 +129,8 @@ public class Localization implements SwerveComponent {
     public synchronized void logTelemetry(String basePath) {
         basePath = LoggingUtil.ensureEndsWithSlash(basePath);
 
-        gyroscope.logTelemetry(basePath + "/Gyroscope");
-        odometry.logTelemetry(basePath + "/Odometry");
+        gyroscope.logTelemetry(basePath + "Gyroscope");
+        odometry.logTelemetry(basePath + "Odometry");
 
         Pose2d position = getPosition();
 

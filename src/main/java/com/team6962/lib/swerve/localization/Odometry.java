@@ -39,7 +39,7 @@ public class Odometry implements SwerveComponent {
     /**
      * The current recorded positions of the swerve modules.
      */
-    private SwerveModulePosition[] currentPostions;
+    private SwerveModulePosition[] currentPositions;
 
     /**
      * The current recorded states of the swerve modules.
@@ -68,7 +68,7 @@ public class Odometry implements SwerveComponent {
         this.kinematics = constants.Structure.getKinematics();
         this.modules = modules;
         lastPositions = computePositions();
-        currentPostions = computePositions();
+        currentPositions = computePositions();
         currentStates = computeStates();
     }
 
@@ -99,7 +99,7 @@ public class Odometry implements SwerveComponent {
      * positions of the swerve modules.
      */
     public synchronized SwerveModulePosition[] getPositions() {
-        return currentPostions;
+        return currentPositions;
     }
 
     /**
@@ -141,8 +141,8 @@ public class Odometry implements SwerveComponent {
     private SwerveModulePosition[] computePositionDeltas() {
         SwerveModulePosition[] deltas = new SwerveModulePosition[modules.length];
         for (int i = 0; i < modules.length; i++) {
-            double deltaDistance = currentPostions[i].distanceMeters - lastPositions[i].distanceMeters;
-            deltas[i] = new SwerveModulePosition(deltaDistance, currentPostions[i].angle);
+            double deltaDistance = currentPositions[i].distanceMeters - lastPositions[i].distanceMeters;
+            deltas[i] = new SwerveModulePosition(deltaDistance, currentPositions[i].angle);
         }
         return deltas;
     }
@@ -183,8 +183,8 @@ public class Odometry implements SwerveComponent {
         basePath = LoggingUtil.ensureEndsWithSlash(basePath);
 
         for (int i = 0; i < modules.length; i++) {
-            DogLog.log(basePath + "Module Positions/" + i + "/distanceMeters", currentPostions[i].distanceMeters, Meters);
-            DogLog.log(basePath + "Module Positions/" + i + "/angleRadians", currentPostions[i].angle.getRadians(), Radians);
+            DogLog.log(basePath + "Module Positions/" + i + "/distanceMeters", currentPositions[i].distanceMeters, Meters);
+            DogLog.log(basePath + "Module Positions/" + i + "/angleRadians", currentPositions[i].angle.getRadians(), Radians);
             DogLog.log(basePath + "Module States/" + i + "/speedMetersPerSecond", currentStates[i].speedMetersPerSecond, MetersPerSecond);
             DogLog.log(basePath + "Module States/" + i + "/angleRadians", currentStates[i].angle.getRadians(), Radians);
             DogLog.log(basePath + "Position Deltas/" + i + "/distanceMeters", positionDeltas[i].distanceMeters, Meters);
@@ -198,8 +198,8 @@ public class Odometry implements SwerveComponent {
 
     @Override
     public synchronized void update(double deltaTimeSeconds) {
-        lastPositions = currentPostions;
-        currentPostions = computePositions();
+        lastPositions = currentPositions;
+        currentPositions = computePositions();
         currentStates = computeStates();
         positionDeltas = computePositionDeltas();
         twist = computeTwist();

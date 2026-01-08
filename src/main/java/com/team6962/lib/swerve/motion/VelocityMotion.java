@@ -2,6 +2,7 @@ package com.team6962.lib.swerve.motion;
 
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -68,7 +69,7 @@ public class VelocityMotion implements SwerveMotion {
         SwerveModuleState[] states = swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);
 
         if (!swerveDrive.getConstants().Driving.MaxLinearVelocity.isEquivalent(MetersPerSecond.of(0)) &&
-            !swerveDrive.getConstants().Driving.MaxAngularVelocity.isEquivalent(MetersPerSecond.of(0))) {
+            !swerveDrive.getConstants().Driving.MaxAngularVelocity.isEquivalent(RadiansPerSecond.of(0))) {
             SwerveDriveKinematics.desaturateWheelSpeeds(
                 states,
                 robotRelativeVelocity,

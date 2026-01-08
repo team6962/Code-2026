@@ -23,9 +23,7 @@ public class SwerveMotionManager implements AutoCloseable {
             nextMotion.close();
         }
 
-        if (nextMotion == null) {
-            nextMotion = newMotion;
-        } else if (newMotion == null) {
+        if (nextMotion == null || newMotion == null) {
             nextMotion = newMotion;
         } else {
             SwerveMotion fusedMotion = nextMotion.fuseWith(newMotion);
