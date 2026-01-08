@@ -50,6 +50,9 @@ public class DrivetrainConstants {
      */
     public SwerveModuleConstants[] SwerveModules = new SwerveModuleConstants[4];
 
+    /**
+     * The constants that define the driving behavior of the drivetrain.
+     */
     public DrivingConstants Driving = new DrivingConstants();
 
     /**
@@ -160,7 +163,8 @@ public class DrivetrainConstants {
      * Sets the driving constants for the drivetrain, and returns this
      * DrivetrainConstants for chaining.
      * 
-     * @return This DrivetrainConstants object
+     * @param driving The driving constants
+     * @return        This DrivetrainConstants object
      */
     public DrivetrainConstants withDriving(DrivingConstants driving) {
         Driving = driving;

@@ -2,6 +2,11 @@ package com.team6962.lib.swerve.config;
 
 import edu.wpi.first.wpilibj.XboxController.Button;
 
+/**
+ * Configuration constants for teleop control of a swerve drive using an Xbox
+ * controller. This includes joystick mappings, button assignments, speed
+ * settings, and control tuning parameters.
+ */
 public class XBoxTeleopSwerveConstants {
     /**
      * The port number of the Xbox controller used to control the robot.
@@ -171,6 +176,221 @@ public class XBoxTeleopSwerveConstants {
      * towards the top of the screen instead of away from the driver station.
      */
     public boolean ReorientControlsInSimulation = true;
+
+    /**
+     * Sets the controller port, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param controllerPort The controller port number (0-5)
+     * @return               This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withControllerPort(int controllerPort) {
+        ControllerPort = controllerPort;
+        return this;
+    }
+
+    /**
+     * Sets the translation joystick, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param translationJoystick The joystick for controlling translation
+     * @return                    This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withTranslationJoystick(Joystick translationJoystick) {
+        TranslationJoystick = translationJoystick;
+        return this;
+    }
+
+    /**
+     * Sets the rotation joystick, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param rotationJoystick The joystick for controlling rotation
+     * @return                 This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withRotationJoystick(Joystick rotationJoystick) {
+        RotationJoystick = rotationJoystick;
+        return this;
+    }
+
+    /**
+     * Sets the zero yaw button, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param zeroYawButton The button for zeroing the robot's yaw
+     * @return              This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withZeroYawButton(Button zeroYawButton) {
+        ZeroYawButton = zeroYawButton;
+        return this;
+    }
+
+    /**
+     * Sets the boost axis, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param boostAxis The trigger for enabling boost speeds
+     * @return          This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withBoostAxis(Trigger boostAxis) {
+        BoostAxis = boostAxis;
+        return this;
+    }
+
+    /**
+     * Sets the angular super boost axis, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param angularSuperBoostAxis The trigger for enabling maximum rotational speed
+     * @return                      This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withAngularSuperBoostAxis(Trigger angularSuperBoostAxis) {
+        AngularSuperBoostAxis = angularSuperBoostAxis;
+        return this;
+    }
+
+    /**
+     * Sets the default translational speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param defaultTranslationalSpeed The default translational speed (0.0-1.0)
+     * @return                          This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withDefaultTranslationalSpeed(double defaultTranslationalSpeed) {
+        DefaultTranslationalSpeed = defaultTranslationalSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the default angular speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param defaultAngularSpeed The default angular speed (0.0-1.0)
+     * @return                    This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withDefaultAngularSpeed(double defaultAngularSpeed) {
+        DefaultAngularSpeed = defaultAngularSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the boost translational speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param boostTranslationalSpeed The boost translational speed (0.0-1.0)
+     * @return                        This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withBoostTranslationalSpeed(double boostTranslationalSpeed) {
+        BoostTranslationalSpeed = boostTranslationalSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the boost angular speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param boostAngularSpeed The boost angular speed (0.0-1.0)
+     * @return                  This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withBoostAngularSpeed(double boostAngularSpeed) {
+        BoostAngularSpeed = boostAngularSpeed;
+        return this;
+    }
+
+    /**
+     * Sets whether fine control is enabled, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param enableFineControl True if D-pad fine control is enabled
+     * @return                  This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withEnableFineControl(boolean enableFineControl) {
+        EnableFineControl = enableFineControl;
+        return this;
+    }
+
+    /**
+     * Sets the fine control translational speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param fineControlTranslationalSpeed The fine control translational speed (0.0-1.0)
+     * @return                              This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withFineControlTranslationalSpeed(double fineControlTranslationalSpeed) {
+        FineControlTranslationalSpeed = fineControlTranslationalSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the fine control angular speed, and returns this XBoxTeleopSwerveConstants
+     * for chaining.
+     *
+     * @param fineControlAngularSpeed The fine control angular speed (0.0-1.0)
+     * @return                        This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withFineControlAngularSpeed(double fineControlAngularSpeed) {
+        FineControlAngularSpeed = fineControlAngularSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the boosted fine control translational speed, and returns this
+     * XBoxTeleopSwerveConstants for chaining.
+     *
+     * @param boostedFineControlTranslationalSpeed The boosted fine control translational speed (0.0-1.0)
+     * @return                                     This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withBoostedFineControlTranslationalSpeed(double boostedFineControlTranslationalSpeed) {
+        BoostedFineControlTranslationalSpeed = boostedFineControlTranslationalSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the boosted fine control angular speed, and returns this
+     * XBoxTeleopSwerveConstants for chaining.
+     *
+     * @param boostedFineControlAngularSpeed The boosted fine control angular speed (0.0-1.0)
+     * @return                               This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withBoostedFineControlAngularSpeed(double boostedFineControlAngularSpeed) {
+        BoostedFineControlAngularSpeed = boostedFineControlAngularSpeed;
+        return this;
+    }
+
+    /**
+     * Sets the joystick sensitivity exponent, and returns this
+     * XBoxTeleopSwerveConstants for chaining.
+     *
+     * @param joystickSensitivityExponent The exponent for joystick sensitivity (1.0+ recommended)
+     * @return                            This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withJoystickSensitivityExponent(double joystickSensitivityExponent) {
+        JoystickSensitivityExponent = joystickSensitivityExponent;
+        return this;
+    }
+
+    /**
+     * Sets the deadband, and returns this XBoxTeleopSwerveConstants for chaining.
+     *
+     * @param deadband The joystick deadband (0.000002-1.0)
+     * @return         This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withDeadband(double deadband) {
+        Deadband = deadband;
+        return this;
+    }
+
+    /**
+     * Sets whether controls are reoriented in simulation, and returns this
+     * XBoxTeleopSwerveConstants for chaining.
+     *
+     * @param reorientControlsInSimulation True if controls should be reoriented in simulation
+     * @return                             This XBoxTeleopSwerveConstants object
+     */
+    public XBoxTeleopSwerveConstants withReorientControlsInSimulation(boolean reorientControlsInSimulation) {
+        ReorientControlsInSimulation = reorientControlsInSimulation;
+        return this;
+    }
 
     /**
      * A joystick on the Xbox controller.
