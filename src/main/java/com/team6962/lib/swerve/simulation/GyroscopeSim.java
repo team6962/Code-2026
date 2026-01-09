@@ -49,8 +49,6 @@ public class GyroscopeSim {
         gyroSim.setAngularVelocityZ(Radians.of(twist.dtheta).div(Seconds.of(deltaTimeSeconds)));
     }
 
-    // TODO: Check mount pose adjustment
-
     public void setYaw(Angle yaw) {
         gyroSim.setRawYaw(yaw.plus(Degrees.of(constants.Gyroscope.DeviceConfiguration.MountPose.MountPoseYaw)));
     }
