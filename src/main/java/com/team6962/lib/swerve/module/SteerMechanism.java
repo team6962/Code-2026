@@ -28,10 +28,34 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
+/**
+ * Controls the steer motor of a swerve module, which rotates the wheel around
+ * its vertical axis.
+ * 
+ * <p>This class contains a set of methods for getting information about the
+ * current state of the steer motor, including its position, velocity,
+ * acceleration, applied voltage, and current draw. All measurements are in
+ * angular units representing the rotation of the wheel about its vertical
+ * axis.
+ * 
+ * <p>The {@link #setControl(ControlRequest)} can be used to apply control
+ * requests to the motor.
+ * 
+ * <p>The {@link #close()} method releases the motor controller resources. This
+ * should be called when the mechanism is no longer needed to ensure proper
+ * cleanup.
+ * 
+ * @see DriveMechanism
+ * @see SwerveModule
+ */
 public class SteerMechanism implements SwerveComponent, AutoCloseable {
+    /** The TalonFX motor controller for the steer motor. */
     private TalonFX motor;
+    
+    /** The CANcoder absolute encoder for that reads the steer angle. */
     private CANcoder encoder;
 
+    // Status signals that allow us to get the current state of the mechanism
     private StatusSignal<Angle> positionSignal;
     private StatusSignal<AngularVelocity> velocitySignal;
     private StatusSignal<AngularAcceleration> accelerationSignal;
@@ -39,6 +63,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     private StatusSignal<Current> statorCurrentSignal;
     private StatusSignal<Current> supplyCurrentSignal;
 
+    // Cached values for the current state of the mechanism
     private Angle position = Radians.of(0);
     private AngularVelocity velocity = RadiansPerSecond.of(0);
     private AngularAcceleration acceleration = RadiansPerSecondPerSecond.of(0);
@@ -46,8 +71,19 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     private Current statorCurrent = Amps.of(0);
     private Current supplyCurrent = Amps.of(0);
 
+    /** The last control request sent to the motor for telemetry logging. */
     private ControlRequest lastControlRequest;
 
+    /**
+     * Creates a new SteerMechanism for the specified corner.
+     * 
+     * <p>Initializes the TalonFX motor controller and CANcoder with the configuration
+     * from the drivetrain constants. Configures the motor to use FusedCANcoder feedback
+     * for accurate absolute angle tracking.
+     * 
+     * @param corner The corner of the robot that this module is occupying
+     * @param constants The drivetrain configuration constants
+     */
     public SteerMechanism(Corner corner, DrivetrainConstants constants) {
         CANBus bus = new CANBus(constants.CANBusName);
 
@@ -70,6 +106,13 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
         supplyCurrentSignal = motor.getSupplyCurrent(false);
     }
 
+    /**
+     * Gets the status signals used by this mechanism. These signals should be
+     * refreshed periodically by the containing class.
+     * 
+     * @return Array of status signals for position, velocity, acceleration,
+     *         voltage, and currents
+     */
     @Override
     public BaseStatusSignal[] getStatusSignals() {
         return new BaseStatusSignal[] {
@@ -124,42 +167,94 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
         supplyCurrent = supplyCurrentSignal.getValue();
     }
 
+    /**
+     * Gets the TalonFX motor controller for direct access.
+     * 
+     * @return The TalonFX motor controller
+     */
     public TalonFX getMotorController() {
         return motor;
     }
 
+    /**
+     * Gets the CANcoder absolute encoder for direct access.
+     * 
+     * @return The CANcoder encoder
+     */
     public CANcoder getEncoder() {
         return encoder;
     }
 
+    /**
+     * Gets the current angular position of the wheel about the steer axis.
+     * 
+     * <p>This is the fused position from the TalonFX and CANcoder,
+     * providing accurate absolute angle tracking.
+     * 
+     * @return The angular position of the wheel
+     */
     public synchronized Angle getPosition() {
         return position;
     }
 
+    /**
+     * Gets the angular velocity of the wheel about the steer axis.
+     * 
+     * @return The angular velocity
+     */
     public synchronized AngularVelocity getVelocity() {
         return velocity;
     }
+
+    /**
+     * Gets the angular acceleration of the wheel about the steer axis.
+     * 
+     * @return The angular acceleration
+     */
     public synchronized AngularAcceleration getAcceleration() {
         return acceleration;
     }
 
+    /**
+     * Gets the voltage currently applied to the steer motor.
+     * 
+     * @return The applied voltage
+     */
     public synchronized Voltage getAppliedVoltage() {
         return appliedVoltage;
     }
 
+    /**
+     * Gets the stator current (torque-producing current) of the steer motor.
+     * 
+     * @return The stator current
+     */
     public synchronized Current getStatorCurrent() {
         return statorCurrent;
     }
 
+    /**
+     * Gets the supply current (battery drawn current) of the steer motor.
+     * 
+     * @return The supply current
+     */
     public synchronized Current getSupplyCurrent() {
         return supplyCurrent;
     }
 
+    /**
+     * Applies the given control request to the steer motor.
+     * 
+     * @param controlRequest The {@link ControlRequest} to apply
+     */
     public void setControl(ControlRequest controlRequest) {
         lastControlRequest = controlRequest;
         motor.setControl(controlRequest);
     }
 
+    /**
+     * Closes the motor controller and encoder, releasing resources.
+     */
     @Override
     public void close() {
         motor.close();

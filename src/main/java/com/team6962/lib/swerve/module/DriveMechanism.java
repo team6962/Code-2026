@@ -33,12 +33,37 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
+/**
+ * Controls the drive motor of a swerve module, which rotates the wheel around
+ * its shaft.
+ * 
+ * <p>This class contains a set of methods for getting information about the
+ * current state of the drive motor, including its position, velocity,
+ * acceleration, applied voltage, and current draw. Note that motion of the
+ * wheel is described in two ways: angular units refer to rotation of the wheel
+ * about its shaft and linear units signify the linear movement of the wheel
+ * along the ground.
+ * 
+ * <p>The {@link #setControl(ControlRequest)} can be used to apply control
+ * requests to the motor.
+ * 
+ * <p>The {@link #close()} method releases the motor controller resources. This
+ * should be called when the mechanism is no longer needed to ensure proper cleanup.
+ * 
+ * @see SteerMechanism
+ * @see SwerveModule
+ */
 public class DriveMechanism implements SwerveComponent, AutoCloseable {
+    /** The corner of the robot that this drive mechanism is on. */
     private Corner corner;
+    
+    /** The drivetrain constants used to configure the mechanism. */
     private DrivetrainConstants constants;
 
+    /** The TalonFX motor controller for the drive motor. */
     private TalonFX motor;
 
+    // Status signals that allow us to get the current state of the mechanism
     private StatusSignal<Angle> positionSignal;
     private StatusSignal<AngularVelocity> velocitySignal;
     private StatusSignal<AngularAcceleration> accelerationSignal;
@@ -46,6 +71,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     private StatusSignal<Current> statorCurrentSignal;
     private StatusSignal<Current> supplyCurrentSignal;
 
+    // Cached state of the mechanism
     private Angle angularPosition = Radians.of(0);
     private AngularVelocity angularVelocity = RadiansPerSecond.of(0);
     private AngularAcceleration angularAcceleration = RadiansPerSecondPerSecond.of(0);
@@ -56,8 +82,19 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     private Current statorCurrent = Amps.of(0);
     private Current supplyCurrent = Amps.of(0);
 
+    /** The last control request sent to the motor, for logging. */
     private ControlRequest lastControlRequest;
 
+    /**
+     * Creates a new DriveMechanism for the specified corner.
+     * 
+     * <p>Initializes the TalonFX motor controller with the configuration from
+     * the drivetrain constants and sets up all status signals for data
+     * acquisition.
+     * 
+     * @param corner The corner of the robot this module is occupying
+     * @param constants The drivetrain configuration constants
+     */
     public DriveMechanism(Corner corner, DrivetrainConstants constants) {
         CANBus bus = new CANBus(constants.CANBusName);
         
@@ -77,10 +114,22 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
         supplyCurrentSignal = motor.getSupplyCurrent(false);
     }
 
+    /**
+     * Gets the TalonFX motor controller for direct access.
+     * 
+     * @return The TalonFX motor controller
+     */
     public TalonFX getMotorController() {
         return motor;
     }
 
+    /**
+     * Gets the status signals used by this mechanism. These signals should be
+     * refreshed periodically by the containing class.
+     * 
+     * @return Array of status signals for position, velocity, acceleration,
+     *         voltage, and currents
+     */
     @Override
     public BaseStatusSignal[] getStatusSignals() {
         return new BaseStatusSignal[] {
@@ -96,6 +145,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     /**
      * Logs telemetry data about the drive mechanism. This method should never
      * be called while refreshing the status signals.
+     * 
+     * @param basePath The base path that all data will be logged under
      */
     @Override
     public void logTelemetry(String basePath) {
@@ -120,6 +171,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     /**
      * Updates the internal state of the drive mechanism. This method should
      * never be called while refreshing the status signals.
+     * 
+     * @param deltaTimeSeconds The time elapsed since the last update, in seconds
      */
     @Override
     public synchronized void update(double deltaTimeSeconds) {
@@ -146,47 +199,100 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
         supplyCurrent = supplyCurrentSignal.getValue();
     }
 
+    /**
+     * Gets the angular position of the wheel (rotation around the shaft).
+     * 
+     * @return The angular position
+     */
     public synchronized Angle getAngularPosition() {
         return angularPosition;
     }
 
+    /**
+     * Gets the linear distance that the wheel has traveled along the ground.
+     * 
+     * @return The linear position (distance traveled)
+     */
     public synchronized Distance getPosition() {
         return linearPosition;
     }
 
+    /**
+     * Gets the angular velocity of the wheel.
+     * 
+     * @return The angular velocity
+     */
     public synchronized AngularVelocity getAngularVelocity() {
         return angularVelocity;
     }
 
+    /**
+     * Gets the linear velocity of the wheel along the ground.
+     * 
+     * @return The linear velocity
+     */
     public synchronized LinearVelocity getVelocity() {
         return linearVelocity;
     }
 
+    /**
+     * Gets the angular acceleration of the wheel.
+     * 
+     * @return The angular acceleration
+     */
     public synchronized AngularAcceleration getAngularAcceleration() {
         return angularAcceleration;
     }
 
+    /**
+     * Gets the linear acceleration of the wheel along the ground.
+     * 
+     * @return The linear acceleration
+     */
     public synchronized LinearAcceleration getAcceleration() {
         return linearAcceleration;
     }
 
+    /**
+     * Gets the voltage currently applied to the motor.
+     * 
+     * @return The applied voltage
+     */
     public synchronized Voltage getAppliedVoltage() {
         return appliedVoltage;
     }
 
+    /**
+     * Gets the stator current (torque-producing current) of the motor.
+     * 
+     * @return The stator current
+     */
     public synchronized Current getStatorCurrent() {
         return statorCurrent;
     }
 
+    /**
+     * Gets the supply current (battery drawn current) of the motor.
+     * 
+     * @return The supply current
+     */
     public synchronized Current getSupplyCurrent() {
         return supplyCurrent;
     }
 
+    /**
+     * Applies the given control request to the drive motor.
+     * 
+     * @param controlRequest The {@link ControlRequest} to apply
+     */
     public void setControl(ControlRequest controlRequest) {
         lastControlRequest = controlRequest;
         motor.setControl(controlRequest);
     }
 
+    /**
+     * Closes the motor controller and releases resources.
+     */
     @Override
     public void close() {
         motor.close();
