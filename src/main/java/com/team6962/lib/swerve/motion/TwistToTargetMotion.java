@@ -23,16 +23,44 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 
+/**
+ * A swerve motion that drives along a circular arc to reach a target pose.
+ * 
+ * <p>TwistToTargetMotion creates a twist (circular arc) between the current
+ * pose and target pose, which is followed to drive the robot to the target.
+ * The dynamic position control ensures smooth acceleration and deceleration.
+ * This motion is great for precise autonomous positioning, but it is not
+ * designed to maximize speed.
+ * 
+ * @see SwerveMotion
+ * @see VelocityMotion
+ */
 public class TwistToTargetMotion implements SwerveMotion {
+    /** The target pose to drive to. */
     private final Pose2d target;
+    
+    /** The swerve drive this motion controls. */
     private final MotionSwerveDrive swerveDrive;
+    
+    /** The computed twist from current pose to target. */
     private Twist2d twist;
 
+    /**
+     * Creates a new TwistToTargetMotion to drive to the specified target pose.
+     * 
+     * @param target The target pose to reach
+     * @param swerveDrive The swerve drive to control
+     */
     public TwistToTargetMotion(Pose2d target, MotionSwerveDrive swerveDrive) {
         this.target = target;
         this.swerveDrive = swerveDrive;
     }
 
+    /**
+     * Logs telemetry data for this twist-to-target motion.
+     * 
+     * @param basePath The base path for telemetry logging
+     */
     @Override
     public void logTelemetry(String basePath) {
         if (!basePath.endsWith("/")) {
@@ -44,6 +72,11 @@ public class TwistToTargetMotion implements SwerveMotion {
         DogLog.log(basePath + "Twist", twist);
     }
 
+    /**
+     * Updates the swerve modules to drive along the twist path toward the target.
+     * 
+     * @param deltaTimeSeconds The time since the last update
+     */
     @Override
     public void update(double deltaTimeSeconds) {
         int moduleCount = swerveDrive.getModules().length;

@@ -22,15 +22,45 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearVelocity;
 
+/**
+ * A swerve motion that drives the robot at a specified field-relative velocity.
+ * 
+ * <p>VelocityMotion converts field-relative chassis speeds into individual swerve module
+ * states and applies velocity control to the drive motors and position control to the
+ * steer motors. Key features include:
+ * <ul>
+ *   <li>Field-relative velocity control (velocities are relative to the field, not the robot)</li>
+ *   <li>Automatic wheel speed desaturation to respect motor limits</li>
+ *   <li>Steer angle optimization to minimize wheel rotation</li>
+ *   <li>Velocity reduction when wheels are misaligned</li>
+ *   <li>Automatic braking when commanded velocity is near zero</li>
+ * </ul>
+ * 
+ * <p>VelocityMotion supports fusion with other VelocityMotions that have non-overlapping
+ * components. For example, a translation-only motion can be fused with a rotation-only
+ * motion to create a combined motion with both components.
+ */
 public class VelocityMotion implements SwerveMotion {
+    /** The target field-relative chassis speeds. */
     private final ChassisSpeeds velocity;
+    
+    /** The swerve drive this motion controls. */
     private final MotionSwerveDrive swerveDrive;
+    
+    /** Whether this motion has a non-zero translation component. */
     private final boolean hasTranslation;
+    
+    /** Whether this motion has a non-zero rotation component. */
     private final boolean hasRotation;
 
+    /**
+     * Creates a new VelocityMotion with the specified field-relative velocity.
+     * 
+     * @param velocity The target field-relative chassis speeds
+     * @param swerveDrive The swerve drive to control
+     */
     public VelocityMotion(ChassisSpeeds velocity, MotionSwerveDrive swerveDrive) {
         this.velocity = velocity;
         this.hasTranslation = Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01;
@@ -38,6 +68,16 @@ public class VelocityMotion implements SwerveMotion {
         this.swerveDrive = swerveDrive;
     }
 
+    /**
+     * Fuses this velocity motion with another velocity motion.
+     * 
+     * <p>Fusion is only allowed when the motions have non-overlapping components
+     * (e.g., one has translation only and the other has rotation only).
+     * 
+     * @param other The motion to fuse with
+     * @return A new VelocityMotion with combined velocities
+     * @throws IllegalArgumentException If both motions have overlapping translation or rotation
+     */
     @Override
     public SwerveMotion fuseWith(SwerveMotion other) {
         if (other instanceof VelocityMotion otherVelocityMotion) {
@@ -57,6 +97,11 @@ public class VelocityMotion implements SwerveMotion {
         throw new IllegalArgumentException("Cannot fuse a " + getClass().getSimpleName() + " with a " + other.getClass().getSimpleName());
     }
 
+    /**
+     * Updates the swerve modules to drive at the target velocity.
+     * 
+     * @param deltaTimeSeconds The time since the last update
+     */
     @Override
     public void update(double deltaTimeSeconds) {
         if (Math.abs(velocity.omegaRadiansPerSecond) < 0.01 && Math.abs(velocity.vxMetersPerSecond) < 0.01 && Math.abs(velocity.vyMetersPerSecond) < 0.01) {
@@ -120,6 +165,11 @@ public class VelocityMotion implements SwerveMotion {
         }
     }
 
+    /**
+     * Logs telemetry data for this velocity motion.
+     * 
+     * @param basePath The base path for telemetry logging
+     */
     @Override
     public void logTelemetry(String basePath) {
         if (!basePath.endsWith("/")) {
@@ -132,19 +182,16 @@ public class VelocityMotion implements SwerveMotion {
         DogLog.log(basePath + "AngularVelocity", velocity.omegaRadiansPerSecond);
     }
 
+    /**
+     * Sets all motors to neutral/brake mode
+     */
     private void brake() {
-        Frequency updateFrequency = swerveDrive.getConstants().Timing.ControlLoopFrequency;
-        boolean timesync = swerveDrive.getConstants().Timing.TimesyncControlRequests;
+        NeutralOut neutralOut = new NeutralOut()
+            .withUpdateFreqHz(swerveDrive.getConstants().Timing.ControlLoopFrequency)
+            .withUseTimesync(swerveDrive.getConstants().Timing.TimesyncControlRequests);
 
         for (SwerveModule module : swerveDrive.getModules()) {
-            module.setControl(
-                new NeutralOut()
-                    .withUpdateFreqHz(updateFrequency)
-                    .withUseTimesync(timesync),
-                new NeutralOut()
-                    .withUpdateFreqHz(updateFrequency)
-                    .withUseTimesync(timesync)
-            );
+            module.setControl(neutralOut, neutralOut);
         }
     }
 }
