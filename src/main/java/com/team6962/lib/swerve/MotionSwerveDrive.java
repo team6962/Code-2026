@@ -146,6 +146,11 @@ public class MotionSwerveDrive implements AutoCloseable {
 
         statusSignals = SwerveComponent.combineStatusSignals(components);
 
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            constants.Timing.SignalUpdateRate,
+            statusSignals
+        );
+
         motionManager = new SwerveMotionManager(new NeutralMotion(this));
 
         controlLoop.start(this::update, constants.Timing.ControlLoopFrequency);
