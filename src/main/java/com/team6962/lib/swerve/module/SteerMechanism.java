@@ -52,6 +52,9 @@ import edu.wpi.first.units.measure.Voltage;
  * @see SwerveModule
  */
 public class SteerMechanism implements SwerveComponent, AutoCloseable {
+    /** The drivetrain constants used to configure the mechanism. */
+    private DrivetrainConstants constants;
+
     /** The TalonFX motor controller for the steer motor. */
     private TalonFX motor;
     
@@ -88,6 +91,8 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
      * @param constants The drivetrain configuration constants
      */
     public SteerMechanism(Corner corner, DrivetrainConstants constants) {
+        this.constants = constants;
+
         CANBus bus = new CANBus(constants.CANBusName);
 
         motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, bus);
@@ -179,14 +184,22 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
      */
     @Override
     public synchronized void update(double deltaTimeSeconds) {
-        position = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-            positionSignal, velocitySignal
-        ));
+        if (constants.SteerMotor.PositionLatencyCompensation) {
+            position = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                positionSignal, velocitySignal
+            ));
+        } else {
+            position = positionSignal.getValue();
+        }
 
-        velocity = RotationsPerSecond.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-            velocitySignal, accelerationSignal
-        ));
-
+        if (constants.SteerMotor.VelocityLatencyCompensation) {
+            velocity = RotationsPerSecond.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                velocitySignal, accelerationSignal
+            ));
+        } else {
+            velocity = velocitySignal.getValue();
+        }
+        
         acceleration = accelerationSignal.getValue();
 
         appliedVoltage = appliedVoltageSignal.getValue();

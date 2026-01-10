@@ -197,17 +197,25 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
      */
     @Override
     public synchronized void update(double deltaTimeSeconds) {
-        angularPosition = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-            positionSignal, velocitySignal
-        ));
+        if (constants.DriveMotor.PositionLatencyCompensation) {
+            angularPosition = Rotations.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                positionSignal, velocitySignal
+            ));
+        } else {
+            angularPosition = positionSignal.getValue();
+        }
 
         Distance wheelRadius = constants.getWheelRadius(corner);
 
         linearPosition = WheelMath.toLinear(angularPosition, wheelRadius);
 
-        angularVelocity = RotationsPerSecond.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
-            velocitySignal, accelerationSignal
-        ));
+        if (constants.DriveMotor.VelocityLatencyCompensation) {
+            angularVelocity = RotationsPerSecond.of(BaseStatusSignal.getLatencyCompensatedValueAsDouble(
+                velocitySignal, accelerationSignal
+            ));
+        } else {
+            angularVelocity = velocitySignal.getValue();
+        }
 
         linearVelocity = WheelMath.toLinear(angularVelocity, wheelRadius);
 
