@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
  * A teleop swerve command that uses an Xbox controller for driver input. This
@@ -54,6 +56,17 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
 
         this.controller = new XboxController(constants.ControllerPort);
         this.constants = constants;
+
+        // When the reset yaw button is pressed, reset the swerve drive's yaw so
+        // that the robot thinks its facing forwards
+        if (constants.ZeroYawButton != null) {
+            CommandXboxController commandController = new CommandXboxController(constants.ControllerPort);
+
+            commandController.button(constants.ZeroYawButton.value).whileTrue(
+                Commands.run(() -> getSwerveDrive().getLocalization().resetYaw())
+                    .ignoringDisable(true)
+            );
+        }
     }
 
     /**
@@ -237,7 +250,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     private double getMappedRotationInput() {
         double rawInput = constants.RotationJoystick == Joystick.LeftStick ? controller.getLeftX() : controller.getRightX(); // Axis 0 or 4
 
-        return map1DJoystickInput(Math.abs(rawInput)) * Math.signum(rawInput);
+        return -map1DJoystickInput(Math.abs(rawInput)) * Math.signum(rawInput);
     }
 
     /**

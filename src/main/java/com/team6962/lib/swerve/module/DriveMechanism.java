@@ -19,6 +19,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.StatusUtil;
+import com.team6962.lib.phoenix.control.DynamicPositionControlRequest;
+import com.team6962.lib.phoenix.control.PositionControlRequest;
+import com.team6962.lib.phoenix.control.VelocityControlRequest;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import com.team6962.lib.swerve.util.SwerveComponent;
@@ -164,6 +167,24 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
         DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
         DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
         DogLog.log(basePath + "DataTimestamp", StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+
+        // If running a position or velocity request, log the target position or
+        // velocity in radians. The target is logged as part of the control
+        // request in rotations already, but it is more convenient if the target
+        // is logged in radians as well.
+        if (PositionControlRequest.isPositionControlRequest(lastControlRequest)) {
+            PositionControlRequest positionControl = new PositionControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetAngularPosition", Rotations.of(positionControl.Position).in(Radians), Radians);
+        } else if (DynamicPositionControlRequest.isDynamicPositionControlRequest(lastControlRequest)) {
+            DynamicPositionControlRequest positionControl = new DynamicPositionControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetAngularPosition", Rotations.of(positionControl.Position).in(Radians), Radians);
+        } else if (VelocityControlRequest.isVelocityControlRequest(lastControlRequest)) {
+            VelocityControlRequest velocityControl = new VelocityControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetAngularVelocity", RotationsPerSecond.of(velocityControl.Velocity).in(RadiansPerSecond), RadiansPerSecond);
+        }
 
         LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
     }

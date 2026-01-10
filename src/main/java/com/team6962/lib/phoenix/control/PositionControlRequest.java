@@ -5,8 +5,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
@@ -75,6 +75,60 @@ public class PositionControlRequest {
      */
     public PositionControlRequest(Angle Position) {
         this.Position = Position.in(Rotations);
+    }
+
+    /**
+     * Constructs a generic position control request from a
+     * {@link ControlRequest} instance.
+     * 
+     * @param controlRequest the control request to copy data from
+     */
+    public PositionControlRequest(ControlRequest controlRequest) {
+        if (controlRequest instanceof PositionVoltage pv) {
+            this.Position = pv.Position;
+            this.Slot = pv.Slot;
+            this.UpdateFreqHz = pv.UpdateFreqHz;
+            this.UseTimesync = pv.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.None;
+            this.OutputType = pv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+        } else if (controlRequest instanceof PositionTorqueCurrentFOC ptc) {
+            this.Position = ptc.Position;
+            this.Slot = ptc.Slot;
+            this.UpdateFreqHz = ptc.UpdateFreqHz;
+            this.UseTimesync = ptc.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.None;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+        } else if (controlRequest instanceof MotionMagicVoltage mmv) {
+            this.Position = mmv.Position;
+            this.Slot = mmv.Slot;
+            this.UpdateFreqHz = mmv.UpdateFreqHz;
+            this.UseTimesync = mmv.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.Trapezoidal;
+            this.OutputType = mmv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+        } else if (controlRequest instanceof MotionMagicTorqueCurrentFOC mmtc) {
+            this.Position = mmtc.Position;
+            this.Slot = mmtc.Slot;
+            this.UpdateFreqHz = mmtc.UpdateFreqHz;
+            this.UseTimesync = mmtc.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.Trapezoidal;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+        } else if (controlRequest instanceof MotionMagicExpoVoltage mmev) {
+            this.Position = mmev.Position;
+            this.Slot = mmev.Slot;
+            this.UpdateFreqHz = mmev.UpdateFreqHz;
+            this.UseTimesync = mmev.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.Exponential;
+            this.OutputType = mmev.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+        } else if (controlRequest instanceof MotionMagicExpoTorqueCurrentFOC mmetc) {
+            this.Position = mmetc.Position;
+            this.Slot = mmetc.Slot;
+            this.UpdateFreqHz = mmetc.UpdateFreqHz;
+            this.UseTimesync = mmetc.UseTimesync;
+            this.MotionProfileType = PositionMotionProfileType.Exponential;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+        } else {
+            throw new IllegalArgumentException("Unsupported ControlRequest type: " + controlRequest.getClass().getName());
+        }
     }
 
     /**
@@ -190,19 +244,19 @@ public class PositionControlRequest {
             case Trapezoidal:
                 switch (OutputType) {
                     case Voltage:
-                        return new MotionMagicVelocityVoltage(Position)
+                        return new MotionMagicVoltage(Position)
                             .withSlot(Slot)
                             .withUpdateFreqHz(UpdateFreqHz)
                             .withUseTimesync(UseTimesync)
                             .withEnableFOC(false);
                     case VoltageFOC:
-                        return new MotionMagicVelocityVoltage(Position)
+                        return new MotionMagicVoltage(Position)
                             .withSlot(Slot)
                             .withUpdateFreqHz(UpdateFreqHz)
                             .withUseTimesync(UseTimesync)
                             .withEnableFOC(true);
                     case TorqueCurrentFOC:
-                        return new MotionMagicVelocityTorqueCurrentFOC(Position)
+                        return new MotionMagicTorqueCurrentFOC(Position)
                             .withSlot(Slot)
                             .withUpdateFreqHz(UpdateFreqHz)
                             .withUseTimesync(UseTimesync);
@@ -231,5 +285,22 @@ public class PositionControlRequest {
 
         throw new IllegalArgumentException("Unsupported MotionProfileType (" +
             MotionProfileType + ") or OutputType (" + OutputType + ")");
+    }
+
+    /**
+     * Returns whether the provided {@link ControlRequest} is a position control
+     * request.
+     * 
+     * @param controlRequest the control request to check
+     * @return true if the control request is a position control request, false
+     *         otherwise
+     */
+    public static boolean isPositionControlRequest(ControlRequest controlRequest) {
+        return controlRequest instanceof PositionVoltage ||
+               controlRequest instanceof PositionTorqueCurrentFOC ||
+               controlRequest instanceof MotionMagicVoltage ||
+               controlRequest instanceof MotionMagicTorqueCurrentFOC ||
+               controlRequest instanceof MotionMagicExpoVoltage ||
+               controlRequest instanceof MotionMagicExpoTorqueCurrentFOC;
     }
 }

@@ -76,6 +76,46 @@ public class VelocityControlRequest {
     }
 
     /**
+     * Constructs a generic velocity control request from a
+     * {@link ControlRequest} instance.
+     * 
+     * @param controlRequest the control request to copy data from
+     */
+    public VelocityControlRequest(ControlRequest controlRequest) {
+        if (controlRequest instanceof VelocityVoltage vv) {
+            this.Velocity = vv.Velocity;
+            this.Slot = vv.Slot;
+            this.UpdateFreqHz = vv.UpdateFreqHz;
+            this.UseTimesync = vv.UseTimesync;
+            this.MotionProfileType = VelocityMotionProfileType.None;
+            this.OutputType = vv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+        } else if (controlRequest instanceof VelocityTorqueCurrentFOC vtc) {
+            this.Velocity = vtc.Velocity;
+            this.Slot = vtc.Slot;
+            this.UpdateFreqHz = vtc.UpdateFreqHz;
+            this.UseTimesync = vtc.UseTimesync;
+            this.MotionProfileType = VelocityMotionProfileType.None;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+        } else if (controlRequest instanceof MotionMagicVelocityVoltage mmvv) {
+            this.Velocity = mmvv.Velocity;
+            this.Slot = mmvv.Slot;
+            this.UpdateFreqHz = mmvv.UpdateFreqHz;
+            this.UseTimesync = mmvv.UseTimesync;
+            this.MotionProfileType = VelocityMotionProfileType.Trapezoidal;
+            this.OutputType = mmvv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+        } else if (controlRequest instanceof MotionMagicVelocityTorqueCurrentFOC mmvtc) {
+            this.Velocity = mmvtc.Velocity;
+            this.Slot = mmvtc.Slot;
+            this.UpdateFreqHz = mmvtc.UpdateFreqHz;
+            this.UseTimesync = mmvtc.UseTimesync;
+            this.MotionProfileType = VelocityMotionProfileType.Trapezoidal;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+        } else {
+            throw new IllegalArgumentException("Unsupported ControlRequest type: " + controlRequest.getClass().getName());
+        }
+    }
+
+    /**
      * Sets the target velocity for this velocity control request.
      * 
      * @param velocity The velocity to drive toward in rotations per second.
@@ -209,5 +249,20 @@ public class VelocityControlRequest {
 
         throw new IllegalArgumentException("Unsupported MotionProfileType (" +
             MotionProfileType + ") or OutputType (" + OutputType + ")");
+    }
+
+    /**
+     * Returns whether the provided {@link ControlRequest} is a velocity control
+     * request.
+     * 
+     * @param controlRequest the control request to check
+     * @return true if the control request is a velocity control request, false
+     *         otherwise
+     */
+    public static boolean isVelocityControlRequest(ControlRequest controlRequest) {
+        return controlRequest instanceof VelocityVoltage ||
+               controlRequest instanceof VelocityTorqueCurrentFOC ||
+               controlRequest instanceof MotionMagicVelocityVoltage ||
+               controlRequest instanceof MotionMagicVelocityTorqueCurrentFOC;
     }
 }

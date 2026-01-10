@@ -5,7 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -23,6 +22,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.phoenix.control.ControlOutputType;
@@ -41,6 +41,7 @@ import com.team6962.lib.swerve.config.StructureConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
+import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -61,39 +62,39 @@ public class RobotContainer {
           new StructureConstants()
             .withTrackWidth(Inches.of(22.75))
             .withWheelBase(Inches.of(22.75))
-            .withRobotMass(Pounds.of(125))
-            .withRobotMomentOfInertia(KilogramSquareMeters.of(3.15))
-            .withWheelRadius(Inches.of(2))
+            .withRobotMass(Pounds.of(40))
+            .withRobotMomentOfInertia(KilogramSquareMeters.of(1.5))
+            .withWheelRadius(Inches.of(3.9053 / 2))
         )
         .withSwerveModules(
           new SwerveModuleConstants[] {
             new SwerveModuleConstants()
               .withDriveMotorCANId(0)
+              .withSteerMotorCANId(2)
+              .withSteerEncoderCANId(2)
+              .withSteerEncoderOffset(Radians.of(0.05)),
+            new SwerveModuleConstants()
+              .withDriveMotorCANId(3)
               .withSteerMotorCANId(1)
               .withSteerEncoderCANId(0)
-              .withSteerEncoderOffset(Degrees.of(0)),
+              .withSteerEncoderOffset(Radians.of(0.049 + Math.PI)),
             new SwerveModuleConstants()
-              .withDriveMotorCANId(2)
-              .withSteerMotorCANId(3)
+              .withDriveMotorCANId(5)
+              .withSteerMotorCANId(7)
               .withSteerEncoderCANId(1)
-              .withSteerEncoderOffset(Degrees.of(0)),
+              .withSteerEncoderOffset(Radians.of(2.4)),
             new SwerveModuleConstants()
               .withDriveMotorCANId(4)
-              .withSteerMotorCANId(5)
-              .withSteerEncoderCANId(2)
-              .withSteerEncoderOffset(Degrees.of(0)),
-            new SwerveModuleConstants()
-              .withDriveMotorCANId(6)
-              .withSteerMotorCANId(7)
+              .withSteerMotorCANId(6)
               .withSteerEncoderCANId(3)
-              .withSteerEncoderOffset(Degrees.of(0))
+              .withSteerEncoderOffset(Radians.of(0.322 + Math.PI))
           }
         )
         .withTiming(
           new TimingConstants()
             .withControlLoopFrequency(Hertz.of(100))
             .withSignalUpdateRate(Hertz.of(100))
-            .withTimesyncControlRequests(true)
+            .withTimesyncControlRequests(false)
             .withUseThreadedControlLoop(true)
         )
         .withDriving(
@@ -102,8 +103,10 @@ public class RobotContainer {
             .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
             .withMaxAngularVelocity(RotationsPerSecond.of(1))
             .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
-            .withTranslationFeedbackKP(1.0)
-            .withAngleFeedbackKP(1.0)
+            .withTranslationFeedbackKP(0.5)
+            .withTranslationFeedbackKD(0.1)
+            .withAngleFeedbackKP(0.25)
+            .withAngleFeedbackKD(0.05)
         )
         .withDriveMotor(
           new DriveMotorConstants()
@@ -119,14 +122,18 @@ public class RobotContainer {
                     .withKP(0.1 / 5.9)
                     .withKI(0.01 / 5.9)
                     .withKD(0.01 / 5.9)
-                    .withKV(0.118 * 5.9)
+                    .withKV(0.708) // theoretical value for trapezoidal commutation
                     .withKA(0.003933 / 5.9)
-                    .withKS(0.17)
+                    .withKS(0.17 / 5.9)
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
                 )
                 .withCurrentLimits(
                   new CurrentLimitsConfigs()
                     .withSupplyCurrentLimitEnable(false)
+                )
+                .withMotorOutput(
+                  new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Brake)
                 )
             )
             .withGearReduction(5.9)
@@ -144,6 +151,7 @@ public class RobotContainer {
                 .withMotorOutput(
                   new MotorOutputConfigs()
                     .withInverted(InvertedValue.Clockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Brake)
                 )
                 .withCurrentLimits(
                   new CurrentLimitsConfigs()
@@ -157,13 +165,13 @@ public class RobotContainer {
                 )
                 .withSlot0(
                   new Slot0Configs()
-                    .withKS(0.282)
-                    .withKV(2.6)
+                    .withKS(0.15)
+                    .withKV(2.5714) // theoretical value for trapezoidal commutation
                     .withKA(0.03)
                     .withKP(18.592)
                     .withKI(0.0)
                     .withKD(0.972)
-                    .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+                    .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
                 )
             )
             .withGearReduction(150.0 / 7.0)
@@ -175,6 +183,7 @@ public class RobotContainer {
         )
         .withSteerEncoder(
           new SteerEncoderConstants()
+            .withDataFusion(DataFusionMethod.Remote)
         )
     );
 

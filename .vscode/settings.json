@@ -8,8 +8,8 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     "bin/": true,
-    "**/.classpath": true,
-    "**/.project": true,
+    "**/.classpath": false,
+    "**/.project": false,
     "**/.settings": true,
     "**/.factorypath": true,
     "**/*~": true
@@ -57,5 +57,7 @@
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
   ],
-  "java.dependency.enableDependencyCheckup": false
+  "java.dependency.enableDependencyCheckup": false,
+  "java.jdt.ls.vmargs": "-Xmx4G",
+  "java.compile.nullAnalysis.mode": "disabled"
 }

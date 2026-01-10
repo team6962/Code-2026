@@ -167,6 +167,38 @@ public class Localization implements SwerveComponent {
     }
 
     /**
+     * Sets the current estimated position of the robot on the field.
+     * 
+     * @param pose The new estimated Pose2d of the robot.
+     */
+    public synchronized void resetPosition(Pose2d pose) {
+        poseEstimator.resetPose(pose);
+    }
+
+    /**
+     * Sets the estimated yaw of the robot to the specified angle.
+     * 
+     * @param yaw The new yaw angle for the robot.
+     */
+    public synchronized void resetYaw(Angle yaw) {
+        Pose2d currentPose = poseEstimator.getEstimatedPosition();
+        Pose2d newPose = new Pose2d(
+            currentPose.getTranslation(),
+            new Rotation2d(yaw.in(Radians))
+        );
+
+        poseEstimator.resetPose(newPose);
+        this.yaw = yaw;
+    }
+
+    /**
+     * Sets the estimated yaw of the robot to zero (forwards).
+     */
+    public synchronized void resetYaw() {
+        resetYaw(Radians.of(0));
+    }
+
+    /**
      * Gets the current estimated position of the robot on the field.
      * 
      * @return The current estimated Pose2d of the robot.

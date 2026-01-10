@@ -2,9 +2,9 @@ package com.team6962.lib.swerve.util;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import java.util.function.Supplier;
-
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.localization.Localization;
+import com.team6962.lib.swerve.localization.Odometry;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -13,29 +13,44 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class FieldLogger implements SwerveComponent {
     private DrivetrainConstants constants;
+
     private Field2d field = new Field2d();
     private boolean isInitialized = false;
-    private Supplier<Pose2d> robotPoseSupplier;
-    Supplier<SwerveModuleState[]> moduleStateSupplier;
 
-    public FieldLogger(DrivetrainConstants constants, Supplier<Pose2d> robotPoseSupplier, Supplier<SwerveModuleState[]> moduleStateSupplier) {
+    private Localization localization;
+    private Odometry odometry;
+
+    private Pose2d previousRobotPose;
+    
+    public FieldLogger(DrivetrainConstants constants, Localization localization, Odometry odometry) {
         this.constants = constants;
-        this.robotPoseSupplier = robotPoseSupplier;
-        this.moduleStateSupplier = moduleStateSupplier;
+        this.localization = localization;
+        this.odometry = odometry;
     }
 
     @Override
     public void logTelemetry(String basePath) {
         if (!isInitialized) {
             SmartDashboard.putData(field);
+            isInitialized = true;
         }
 
-        Pose2d robotPose = robotPoseSupplier.get();
+        if (previousRobotPose != null) {
+            Pose2d updatedRobotPose = field.getRobotPose();
+
+            if (!previousRobotPose.equals(updatedRobotPose)) {
+                localization.resetPosition(updatedRobotPose);
+            }
+        }
+
+        Pose2d robotPose = localization.getPosition();
+
+        previousRobotPose = robotPose;
 
         field.setRobotPose(robotPose);
 
         Pose2d[] modulePoses = new Pose2d[4];
-        SwerveModuleState[] moduleStates = moduleStateSupplier.get();
+        SwerveModuleState[] moduleStates = odometry.getStates();
 
         for (int i = 0; i < 4; i++) {
             Pose2d relativePose = new Pose2d(

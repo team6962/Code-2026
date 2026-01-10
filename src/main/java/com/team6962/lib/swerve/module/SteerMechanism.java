@@ -11,12 +11,15 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
+import com.team6962.lib.phoenix.control.DynamicPositionControlRequest;
+import com.team6962.lib.phoenix.control.PositionControlRequest;
+import com.team6962.lib.phoenix.control.VelocityControlRequest;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import com.team6962.lib.swerve.util.SwerveComponent;
@@ -92,11 +95,17 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
 
         constants.SteerMotor.DeviceConfiguration.Feedback.RotorToSensorRatio = constants.SteerMotor.GearReduction;
         constants.SteerMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = 1.0;
-        constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackSensorSource = constants.SteerEncoder.DataFusion.feedbackSensorSource;
         constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackRemoteSensorID = constants.getSwerveModule(corner).SteerEncoderCANId;
 
+        CANcoderConfiguration encoderConfig = constants.SteerEncoder.DeviceConfiguration.clone();
+
+        // Add an offset for each module that accounts for each module's
+        // rotation on the robot, to make module swapping easier
+        encoderConfig.MagnetSensor.MagnetOffset = constants.getSwerveModule(corner).SteerEncoderOffset.minus(corner.getRotation()).in(Rotations);
+
         StatusUtil.check(motor.getConfigurator().apply(constants.SteerMotor.DeviceConfiguration));
-        StatusUtil.check(encoder.getConfigurator().apply(constants.SteerEncoder.DeviceConfiguration));
+        StatusUtil.check(encoder.getConfigurator().apply(encoderConfig));
 
         positionSignal = motor.getPosition(false);
         velocitySignal = motor.getVelocity(false);
@@ -142,6 +151,24 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
         DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
         DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
         DogLog.log(basePath + "DataTimestamp", StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+
+        // If running a position or velocity request, log the target position or
+        // velocity in radians. The target is logged as part of the control
+        // request in rotations already, but it is more convenient if the target
+        // is logged in radians as well.
+        if (PositionControlRequest.isPositionControlRequest(lastControlRequest)) {
+            PositionControlRequest positionControl = new PositionControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetPosition", Rotations.of(positionControl.Position).in(Radians), Radians);
+        } else if (DynamicPositionControlRequest.isDynamicPositionControlRequest(lastControlRequest)) {
+            DynamicPositionControlRequest positionControl = new DynamicPositionControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetPosition", Rotations.of(positionControl.Position).in(Radians), Radians);
+        } else if (VelocityControlRequest.isVelocityControlRequest(lastControlRequest)) {
+            VelocityControlRequest velocityControl = new VelocityControlRequest(lastControlRequest);
+
+            DogLog.log(basePath + "TargetVelocity", RotationsPerSecond.of(velocityControl.Velocity).in(RadiansPerSecond), RadiansPerSecond);
+        }
 
         LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
     }

@@ -131,7 +131,7 @@ public class MotionSwerveDrive implements AutoCloseable {
             new ControlLoop.Threaded() :
             new ControlLoop.SubsystemPeriodic();
 
-        fieldLogger = new FieldLogger(constants, this::getPosition, this::getModuleStates);
+        fieldLogger = new FieldLogger(constants, localization, odometry);
 
         // Build the array of status signals that will be refreshed in parallel
         SwerveComponent[] components = new SwerveComponent[3 + modules.length];

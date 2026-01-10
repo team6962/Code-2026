@@ -21,13 +21,47 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
+/**
+ * Simulates a swerve module's drive mechanism using WPILib's DCMotorSim
+ * physics simulation.
+ *
+ * <p>This class bridges the gap between CTRE's TalonFX simulation state and
+ * WPILib's physics simulation. It reads the motor controller's applied
+ * voltage, runs the physics simulation, and updates the motor controller's
+ * simulated sensor values accordingly.
+ *
+ * <p>The simulation properly handles motor inversion by converting between
+ * the motor controller's configured positive direction and the physics
+ * simulation's counter-clockwise-positive convention.
+ *
+ * <p>Getter methods return both angular values (wheel-relative) and linear
+ * values (movement of wheel along ground) by converting with the configured
+ * wheel radius.
+ *
+ * <p>The {@link #update(double)} method should be called periodically
+ * (typically every simulation tick) to advance the physics simulation and
+ * synchronize state with the motor controller.
+ */
 public class DriveMechanismSim {
+    /** The corner of the robot that this module occupies. */
     private Corner corner;
+
+    /** Drivetrain configuration containing motor and wheel constants. */
     private DrivetrainConstants constants;
 
+    /** CTRE simulation state for the TalonFX motor controller. */
     private TalonFXSimState motorControllerSimulation;
+
+    /** WPILib physics simulation for the DC motor. */
     private DCMotorSim physicsSimulation;
 
+    /**
+     * Creates a new drive mechanism simulation.
+     *
+     * @param corner the corner of the robot that this module occupies
+     * @param constants drivetrain configuration
+     * @param motorController the TalonFX motor controller to simulate
+     */
     public DriveMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController) {
         this.corner = corner;
         this.constants = constants;
@@ -44,30 +78,49 @@ public class DriveMechanismSim {
         );
     }
 
+    /**
+     * Returns the angular position of the wheel around its shaft.
+     * 
+     * @return The {@link Angle}
+     */
     public Angle getAngularPosition() {
         return physicsSimulation.getAngularPosition();
     }
 
+    /**
+     * Returns the angular velocity of the wheel around its shaft.
+     * 
+     * @return The {@link AngularVelocity}
+     */
     public AngularVelocity getAngularVelocity() {
         return physicsSimulation.getAngularVelocity();
     }
 
+    /** Returns the angular acceleration of the wheel around its shaft. */
     public AngularAcceleration getAngularAcceleration() {
         return physicsSimulation.getAngularAcceleration();
     }
 
+    /** Returns the linear distance traveled by the wheel. */
     public Distance getPosition() {
         return WheelMath.toLinear(physicsSimulation.getAngularPosition(), constants.getWheelRadius(corner));
     }
 
+    /** Returns the linear velocity of the wheel along the ground. */
     public LinearVelocity getVelocity() {
         return WheelMath.toLinear(physicsSimulation.getAngularVelocity(), constants.getWheelRadius(corner));
     }
 
+    /** Returns the linear acceleration of the wheel along the ground. */
     public LinearAcceleration getAcceleration() {
         return WheelMath.toLinear(physicsSimulation.getAngularAcceleration(), constants.getWheelRadius(corner));
     }
 
+    /**
+     * Updates the physics simulation and synchronizes motor controller state.
+     *
+     * @param deltaTimeSeconds time elapsed since the last update
+     */
     public void update(double deltaTimeSeconds) {
         // Set the motor controller's supply voltage to the battery voltage
         // reported by RobotController, which can be overriden in simulation

@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
@@ -173,9 +173,9 @@ class PositionControlRequestTest {
             .withOutputType(ControlOutputType.Voltage);
         
         ControlRequest result = request.toControlRequest();
-        assertInstanceOf(MotionMagicVelocityVoltage.class, result);
-        MotionMagicVelocityVoltage typed = (MotionMagicVelocityVoltage) result;
-        assertEquals(5.0, typed.Velocity);
+        assertInstanceOf(MotionMagicVoltage.class, result);
+        MotionMagicVoltage typed = (MotionMagicVoltage) result;
+        assertEquals(5.0, typed.Position);
         assertEquals(0, typed.Slot);
         assertEquals(50.0, typed.UpdateFreqHz);
         assertFalse(typed.UseTimesync);
@@ -192,9 +192,9 @@ class PositionControlRequestTest {
             .withOutputType(ControlOutputType.VoltageFOC);
         
         ControlRequest result = request.toControlRequest();
-        assertInstanceOf(MotionMagicVelocityVoltage.class, result);
-        MotionMagicVelocityVoltage typed = (MotionMagicVelocityVoltage) result;
-        assertEquals(5.0, typed.Velocity);
+        assertInstanceOf(MotionMagicVoltage.class, result);
+        MotionMagicVoltage typed = (MotionMagicVoltage) result;
+        assertEquals(5.0, typed.Position);
         assertEquals(1, typed.Slot);
         assertEquals(75.0, typed.UpdateFreqHz);
         assertTrue(typed.UseTimesync);
@@ -211,9 +211,9 @@ class PositionControlRequestTest {
             .withOutputType(ControlOutputType.TorqueCurrentFOC);
         
         ControlRequest result = request.toControlRequest();
-        assertInstanceOf(MotionMagicVelocityTorqueCurrentFOC.class, result);
-        MotionMagicVelocityTorqueCurrentFOC typed = (MotionMagicVelocityTorqueCurrentFOC) result;
-        assertEquals(5.0, typed.Velocity);
+        assertInstanceOf(MotionMagicTorqueCurrentFOC.class, result);
+        MotionMagicTorqueCurrentFOC typed = (MotionMagicTorqueCurrentFOC) result;
+        assertEquals(5.0, typed.Position);
         assertEquals(2, typed.Slot);
         assertEquals(100.0, typed.UpdateFreqHz);
         assertFalse(typed.UseTimesync);

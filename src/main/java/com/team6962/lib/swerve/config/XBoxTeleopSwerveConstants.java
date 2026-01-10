@@ -29,7 +29,8 @@ public class XBoxTeleopSwerveConstants {
 
     /**
      * When pressed, this button will zero the robot's yaw heading, making the
-     * robot think it is facing directly away from the driver station.
+     * robot think it is facing directly away from the driver station. This
+     * constant can be set to null to make no button zero the robot's yaw.
      */
     public Button ZeroYawButton = Button.kY;
 

@@ -129,6 +129,56 @@ public class DynamicPositionControlRequest {
     }
 
     /**
+     * Constructs a generic dynamic position control request from a
+     * {@link ControlRequest} instance.
+     * 
+     * @param controlRequest the control request to copy data from
+     */
+    public DynamicPositionControlRequest(ControlRequest controlRequest) {
+        if (controlRequest instanceof DynamicMotionMagicVoltage dmmv) {
+            this.Position = dmmv.Position;
+            this.Slot = dmmv.Slot;
+            this.UpdateFreqHz = dmmv.UpdateFreqHz;
+            this.UseTimesync = dmmv.UseTimesync;
+            this.MotionProfileType = DynamicPositionMotionProfileType.Trapezoidal;
+            this.OutputType = dmmv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+            this.Velocity = dmmv.Velocity;
+            this.Acceleration = dmmv.Acceleration;
+            this.Jerk = dmmv.Jerk;
+        } else if (controlRequest instanceof DynamicMotionMagicTorqueCurrentFOC dmmtc) {
+            this.Position = dmmtc.Position;
+            this.Slot = dmmtc.Slot;
+            this.UpdateFreqHz = dmmtc.UpdateFreqHz;
+            this.UseTimesync = dmmtc.UseTimesync;
+            this.MotionProfileType = DynamicPositionMotionProfileType.Trapezoidal;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+            this.Velocity = dmmtc.Velocity;
+            this.Acceleration = dmmtc.Acceleration;
+            this.Jerk = dmmtc.Jerk;
+        } else if (controlRequest instanceof DynamicMotionMagicExpoVoltage dmmev) {
+            this.Position = dmmev.Position;
+            this.Slot = dmmev.Slot;
+            this.UpdateFreqHz = dmmev.UpdateFreqHz;
+            this.UseTimesync = dmmev.UseTimesync;
+            this.MotionProfileType = DynamicPositionMotionProfileType.Exponential;
+            this.OutputType = dmmev.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+            this.KV = dmmev.kV;
+            this.KA = dmmev.kA;
+        } else if (controlRequest instanceof DynamicMotionMagicExpoTorqueCurrentFOC dmmetc) {
+            this.Position = dmmetc.Position;
+            this.Slot = dmmetc.Slot;
+            this.UpdateFreqHz = dmmetc.UpdateFreqHz;
+            this.UseTimesync = dmmetc.UseTimesync;
+            this.MotionProfileType = DynamicPositionMotionProfileType.Exponential;
+            this.OutputType = ControlOutputType.TorqueCurrentFOC;
+            this.KV = dmmetc.kV;
+            this.KA = dmmetc.kA;
+        } else {
+            throw new IllegalArgumentException("Unsupported ControlRequest type: " + controlRequest.getClass().getName());
+        }
+    }
+
+    /**
      * Sets the maximum velocity constraint for this position control request.
      * 
      * @param velocity The velocity to drive toward in rotations per second.
@@ -331,5 +381,20 @@ public class DynamicPositionControlRequest {
 
         throw new IllegalArgumentException("Unsupported MotionProfileType (" +
             MotionProfileType + ") or OutputType (" + OutputType + ")");
+    }
+
+    /**
+     * Returns whether the provided {@link ControlRequest} is a position control
+     * request with dynamic constraints.
+     * 
+     * @param controlRequest the control request to check
+     * @return true if the control request is a position control request with
+     *         dynamic constraints, false otherwise
+     */
+    public static boolean isDynamicPositionControlRequest(ControlRequest controlRequest) {
+        return controlRequest instanceof DynamicMotionMagicVoltage ||
+               controlRequest instanceof DynamicMotionMagicTorqueCurrentFOC ||
+               controlRequest instanceof DynamicMotionMagicExpoVoltage ||
+               controlRequest instanceof DynamicMotionMagicExpoTorqueCurrentFOC;
     }
 }
