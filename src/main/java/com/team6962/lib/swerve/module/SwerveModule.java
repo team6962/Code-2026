@@ -2,6 +2,7 @@ package com.team6962.lib.swerve.module;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import com.team6962.lib.swerve.util.SwerveComponent;
@@ -70,6 +71,18 @@ public class SwerveModule implements SwerveComponent, AutoCloseable {
     @Override
     public BaseStatusSignal[] getStatusSignals() {
         return SwerveComponent.combineStatusSignals(driveMechanism, steerMechanism);
+    }
+
+    /**
+     * Gets the list of Phoenix devices connected to by this component. All
+     * devices in this list will have their bus utilization optimized in
+     * parallel.
+     * 
+     * @return an array of Phoenix devices used by this component
+     */
+    @Override
+    public ParentDevice[] getPhoenixDevices() {
+        return SwerveComponent.combinePhoenixDevices(driveMechanism, steerMechanism);
     }
 
     /**

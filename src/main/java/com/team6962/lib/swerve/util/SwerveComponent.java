@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.hardware.ParentDevice;
 
 /**
  * Interface for components of a swerve drive system that require status
@@ -26,6 +27,17 @@ public interface SwerveComponent {
      */
     public default BaseStatusSignal[] getStatusSignals() {
         return new BaseStatusSignal[0];
+    }
+
+    /**
+     * Gets the list of Phoenix devices connected to by this component. All
+     * devices in this list will have their bus utilization optimized in
+     * parallel.
+     * 
+     * @return an array of Phoenix devices used by this component
+     */
+    public default ParentDevice[] getPhoenixDevices() {
+        return new ParentDevice[0];
     }
 
     /**
@@ -64,5 +76,25 @@ public interface SwerveComponent {
         }
 
         return signalSet.toArray(new BaseStatusSignal[0]);
+    }
+
+    /**
+     * Combines the Phoenix devices from multiple SwerveComponents into a single
+     * array, removing duplicates.
+     * 
+     * @param components The SwerveComponents to combine Phoenix devices from.
+     * @return An array of unique Phoenix devices from all provided components.
+     */
+    public static ParentDevice[] combinePhoenixDevices(SwerveComponent... components) {
+        Set<ParentDevice> deviceSet = new HashSet<>();
+
+        for (SwerveComponent component : components) {
+            ParentDevice[] devices = component.getPhoenixDevices();
+            for (ParentDevice device : devices) {
+                deviceSet.add(device);
+            }
+        }
+
+        return deviceSet.toArray(new ParentDevice[0]);
     }
 }

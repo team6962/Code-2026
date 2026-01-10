@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
@@ -150,6 +151,10 @@ public class MotionSwerveDrive implements AutoCloseable {
             constants.Timing.SignalUpdateRate,
             statusSignals
         );
+
+        ParentDevice[] devices = SwerveComponent.combinePhoenixDevices(components);
+
+        ParentDevice.optimizeBusUtilizationForAll(devices);
 
         motionManager = new SwerveMotionManager(new NeutralMotion(this));
 

@@ -15,6 +15,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.WheelMath;
@@ -142,6 +143,20 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
             appliedVoltageSignal,
             statorCurrentSignal,
             supplyCurrentSignal
+        };
+    }
+
+    /**
+     * Gets the list of Phoenix devices connected to by this component. All
+     * devices in this list will have their bus utilization optimized in
+     * parallel.
+     * 
+     * @return an array of Phoenix devices used by this component
+     */
+    @Override
+    public ParentDevice[] getPhoenixDevices() {
+        return new ParentDevice[] {
+            motor
         };
     }
 

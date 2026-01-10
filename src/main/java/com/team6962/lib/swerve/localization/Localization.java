@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
@@ -123,6 +124,11 @@ public class Localization implements SwerveComponent {
     @Override
     public BaseStatusSignal[] getStatusSignals() {
         return SwerveComponent.combineStatusSignals(gyroscope, odometry);
+    }
+
+    @Override
+    public ParentDevice[] getPhoenixDevices() {
+        return SwerveComponent.combinePhoenixDevices(gyroscope, odometry);
     }
 
     @Override

@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
@@ -99,6 +100,20 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
             pitchVelocitySignal,
             rollSignal,
             rollVelocitySignal
+        };
+    }
+
+    /**
+     * Gets the list of Phoenix devices connected to by this component. All
+     * devices in this list will have their bus utilization optimized in
+     * parallel.
+     * 
+     * @return an array of Phoenix devices used by this component
+     */
+    @Override
+    public ParentDevice[] getPhoenixDevices() {
+        return new ParentDevice[] {
+            gyro
         };
     }
 
