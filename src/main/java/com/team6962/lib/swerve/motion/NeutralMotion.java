@@ -15,12 +15,14 @@ import dev.doglog.DogLog;
 /**
  * A swerve motion that sets all motors to a neutral state.
  * 
- * <p>NeutralMotion disables active control of the swerve modules and allows them to
- * either coast freely or actively brake, depending on the configured neutral mode.
+ * <p>NeutralMotion disables active control of the swerve modules and allows
+ * them to either coast freely or actively brake, depending on the configured
+ * neutral mode.
  * 
  * <p>The neutral mode can be configured to:
  * <ul>
- *   <li>{@link NeutralModeValue#Coast} - Motors spin freely with no resistance</li>
+ *   <li>{@link NeutralModeValue#Coast} - Motors spin freely with no resistance
+ *       </li>
  *   <li>{@link NeutralModeValue#Brake} - Motors actively resist rotation</li>
  *   <li>{@code null} - Uses the default neutral output behavior specified in
  *                      the motor controller configurations</li>

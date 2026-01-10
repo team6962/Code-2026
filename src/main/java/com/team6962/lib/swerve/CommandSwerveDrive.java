@@ -138,7 +138,8 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
      * provided by the supplier. The command only requires the translation
      * subsystem, allowing rotation to be controlled independently.
      *
-     * @param velocity A supplier that provides the desired translational velocity
+     * @param velocity A supplier that provides the desired translational
+     *                 velocity
      * @return A command that applies the translational velocity motion
      */
     public Command driveTranslation(Supplier<TranslationalVelocity> velocity) {
@@ -146,11 +147,12 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
     }
 
     /**
-     * Creates a command that drives the robot's rotation at the angular velocity
-     * provided by the supplier. The command only requires the rotation subsystem,
-     * allowing translation to be controlled independently.
+     * Creates a command that drives the robot's rotation at the angular
+     * velocity provided by the supplier. The command only requires the rotation
+     * subsystem, allowing translation to be controlled independently.
      *
-     * @param angularVelocity A supplier that provides the desired angular velocity
+     * @param angularVelocity A supplier that provides the desired angular
+     *                        velocity
      * @return A command that applies the rotational velocity motion
      */
     public Command driveRotation(Supplier<AngularVelocity> angularVelocity) {
@@ -280,8 +282,9 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
      * Creates a command that rotates the robot to the specified heading with
      * the specified ending angular velocity. Translation is not controlled.
      *
-     * @param angle           The target heading angle
-     * @param angularVelocity The target angular velocity at the end of the motion
+     * @param angle The target heading angle
+     * @param angularVelocity The target angular velocity at the end of th
+     *                        motion
      * @return A DriveToStateCommand configured with the target
      */
     public DriveToStateCommand driveTo(Angle angle, AngularVelocity angularVelocity) {

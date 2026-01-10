@@ -21,14 +21,15 @@ import edu.wpi.first.units.measure.Distance;
 /**
  * A swerve motion that locks the wheels in an X pattern to resist being pushed.
  * 
- * <p>LockMotion orients the swerve modules into an X configuration where each wheel
- * points toward or away from the center of the robot. This configuration makes it
- * very difficult to push the robot in any direction, which is when the robot
- * is being defended to prevent opponents from pushing the robot.
+ * <p>LockMotion orients the swerve modules into an X configuration where each
+ * wheel points toward or away from the center of the robot. This configuration
+ * makes it very difficult to push the robot in any direction, which is when the
+ * robot is being defended to prevent opponents from pushing the robot.
  * 
  * <p>The lock pattern uses position control on both drive and steer motors to
  * actively hold the wheels at their target positions. The target positions are
- * captured when the motion first starts, with steer angles set to form the X pattern.
+ * captured when the motion first starts, with steer angles set to form the X
+ * pattern.
  */
 public class LockMotion implements SwerveMotion {
     /** The swerve drive this motion controls. */

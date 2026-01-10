@@ -4,17 +4,19 @@ package com.team6962.lib.swerve.motion;
  * Manages the lifecycle of swerve motions, and fuses translational and
  * rotational motions together before applying them to control the swerve drive.
  * 
- * <p>The SwerveMotionManager handles the coordination of motion commands sent to the
- * swerve drive. It implements a buffering pattern where:
+ * <p>The SwerveMotionManager handles the coordination of motion commands sent
+ * to the swerve drive. It implements a buffering pattern where:
  * <ol>
- *   <li>New motions are queued as the "next" motion via {@link #apply(SwerveMotion)}</li>
+ *   <li>New motions are queued as the "next" motion via
+ *       {@link #apply(SwerveMotion)}</li>
  *   <li>During {@link #update()}, the next motion becomes the active motion,
- *       and the next motion is cleared so it won't be fused with later motions</li>
+ *       and the next motion is cleared so it won't be fused with later
+ *       motions</li>
  *   <li>The active motion is executed each control loop iteration</li>
  * </ol>
  * 
- * <p>This design ensures thread-safe motion transitions and allows motions to be
- * applied from any thread while updates occur in the control loop thread.
+ * <p>This design ensures thread-safe motion transitions and allows motions to
+ * be applied from any thread while updates occur in the control loop thread.
  * 
  * <p>When motions are applied in sequence (before an update), they are fused
  * together using {@link SwerveMotion#fuseWith(SwerveMotion)}.
@@ -46,9 +48,9 @@ public class SwerveMotionManager implements AutoCloseable {
     /**
      * Transitions to the next queued motion.
      * 
-     * <p>This method should be called once per control loop iteration. It closes
-     * the current active motion and promotes the next motion to active status.
-     * After this call, the next motion slot is cleared.
+     * <p>This method should be called once per control loop iteration. It
+     * closes the current active motion and promotes the next motion to active
+     * status. After this call, the next motion slot is cleared.
      */
     public synchronized void update() {
         if (activeMotion != null) {
@@ -83,9 +85,11 @@ public class SwerveMotionManager implements AutoCloseable {
     /**
      * Gets the current active motion.
      * 
-     * <p>Returns the active motion if one is set, otherwise returns the default motion.
+     * <p>Returns the active motion if one is set, otherwise returns the default
+     * motion.
      * 
-     * @return The active motion, or the default motion if no active motion is set
+     * @return The active motion, or the default motion if no active motion is
+     *         set
      */
     public synchronized SwerveMotion getActiveMotion() {
         if (activeMotion != null) {

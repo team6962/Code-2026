@@ -12,9 +12,9 @@ import dev.doglog.DogLog;
 /**
  * A swerve motion for running test control requests on motor controllers.
  * 
- * <p>ControlTestMotion allows direct, low-level control of individual swerve module
- * motors by sending arbitrary {@link ControlRequest} objects to specific drive or
- * steer motors. This is primarily useful for:
+ * <p>ControlTestMotion allows direct, low-level control of individual swerve
+ * module motors by sending arbitrary {@link ControlRequest} objects to specific
+ * drive or steer motors. This is primarily useful for:
  * <ul>
  *   <li>Testing and tuning individual motor controllers</li>
  *   <li>Debugging motor behavior in isolation</li>

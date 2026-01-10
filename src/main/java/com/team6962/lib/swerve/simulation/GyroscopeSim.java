@@ -72,7 +72,8 @@ public class GyroscopeSim {
     }
 
     /**
-     * Updates the gyroscope simulation by calculating rotation from module motion.
+     * Updates the gyroscope simulation by calculating rotation from module
+     * motion.
      *
      * @param deltaTimeSeconds time elapsed since the last update
      */

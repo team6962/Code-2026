@@ -40,10 +40,10 @@ public class VelocityControlRequest {
     public double UpdateFreqHz = 50.0;
 
     /**
-     * Set to true to delay applying this control request until a timesync boundary
-     * (requires Phoenix Pro and CANivore). This eliminates the impact of
-     * nondeterministic network delays in exchange for a larger but deterministic
-     * control latency.
+     * Set to true to delay applying this control request until a timesync
+     * boundary (requires Phoenix Pro and CANivore). This eliminates the impact
+     * of nondeterministic network delays in exchange for a larger but
+     * deterministic control latency.
      */
     public boolean UseTimesync = false;
 

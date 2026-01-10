@@ -11,9 +11,11 @@ import edu.wpi.first.wpilibj.Timer;
  * {@link StatusCode}s. This class provides two methods for logging error codes:
  *
  * <ul>
- *   <li>{@link #check(StatusCode)} logs an error with a stack trace if the status code is not OK
- *   <li>{@link #unwrap(StatusSignal)} returns the value contained in a status signal, logging an
- *       error with a stack trace if the status code is not OK
+ *   <li>{@link #check(StatusCode)} logs an error with a stack trace if the
+ *       status code is not OK
+ *   <li>{@link #unwrap(StatusSignal)} returns the value contained in a status
+ * 		 signal, logging an error with a stack trace if the status code is not
+ *       OK
  * </ul>
  * 
  * Additionally, this class provides the method {@link #toFPGATimestamp(double)}
@@ -41,8 +43,8 @@ public final class StatusUtil {
 	}
 
 	/**
-	 * Unwraps the value from the given {@link StatusSignal}, checking the status
-	 * code and logging an error with a stack trace if it is not OK.
+	 * Unwraps the value from the given {@link StatusSignal}, checking the
+	 * status code and logging an error with a stack trace if it is not OK.
 	 * @param <T> the type of the value contained in the status signal
 	 * @param signal the {@link StatusSignal} to unwrap
 	 * @return the value contained in the status signal

@@ -27,20 +27,22 @@ import edu.wpi.first.units.measure.LinearVelocity;
 /**
  * A swerve motion that drives the robot at a specified field-relative velocity.
  * 
- * <p>VelocityMotion converts field-relative chassis speeds into individual swerve module
- * states and applies velocity control to the drive motors and position control to the
- * steer motors. Key features include:
+ * <p>VelocityMotion converts field-relative chassis speeds into individual
+ * swerve module states and applies velocity control to the drive motors and
+ * position control to the steer motors. Key features include:
  * <ul>
- *   <li>Field-relative velocity control (velocities are relative to the field, not the robot)</li>
+ *   <li>Field-relative velocity control (velocities are relative to the field,
+ *       not the robot)</li>
  *   <li>Automatic wheel speed desaturation to respect motor limits</li>
  *   <li>Steer angle optimization to minimize wheel rotation</li>
  *   <li>Velocity reduction when wheels are misaligned</li>
  *   <li>Automatic braking when commanded velocity is near zero</li>
  * </ul>
  * 
- * <p>VelocityMotion supports fusion with other VelocityMotions that have non-overlapping
- * components. For example, a translation-only motion can be fused with a rotation-only
- * motion to create a combined motion with both components.
+ * <p>VelocityMotion supports fusion with other VelocityMotions that have
+ * non-overlapping components. For example, a translation-only motion can be
+ * fused with a rotation-only motion to create a combined motion with both
+ * components.
  */
 public class VelocityMotion implements SwerveMotion {
     /** The target field-relative chassis speeds. */
@@ -71,12 +73,14 @@ public class VelocityMotion implements SwerveMotion {
     /**
      * Fuses this velocity motion with another velocity motion.
      * 
-     * <p>Fusion is only allowed when the motions have non-overlapping components
-     * (e.g., one has translation only and the other has rotation only).
+     * <p>Fusion is only allowed when the motions have non-overlapping
+     * components (e.g., one has translation only and the other has rotation
+     * only).
      * 
      * @param other The motion to fuse with
      * @return A new VelocityMotion with combined velocities
-     * @throws IllegalArgumentException If both motions have overlapping translation or rotation
+     * @throws IllegalArgumentException If both motions have overlapping
+     *                                  translation or rotation
      */
     @Override
     public SwerveMotion fuseWith(SwerveMotion other) {

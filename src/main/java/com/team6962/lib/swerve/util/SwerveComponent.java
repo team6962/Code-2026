@@ -5,6 +5,17 @@ import java.util.Set;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 
+/**
+ * Interface for components of a swerve drive system that require status
+ * signal refreshing, telemetry logging, and periodic updates.
+ *
+ * <p>This interface provides a common contract for swerve subsystem components
+ * (modules, mechanisms, localization, etc.) to expose their status signals
+ * for bulk refresh, log their telemetry data, and receive periodic updates.
+ *
+ * <p>The default implementations return no status signals and perform no
+ * actions, allowing components to override only the methods they need.
+ */
 public interface SwerveComponent {
     /**
      * Gets the status signals used by this component for monitoring and

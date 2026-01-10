@@ -95,7 +95,8 @@ public class SteerMechanismSim {
     }
 
     /**
-     * Updates the physics simulation and synchronizes motor controller and encoder state.
+     * Updates the physics simulation and synchronizes motor controller and
+     * encoder state.
      *
      * @param deltaTimeSeconds time elapsed since the last update
      */

@@ -73,7 +73,8 @@ public class TwistToTargetMotion implements SwerveMotion {
     }
 
     /**
-     * Updates the swerve modules to drive along the twist path toward the target.
+     * Updates the swerve modules to drive along the twist path toward the
+     * target.
      * 
      * @param deltaTimeSeconds The time since the last update
      */
