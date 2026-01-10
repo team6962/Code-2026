@@ -118,7 +118,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
      */
     @Override
     protected ChassisSpeeds getDrivenVelocity() {
-        if (isFineControlling()) {
+        if (constants.EnableFineControl && isFineControlling()) {
             Translation2d robotRelativeVelocity = getFineControlInput();
 
             robotRelativeVelocity = robotRelativeVelocity.times(getFineControlTranslationScalar());
