@@ -24,6 +24,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.phoenix.control.ControlOutputType;
 import com.team6962.lib.phoenix.control.PositionMotionProfileType;
@@ -54,6 +55,8 @@ public class RobotContainer {
   private XBoxTeleopSwerveCommand teleopSwerveCommand;
 
   public RobotContainer() {
+    LoggingUtil.logGitProperties();
+
     swerveDrive = new CommandSwerveDrive(
       new DrivetrainConstants()
         .withCANBusName("drivetrain")

@@ -1,7 +1,9 @@
 package com.team6962.lib.logging;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 
@@ -67,5 +69,32 @@ public class LoggingUtil {
         }
         
         return path;
+    }
+
+    /**
+     * Logs git properties such as commit hash and build time.
+     */
+    public static void logGitProperties() {
+        // Load git properties from classpath
+        Properties gitProps = new Properties();
+
+        try (InputStream inputStream = LoggingUtil.class.getClassLoader().getResourceAsStream("git.properties")) {
+            if (inputStream != null) {
+                gitProps.load(inputStream);
+
+                // Log all git properties
+                gitProps.forEach(
+                    (key, value) -> {
+                        DogLog.log("/Metadata/" + key.toString(), value.toString());
+
+                        // Also print to console for debugging
+                        System.out.println(key + ": " + value);
+                    });
+            } else {
+                System.err.println("git.properties not found in classpath");
+            }
+        } catch (Exception e) {
+                System.err.println("Failed to load git properties: " + e.getMessage());
+        }
     }
 }
