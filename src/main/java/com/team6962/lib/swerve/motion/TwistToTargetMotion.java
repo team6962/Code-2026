@@ -84,7 +84,7 @@ public class TwistToTargetMotion implements SwerveMotion {
 
         SwerveModulePosition[] currentPositions = swerveDrive.getModulePositions();
 
-        Pose2d currentPose = swerveDrive.getPosition();
+        Pose2d currentPose = swerveDrive.getPosition2d();
 
         twist = currentPose.log(target);
 
