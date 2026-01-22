@@ -16,6 +16,7 @@ import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -61,6 +62,7 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
     private AngularVelocity pitchVelocity = RadiansPerSecond.of(0);
     private Angle roll = Radians.of(0);
     private AngularVelocity rollVelocity = RadiansPerSecond.of(0);
+    private Rotation3d rotation3d = new Rotation3d(Radians.of(0), Radians.of(0), Radians.of(0));
 
     /**
      * Constructs a Gyroscope object using the provided drivetrain constants.
@@ -205,6 +207,8 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
             pitchVelocity = pitchVelocitySignal.getValue();
             rollVelocity = rollVelocitySignal.getValue();
         }
+
+        rotation3d = new Rotation3d(roll, pitch, yaw);
     }
 
     @Override
@@ -264,5 +268,14 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
      */
     public synchronized AngularVelocity getRollVelocity() {
         return rollVelocity;
+    }
+
+    /**
+     * Gets the 3d rotation of the robot.
+     * 
+     * @return The robot rotation as a Rotation3d
+     */
+    public synchronized Rotation3d getRotation() {
+        return rotation3d;
     }
 }

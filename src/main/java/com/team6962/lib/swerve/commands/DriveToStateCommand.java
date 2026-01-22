@@ -207,7 +207,7 @@ public class DriveToStateCommand extends Command {
     private void createMotionProfiles() {
         if (translationController != null) {
             translationController.setProfile(
-                swerveDrive.getPosition().getTranslation(),
+                swerveDrive.getPosition2d().getTranslation(),
                 swerveDrive.getTranslationalVelocity(),
                 target.translation,
                 target.translationalVelocity
@@ -258,7 +258,7 @@ public class DriveToStateCommand extends Command {
         // Calculate and apply velocity commands for translation and rotation
         if (translationController != null) {
             TranslationalVelocity outputTranslationalVelocity = translationController.calculate(
-                swerveDrive.getPosition().getTranslation(),
+                swerveDrive.getPosition2d().getTranslation(),
                 swerveDrive.getTranslationalVelocity()
             );
 

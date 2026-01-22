@@ -69,7 +69,7 @@ public class FieldLogger implements SwerveComponent {
             }
         }
 
-        Pose2d robotPose = localization.getPosition();
+        Pose2d robotPose = localization.getPosition2d();
 
         previousRobotPose = robotPose;
 

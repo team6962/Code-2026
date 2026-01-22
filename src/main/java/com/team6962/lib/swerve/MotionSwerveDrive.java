@@ -26,15 +26,13 @@ import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -53,7 +51,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  * motion, and prepares the internal state for more motions to be applied in the
  * next control loop cycle.
  * 
- * <p>Various methods, including {@link #getPosition()}, {@link #getVelocity()},
+ * <p>Various methods, including {@link #getPosition2d()}, {@link #getVelocity()},
  * and {@link #getHeading()}, provide access to localization information about
  * the state of the swerve drive. The localization system fuses wheel motion
  * data (odometry), gyroscope readings, and vision measurements, which must be
@@ -115,7 +113,7 @@ public class MotionSwerveDrive implements AutoCloseable {
 
         odometry = new Odometry(constants, modules);
         gyroscope = new Gyroscope(constants, odometry);
-        localization = new Localization(constants, new Pose2d(), odometry, gyroscope);
+        localization = new Localization(constants, new Pose3d(), odometry, gyroscope);
 
         // Initialize the kinematics object for converting between chassis
         // speeds and module states
@@ -347,8 +345,17 @@ public class MotionSwerveDrive implements AutoCloseable {
      * 
      * @return The robot's pose (x, y, rotation)
      */
-    public Pose2d getPosition() {
-        return localization.getPosition();
+    public Pose2d getPosition2d() {
+        return localization.getPosition2d();
+    }
+
+    /**
+     * Gets the current estimated 3D position of the robot on the field.
+     * 
+     * @return The robot's 3D pose (x, y, z, rotation)
+     */
+    public Pose3d getPosition3d() {
+        return localization.getPosition3d();
     }
 
     /**
@@ -362,7 +369,7 @@ public class MotionSwerveDrive implements AutoCloseable {
      * @return {@code true} if within both tolerances, {@code false} otherwise
      */
     public boolean isNear(Pose2d target, Distance translationTolerance, Angle angularTolerance) {
-        Pose2d current = getPosition();
+        Pose2d current = getPosition2d();
 
         double linearError = current.getTranslation().getDistance(target.getTranslation());
         double angularError = Math.abs(current.getRotation().minus(target.getRotation()).getRadians());
@@ -400,37 +407,6 @@ public class MotionSwerveDrive implements AutoCloseable {
      */
     public Twist2d getArcVelocity() {
         return localization.getArcVelocity();
-    }
-
-    /**
-     * Adds a vision-based pose measurement with custom standard deviations.
-     * 
-     * <p>Vision measurements are fused with odometry to improve pose estimation.
-     * Lower standard deviations indicate higher confidence in the measurement.
-     * 
-     * @param pose The measured pose from vision
-     * @param timestampSeconds The timestamp of the measurement in seconds
-     * @param stdDevs The standard deviations for x, y, and theta (3x1 matrix)
-     */
-    public void addVisionMeasurement(
-        Pose2d pose,
-        double timestampSeconds,
-        Matrix<N3, N1> stdDevs
-    ) {
-        localization.addVisionEstimate(pose, timestampSeconds, stdDevs);
-    }
-
-    /**
-     * Adds a vision-based pose measurement with default standard deviations.
-     * 
-     * @param pose The measured pose from vision
-     * @param timestampSeconds The timestamp of the measurement in seconds
-     */
-    public void addVisionEstimate(
-        Pose2d pose,
-        double timestampSeconds
-    ) {
-        localization.addVisionEstimate(pose, timestampSeconds);
     }
 
     /**
