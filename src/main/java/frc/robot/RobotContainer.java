@@ -8,35 +8,31 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.auto.DriveStraightAuto;
-import frc.robot.controls.TeleopControls;
-import frc.robot.learnbot.LearnBotConstants;
+//import frc.robot.controls.TeleopControls;
+import frc.robot.subsystems.TurretRotation;
 
 public class RobotContainer {
-  private final CommandSwerveDrive swerveDrive;
-  private final TeleopControls teleopControls;
-  private final DriveStraightAuto driveStraightAuto;
-
+  // private final CommandSwerveDrive swerveDrive;
+  // private final TeleopControls teleopControls;
+  private TurretRotation turretRotation;
   public RobotContainer() {
     LoggingUtil.logGitProperties();
-
-    swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
-
-    teleopControls = new TeleopControls(this);
-    teleopControls.configureBindings();
-
-    driveStraightAuto = new DriveStraightAuto(this);
+    // swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    // teleopControls = new TeleopControls(this);
+    // teleopControls.configureBindings();
+    this.turretRotation = new TurretRotation();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
-    return swerveDrive;
+    return null;
+    // return swerveDrive;
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    return turretRotation.moveToleft();
   }
 
   public void latePeriodic() {
-    swerveDrive.latePeriodic();
+    // swerveDrive.latePeriodic();
   }
 }
