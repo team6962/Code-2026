@@ -8,35 +8,43 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.auto.DriveStraightAuto;
-import frc.robot.controls.TeleopControls;
-import frc.robot.learnbot.LearnBotConstants;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.FeederRoller;
+import frc.robot.subsystems.ShooterHood;
 
 public class RobotContainer {
-  private final CommandSwerveDrive swerveDrive;
-  private final TeleopControls teleopControls;
-  private final DriveStraightAuto driveStraightAuto;
+  // private final CommandSwerveDrive swerveDrive;
+  // private final TeleopControls teleopControls;
+  // private final DriveStraightAuto driveStraightAuto;
+
+private ShooterHood shooterHood;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    // swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
 
-    teleopControls = new TeleopControls(this);
-    teleopControls.configureBindings();
+    // teleopControls = new TeleopControls(this);
+    // teleopControls.configureBindings();
 
-    driveStraightAuto = new DriveStraightAuto(this);
+    new FeederRoller();
+    this.shooterHood = new ShooterHood();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
-    return swerveDrive;
+    // return swerveDrive;
+    return null;
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    //return driveStraightAuto.getCommand();
+    // return feederRoller.drive();
+    return Commands.sequence(
+      shooterHood.moveTo(10)
+    );
   }
 
   public void latePeriodic() {
-    swerveDrive.latePeriodic();
+    // swerveDrive.latePeriodic();
   }
 }
