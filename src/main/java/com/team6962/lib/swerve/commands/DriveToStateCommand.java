@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.team6962.lib.control.TranslationController;
-import com.team6962.lib.control.TrapezoidalController;
+import com.team6962.lib.control.SynchronizableTrapezoidalController;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
@@ -41,7 +41,7 @@ public class DriveToStateCommand extends Command {
     /**
      * Controller for rotational motion.
      */
-    private TrapezoidalController headingController;
+    private SynchronizableTrapezoidalController headingController;
 
     /**
      * Whether to finish automatically when the target is reached.
@@ -180,7 +180,7 @@ public class DriveToStateCommand extends Command {
         }
 
         if (target.angle != null) {
-            headingController = new TrapezoidalController(
+            headingController = new SynchronizableTrapezoidalController(
                 swerveDrive.getConstants().Driving.AngleFeedbackKP,
                 swerveDrive.getConstants().Driving.AngleFeedbackKI,
                 swerveDrive.getConstants().Driving.AngleFeedbackKD,

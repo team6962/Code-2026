@@ -16,11 +16,9 @@ import edu.wpi.first.wpilibj.Timer;
  * <h3>Usage</h3>
  * 
  * To use this controller, first create an instance of the
- * {@link TrapezoidalController} class, providing the PID constants, motion
+ * {@link SimpleTrapezoidalController} class, providing the PID constants, motion
  * profile constraints (maximum velocity and acceleration), and update
- * frequency. Next, set up a motion profile by calling the
- * {@link #setProfile setProfile()} method with the initial and goal states.
- * The {@link #calculate calculate()} method can then be called periodically to
+ * frequency. The {@link #calculate calculate()} method can then be called periodically to
  * get the desired velocity that will move the system along the profile.
  * <p>
  * The {@link #getDuration()} method can be used to get the expected
@@ -30,12 +28,12 @@ import edu.wpi.first.wpilibj.Timer;
  * estimated time until the profile will be completed. The {@link #isFinished()}
  * method can be used to check if the profile has been completed.
  * <p>
- * Additionally, the controller supports stretching the profile to make it take
- * longer than the minimum time required by the physical constraints of the
- * system. This can be done by calling the {@link #setDuration setDuration()}
- * method with the desired duration.
+ * Note that this controller does not support time scaling; to synchronize
+ * multiple controllers, the user must manually adjust the motion profile
+ * constraints to ensure they all have the same duration or using
+ * {@link SynchronizableTrapezoidalController} instead.
  */
-public class TrapezoidalController {
+public class SimpleTrapezoidalController {
     /**
      * The trapezoidal motion profile used to generate setpoints.
      */
@@ -53,19 +51,16 @@ public class TrapezoidalController {
     private double initialTime;
     
     /**
-     * The initial and goal states of the motion profile.
+     * The initial and state of the motion profile.
      */
-    private TrapezoidProfile.State initialState, goalState;
+    private TrapezoidProfile.State profileInitialState;
 
     /**
-     * A scaling factor for the time duration of the profile. This value should
-     * always be greater than or equal to 1, making the profile take longer than
-     * or equal to the minimum time required by the physical constraints of the
-     * system.
+     * The goal state of the motion profile.
      */
-    private double timeScale = 1.0;
+    private TrapezoidProfile.State profileGoalState;
 
-    public TrapezoidalController(
+    public SimpleTrapezoidalController(
         double kP, double kI, double kD,
         TrapezoidProfile.Constraints constraints,
         Frequency updateFrequency
@@ -81,28 +76,13 @@ public class TrapezoidalController {
      * starts)
      * @param goal The goal state (target position and velocity)
      */
-    public void setProfile(State initial, State goal) {
-        timeScale = 1.0;
+    private void setProfile(State initial, State goal) {
         initialTime = Timer.getFPGATimestamp();
 
-        this.initialState = initial;
-        this.goalState = goal;
+        this.profileInitialState = initial;
+        this.profileGoalState = goal;
 
         profile.calculate(0, initial, goal);
-    }
-
-    /**
-     * Sets up a new motion profile from the given initial and goal states,
-     * and stretches the profile to take the specified duration.
-     * 
-     * @param initial The initial state (position and velocity when the motion
-     * starts)
-     * @param goal The goal state (target position and velocity)
-     * @param duration The desired duration of the profile in seconds
-     */
-    public void setProfile(State initial, State goal, double duration) {
-        setProfile(initial, goal);
-        setDuration(duration);
     }
 
     /**
@@ -111,57 +91,45 @@ public class TrapezoidalController {
      * @return The duration of the profile in seconds
      */
     public double getDuration() {
-        return profile.totalTime() * timeScale;
+        return profile.totalTime();
     }
 
     /**
-     * Stretches the current motion profile to take the specified duration.
-     * 
-     * @param duration The desired duration of the profile in seconds
-     */
-    public void setDuration(double duration) {
-        double unscaledDuration = profile.totalTime();
-
-        if (unscaledDuration == 0) {
-            timeScale = 1.0;
-            return;
-        }
-
-        timeScale = duration / unscaledDuration;
-    }
-
-    /**
-     * Samples the motion profile at the given time, adjusting for the time
-     * scaling.
+     * Samples the motion profile at the given time to find the expected state.
      * 
      * @param time The time at which to sample the profile, in seconds
      * @return The state of the profile at the given time
      */
     private TrapezoidProfile.State sampleAt(double time) {
-        TrapezoidProfile.State originalState = profile.calculate(time / timeScale, initialState, goalState);
+        TrapezoidProfile.State originalState = profile.calculate(time, profileInitialState, profileGoalState);
 
         return new TrapezoidProfile.State(
             originalState.position,
-            originalState.velocity / timeScale
+            originalState.velocity
         );
     }
 
     /**
      * Calculates the desired velocity at the current time, given the current
-     * state of the system.
+     * state of the system and desired goal state.
      * 
      * @param current The current state of the system (position and velocity)
+     * @param goal The desired goal state (position and velocity)
      * @return The desired velocity that will cause the system to follow the
      * motion profile
      */
-    public double calculate(State current) {
-        double time = (Timer.getFPGATimestamp() - initialTime) / timeScale;
+    public double calculate(State current, State goal) {
+        if (profileGoalState == null || goal.position != profileGoalState.position || goal.velocity != profileGoalState.velocity || isFinished()) {
+            setProfile(current, goal);
+        }
+
+        double time = (Timer.getFPGATimestamp() - initialTime);
 
         if (time > getDuration()) {
-            if (goalState.velocity != 0) {
-                return goalState.velocity;
+            if (profileGoalState.velocity != 0) {
+                return profileGoalState.velocity;
             } else {
-                return feedback.calculate(current.position, goalState.position);
+                return feedback.calculate(current.position, profileGoalState.position);
             }
         } else {
             State profileState = sampleAt(time);
@@ -174,8 +142,7 @@ public class TrapezoidalController {
     }
 
     /**
-     * Gets the underlying trapezoidal motion profile. Note that the profile
-     * is not stretched, so the time scaling must be applied separately.
+     * Gets the underlying trapezoidal motion profile.
      * 
      * @return The trapezoidal motion profile
      */
@@ -198,7 +165,7 @@ public class TrapezoidalController {
      * @return The remaining time in seconds
      */
     public double getRemainingTime() {
-        double time = (Timer.getFPGATimestamp() - initialTime) * timeScale;
+        double time = Timer.getFPGATimestamp() - initialTime;
         return Math.max(0, getDuration() - time);
     }
 

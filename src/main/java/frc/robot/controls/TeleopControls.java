@@ -1,6 +1,5 @@
 package frc.robot.controls;
 
-import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -31,7 +30,7 @@ public class TeleopControls {
         // Configure basic driver controls
         Trigger teleopEnabledTrigger = new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled());
 
-        Command teleopSwerveCommand = new XBoxTeleopSwerveCommand(
+        Command teleopSwerveCommand = new ObstacleAvoidingTeleopSwerveCommand(
             robot.getSwerveDrive(),
             new XBoxTeleopSwerveConstants()
         );

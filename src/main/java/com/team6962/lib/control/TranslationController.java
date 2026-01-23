@@ -57,14 +57,14 @@ public class TranslationController {
      * The trapezoidal controller that moves the system along the direct line to
      * the goal.
      */
-    private TrapezoidalController directController;
+    private SynchronizableTrapezoidalController directController;
 
     /**
      * The trapezoidal controller that moves the system perpendicular to the
      * direct line to the goal (strafing). This is used in many cases when the
      * initial velocity or target velocity is nonzero.
      */
-    private TrapezoidalController strafeController;
+    private SynchronizableTrapezoidalController strafeController;
 
     /**
      * The initial translation of the system in 2D space.
@@ -99,8 +99,8 @@ public class TranslationController {
     ) {
         // Initialize controllers that use trapezoidal profiling and PID to
         // reach targets along each axis
-        this.directController = new TrapezoidalController(kP, kI, kD, constraints, updateFrequency);
-        this.strafeController = new TrapezoidalController(kP, kI, kD, constraints, updateFrequency);
+        this.directController = new SynchronizableTrapezoidalController(kP, kI, kD, constraints, updateFrequency);
+        this.strafeController = new SynchronizableTrapezoidalController(kP, kI, kD, constraints, updateFrequency);
     }
 
     /**

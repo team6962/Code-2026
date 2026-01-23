@@ -82,7 +82,7 @@ public class LearnBotConstants {
         .withDriving(
           new DrivingConstants()
             .withMaxLinearVelocity(MetersPerSecond.of(4))
-            .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
+            .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(4))
             .withMaxAngularVelocity(RotationsPerSecond.of(1))
             .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
             .withTranslationFeedbackKP(0.5)

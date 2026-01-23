@@ -55,19 +55,19 @@ public class Localization implements SwerveComponent {
      * The current field-relative velocity of the robot as a ChassisSpeeds
      * object.
      */
-    private ChassisSpeeds velocity;
+    private ChassisSpeeds velocity = new ChassisSpeeds();
 
     /**
      * The current field-relative translation velocity of the robot as a
      * TranslationalVelocity object.
      */
-    private TranslationalVelocity translationalVelocity;
+    private TranslationalVelocity translationalVelocity = new TranslationalVelocity();
 
     /**
      * The most recent twist (change in position along a circular arc) computed
      * by the odometry.
      */
-    private Twist2d twist;
+    private Twist2d twist = new Twist2d();
 
     /**
      * The velocity along a circular arc, computed from odometry data. This is
@@ -75,7 +75,7 @@ public class Localization implements SwerveComponent {
      * velocities in the x, y, and angular directions, respectively, instead of
      * changes in position.
      */
-    private Twist2d arcVelocity;
+    private Twist2d arcVelocity = new Twist2d();
 
     /**
      * The current yaw of the robot, stored as a continuous angle to prevent
