@@ -29,7 +29,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return turretRotation.moveToleft();
+    return turretRotation.playSong();
   }
 
   public void latePeriodic() {
