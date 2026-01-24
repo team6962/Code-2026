@@ -35,9 +35,9 @@ public class TurretRotation extends SubsystemBase {
     * Initializes the motor and status signal
     */
     public TurretRotation() {
-        motor = new TalonFX(2, new CANBus("drivetrain"));
+        motor = new TalonFX(0, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = 1.2;
+        config.Slot0.kP = 500;
         motor.getConfigurator().apply(config);
         angVelocitySignal = motor.getVelocity();
         voltageSignal = motor.getMotorVoltage();
@@ -48,7 +48,7 @@ public class TurretRotation extends SubsystemBase {
             simulation = new TurretSim(motor);
         }
     }
-
+    
     @Override
     public void periodic() {
         if(simulation != null){
@@ -63,8 +63,8 @@ public class TurretRotation extends SubsystemBase {
     }
 
     /**
-     * Gets Angular Velocity and Motor Voltage
-     */
+    * Gets Angular Velocity and Motor Voltage
+    */
     public Current getSupplyCurrent() {
         return supplyCurrentSignal.getValue();
     }
@@ -94,6 +94,14 @@ public class TurretRotation extends SubsystemBase {
     public Command moveToleft() {
         return startEnd(()->{
         motor.setControl(new PositionVoltage(1));
+        }, ()->{
+        motor.setControl(new PositionVoltage(0));
+        });
+    }
+
+    public Command moveTo(Angle targetAngle) {
+        return startEnd(()->{
+        motor.setControl(new PositionVoltage(targetAngle));
         }, ()->{
         motor.setControl(new PositionVoltage(0));
         });

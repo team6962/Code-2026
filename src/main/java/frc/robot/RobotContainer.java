@@ -20,12 +20,15 @@ public class RobotContainer {
     // swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
     // teleopControls = new TeleopControls(this);
     // teleopControls.configureBindings();
-    this.turretRotation = new TurretRotation();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
     return null;
     // return swerveDrive;
+  }
+
+  public TurretRotation getTurretRotation() {
+    return turretRotation;
   }
 
   public Command getAutonomousCommand() {

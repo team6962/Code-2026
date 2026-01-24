@@ -41,5 +41,6 @@ public class TeleopControls {
         // Configure operator controls and automated driver controls
         driver.a().onTrue(Commands.print("Ping!"));
         operator.a().onTrue(Commands.print("Pong!"));
+        driver.b().onTrue(robot.getTurretRotation().moveToleft());
     }
 }
