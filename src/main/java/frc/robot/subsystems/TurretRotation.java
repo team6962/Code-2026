@@ -37,7 +37,7 @@ public class TurretRotation extends SubsystemBase {
     * Initializes the motor and status signal
     */
     public TurretRotation() {
-        motor = new TalonFX(0, new CANBus("drivetrain"));
+        motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 6;
         config.Feedback.RotorToSensorRatio = 150.0 / 7.0;
