@@ -8,6 +8,8 @@ import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.math.MeasureUtil;
+import com.team6962.lib.phoenix.StatusUtil;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -37,8 +39,8 @@ public class TurretRotation extends SubsystemBase {
     public TurretRotation() {
         motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = 1.2;
-        motor.getConfigurator().apply(config);
+        config.Slot0.kP = 6;
+        StatusUtil.check(motor.getConfigurator().apply(config));
         angVelocitySignal = motor.getVelocity();
         voltageSignal = motor.getMotorVoltage();
         angleSignal = motor.getPosition();
@@ -95,7 +97,15 @@ public class TurretRotation extends SubsystemBase {
         return startEnd(()->{
         motor.setControl(new PositionVoltage(1));
         }, ()->{
-        motor.setControl(new PositionVoltage(0));
+        motor.setControl(new PositionVoltage(getPosition()));
+        });
+    }
+        public Command moveTo(Angle target) {
+        return startEnd(()->{
+            System.out.println("Move");
+            StatusUtil.check(motor.setControl(new PositionVoltage(target))) ;
+        }, ()->{
+            StatusUtil.check(motor.setControl(new PositionVoltage(getPosition())));
         });
     }
 }

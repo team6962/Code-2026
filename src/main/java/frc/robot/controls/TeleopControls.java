@@ -1,5 +1,8 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 
@@ -41,5 +44,6 @@ public class TeleopControls {
         // Configure operator controls and automated driver controls
         driver.a().onTrue(Commands.print("Ping!"));
         operator.a().onTrue(Commands.print("Pong!"));
+        driver.b().whileTrue(robot.getTurretRotation().moveTo(Rotations.of(0.5)));
     }
 }
