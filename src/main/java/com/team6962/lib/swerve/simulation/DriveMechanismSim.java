@@ -44,16 +44,15 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  */
 public class DriveMechanismSim {
     /** The corner of the robot that this module occupies. */
-    private Corner corner;
+    private Corner cornerThing;
 
     /** Drivetrain configuration containing motor and wheel constants. */
-    private DrivetrainConstants constants;
+    private DrivetrainConstants Consts;
 
     /** CTRE simulation state for the TalonFX motor controller. */
-    private TalonFXSimState motorControllerSimulation;
-
+    private TalonFXSimState theMotorControllerSimulation;
     /** WPILib physics simulation for the DC motor. */
-    private DCMotorSim physicsSimulation;
+        private DCMotorSim physicssimulation;
 
     /**
      * Creates a new drive mechanism simulation.
@@ -61,22 +60,19 @@ public class DriveMechanismSim {
      * @param corner the corner of the robot that this module occupies
      * @param constants drivetrain configuration
      * @param motorController the TalonFX motor controller to simulate
-     */
-    public DriveMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController) {
-        this.corner = corner;
-        this.constants = constants;
+     */public DriveMechanismSim(Corner corner, DrivetrainConstants constants, TalonFX motorController) {
+    this.cornerThing = corner;
+    this.Consts = constants;
 
-        this.motorControllerSimulation = motorController.getSimState();
+        this.theMotorControllerSimulation = motorController.getSimState();
 
-        this.physicsSimulation = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
+        this.physicssimulation = new DCMotorSim(
+                LinearSystemId.createDCMotorSystem(
                 constants.DriveMotor.SimulatedMotor,
-                constants.DriveMotor.SimulatedMomentOfInertia.in(KilogramSquareMeters),
-                constants.DriveMotor.GearReduction
-            ),
-            constants.DriveMotor.SimulatedMotor
-        );
-    }
+        constants.DriveMotor.SimulatedMomentOfInertia.in(KilogramSquareMeters) ,constants.DriveMotor.GearReduction
+            )
+            , constants.DriveMotor.SimulatedMotor
+        );}
 
     /**
      * Returns the angular position of the wheel around its shaft.
@@ -84,7 +80,7 @@ public class DriveMechanismSim {
      * @return The {@link Angle}
      */
     public Angle getAngularPosition() {
-        return physicsSimulation.getAngularPosition();
+        return physicssimulation.getAngularPosition();
     }
 
     /**
@@ -93,27 +89,27 @@ public class DriveMechanismSim {
      * @return The {@link AngularVelocity}
      */
     public AngularVelocity getAngularVelocity() {
-        return physicsSimulation.getAngularVelocity();
+        return physicssimulation.getAngularVelocity();
     }
 
     /** Returns the angular acceleration of the wheel around its shaft. */
     public AngularAcceleration getAngularAcceleration() {
-        return physicsSimulation.getAngularAcceleration();
+        return physicssimulation.getAngularAcceleration();
     }
 
     /** Returns the linear distance traveled by the wheel. */
     public Distance getPosition() {
-        return WheelMath.toLinear(physicsSimulation.getAngularPosition(), constants.getWheelRadius(corner));
+        return WheelMath.toLinear(physicssimulation.getAngularPosition(), Consts.getWheelRadius(cornerThing));
     }
 
     /** Returns the linear velocity of the wheel along the ground. */
     public LinearVelocity getVelocity() {
-        return WheelMath.toLinear(physicsSimulation.getAngularVelocity(), constants.getWheelRadius(corner));
+        return WheelMath.toLinear(physicssimulation.getAngularVelocity(), Consts.getWheelRadius(cornerThing));
     }
 
     /** Returns the linear acceleration of the wheel along the ground. */
     public LinearAcceleration getAcceleration() {
-        return WheelMath.toLinear(physicsSimulation.getAngularAcceleration(), constants.getWheelRadius(corner));
+        return WheelMath.toLinear(physicssimulation.getAngularAcceleration(), Consts.getWheelRadius(cornerThing));
     }
 
     /**
@@ -124,28 +120,28 @@ public class DriveMechanismSim {
     public void update(double deltaTimeSeconds) {
         // Set the motor controller's supply voltage to the battery voltage
         // reported by RobotController, which can be overriden in simulation
-        motorControllerSimulation.setSupplyVoltage(RobotController.getBatteryVoltage());
+        theMotorControllerSimulation.setSupplyVoltage(RobotController.getBatteryVoltage());
 
         // Sign multiplier to account for motor inversion setting. The motor
         // controller reports values in its configured positive direction, but
         // the physics simulation always uses counter-clockwise-positive, so we
         // need to negate values when the motor is configured as
         // clockwise-positive.
-        double motorSign = constants.DriveMotor.DeviceConfiguration.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0;
+        double motorSign = Consts.DriveMotor.DeviceConfiguration.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0;
 
         // Set the physics simulation input voltage to the motor controller's
         // applied output voltage
-        physicsSimulation.setInputVoltage(motorControllerSimulation.getMotorVoltage() * motorSign);
+        physicssimulation.setInputVoltage(theMotorControllerSimulation.getMotorVoltage() * motorSign);
 
         // Update the physics simulation
-        physicsSimulation.update(deltaTimeSeconds);
+        physicssimulation.update(deltaTimeSeconds);
 
         // Update the motor controller simulation with the new position,
         // velocity, and acceleration from the physics simulation
-        motorControllerSimulation.setRawRotorPosition(physicsSimulation.getAngularPosition().times(constants.DriveMotor.GearReduction * motorSign));
-        motorControllerSimulation.setRotorVelocity(physicsSimulation.getAngularVelocity().times(constants.DriveMotor.GearReduction * motorSign));
-        motorControllerSimulation.setRotorAcceleration(physicsSimulation.getAngularAcceleration().times(constants.DriveMotor.GearReduction * motorSign));
+        theMotorControllerSimulation.setRawRotorPosition(physicssimulation.getAngularPosition().times(Consts.DriveMotor.GearReduction * motorSign));
+        theMotorControllerSimulation.setRotorVelocity(physicssimulation.getAngularVelocity().times(Consts.DriveMotor.GearReduction * motorSign));
+        theMotorControllerSimulation.setRotorAcceleration(physicssimulation.getAngularAcceleration().times(Consts.DriveMotor.GearReduction * motorSign));
 
-        DogLog.log("Drivetrain/Simulation/" + corner.name() + "Drive/Position", getPosition().in(Meters));
+        DogLog.log("Drivetrain/Simulation/" + cornerThing.name() + "Drive/Position", getPosition().in(Meters));
     }
 }
