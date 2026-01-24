@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
@@ -30,7 +32,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return turretRotation.moveToleft();
+    return turretRotation.moveTo(Rotations.of(2));
   }
   public TurretRotation getTurretRotation() {
     return turretRotation;
