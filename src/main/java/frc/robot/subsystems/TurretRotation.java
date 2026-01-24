@@ -15,10 +15,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.ctre.phoenix6.Orchestra;
 
 /**
  * This defines the Shooter Roller as a new Subsystem(adds shootermotor, angVelocity, and Voltage)
@@ -32,8 +30,6 @@ public class TurretRotation extends SubsystemBase {
         private StatusSignal<AngularAcceleration> angAccelerationSignal;
         private StatusSignal<Current> supplyCurrentSignal;
         private TurretSim simulation;
-        private Timer timer;
-        private final Orchestra orchestra = new Orchestra();
 
     /**
     * Initializes the motor and status signal
