@@ -26,13 +26,6 @@ import com.ctre.phoenix6.Orchestra;
 
 public class TurretRotation extends SubsystemBase {
         private TalonFX motor;
-        private TalonFX motor2;
-        private TalonFX motor3;
-        private TalonFX motor4;
-        private TalonFX motor5;
-        private TalonFX motor6;
-        private TalonFX motor7;
-        private TalonFX motor8;
         private StatusSignal<AngularVelocity> angVelocitySignal;
         private StatusSignal<Voltage> voltageSignal;
         private StatusSignal<Angle> angleSignal;
@@ -46,14 +39,7 @@ public class TurretRotation extends SubsystemBase {
     * Initializes the motor and status signal
     */
     public TurretRotation() {
-        motor = new TalonFX(0, new CANBus("drivetrain"));
-        motor2 = new TalonFX(1, new CANBus("drivetrain"));
-        motor3 = new TalonFX(2, new CANBus("drivetrain"));
-        motor4 = new TalonFX(3, new CANBus("drivetrain"));
-        motor5 = new TalonFX(4, new CANBus("drivetrain"));
-        motor6 = new TalonFX(5, new CANBus("drivetrain"));
-        motor7 = new TalonFX(6, new CANBus("drivetrain"));
-        motor8 = new TalonFX(7, new CANBus("drivetrain"));
+        motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 1.2;
         motor.getConfigurator().apply(config);
@@ -78,41 +64,6 @@ public class TurretRotation extends SubsystemBase {
         DogLog.log("Turret Rotation/Motor Position angle", getPosition());
         DogLog.log("Turret Rotation/Angular Acceleration", getAngularVelocity());
         DogLog.log("Turret Rotation/Angular Supply Current", getSupplyCurrent());
-    }
-
-    public Command playSong() {
-    return run(() -> {})
-        .beforeStarting(() -> {
-          orchestra.addInstrument(motor);
-          orchestra.addInstrument(motor2);
-          orchestra.addInstrument(motor3);
-          orchestra.addInstrument(motor4);
-          orchestra.addInstrument(motor5);
-          orchestra.addInstrument(motor6);
-          orchestra.addInstrument(motor7);
-          orchestra.addInstrument(motor8);
-          var status = orchestra.loadMusic("song.chrp"); // Put the chrp fie in the deploy folder
-          if (!status.isOK()) {
-            DogLog.log("CHRP FAILED TO LOAD", true);
-          }
-          orchestra.play();
-        })
-        .finallyDo(() -> {
-          orchestra.stop();
-          motor.setControl(new CoastOut());
-        });
-    }
-
-    public Command playTone(float tone) {
-        return run(() -> motor.setControl(new MusicTone(tone)))
-            .beforeStarting(() -> {
-            timer.reset();
-            timer.start();
-            })
-            .finallyDo(() -> {
-            timer.stop();
-            motor.setControl(new CoastOut());
-            });
     }
 
     /**
