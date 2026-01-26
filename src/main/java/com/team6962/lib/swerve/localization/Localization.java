@@ -15,13 +15,18 @@ import com.team6962.lib.swerve.util.SwerveComponent;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator3d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.units.measure.Angle;
 
 /**
@@ -33,7 +38,7 @@ public class Localization implements SwerveComponent {
      * The pose estimator that fuses gyroscope, odometry, and vision data to
      * estimate the robot's position on the field.
      */
-    private SwerveDrivePoseEstimator poseEstimator;
+    private SwerveDrivePoseEstimator3d poseEstimator;
 
     /**
      * The gyroscope used to obtain the robot's heading relative to its original
@@ -78,13 +83,13 @@ public class Localization implements SwerveComponent {
      */
     private Angle yaw = Radians.of(0);
 
-    public Localization(DrivetrainConstants constants, Pose2d initialPose, Odometry odometry, Gyroscope gyroscope) {
+    public Localization(DrivetrainConstants constants, Pose3d initialPose, Odometry odometry, Gyroscope gyroscope) {
         this.gyroscope = gyroscope;
         this.odometry = odometry;
         
-        this.poseEstimator = new SwerveDrivePoseEstimator(
+        this.poseEstimator = new SwerveDrivePoseEstimator3d(
             constants.Structure.getKinematics(),
-            new Rotation2d(gyroscope.getYaw()),
+            gyroscope.getRotation(),
             odometry.getPositions(),
             initialPose
         );
@@ -93,9 +98,9 @@ public class Localization implements SwerveComponent {
     @Override
     public synchronized void update(double deltaTimeSeconds) {
         // Update the pose estimator with new gyroscope and odometry data
-        poseEstimator.update(new Rotation2d(gyroscope.getYaw()), odometry.getPositions());
+        poseEstimator.update(gyroscope.getRotation(), odometry.getPositions());
 
-        yaw = AngleMath.toContinuous(poseEstimator.getEstimatedPosition().getRotation().getMeasure(), yaw);
+        yaw = AngleMath.toContinuous(poseEstimator.getEstimatedPosition().getRotation().getMeasureZ(), yaw);
 
         // Update the odometry to compute the latest twist
         twist = odometry.getTwist();
@@ -105,7 +110,7 @@ public class Localization implements SwerveComponent {
             twist.dx / deltaTimeSeconds,
             twist.dy / deltaTimeSeconds,
             twist.dtheta / deltaTimeSeconds
-        ), poseEstimator.getEstimatedPosition().getRotation());
+        ), new Rotation2d(poseEstimator.getEstimatedPosition().getRotation().getMeasureZ()));
 
         // Update the translational velocity
         translationalVelocity = new TranslationalVelocity(
@@ -138,15 +143,27 @@ public class Localization implements SwerveComponent {
         gyroscope.logTelemetry(basePath + "Gyroscope");
         odometry.logTelemetry(basePath + "Odometry");
 
-        Pose2d position = getPosition();
+        Pose3d position = getPosition3d();
+
+        DogLog.log(basePath + "Localization/Position", position);
 
         DogLog.log(basePath + "Localization/PositionX", position.getX(), Meters);
         DogLog.log(basePath + "Localization/PositionY", position.getY(), Meters);
+        DogLog.log(basePath + "Localization/PositionZ", position.getZ(), Meters);
+
+        DogLog.log(basePath + "Localization/RotationYaw", position.getRotation().getZ(), Radians);
+        DogLog.log(basePath + "Localization/RotationPitch", position.getRotation().getY(), Radians);
+        DogLog.log(basePath + "Localization/RotationRoll", position.getRotation().getX(), Radians);
+
         DogLog.log(basePath + "Localization/Heading", getHeading().in(Radians), Radians);
 
         DogLog.log(basePath + "Localization/VelocityX", velocity.vxMetersPerSecond, MetersPerSecond);
         DogLog.log(basePath + "Localization/VelocityY", velocity.vyMetersPerSecond, MetersPerSecond);
         DogLog.log(basePath + "Localization/AngularVelocity", velocity.omegaRadiansPerSecond, RadiansPerSecond);
+
+        DogLog.log(basePath + "Localization/AngularVelocityYaw", gyroscope.getYawVelocity().in(RadiansPerSecond), RadiansPerSecond);
+        DogLog.log(basePath + "Localization/AngularVelocityPitch", gyroscope.getPitchVelocity().in(RadiansPerSecond), RadiansPerSecond);
+        DogLog.log(basePath + "Localization/AngularVelocityRoll", gyroscope.getRollVelocity().in(RadiansPerSecond), RadiansPerSecond);
 
         DogLog.log(basePath + "Localization/TwistDX", twist.dx, Meters);
         DogLog.log(basePath + "Localization/TwistDY", twist.dy, Meters);
@@ -157,19 +174,113 @@ public class Localization implements SwerveComponent {
         DogLog.log(basePath + "Localization/ArcVelocityDTheta", arcVelocity.dtheta, RadiansPerSecond);
     }
 
-    public synchronized void addVisionEstimate(
-        Pose2d pose,
+    /**
+     * Adds a vision measurement to the Kalman Filter. This will correct the
+     * odometry pose estimate while still accounting for measurement noise.
+     * 
+     * This method can be called as infrequently as you want.
+     * 
+     * To promote stability of the pose estimate and make it robust to bad
+     * vision data, we recommend only adding vision measurements that are
+     * already within one meter or so of the current pose estimate.
+     * 
+     * @param pose The pose of the robot as measured by the vision camera.
+     * @param timestampSeconds The timestamp of the vision measurement in
+     * seconds. Note that you must use a timestamp with an epoch since FPGA
+     * startup. This means that you should use
+     * {@link edu.wpi.first.wpilibj.Timer#getFPGATimestamp() Timer.getFPGATimestamp()}
+     * as your time source.
+     * @param stdDevs Standard deviations of the vision pose measurement (x
+     * position in meters, y position in meters, z position in meters, and angle
+     * in radians). Increase these numbers to trust the vision pose measurement
+     * less.
+     */
+    public synchronized void addVisionMeasurement(
+        Pose3d pose,
         double timestampSeconds,
-        Matrix<N3, N1> stdDevs
+        Matrix<N4, N1> stdDevs
     ) {
         poseEstimator.addVisionMeasurement(pose, timestampSeconds, stdDevs);
     }
 
-    public synchronized void addVisionEstimate(
+    /**
+     * Adds a vision measurement to the Kalman Filter. This will correct the
+     * odometry pose estimate while still accounting for measurement noise.
+     * 
+     * This method can be called as infrequently as you want.
+     * 
+     * To promote stability of the pose estimate and make it robust to bad
+     * vision data, we recommend only adding vision measurements that are
+     * already within one meter or so of the current pose estimate.
+     * 
+     * @param pose The pose of the robot as measured by the vision camera.
+     * @param timestampSeconds The timestamp of the vision measurement in
+     * seconds. Note that you must use a timestamp with an epoch since FPGA
+     * startup. This means that you should use
+     * {@link edu.wpi.first.wpilibj.Timer#getFPGATimestamp() Timer.getFPGATimestamp()}
+     * as your time source.
+     * @param stdDevs Standard deviations of the vision pose measurement (x
+     * position in meters, y position in meters, and angle in radians). Increase
+     * these numbers to trust the vision pose measurement less.
+     */
+    public synchronized void addVisionMeasurement(
         Pose2d pose,
+        double timestampSeconds,
+        Matrix<N3, N1> stdDevs
+    ) {
+        Vector<N4> stdDevs3d = new Vector<N4>(Nat.N4());
+
+        stdDevs3d.set(0, 0, stdDevs.get(0, 0));
+        stdDevs3d.set(1, 0, stdDevs.get(1, 0));
+        stdDevs3d.set(2, 0, 0.0);
+        stdDevs3d.set(3, 0, stdDevs.get(2, 0));
+
+        poseEstimator.addVisionMeasurement(new Pose3d(pose), timestampSeconds, stdDevs3d);
+    }
+
+    /**
+     * Adds a vision measurement to the Kalman Filter. This will correct the
+     * odometry pose estimate while still accounting for measurement noise.
+     * 
+     * @param pose The pose of the robot as measured by the vision camera.
+     * @param timestampSeconds The timestamp of the vision measurement in
+     * seconds. Note that you must use a timestamp with an epoch since FPGA
+     * startup. This means that you should use
+     * {@link edu.wpi.first.wpilibj.Timer#getFPGATimestamp() Timer.getFPGATimestamp()}
+     * as your time source.
+     */
+    public synchronized void addVisionMeasurement(
+        Pose3d pose,
         double timestampSeconds
     ) {
         poseEstimator.addVisionMeasurement(pose, timestampSeconds);
+    }
+
+    /**
+     * Adds a vision measurement to the Kalman Filter. This will correct the
+     * odometry pose estimate while still accounting for measurement noise.
+     * 
+     * @param pose The pose of the robot as measured by the vision camera.
+     * @param timestampSeconds The timestamp of the vision measurement in
+     * seconds. Note that you must use a timestamp with an epoch since FPGA
+     * startup. This means that you should use
+     * {@link edu.wpi.first.wpilibj.Timer#getFPGATimestamp() Timer.getFPGATimestamp()}
+     * as your time source.
+     */
+    public synchronized void addVisionMeasurement(
+        Pose2d pose,
+        double timestampSeconds
+    ) {
+        poseEstimator.addVisionMeasurement(new Pose3d(pose), timestampSeconds);
+    }
+
+    /**
+     * Sets the current estimated position of the robot on the field.
+     * 
+     * @param pose The new estimated Pose3d of the robot.
+     */
+    public synchronized void resetPosition(Pose3d pose) {
+        poseEstimator.resetPose(pose);
     }
 
     /**
@@ -178,7 +289,7 @@ public class Localization implements SwerveComponent {
      * @param pose The new estimated Pose2d of the robot.
      */
     public synchronized void resetPosition(Pose2d pose) {
-        poseEstimator.resetPose(pose);
+        poseEstimator.resetPose(new Pose3d(pose));
     }
 
     /**
@@ -187,10 +298,14 @@ public class Localization implements SwerveComponent {
      * @param yaw The new yaw angle for the robot.
      */
     public synchronized void resetYaw(Angle yaw) {
-        Pose2d currentPose = poseEstimator.getEstimatedPosition();
-        Pose2d newPose = new Pose2d(
+        Pose3d currentPose = poseEstimator.getEstimatedPosition();
+        Pose3d newPose = new Pose3d(
             currentPose.getTranslation(),
-            new Rotation2d(yaw.in(Radians))
+            new Rotation3d(
+                currentPose.getRotation().getX(),
+                currentPose.getRotation().getY(),
+                yaw.in(Radians)
+            )
         );
 
         poseEstimator.resetPose(newPose);
@@ -209,7 +324,16 @@ public class Localization implements SwerveComponent {
      * 
      * @return The current estimated Pose2d of the robot.
      */
-    public synchronized Pose2d getPosition() {
+    public synchronized Pose2d getPosition2d() {
+        return poseEstimator.getEstimatedPosition().toPose2d();
+    }
+
+    /**
+     * Gets the current estimated position of the robot on the field.
+     * 
+     * @return The current estimated Pose3d of the robot.
+     */
+    public synchronized Pose3d getPosition3d() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -220,7 +344,43 @@ public class Localization implements SwerveComponent {
      * @return
      */
     public synchronized Angle getHeading() {
-        return AngleMath.toContinuous(poseEstimator.getEstimatedPosition().getRotation().getMeasure(), gyroscope.getYaw());
+        return AngleMath.toContinuous(poseEstimator.getEstimatedPosition().getRotation().getMeasureZ(), gyroscope.getYaw());
+    }
+
+    /**
+     * Gets the current rotation of the robot as a Rotation3d object.
+     * 
+     * @return The current rotation of the robot.
+     */
+    public synchronized Rotation3d getRotation3d() {
+        return poseEstimator.getEstimatedPosition().getRotation();
+    }
+
+    /**
+     * Gets the pitch of the robot.
+     * 
+     * @return The current pitch of the robot.
+     */
+    public synchronized Angle getPitch() {
+        return poseEstimator.getEstimatedPosition().getRotation().getMeasureX();
+    }
+
+    /**
+     * Gets the roll of the robot.
+     * 
+     * @return The current roll of the robot.
+     */
+    public synchronized Angle getRoll() {
+        return poseEstimator.getEstimatedPosition().getRotation().getMeasureY();
+    }
+
+    /**
+     * Gets the yaw of the robot.
+     * 
+     * @return The current yaw of the robot.
+     */
+    public synchronized Angle getYaw() {
+        return getHeading();
     }
 
     /**
