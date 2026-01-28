@@ -11,6 +11,8 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
+import org.photonvision.simulation.SimCameraProperties;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -28,11 +30,17 @@ import com.team6962.lib.swerve.config.DrivingConstants;
 import com.team6962.lib.swerve.config.GyroscopeConstants;
 import com.team6962.lib.swerve.config.SteerEncoderConstants;
 import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
+import com.team6962.lib.vision.AprilTagCameraConstants;
+import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.config.StructureConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 
 public class LearnBotConstants {
@@ -167,5 +175,24 @@ public class LearnBotConstants {
           new SteerEncoderConstants()
             .withDataFusion(DataFusionMethod.Remote)
         );
+    }
+
+    public static AprilTagVisionConstants getAprilTagVisionConstants() {
+        return new AprilTagVisionConstants()
+          .withCameras(
+            new AprilTagCameraConstants(
+              "camera",
+              new Transform3d(new Translation3d(0.25, 0, 0.25), new Rotation3d())
+            )
+          )
+          .withCameraSimProperties(
+            new SimCameraProperties()
+              .setCalibration(640, 480, Rotation2d.fromDegrees(60))
+              .setCalibError(0.25, 0.08)
+              .setFPS(60)
+              .setAvgLatencyMs(10)
+              .setLatencyStdDevMs(5)
+          )
+          .withDrawWireframes(true);
     }
 }
