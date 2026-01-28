@@ -178,21 +178,22 @@ public class LearnBotConstants {
     }
 
     public static AprilTagVisionConstants getAprilTagVisionConstants() {
-        return new AprilTagVisionConstants()
-          .withCameras(
-            new AprilTagCameraConstants(
-              "camera",
-              new Transform3d(new Translation3d(0.25, 0, 0.25), new Rotation3d())
-            )
+      // Random values for simulation testing
+      return new AprilTagVisionConstants()
+        .withCameras(
+          new AprilTagCameraConstants(
+            "camera",
+            new Transform3d(new Translation3d(0.25, 0, 0.25), new Rotation3d())
           )
-          .withCameraSimProperties(
-            new SimCameraProperties()
-              .setCalibration(640, 480, Rotation2d.fromDegrees(60))
-              .setCalibError(0.25, 0.08)
-              .setFPS(60)
-              .setAvgLatencyMs(10)
-              .setLatencyStdDevMs(5)
-          )
-          .withDrawWireframes(true);
+        )
+        .withCameraSimProperties(
+          new SimCameraProperties()
+            .setCalibration(640, 480, Rotation2d.fromDegrees(60))
+            .setCalibError(0.25, 0.08)
+            .setFPS(60)
+            .setAvgLatencyMs(10)
+            .setLatencyStdDevMs(5)
+        )
+        .withDrawWireframes(true);
     }
 }

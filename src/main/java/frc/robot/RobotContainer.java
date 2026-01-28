@@ -8,9 +8,6 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
@@ -20,6 +17,7 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+  @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
@@ -33,11 +31,6 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-
-    aprilTagVision.getCamera("camera").setTransform(new Transform3d(
-      new Translation3d(0, 1, 0),
-      new Rotation3d()
-    ));
   }
 
   public CommandSwerveDrive getSwerveDrive() {
