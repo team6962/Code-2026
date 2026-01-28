@@ -7,7 +7,6 @@ package frc.robot;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
@@ -17,6 +16,7 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+
   @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
 
@@ -25,7 +25,8 @@ public class RobotContainer {
 
     swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
 
-    aprilTagVision = new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
+    aprilTagVision =
+        new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
