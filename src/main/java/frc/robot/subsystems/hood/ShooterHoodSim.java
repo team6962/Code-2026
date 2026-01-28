@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.hood;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
 

@@ -9,7 +9,7 @@ import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.FeederRoller;
-import frc.robot.subsystems.ShooterHood;
+import frc.robot.subsystems.hood.ShooterHood;
 
 public class RobotContainer {
   // private final CommandSwerveDrive swerveDrive;
