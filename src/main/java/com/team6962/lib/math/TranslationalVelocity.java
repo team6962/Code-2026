@@ -159,6 +159,19 @@ public class TranslationalVelocity {
   }
 
   /**
+   * Multiplies this TranslationalVelocity by a Time measure and returns the resulting
+   * Translation2d.
+   *
+   * @param time The Time measure to multiply by
+   * @return The resulting Translation2d
+   */
+  public Translation2d times(edu.wpi.first.units.measure.Time time) {
+    return new Translation2d(
+        this.x.in(MetersPerSecond) * time.in(edu.wpi.first.units.Units.Seconds),
+        this.y.in(MetersPerSecond) * time.in(edu.wpi.first.units.Units.Seconds));
+  }
+
+  /**
    * Divides this TranslationalVelocity by a scalar and returns the result.
    *
    * @param scalar The scalar to divide by
