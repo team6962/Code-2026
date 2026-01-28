@@ -61,11 +61,11 @@ public class IntakeRollers extends SubsystemBase {
     }
     
     public Command intake() {
-        return move(Volts.of(12)); //temporary
+        return move(Volts.of(12)); 
     }
 
     public Command outtake() {
-        return move(Volts.of(-12)); //temporary
+        return move(Volts.of(-12)); 
     }
 
     public AngularVelocity getVelocity() {
