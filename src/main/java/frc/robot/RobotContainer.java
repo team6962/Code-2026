@@ -23,7 +23,8 @@ public class RobotContainer {
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    swerveDrive =
+        new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
