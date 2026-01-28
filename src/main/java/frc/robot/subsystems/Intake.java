@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -49,7 +50,7 @@ public class Intake extends SubsystemBase {
   private IntakeSim simulation;
 
   public Intake() {
-    motorController = new TalonFX(16);
+    motorController = new TalonFX(2, new CANBus("drivetrain"));
     TalonFXConfiguration configuration = new TalonFXConfiguration();
     configuration.CurrentLimits.StatorCurrentLimitEnable = false;
     configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
