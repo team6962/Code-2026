@@ -12,16 +12,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.team6962.lib.math.MeasureUtil;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.LinearAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -29,108 +23,88 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/**
- * The Feeder controls the Feeder Subsystem on the robot.
- */
 public class Intake extends SubsystemBase {
-  private TalonFX motorController;
+  private TalonFX motor;
+
+  private StatusSignal<Angle> angleSignal;
   private StatusSignal<AngularVelocity> angularVelocitySignal;
+  private StatusSignal<AngularAcceleration> angularAccelerationSignal;
+
   private StatusSignal<Voltage> voltageSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
-  private StatusSignal<AngularAcceleration> angularAccelerationSignal;
-  private StatusSignal<Angle> angleSignal;
+
   private IntakeSim simulation;
 
   public Intake() {
-    motorController = new TalonFX(2, new CANBus("drivetrain"));
+    motor = new TalonFX(2, new CANBus("drivetrain"));
+
     TalonFXConfiguration configuration = new TalonFXConfiguration();
     configuration.CurrentLimits.StatorCurrentLimitEnable = false;
     configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
     configuration.Feedback.RotorToSensorRatio = 5.0 / 0.05;
     configuration.Slot0.kP = 0.36;
-    motorController.getConfigurator().apply(configuration);
-    angularVelocitySignal = motorController.getVelocity();
-    voltageSignal = motorController.getMotorVoltage();
-    statorCurrentSignal = motorController.getStatorCurrent();
-    supplyCurrentSignal = motorController.getSupplyCurrent();
-    angleSignal = motorController.getPosition();
-    angularAccelerationSignal = motorController.getAcceleration();
+    motor.getConfigurator().apply(configuration);
+
+    angleSignal = motor.getPosition();
+    angularVelocitySignal = motor.getVelocity();
+    angularAccelerationSignal = motor.getAcceleration();
+
+    voltageSignal = motor.getMotorVoltage();
+    statorCurrentSignal = motor.getStatorCurrent();
+    supplyCurrentSignal = motor.getSupplyCurrent();
 
     if (RobotBase.isSimulation()) {
-        simulation = new IntakeSim(motorController);
+        simulation = new IntakeSim(motor);
     }
-    
   }
-
-  // public class ArmSim {
-  //   private TalonFXSimState motorSim;
-  //   private CANcoderSimSTate encoderSim;
-  //   private SingleJointArmSim physicsSim;
-  //   private double lastUpdateTimeSeconds = -1;
-  //   private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
-  //   public ArmSim(TalonFX motor, CANcoder encoder) {
-
-  //   }
-  // }
-  private Boolean lastAction = false;
-  /**
-   * move controls the voltage sent to the feeder. 
-   * When the command starts, the voltage output will be five.
-   * When the command stops, the code will cut off the voltage.
-   * @return The command returned will rotate the feeder when on
-   */
-  // public Command move() {
-  //   return startEnd(() -> {
-  //     motorController.setControl(new VoltageOut(5));
-  //   }, () -> {
-  //     motorController.setControl(new CoastOut());
-  //   });
-  // }
 
   public Command extend() {
     return startEnd(() -> {
-      motorController.setControl(new PositionVoltage(1));
+      motor.setControl(new PositionVoltage(1));
     }, () -> {
-      motorController.setControl(new PositionVoltage(getDistance().magnitude()));
+      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
     });
   }
 
   public Command retract() {
     return startEnd(() -> {
-      motorController.setControl(new PositionVoltage(0));
+      motor.setControl(new PositionVoltage(0));
     }, () -> {
-      motorController.setControl(new PositionVoltage(getDistance(). magnitude()));
+      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
     });
   }
 
   /**
-   * LinearVelocity finds the angular velocity and converts it.
-   * @return It returns the Linear Velocity.
+   * Finds the linear velocity of the end of the intake. Positive values mean
+   * that the intake is extending outwards, and negative values mean that the intake
+   * is retracting inwards.
+   * 
+   * @return The linear velocity as a LinearVelocity object.
    */
-  public LinearVelocity getLinearVelocity() {
-    //BaseStatusSignal.getLatencyCompensatedValue(angularVelocitySignal, angularAccelerationSignal);
+  public LinearVelocity getVelocity() {
+    // TODO: Add latency compensation
     return MetersPerSecond.of(angularVelocitySignal.getValueAsDouble());
   }
 
   /**
-   * Angle finds the position.
-   * @return It returns the angle
+   * Finds the position of the intake.
+   * 
+   * @return The position as a Distance object.
    */
-  public Distance getDistance() {
+  public Distance getPosition() {
     return Meters.of(angleSignal.getValueAsDouble());
   }
 
   /**
-   * Linear Acceleration finds the angular acceleration and converts it to linear acceleration
-   * @return linear Acceleration
+   * Finds the linear acceleration of the end of the intake.
+   * 
+   * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
     return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
@@ -160,20 +134,20 @@ public class Intake extends SubsystemBase {
     return supplyCurrentSignal.getValue();
   }
 
-  /**
-   * This will now log all the information periodically into a dataset the will grow over time.
-   */
   @Override
   public void periodic() {
     if (simulation != null) {
       simulation.update();
     }
+
     BaseStatusSignal.refreshAll(angularVelocitySignal, voltageSignal, statorCurrentSignal, supplyCurrentSignal, angleSignal, angularAccelerationSignal);
-    DogLog.log("intake/linearVelocity", getLinearVelocity());
+
+    DogLog.log("intake/position", getPosition());
+    DogLog.log("intake/velocity", getVelocity());
+    DogLog.log("intake/acceleration", getAcceleration());
+
     DogLog.log("intake/voltage", getVoltage());
     DogLog.log("intake/statorCurrent", getStatorCurrent());
     DogLog.log("intake/supplyCurrent", getSupplyCurrent());
-    DogLog.log("intake/distance", getDistance());
-    DogLog.log("intake/linearAcceleration", getAcceleration());
   }
 }
