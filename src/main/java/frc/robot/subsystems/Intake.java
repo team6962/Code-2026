@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
     configuration.CurrentLimits.StatorCurrentLimitEnable = false;
     configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
     configuration.Feedback.RotorToSensorRatio = 5.0 / 0.05;
-    configuration.Slot0.kP = 0.36;
+    configuration.Slot0.kP = 0.33;
     motorController.getConfigurator().apply(configuration);
     angularVelocitySignal = motorController.getVelocity();
     voltageSignal = motorController.getMotorVoltage();
