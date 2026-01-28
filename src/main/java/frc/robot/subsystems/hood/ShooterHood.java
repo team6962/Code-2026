@@ -19,11 +19,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterHood extends SubsystemBase{
     private TalonFX hoodMotor;
-    private StatusSignal<AngularVelocity> angVelocity;
-    private StatusSignal<Voltage> voltage;
-    private StatusSignal<AngularAcceleration> angAcceleration;
+
     private StatusSignal<Angle> angle;
+    private StatusSignal<AngularVelocity> angVelocity;
+    private StatusSignal<AngularAcceleration> angAcceleration;
+
+    private StatusSignal<Voltage> voltage;
     private StatusSignal<Current> current;
+
     private ShooterHoodSim simulation;
     /**
      * Initializes the motor and status signal
@@ -33,11 +36,13 @@ public class ShooterHood extends SubsystemBase{
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 0.75;
         hoodMotor.getConfigurator().apply(config);
+
         angVelocity = hoodMotor.getVelocity();
         voltage = hoodMotor.getMotorVoltage();
         angAcceleration = hoodMotor.getAcceleration();
         angle = hoodMotor.getPosition();
         current = hoodMotor.getSupplyCurrent();
+
         if (RobotBase.isSimulation()) {
             simulation = new ShooterHoodSim(hoodMotor);
         }
@@ -50,10 +55,10 @@ public class ShooterHood extends SubsystemBase{
         }
 
         BaseStatusSignal.refreshAll(angVelocity, voltage, angAcceleration, angle, current);
-        DogLog.log("Hood Motor/Angular Velocity", getAngularVelocity());
-        DogLog.log("Hood Motor/Motor Voltage", getMotorVoltage());
-        DogLog.log("Hood Motor/Angular Acceleration", getAngularAcceleration());
         DogLog.log("Hood Motor/Angle", getPosition());
+        DogLog.log("Hood Motor/Angular Velocity", getAngularVelocity());
+        DogLog.log("Hood Motor/Angular Acceleration", getAngularAcceleration());
+        DogLog.log("Hood Motor/Motor Voltage", getMotorVoltage());
         DogLog.log("Hood Motor/Current", getSupply());
     }
     /**
