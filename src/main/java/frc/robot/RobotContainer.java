@@ -4,17 +4,26 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.IntakeRollers;
+import frc.robot.subsystems.Turret;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+
+  private IntakeRollers intakeRollers;
+
+  private Turret turret;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -25,6 +34,9 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+    this.turret = new Turret();
+
+    this.intakeRollers = new IntakeRollers();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
