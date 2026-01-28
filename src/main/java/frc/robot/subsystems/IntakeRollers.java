@@ -4,12 +4,13 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.phoenix.StatusUtil;
@@ -31,7 +32,7 @@ public class IntakeRollers extends SubsystemBase {
     private StatusSignal<Current> supplyCurrentSignal;
     private StatusSignal<Voltage> appliedVoltageSignal;
 /**
- * intializes motor and status signals
+ * Intializes motor and status signals
  * Class for Intake Rollers
  */
     public IntakeRollers() {
@@ -45,30 +46,26 @@ public class IntakeRollers extends SubsystemBase {
         this.statorCurrentSignal = intakeMotor.getStatorCurrent();
         this.supplyCurrentSignal = intakeMotor.getSupplyCurrent();
         this.appliedVoltageSignal = intakeMotor.getMotorVoltage();
-      
     }
+
     /** 
      * Returns command to make the motor move and stop
     */
-    
-    
-    public Command move() {
-      //if (state == "normal") {
+    public Command move(Voltage voltage) {
         return startEnd(( ) -> {
-          intakeMotor.setControl(new VelocityVoltage(-50));
-          
+          intakeMotor.setControl(new VoltageOut (voltage));
         }, () -> {
           intakeMotor.setControl(new CoastOut());
         });
-        //}
-        //else if (state == "stuck") {
-        //return startEnd(( ) -> {
-        //   intakeMotor.setControl(new VelocityVoltage(50));
-          
-        // }, () -> {
-        //   intakeMotor.setControl(new CoastOut());
-        // });
-        //}
+
+    }
+    
+    public Command intake() {
+        return move(Volts.of(12)); //temporary
+    }
+
+    public Command outtake() {
+        return move(Volts.of(-12)); //temporary
     }
 
     public AngularVelocity getVelocity() {
