@@ -78,28 +78,11 @@ public class Intake extends SubsystemBase {
   //   private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
   //   public ArmSim(TalonFX motor, CANcoder encoder) {
 
-  //   }
-  // }
-  private Boolean lastAction = false;
-  /**
-   * move controls the voltage sent to the feeder. 
-   * When the command starts, the voltage output will be five.
-   * When the command stops, the code will cut off the voltage.
-   * @return The command returned will rotate the feeder when on
-   */
-  // public Command move() {
-  //   return startEnd(() -> {
-  //     motorController.setControl(new VoltageOut(5));
-  //   }, () -> {
-  //     motorController.setControl(new CoastOut());
-  //   });
-  // }
-
   public Command extend() {
     return startEnd(() -> {
       motorController.setControl(new PositionVoltage(1));
     }, () -> {
-      motorController.setControl(new PositionVoltage(getDistance().magnitude()));
+      motorController.setControl(new PositionVoltage(getDistance().in(Meters)));
     });
   }
 
@@ -111,10 +94,6 @@ public class Intake extends SubsystemBase {
     });
   }
 
-  /**
-   * LinearVelocity finds the angular velocity and converts it.
-   * @return It returns the Linear Velocity.
-   */
   public LinearVelocity getLinearVelocity() {
     //BaseStatusSignal.getLatencyCompensatedValue(angularVelocitySignal, angularAccelerationSignal);
     return MetersPerSecond.of(angularVelocitySignal.getValueAsDouble());
