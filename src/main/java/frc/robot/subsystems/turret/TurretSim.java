@@ -9,10 +9,17 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class TurretSim{
+/**
+* This handles the TurretRotation behavior in simulation mode
+*/
+
+public class TurretSim {
+    //This defines the motor and physics simulators
     private TalonFXSimState motorSim;
-    private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
     private DCMotorSim physicsSim;
+
+    //This assigns motor and physics simulators to a digital motor 
+    //and a configured physics simulation respectively
     public TurretSim (TalonFX motor) {
         motorSim = motor.getSimState();
         physicsSim = new DCMotorSim( 
@@ -23,12 +30,19 @@ public class TurretSim{
         DCMotor.getKrakenX60Foc(1)
         );
     }
+    
+    /**
+    * This updates the simulated motors periodically
+    */
     public void update() {
+        //Sets the correct voltage values in the simulations and gets the angular velocity and position angle
         motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
         double motorVoltage = invert(motorSim.getMotorVoltage(),
             false);
         Angle position = physicsSim.getAngularPosition();
         AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
+
+        //Handles physics simulation updates
         physicsSim.setInput(motorVoltage);
         physicsSim.update(0.02);
         motorSim.setRawRotorPosition(
@@ -38,6 +52,10 @@ public class TurretSim{
             invert(velocity, false)
             .times(42.0));
     }
+
+    /**
+    * Defines helper methods
+    */
     private static Angle invert(Angle angle, boolean shouldBeInverted) {
         return shouldBeInverted ? angle.unaryMinus() : angle;
     }

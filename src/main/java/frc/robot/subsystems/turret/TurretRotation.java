@@ -16,10 +16,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/**
- * This defines the Shooter Roller as a new Subsystem called motor.
- * The following Status Signals are dictating the different stats of the motor(Angvelocity, voltage, ect...)
- */
+/* This defines the Shooter Roller as a new Subsystem called motor.
+* The following StatusSignals represent certain stats of the motor */
 
 public class TurretRotation extends SubsystemBase {
         private TalonFX motor;
@@ -29,9 +27,8 @@ public class TurretRotation extends SubsystemBase {
         private StatusSignal<AngularAcceleration> angAccelerationSignal;
         private StatusSignal<Current> supplyCurrentSignal;
         private TurretSim simulation;
-/**
-* Assignes the Status Signal variables to the different methods part of the motor.get...()
-*/
+
+    /* Assigns StatusSignals to different methods part of the motor.get...() */
     public TurretRotation() {
         motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -46,14 +43,14 @@ public class TurretRotation extends SubsystemBase {
             simulation = new TurretSim(motor);
         }
     }
-@Override
+
+    @Override
     public void periodic() {
         if(simulation != null){
             simulation.update();
         }
-/**
-* The BaseStatusSignal refreshes all the get stats from above of a period of time.
-*/
+
+        /* Motor Statistics are logged as Turret Rotation */
         BaseStatusSignal.refreshAll(angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
         DogLog.log("Turret Rotation/Angular Velocity", getAngularVelocity());
         DogLog.log("Turret Rotation/Motor Voltage", getMotorVoltage());
@@ -62,9 +59,6 @@ public class TurretRotation extends SubsystemBase {
         DogLog.log("Turret Rotation/Angular Supply Current", getSupplyCurrent());
     }
 
-/**
- * Gets the Status signal and returns it back to the get value
- */
     public Current getSupplyCurrent() {
         return supplyCurrentSignal.getValue();
     }
@@ -88,6 +82,7 @@ public class TurretRotation extends SubsystemBase {
         );
     }
 
+    /* Moves the motor to the target angle */
     public Command moveToleft() {
         return startEnd(()->{
         motor.setControl(new PositionVoltage(1));
