@@ -45,6 +45,8 @@ public class AprilTagVision extends SubsystemBase {
     for (AprilTagCameraConstants cameraConstants : visionConstants.Cameras) {
       addCamera(new AprilTagCamera(cameraConstants, visionConstants, visionSystemSim));
     }
+
+    DogLog.log("Vision/CameraCount", visionConstants.Cameras.size());
   }
 
   /**

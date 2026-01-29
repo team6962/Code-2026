@@ -16,6 +16,8 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import dev.doglog.DogLog;
+
 /** Represents a camera used to detect AprilTags for robot pose estimation. */
 public class AprilTagCamera {
   /** The PhotonCamera representing the physical camera device. */
@@ -127,6 +129,8 @@ public class AprilTagCamera {
     List<AprilTagVisionMeasurement> estimates = new ArrayList<>();
     List<PhotonPipelineResult> results = device.getAllUnreadResults();
 
+    int estimateCount = 0;
+
     for (int i = results.size() - 1; i >= 0; i--) {
       PhotonPipelineResult result = results.get(i);
 
@@ -141,6 +145,8 @@ public class AprilTagCamera {
         continue;
       }
 
+      estimateCount++;
+
       EstimatedRobotPose estimate = possibleEstimate.get();
 
       Optional<Matrix<N4, N1>> possibleStdDevs =
@@ -154,6 +160,8 @@ public class AprilTagCamera {
 
       estimates.add(new AprilTagVisionMeasurement(estimate, stdDevs));
     }
+
+    DogLog.log("Vision/Cameras/" + device.getName() + "/EstimateCount", estimateCount);
 
     return estimates;
   }
