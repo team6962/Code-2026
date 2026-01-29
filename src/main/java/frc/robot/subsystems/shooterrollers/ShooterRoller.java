@@ -9,11 +9,14 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,8 +35,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ShooterRoller extends SubsystemBase {
     private TalonFX shooterRollerMotor1;
     private TalonFX shooterRollerMotor2;
-    private StatusSignal<AngularVelocity> angVelocity;
-    private StatusSignal<Voltage> voltage;
+    private StatusSignal<AngularVelocity> angVelocitySignal;
+    private StatusSignal<AngularAcceleration> angAccelerationSignal;
+    private StatusSignal<Current> supplyCurrentSignal;
+    private StatusSignal<Current> statorCurrentSignal;
+    private StatusSignal<Voltage> voltageSignal;
     private ShooterRollerSim simulation;
     
     
@@ -76,8 +82,13 @@ public class ShooterRoller extends SubsystemBase {
             
         );
         // defines the variables we are keeping track of
-        angVelocity = shooterRollerMotor1.getVelocity();
-        voltage = shooterRollerMotor1.getMotorVoltage();
+        angVelocitySignal = shooterRollerMotor1.getVelocity();
+        voltageSignal = shooterRollerMotor1.getMotorVoltage();
+        angAccelerationSignal = shooterRollerMotor1.getAcceleration();
+        supplyCurrentSignal = shooterRollerMotor1.getSupplyCurrent();
+        statorCurrentSignal = shooterRollerMotor1.getStatorCurrent();
+
+
         shooterRollerMotor2.setControl(new Follower(shooterRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
         if (RobotBase.isSimulation()) {
             simulation = new ShooterRollerSim(shooterRollerMotor1);
@@ -87,7 +98,7 @@ public class ShooterRoller extends SubsystemBase {
     public Command shoot(){
         return startEnd(()->{
             //defines a local function to set motor voltage to make it go brrrrrrrrrrrrrrrrrrrrr
-            shooterRollerMotor1.setControl(new PositionVoltage(1.0));
+            shooterRollerMotor1.setControl(new VelocityVoltage(1.0));
 
         }, () -> {
             //defines a local function to stop motor
@@ -104,21 +115,39 @@ public class ShooterRoller extends SubsystemBase {
         }
 
         //this will log stuff every once in a while
-        BaseStatusSignal.refreshAll(angVelocity,voltage);
-        DogLog.log("outtake/voltage", getMotorVoltage());
-        DogLog.log("angular velocity", getAngularVelocity());
+        BaseStatusSignal.refreshAll(angVelocitySignal,voltageSignal,supplyCurrentSignal,statorCurrentSignal,angAccelerationSignal);
+        DogLog.log("shooterRoller/voltage", getMotorVoltage());
+        DogLog.log("shooterRoller/angular velocity", getAngularVelocity());
+        DogLog.log("shooterRoller/statorCurrent", getStatorCurrent());
+        DogLog.log("shooterRoller/angular acceleration", getAngularAcceleration());
+        DogLog.log("shooterRoller/supply current", getSupplyCurrent());
 
     }
 
     // gets the angular velocity
     public AngularVelocity getAngularVelocity() {
-        return angVelocity.getValue();
+        return angVelocitySignal.getValue();
+    
+    }
+
+    public AngularAcceleration getAngularAcceleration() {
+        return angAccelerationSignal.getValue();
+    
+    }
+
+    public Current getSupplyCurrent() {
+        return supplyCurrentSignal.getValue();
+    
+    }
+
+    public Current getStatorCurrent() {
+        return statorCurrentSignal.getValue();
     
     }
 
     //gets the voltage
     public Voltage getMotorVoltage() {
-        return voltage.getValue();
+        return voltageSignal.getValue();
     
     }
 

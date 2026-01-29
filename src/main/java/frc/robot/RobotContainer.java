@@ -17,7 +17,7 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
-  private ShooterRoller outtakeMotor1;
+  private ShooterRoller shooterRoller;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -28,7 +28,7 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-    this.outtakeMotor1 = new ShooterRoller();
+    shooterRoller = new ShooterRoller();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -36,7 +36,9 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+
+    //return driveStraightAuto.getCommand();
+    return shooterRoller.shoot();
   }
 
   public void latePeriodic() {
