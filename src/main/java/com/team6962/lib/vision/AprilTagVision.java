@@ -3,6 +3,7 @@ package com.team6962.lib.vision;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +90,12 @@ public class AprilTagVision extends SubsystemBase {
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
+        // Don't update rotation unless disabled and multiple targets are used
+        if (RobotState.isEnabled() || measurement.getPhotonEstimate().targetsUsed.size() < 2) {
+          measurement =
+              measurement.withAdjustedRotation(swerveDrive.getLocalization().getRotation3d());
+        }
+
         swerveDrive.getLocalization().addVisionMeasurement(measurement);
         measurements++;
       }

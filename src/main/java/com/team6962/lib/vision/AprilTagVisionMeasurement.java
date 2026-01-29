@@ -2,6 +2,7 @@ package com.team6962.lib.vision;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N4;
 import org.photonvision.EstimatedRobotPose;
@@ -69,5 +70,24 @@ public class AprilTagVisionMeasurement {
    */
   public Matrix<N4, N1> getStdDevs() {
     return stdDevs;
+  }
+
+  /**
+   * Returns a copy of this vision measurement with the estimated orientation adjusted.
+   *
+   * @param newRotation The new rotation to set in the pose.
+   * @return A new AprilTagVisionMeasurement with the updated rotation.
+   */
+  public AprilTagVisionMeasurement withAdjustedRotation(Rotation3d newRotation) {
+    Pose3d adjustedPose = new Pose3d(photonEstimate.estimatedPose.getTranslation(), newRotation);
+
+    EstimatedRobotPose adjustedEstimate =
+        new EstimatedRobotPose(
+            adjustedPose,
+            photonEstimate.timestampSeconds,
+            photonEstimate.targetsUsed,
+            photonEstimate.strategy);
+
+    return new AprilTagVisionMeasurement(adjustedEstimate, this.stdDevs);
   }
 }
