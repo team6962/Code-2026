@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
@@ -161,12 +162,12 @@ public class LearnBotConstants {
     return new AprilTagVisionConstants()
         .withCameras(
             new AprilTagCameraConstants(
-                "camera", new Transform3d(new Translation3d(0.25, 0, 0.25), new Rotation3d())))
+                "Color-2", new Transform3d(new Translation3d(Inches.of(1).in(Meters),Inches.of(-14).in(Meters),Inches.of(4.5).in(Meters)), new Rotation3d(0,0,-Math.PI/2))))
         .withCameraSimProperties(
             new SimCameraProperties()
-                .setCalibration(640, 480, Rotation2d.fromDegrees(60))
-                .setCalibError(0.25, 0.08)
-                .setFPS(60)
+                .setCalibration(1280, 800, Rotation2d.fromDegrees(70))
+                .setCalibError(0.29, 0.08)
+                .setFPS(30)
                 .setAvgLatencyMs(10)
                 .setLatencyStdDevMs(5))
         .withDrawWireframes(true);
