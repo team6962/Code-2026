@@ -35,6 +35,7 @@ import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -169,6 +170,7 @@ public class LearnBotConstants {
                         Inches.of(-14).in(Meters),
                         Inches.of(4.5).in(Meters)),
                     new Rotation3d(0, 0, -Math.PI / 2))))
+        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withCameraSimProperties(
             new SimCameraProperties()
                 .setCalibration(1280, 800, Rotation2d.fromDegrees(70))
