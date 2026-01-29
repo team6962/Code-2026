@@ -19,6 +19,9 @@ public class AprilTagVision extends SubsystemBase {
   /** The swerve drive subsystem to provide vision measurements to. */
   private final CommandSwerveDrive swerveDrive;
 
+  /** The constants that configure the vision system. */
+  private final AprilTagVisionConstants visionConstants;
+
   /** Map of camera names to AprilTagCamera instances. */
   private final Map<String, AprilTagCamera> cameras;
 
@@ -34,6 +37,7 @@ public class AprilTagVision extends SubsystemBase {
    */
   public AprilTagVision(CommandSwerveDrive swerveDrive, AprilTagVisionConstants visionConstants) {
     this.swerveDrive = swerveDrive;
+    this.visionConstants = visionConstants;
     this.cameras = new HashMap<>();
 
     // Initialize vision simulation if running in simulation mode
@@ -47,7 +51,7 @@ public class AprilTagVision extends SubsystemBase {
       addCamera(new AprilTagCamera(cameraConstants, visionConstants, visionSystemSim));
     }
 
-    DogLog.log("Vision/CameraCount", visionConstants.Cameras.size());
+    DogLog.log("Vision/Cameras/Count", visionConstants.Cameras.size());
   }
 
   /**
@@ -90,12 +94,20 @@ public class AprilTagVision extends SubsystemBase {
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
-        // Don't update rotation unless disabled and multiple targets are used
-        if (RobotState.isEnabled() || measurement.getPhotonEstimate().targetsUsed.size() < 2) {
+        // Don't update rotation unless the conditions specified in vision constants are met
+        boolean canUpdateRotation = true;
+
+        canUpdateRotation &= !visionConstants.RequireDisabledForHeadingUpdate
+            || RobotState.isDisabled();
+        canUpdateRotation &= measurement.getPhotonEstimate().targetsUsed.size()
+            >= visionConstants.MinTagsForHeadingUpdate;
+
+        if (!canUpdateRotation) {
           measurement =
               measurement.withAdjustedRotation(swerveDrive.getLocalization().getRotation3d());
         }
 
+        // Add the measurement to the swerve drive's localization system
         swerveDrive.getLocalization().addVisionMeasurement(measurement);
         measurements++;
       }

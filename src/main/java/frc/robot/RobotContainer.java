@@ -16,8 +16,6 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
-
-  @SuppressWarnings("unused")
   private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
@@ -37,6 +35,10 @@ public class RobotContainer {
 
   public CommandSwerveDrive getSwerveDrive() {
     return swerveDrive;
+  }
+
+  public AprilTagVision getAprilTagVision() {
+    return aprilTagVision;
   }
 
   public Command getAutonomousCommand() {
