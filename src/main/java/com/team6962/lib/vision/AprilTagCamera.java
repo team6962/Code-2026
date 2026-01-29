@@ -129,9 +129,12 @@ public class AprilTagCamera {
     List<AprilTagVisionMeasurement> estimates = new ArrayList<>();
     List<PhotonPipelineResult> results = device.getAllUnreadResults();
 
+    int resultCount = 0;
     int estimateCount = 0;
 
     for (int i = results.size() - 1; i >= 0; i--) {
+      resultCount++;
+
       PhotonPipelineResult result = results.get(i);
 
       Optional<EstimatedRobotPose> possibleEstimate =
@@ -161,6 +164,7 @@ public class AprilTagCamera {
       estimates.add(new AprilTagVisionMeasurement(estimate, stdDevs));
     }
 
+    DogLog.log("Vision/Cameras/" + device.getName() + "/ResultCount", resultCount);
     DogLog.log("Vision/Cameras/" + device.getName() + "/EstimateCount", estimateCount);
 
     return estimates;
