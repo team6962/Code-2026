@@ -3,6 +3,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.math.MeasureUtil;
@@ -32,7 +33,18 @@ public class TurretRotation extends SubsystemBase {
     public TurretRotation() {
         motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = 1.3;
+
+        config.Slot0.kP = 0.5;
+        config.Slot0.kD = 0.1;
+        config.Slot0.kS = 0.150;
+        config.Slot0.kV = 2.571;
+        config.Slot0.kA = 0.030;
+
+        config.MotionMagic.MotionMagicCruiseVelocity = 10;
+        config.MotionMagic.MotionMagicAcceleration = 5;
+       
+        config.Feedback.RotorToSensorRatio = 150.0 / 7.0;
+
         motor.getConfigurator().apply(config);
         angVelocitySignal = motor.getVelocity();
         voltageSignal = motor.getMotorVoltage();
@@ -84,10 +96,16 @@ public class TurretRotation extends SubsystemBase {
 
     /* Moves the motor to the target angle */
     public Command moveToleft() {
-        return startEnd(()->{
-        motor.setControl(new PositionVoltage(1));
-        }, ()->{
-        motor.setControl(new PositionVoltage(getPosition()));
-        });
+        return startEnd(
+            () -> motor.setControl(new MotionMagicVoltage(1)),
+            () -> motor.setControl(new MotionMagicVoltage(0))
+        );
+    }
+
+    public Command moveTo(Angle targetAngle) {
+        return startEnd(
+            () -> motor.setControl(new MotionMagicVoltage(targetAngle)),
+            () -> motor.setControl(new MotionMagicVoltage(getPosition()))
+        );
     }
 }

@@ -6,15 +6,19 @@ package frc.robot;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.turret.TurretRotation;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
-  private final DriveStraightAuto driveStraightAuto;
+  private final TurretRotation turretRotation = new TurretRotation();
+  double angleInRadians = Math.PI / 2;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -23,8 +27,6 @@ public class RobotContainer {
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
-
-    driveStraightAuto = new DriveStraightAuto(this);
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -32,10 +34,10 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    return turretRotation.moveToleft();
   }
 
   public void latePeriodic() {
-    swerveDrive.latePeriodic();
+    // swerveDrive.latePeriodic();
   }
 }
