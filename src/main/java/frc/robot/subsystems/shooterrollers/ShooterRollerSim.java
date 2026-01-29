@@ -21,10 +21,10 @@ public class ShooterRollerSim {
         motorSim = motor.getSimState();
         physicsSim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(
-            DCMotor.getKrakenX60Foc(1), 
+            DCMotor.getKrakenX60Foc(2), 
         //note: ask build what motor will be used
-        0.000174,42.0),
-            DCMotor.getKrakenX60Foc(1)    
+        0.000174,0.75),
+            DCMotor.getKrakenX60Foc(2)    
         
         );
     }
@@ -37,11 +37,11 @@ public class ShooterRollerSim {
         physicsSim.update(0.02);
         motorSim.setRawRotorPosition(
             invert(position,false)
-            .times(42.0)
+            .times(0.75)
         );
         motorSim.setRotorVelocity(
             invert(velocity,false)
-            .times(42.0)
+            .times(0.75)
         );
 
     }
