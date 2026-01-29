@@ -21,6 +21,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Scanner; // Import the Scanner class
 
 //creates status signals
+
+//REMEMBER: The build team for some unexplainable reason will use TWO motors for the shooter roller
+//rewrite code to work for two motors
+//why did the build team decide to do this
+//remember: ask shooter roller guy on build to rethink their design choices
+//
+
 public class ShooterRoller extends SubsystemBase {
     private TalonFX shooterRollerMotor1;
     private StatusSignal<AngularVelocity> angVelocity;
@@ -29,6 +36,8 @@ public class ShooterRoller extends SubsystemBase {
 
 
     // i don't know what this does ether, probably some safety feature
+    //update: it's apparently a feed forward thing to tell motors to get from point a to point b
+    //new goal: find a way to delete without causing error to reduce processing power
     public ShooterRoller() {
         shooterRollerMotor1 = new TalonFX(2,new CANBus("drive train"));
         shooterRollerMotor1.getConfigurator().apply(
