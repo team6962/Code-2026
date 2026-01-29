@@ -12,4 +12,9 @@ public final class Main {
   public static void main(String... args) {
     RobotBase.startRobot(Robot::new);
   }
+
+    // Test method with bad formatting - spotless should fix this
+  public static int add(int a,int b){
+        return a+b;
+    }
 }
