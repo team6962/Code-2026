@@ -23,6 +23,7 @@ public class ShooterRollerSim {
         LinearSystemId.createDCMotorSystem(
             DCMotor.getKrakenX60Foc(2), 
         //note: ask build what motor will be used
+        //update: I guessed right first time so don't change it
         0.000174,0.75),
             DCMotor.getKrakenX60Foc(2)    
         
