@@ -10,25 +10,33 @@ on:
   pull_request:
     branches: [ main ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-24.04
+permissions:
+  contents: write
 
-    # This grabs the WPILib docker container
+jobs:
+  build:
+    runs-on: ubuntu-24.04
     container: wpilib/roborio-cross-ubuntu:2025-24.04
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref || github.ref }}
 
-    # Declares the repository safe and not under dubious ownership.
-    - name: Add repository to git safe directories
-      run: git config --global --add safe.directory $GITHUB_WORKSPACE
+    - run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
-    # Runs a single command using the runners shell
-    - name: Compile and run tests on robot code
+    - name: Compile
+      run: ./gradlew compileJava
+
+    - name: Apply Spotless fixes
+      run: ./gradlew spotlessApply
+
+    - name: Commit spotless changes
+      if: github.event_name == 'pull_request'
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "style: Apply Spotless fixes"
+        branch: ${{ github.head_ref }}
+
+    - name: Build and test
       run: ./gradlew build
