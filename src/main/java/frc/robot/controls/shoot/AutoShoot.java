@@ -128,21 +128,16 @@ public class AutoShoot extends Command {
           hoodAngle.in(Radians), rollerSpeed.in(RadiansPerSecond), targetHeight.in(Meters)
         };
 
-    // Calculate the release time and translation of the projectile when released
-    Time releaseTime = Seconds.of(AutoShootConstants.releaseTimeFunction.value(parameters));
-    Translation2d releaseTranslation =
-        shooterPose.getTranslation().plus(shooterVelocity.times(releaseTime));
-
     // Calculate the displacement of the projectile during flight
     double distance = AutoShootConstants.distanceFunction.value(parameters);
-    Time flightTime = Seconds.of(AutoShootConstants.flightTimeFunction.value(parameters));
     Translation2d displacement = new Translation2d(distance, new Rotation2d(azimuthAngle));
 
     // Account for the shooter's initial velocity during flight
+    Time flightTime = Seconds.of(AutoShootConstants.flightTimeFunction.value(parameters));
     displacement = displacement.plus(shooterVelocity.times(flightTime));
 
     // Calculate the final destination of the projectile
-    Translation2d destination = releaseTranslation.plus(displacement);
+    Translation2d destination = shooterPose.getTranslation().plus(displacement);
 
     return new Translation3d(destination.getX(), destination.getY(), targetHeight.in(Meters));
   }
@@ -158,10 +153,13 @@ public class AutoShoot extends Command {
    */
   private Pair<Angle, Angle> getStaticShootingAngles(
       Pose2d shooterPose, AngularVelocity shooterVelocity, Translation3d target) {
-    // Calculate the azimuth angle and hood angle using the shooting model functions
+    // Calculate the azimuth angle to the target
     Angle azimuthAngle =
         shooterPose.getTranslation().minus(target.toTranslation2d()).getAngle().getMeasure();
+
+    // Calculate the hood angle using the hood angle function
     double horizontalDistance = shooterPose.getTranslation().getDistance(target.toTranslation2d());
+
     Angle hoodAngle =
         Radians.of(
             AutoShootConstants.hoodAngleFunction.value(
