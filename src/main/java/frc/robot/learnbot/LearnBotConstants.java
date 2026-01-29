@@ -162,7 +162,13 @@ public class LearnBotConstants {
     return new AprilTagVisionConstants()
         .withCameras(
             new AprilTagCameraConstants(
-                "Color-2", new Transform3d(new Translation3d(Inches.of(1).in(Meters),Inches.of(-14).in(Meters),Inches.of(4.5).in(Meters)), new Rotation3d(0,0,-Math.PI/2))))
+                "Color-2",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(1).in(Meters),
+                        Inches.of(-14).in(Meters),
+                        Inches.of(4.5).in(Meters)),
+                    new Rotation3d(0, 0, -Math.PI / 2))))
         .withCameraSimProperties(
             new SimCameraProperties()
                 .setCalibration(1280, 800, Rotation2d.fromDegrees(70))

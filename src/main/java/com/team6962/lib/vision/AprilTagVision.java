@@ -1,6 +1,7 @@
 package com.team6962.lib.vision;
 
 import com.team6962.lib.swerve.CommandSwerveDrive;
+import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
@@ -81,11 +82,16 @@ public class AprilTagVision extends SubsystemBase {
       visionSystemSim.update(swerveDrive.getSimulation().getOdometry().getPosition());
     }
 
+    int measurements = 0;
+
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
         swerveDrive.getLocalization().addVisionMeasurement(measurement);
+        measurements++;
       }
     }
+
+    DogLog.log("Vision/Measurements", measurements);
   }
 }
