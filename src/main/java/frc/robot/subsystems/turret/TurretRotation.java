@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.turret;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
