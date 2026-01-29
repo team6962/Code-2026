@@ -7,6 +7,8 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -42,7 +44,7 @@ public class Intake extends SubsystemBase {
   private IntakeSim simulation;
 
   public Intake() {
-    motor = new TalonFX(2, new CANBus("drivetrain"));
+    motor = new TalonFX(16);
 
     TalonFXConfiguration configuration = new TalonFXConfiguration();
     configuration.CurrentLimits.StatorCurrentLimitEnable = false;
@@ -88,17 +90,15 @@ public class Intake extends SubsystemBase {
    * @return The linear velocity as a LinearVelocity object.
    */
   public LinearVelocity getVelocity() {
-    // TODO: Add latency compensation
-    return MetersPerSecond.of(angularVelocitySignal.getValueAsDouble());
+    return MetersPerSecond.of(BaseStatusSignal.getLatencyCompensatedValue(angularVelocitySignal, angularAccelerationSignal).in(RotationsPerSecond));
   }
 
   /**
    * Finds the position of the intake.
-   * 
    * @return The position as a Distance object.
    */
   public Distance getPosition() {
-    return Meters.of(angleSignal.getValueAsDouble());
+  return Meters.of(BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal).in(Rotations));
   }
 
   /**
