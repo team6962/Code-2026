@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N4;
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -162,10 +164,15 @@ public class AprilTagCamera {
       Matrix<N4, N1> stdDevs = possibleStdDevs.get();
 
       estimates.add(new AprilTagVisionMeasurement(estimate, stdDevs));
+
+      DogLog.log("Vision/Cameras/" + device.getName() + "/Estimates/" + (estimateCount - 1) + "/Pose", estimate.estimatedPose);
+      DogLog.log("Vision/Cameras/" + device.getName() + "/Estimates/" + (estimateCount - 1) + "/Latency", Timer.getFPGATimestamp() - estimate.timestampSeconds);
+      DogLog.log("Vision/Cameras/" + device.getName() + "/Estimates/" + (estimateCount - 1) + "/Strategy", estimate.strategy);
+      DogLog.log("Vision/Cameras/" + device.getName() + "/Estimates/" + (estimateCount - 1) + "/TagCount", estimate.targetsUsed.size());
     }
 
     DogLog.log("Vision/Cameras/" + device.getName() + "/ResultCount", resultCount);
-    DogLog.log("Vision/Cameras/" + device.getName() + "/EstimateCount", estimateCount);
+    DogLog.log("Vision/Cameras/" + device.getName() + "/Estimates/Count", estimateCount);
 
     return estimates;
   }
