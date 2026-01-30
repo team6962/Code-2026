@@ -10,16 +10,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.intakerollers.IntakeRollers;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+  private final IntakeRollers intakeRollers;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
     swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    intakeRollers = new IntakeRollers();
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
@@ -32,7 +35,9 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    // return driveStraightAuto.getCommand();
+    return intakeRollers.intake();
+    
   }
 
   public void latePeriodic() {

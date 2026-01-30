@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.intakerollers;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -19,6 +19,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -31,6 +32,7 @@ public class IntakeRollers extends SubsystemBase {
     private StatusSignal<Current> statorCurrentSignal;
     private StatusSignal<Current> supplyCurrentSignal;
     private StatusSignal<Voltage> appliedVoltageSignal;
+    private IntakeRollerSim simulation;
 /**
  * Intializes motor and status signals
  * Class for Intake Rollers
@@ -46,6 +48,9 @@ public class IntakeRollers extends SubsystemBase {
         this.statorCurrentSignal = intakeMotor.getStatorCurrent();
         this.supplyCurrentSignal = intakeMotor.getSupplyCurrent();
         this.appliedVoltageSignal = intakeMotor.getMotorVoltage();
+        if (RobotBase.isSimulation()) {
+          simulation = new IntakeRollerSim(intakeMotor);
+        }
     }
 
     /** 
@@ -86,6 +91,9 @@ public class IntakeRollers extends SubsystemBase {
     
     @Override
     public void periodic() {
+        if (simulation != null) {
+          simulation.update();
+        }
         DogLog.log("intakeRollers/velocity",getVelocity());
         DogLog.log("intakeRollers/statorCurrent", getStatorCurrent());
         DogLog.log("intakeRollers/SupplyCurrent", getSupplyCurrent());
