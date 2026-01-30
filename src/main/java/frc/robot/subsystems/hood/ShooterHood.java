@@ -34,7 +34,7 @@ public class ShooterHood extends SubsystemBase{
      * Initializes the motor and status signal
      */
     public ShooterHood() {
-        hoodMotor = new TalonFX(39); //change later
+        hoodMotor = new TalonFX(20); //change later
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 0.75;
         hoodMotor.getConfigurator().apply(config);
