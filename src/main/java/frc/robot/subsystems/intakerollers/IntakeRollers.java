@@ -11,11 +11,13 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.phoenix.StatusUtil;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -33,6 +35,7 @@ public class IntakeRollers extends SubsystemBase {
     private StatusSignal<Current> supplyCurrentSignal;
     private StatusSignal<Voltage> appliedVoltageSignal;
     private IntakeRollerSim simulation;
+
 /**
  * Intializes motor and status signals
  * Class for Intake Rollers
@@ -42,7 +45,7 @@ public class IntakeRollers extends SubsystemBase {
         TalonFXConfiguration configuration = new TalonFXConfiguration();
         configuration.CurrentLimits.StatorCurrentLimitEnable = false;
         configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
-        configuration.Slot0.kV = 0.12;
+        configuration.Slot0.kP = 1;
         intakeMotor.getConfigurator().apply(configuration);
         this.velocitySignal = intakeMotor.getVelocity();
         this.statorCurrentSignal = intakeMotor.getStatorCurrent();
@@ -73,6 +76,14 @@ public class IntakeRollers extends SubsystemBase {
         return move(Volts.of(-12)); 
     }
 
+    public Command moveAtVelocity(double target) {
+        return startEnd(()->{
+          intakeMotor.setControl(new VelocityVoltage(target));
+        }, ()->{
+          intakeMotor.setControl(new CoastOut());
+        });
+    }
+
     public AngularVelocity getVelocity() {
       return velocitySignal.getValue();
     }
@@ -89,6 +100,8 @@ public class IntakeRollers extends SubsystemBase {
       return appliedVoltageSignal.getValue();
     }
     
+
+
     @Override
     public void periodic() {
         if (simulation != null) {
