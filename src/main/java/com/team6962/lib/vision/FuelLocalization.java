@@ -23,24 +23,28 @@ public class FuelLocalization {
    
   private static final double MAX_FOV_RATIO = Math.PI / 2;
 
-  public static Translation2d getClumpPosition(String name, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot) {
-    PhotonCamera camera = new PhotonCamera(name);
+  public static Translation2d getClumpPosition(PhotonCamera camera, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot) {
     PhotonPipelineResult result = camera.getLatestResult();
-    double fuelDistance = 0;
+    if (!result.hasTargets()) return null;
 
     Translation2d bestPosition = null;
-    double lowestTotalDistance = 0;
+    double lowestTotalDistance = Double.MAX_VALUE;
 
-    for(int i = 0; i <= result.getTargets().size(); i++ ){
+    List<PhotonTrackedTarget> targets = result.getTargets();
+
+    for(int i = 0; i < result.getTargets().size(); i++ ){
+      PhotonTrackedTarget thisTarget = targets.get(i);
       double totalDistance = 0;
-      Translation2d thisFuelPosition = getFuelPosition(name, swerveDrive, cameraToRobot, i);
-      for (int j = 0; j < result.getTargets().size(); j++) {
-        if (i == j) {
-          continue;
+      Translation2d thisFuelPosition = getFuelPosition(thisTarget, swerveDrive, cameraToRobot);
+      for (int j = 0; j < result.getTargets().size() - 1; j++) {
+        if (i == j) continue;
+        
+        PhotonTrackedTarget otherTarget = targets.get(j);
+        Translation2d otherFuelPosition = getFuelPosition(otherTarget, swerveDrive, cameraToRobot);
+        if (otherFuelPosition != null) {
+          double fuelDistance = thisFuelPosition.getDistance(otherFuelPosition);
+          totalDistance = totalDistance + fuelDistance;
         }
-        Translation2d otherFuelPosition = getFuelPosition(name, swerveDrive, cameraToRobot, j);
-        fuelDistance = thisFuelPosition.getDistance(otherFuelPosition);
-        totalDistance = totalDistance + fuelDistance;
       }
       if (totalDistance < lowestTotalDistance) {
         lowestTotalDistance = totalDistance;
@@ -51,23 +55,9 @@ public class FuelLocalization {
   }
 
   public static Translation2d getFuelPosition(
-      String name, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot, int targetID) {
-      PhotonTrackedTarget target = null;
-    try (PhotonCamera camera = new PhotonCamera(name)) {
-      PhotonPipelineResult result = camera.getLatestResult();
-      List<PhotonTrackedTarget> targets = result.getTargets();
-      for (PhotonTrackedTarget targetWithID : targets) {
-        if (targetWithID.getFiducialId() == targetID) {     
-          target = targetWithID;     
-          break;
-        }
-      }
+      PhotonTrackedTarget target, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot) {
 
-      if (result == null || !result.hasTargets()) return null; // Check if detection is valid
-
-
-      if (target == null || target.getDetectedObjectClassID() != 1)
-        return null; // Check if target is valid
+      if (target == null || target.getDetectedObjectClassID() != 1) return null; // Check if detection is valid
 
       Translation2d fuelPosition = new Translation2d(0, 0);
 
@@ -99,7 +89,7 @@ public class FuelLocalization {
 
       return fuelPosition;
     }
-  }
+  
 
   
 
