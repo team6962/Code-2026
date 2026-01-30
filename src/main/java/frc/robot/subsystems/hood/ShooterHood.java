@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.networktables.DoubleSubscriber;
 
 public class ShooterHood extends SubsystemBase{
     private TalonFX hoodMotor;
@@ -28,6 +29,7 @@ public class ShooterHood extends SubsystemBase{
     private StatusSignal<Current> current;
 
     private ShooterHoodSim simulation;
+    private final DoubleSubscriber angleInput;
     /**
      * Initializes the motor and status signal
      */
@@ -42,6 +44,10 @@ public class ShooterHood extends SubsystemBase{
         angAcceleration = hoodMotor.getAcceleration();
         angle = hoodMotor.getPosition();
         current = hoodMotor.getSupplyCurrent();
+
+        angleInput = DogLog.tunable("Hood Motor/Input Angle", 0.0, newAngle -> {
+            moveTo(newAngle).schedule();
+        });
 
         if (RobotBase.isSimulation()) {
             simulation = new ShooterHoodSim(hoodMotor);
