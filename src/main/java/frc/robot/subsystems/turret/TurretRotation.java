@@ -1,4 +1,6 @@
 package frc.robot.subsystems.turret;
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -7,6 +9,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -29,6 +32,10 @@ public class TurretRotation extends SubsystemBase {
         private TurretSim simulation;
 
     /* Assigns StatusSignals to different methods part of the motor.get...() */
+        private final DoubleSubscriber angleInput;
+/**
+* Assignes the Status Signal variables to the different methods part of the motor.get...()
+*/
     public TurretRotation() {
         motor = new TalonFX(2, new CANBus("drivetrain"));
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -50,6 +57,11 @@ public class TurretRotation extends SubsystemBase {
         angleSignal = motor.getPosition();
         angAccelerationSignal = motor.getAcceleration();
         supplyCurrentSignal = motor.getSupplyCurrent();
+
+        angleInput = DogLog.tunable("Turret Rotation/Input Angle", 0.0, newAngle -> {
+            moveTo(Radians.of(newAngle)).schedule();
+        });
+
         if (RobotBase.isSimulation()) {
             simulation = new TurretSim(motor);
         }
@@ -92,7 +104,6 @@ public class TurretRotation extends SubsystemBase {
             )
         );
     }
-
     /* Moves the motor to the target angle */
     public Command moveToleft() {
         return startEnd(
@@ -102,9 +113,16 @@ public class TurretRotation extends SubsystemBase {
     }
 
     public Command moveTo(Angle targetAngle) {
+        System.out.println("cool guy 67");
         return startEnd(
-            () -> motor.setControl(new MotionMagicVoltage(targetAngle)),
-            () -> motor.setControl(new MotionMagicVoltage(getPosition()))
+            () -> {
+                motor.setControl(new MotionMagicVoltage(targetAngle));
+                System.out.println("cool");
+            },
+            () -> {
+                motor.setControl(new MotionMagicVoltage(getPosition()));
+                System.out.println("guy");
+            }
         );
     }
 }

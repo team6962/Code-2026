@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Radians;
+
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 
@@ -30,11 +32,11 @@ public class RobotContainer {
   }
 
   public CommandSwerveDrive getSwerveDrive() {
-    return swerveDrive;
+   return swerveDrive;
   }
 
   public Command getAutonomousCommand() {
-    return turretRotation.moveToleft();
+    return turretRotation.moveTo(Radians.of(3));
   }
 
   public void latePeriodic() {
