@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.math.MeasureUtil;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import dev.doglog.DogLog;
@@ -35,9 +36,19 @@ public class ShooterHood extends SubsystemBase{
      */
     public ShooterHood() {
         hoodMotor = new TalonFX(20); //change later
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = 0.75;
-        hoodMotor.getConfigurator().apply(config);
+        // TalonFXConfiguration config = new TalonFXConfiguration();
+        // config.Slot0.kP = 0.75;
+        // config.Slot0.kD = 0.1;
+        // config.Slot0.kS = 0.15;
+        // config.Slot0.kV = 2.571;
+        // config.Slot0.kA = 0.030;
+
+        // config.MotionMagic.MotionMagicCruiseVelocity = 10;
+        // config.MotionMagic.MotionMagicAcceleration = 5;
+
+        // config.Feedback.RotorToSensorRatio = 150.0 /7.0;
+
+        hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
 
         angVelocity = hoodMotor.getVelocity();
         voltage = hoodMotor.getMotorVoltage();
@@ -97,9 +108,9 @@ public class ShooterHood extends SubsystemBase{
 
     public Command moveTo(double radians) {
         return startEnd(()->{
-        hoodMotor.setControl(new PositionVoltage(radians/(Math.PI*2)));   
+        hoodMotor.setControl(new MotionMagicVoltage(radians/(Math.PI*2)));   
         }, ()->{
-        hoodMotor.setControl(new PositionVoltage(getPosition()));
+        hoodMotor.setControl(new MotionMagicVoltage(getPosition()));
         });
      }
 }
