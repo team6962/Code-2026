@@ -6,7 +6,12 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
@@ -80,6 +85,8 @@ public class TurretRotation extends SubsystemBase {
         DogLog.log("Turret Rotation/Motor Position angle", getPosition());
         DogLog.log("Turret Rotation/Angular Acceleration", getAngularVelocity());
         DogLog.log("Turret Rotation/Angular Supply Current", getSupplyCurrent());
+
+        LoggingUtil.log("Turret Rotation/Control Request", motor.getAppliedControl());
     }
 
     public Current getSupplyCurrent() {
@@ -113,15 +120,23 @@ public class TurretRotation extends SubsystemBase {
     }
 
     public Command moveTo(Angle targetAngle) {
-        System.out.println("cool guy 67");
         return startEnd(
             () -> {
                 motor.setControl(new MotionMagicVoltage(targetAngle));
-                System.out.println("cool");
             },
             () -> {
                 motor.setControl(new MotionMagicVoltage(getPosition()));
-                System.out.println("guy");
+            }
+        );
+    }
+
+    public Command moveTo(double targetAngle) {
+        return startEnd(
+            () -> {
+                motor.setControl(new MotionMagicVoltage(targetAngle));
+            },
+            () -> {
+                motor.setControl(new MotionMagicVoltage(getPosition()));
             }
         );
     }
