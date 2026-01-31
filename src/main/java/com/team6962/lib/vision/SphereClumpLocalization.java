@@ -14,6 +14,7 @@ import org.photonvision.targeting.TargetCorner;
 
 import com.team6962.lib.swerve.MotionSwerveDrive;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -21,8 +22,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SphereClumpLocalization {
+public class SphereClumpLocalization extends SubsystemBase {
   private MotionSwerveDrive swerveDrive;
   private PhotonCamera camera;
   private SphereCameraConstants cameraConstants;
@@ -32,7 +34,10 @@ public class SphereClumpLocalization {
     this.camera = new PhotonCamera(cameraConstants.Name);
     this.cameraConstants = cameraConstants;
   }
-
+  @Override
+  public void periodic() {
+      DogLog.log("vision/clump-translation", getClumpPosition());
+  }
   public Translation2d getClumpPosition() {
     // TODO: Switch to getAllUnreadResults()
     PhotonPipelineResult result = camera.getLatestResult();
@@ -43,11 +48,14 @@ public class SphereClumpLocalization {
 
     List<PhotonTrackedTarget> targets = result.getTargets();
     List<Translation2d> fuelLocations = new ArrayList<>();
+    int fuelIndex = 0;
     for (PhotonTrackedTarget target : targets) {
       if (target == null) continue;
       Translation2d fuelLocation = getFuelPosition(target);
       if (fuelLocation == null) continue;
       fuelLocations.add(fuelLocation);
+      DogLog.log("vision/fuel-location/" + fuelIndex, fuelLocation);
+      fuelIndex++;
     }
     for (int i = 0; i < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); i++) {
       double totalDistance = 0;
