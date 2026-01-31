@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -42,7 +43,7 @@ public class ShooterRoller extends SubsystemBase {
     private StatusSignal<Voltage> voltageSignal;
     private ShooterRollerSim simulation;
     
-    
+    private final DoubleSubscriber velocityInput;
 
 
     // i don't know what this does ether, probably some safety feature
@@ -50,8 +51,9 @@ public class ShooterRoller extends SubsystemBase {
     //new goal: find a way to delete without causing error to reduce processing power
 
     public ShooterRoller() {
-        shooterRollerMotor1 = new TalonFX(20,new CANBus("drive train"));
+        shooterRollerMotor1 = new TalonFX(21,new CANBus("drive train"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
+        //update: fixed, device id is what it should be according to tech binder
         shooterRollerMotor1.getConfigurator().apply(
             new TalonFXConfiguration()
             .withSlot0(
@@ -65,8 +67,9 @@ public class ShooterRoller extends SubsystemBase {
 
             
         );
-        shooterRollerMotor2 = new TalonFX(21,new CANBus("drive train"));
+        shooterRollerMotor2 = new TalonFX(22,new CANBus("drive train"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
+        //update: fixed, device id is what it should be according to tech binder
         shooterRollerMotor2.getConfigurator().apply(
             new TalonFXConfiguration()
             .withSlot0(
@@ -87,7 +90,9 @@ public class ShooterRoller extends SubsystemBase {
         angAccelerationSignal = shooterRollerMotor1.getAcceleration();
         supplyCurrentSignal = shooterRollerMotor1.getSupplyCurrent();
         statorCurrentSignal = shooterRollerMotor1.getStatorCurrent();
-
+        velocityInput = DogLog.tunable("shooterRoller / input velocity", 0.0, newVelocity -> {
+            shoot(newVelocity).schedule();
+        });
 
         shooterRollerMotor2.setControl(new Follower(shooterRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
         if (RobotBase.isSimulation()) {
@@ -95,10 +100,10 @@ public class ShooterRoller extends SubsystemBase {
         }
     }
     //makes the motor go
-    public Command shoot(){
+    public Command shoot(double targetVelocity){
         return startEnd(()->{
             //defines a local function to set motor voltage to make it go brrrrrrrrrrrrrrrrrrrrr
-            shooterRollerMotor1.setControl(new VelocityVoltage(1.0));
+            shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
 
         }, () -> {
             //defines a local function to stop motor

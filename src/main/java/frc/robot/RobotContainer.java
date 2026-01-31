@@ -38,7 +38,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 
     //return driveStraightAuto.getCommand();
-    return shooterRoller.shoot();
+    return shooterRoller.shoot(15);
   }
 
   public void latePeriodic() {
