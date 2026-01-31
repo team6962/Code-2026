@@ -24,9 +24,9 @@ public class ShooterHoodSim {
     public ShooterHoodSim(TalonFX motor) {
         motorSim = motor.getSimState();
         physicsSim = new SingleJointedArmSim(
-            DCMotor.getKrakenX60Foc(1),
-            42.0*1.0,
-            SingleJointedArmSim.estimateMOI(Inches.of(40.0).in(Meters), 4.54),
+            ShooterHoodConstants.MOTOR_PHYSICS,
+            ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio,
+            SingleJointedArmSim.estimateMOI(Inches.of(40.0).in(Meters), 4.54), //Change after MOI value is put into shooter hood constants
             Inches.of(40.0).in(Meters),
             (-Math.PI)/2,
             Math.PI/2,
@@ -50,12 +50,12 @@ public class ShooterHoodSim {
 
         motorSim.setRawRotorPosition(
             invert(position, false)
-                .times(42.0)
+                .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
         );
 
         motorSim.setRotorVelocity(
             invert(velocity, false)
-                .times(42.0)
+                .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
         );
     }
 
