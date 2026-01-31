@@ -97,10 +97,11 @@ public class AprilTagVision extends SubsystemBase {
         // Don't update rotation unless the conditions specified in vision constants are met
         boolean canUpdateRotation = true;
 
-        canUpdateRotation &= !visionConstants.RequireDisabledForHeadingUpdate
-            || RobotState.isDisabled();
-        canUpdateRotation &= measurement.getPhotonEstimate().targetsUsed.size()
-            >= visionConstants.MinTagsForHeadingUpdate;
+        canUpdateRotation &=
+            !visionConstants.RequireDisabledForHeadingUpdate || RobotState.isDisabled();
+        canUpdateRotation &=
+            measurement.getPhotonEstimate().targetsUsed.size()
+                >= visionConstants.MinTagsForHeadingUpdate;
 
         if (!canUpdateRotation) {
           measurement =
