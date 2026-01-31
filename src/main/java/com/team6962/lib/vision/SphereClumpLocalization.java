@@ -35,7 +35,6 @@ public class SphereClumpLocalization {
 
   public Translation2d getClumpPosition() {
     // TODO: Switch to getAllUnreadResults()
-    @SuppressWarnings("removal")
     PhotonPipelineResult result = camera.getLatestResult();
     if (!result.hasTargets()) return null;
 
