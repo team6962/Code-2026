@@ -17,7 +17,7 @@ public final class ShooterHoodConstants {
     public static final int MOTOR_CAN_ID = 20;
     public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1);
 
-    public static final double MOI = 141234;
+    public static final double MOI = 0.04942;
 
     public static final Angle MIN_ANGLE = Degrees.of(-90);
     public static final Angle MAX_ANGLE = Degrees.of(90);
@@ -33,23 +33,23 @@ public final class ShooterHoodConstants {
         )
         .withMotionMagic(
             new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(10)
-                .withMotionMagicAcceleration(5)
+                .withMotionMagicCruiseVelocity(1)
+                .withMotionMagicAcceleration(1)
                 .withMotionMagicJerk(0)
         )
         .withSlot0(
             new Slot0Configs()
-                .withKP(0.5)
-                .withKD(0.1)
-                .withKS(0.150)
-                .withKG(0.0)
-                .withKV(2.571)
-                .withKA(5)
+                .withKP(0)
+                .withKD(0)
+                .withKS(0)
+                .withKG(0.128)
+                .withKV(7.283)
+                .withKA(0.001)
                 .withGravityType(GravityTypeValue.Arm_Cosine)
         )
         .withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(200))
+                .withStatorCurrentLimit(Amps.of(60))
                 .withStatorCurrentLimitEnable(false)
                 .withSupplyCurrentLimit(Amps.of(60))
                 .withSupplyCurrentLimitEnable(true)

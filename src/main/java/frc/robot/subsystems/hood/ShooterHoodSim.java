@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -26,11 +28,11 @@ public class ShooterHoodSim {
         physicsSim = new SingleJointedArmSim(
             ShooterHoodConstants.MOTOR_PHYSICS,
             ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio,
-            SingleJointedArmSim.estimateMOI(Inches.of(40.0).in(Meters), 4.54), //Change after MOI value is put into shooter hood constants
-            Inches.of(40.0).in(Meters),
-            (-Math.PI)/2,
-            Math.PI/2,
-            false,
+            ShooterHoodConstants.MOI,
+            Inches.of(6.85).in(Meters),
+            ShooterHoodConstants.MIN_ANGLE.in(Radians),
+            ShooterHoodConstants.MAX_ANGLE.in(Radians),
+            true,
             0
         );
     }

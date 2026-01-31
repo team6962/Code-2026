@@ -1,9 +1,13 @@
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -72,11 +76,23 @@ public class ShooterHood extends SubsystemBase{
         }
 
         BaseStatusSignal.refreshAll(angVelocity, voltage, angAcceleration, angle, current);
-        DogLog.log("Hood Motor/Angle", getPosition());
+        DogLog.log("Hood Motor/Angle", getPosition().in(Degrees));
         DogLog.log("Hood Motor/Angular Velocity", getAngularVelocity());
         DogLog.log("Hood Motor/Angular Acceleration", getAngularAcceleration());
         DogLog.log("Hood Motor/Motor Voltage", getMotorVoltage());
         DogLog.log("Hood Motor/Current", getSupply());
+
+        LoggingUtil.log("Hood Motor/Control Request", hoodMotor.getAppliedControl());
+    }
+
+    public Angle clampPositionToSafeRange(Angle input) {
+        if (input.gt(ShooterHoodConstants.MAX_ANGLE)) {
+            return ShooterHoodConstants.MAX_ANGLE;
+        }
+        else if (input.lt(ShooterHoodConstants.MIN_ANGLE)) {
+            return ShooterHoodConstants.MIN_ANGLE;
+        }
+        return input;
     }
     /**
      * Gets Angular Velocity and Motor Voltage
@@ -107,9 +123,14 @@ public class ShooterHood extends SubsystemBase{
     }
 
     public Command moveTo(double radians) {
+        Angle clampedAngle = clampPositionToSafeRange(Radians.of(radians));
+
+        DogLog.log("Hood Motor/Target Angle", clampedAngle.in(Degrees));
+
         return startEnd(()->{
-        hoodMotor.setControl(new MotionMagicVoltage(radians/(Math.PI*2)));   
+        hoodMotor.setControl(new MotionMagicVoltage(clampedAngle));   
         }, ()->{
+            System.out.println(getPosition());
         hoodMotor.setControl(new MotionMagicVoltage(getPosition()));
         });
      }
