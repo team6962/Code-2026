@@ -25,7 +25,7 @@ public class TurretSim {
         physicsSim = new DCMotorSim( 
             LinearSystemId.createDCMotorSystem(
             DCMotor.getKrakenX60Foc(1),
-            0.000174, 42.0
+            0.09803, 34.5
             ),
         DCMotor.getKrakenX60Foc(1)
         );
@@ -47,10 +47,10 @@ public class TurretSim {
         physicsSim.update(0.02);
         motorSim.setRawRotorPosition(
             invert(position, false)
-            .times(42.0));
+            .times(34.5));
         motorSim.setRotorVelocity(
             invert(velocity, false)
-            .times(42.0));
+            .times(34.5));
     }
 
     /**

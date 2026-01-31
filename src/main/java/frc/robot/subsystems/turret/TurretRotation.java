@@ -58,14 +58,14 @@ public class TurretRotation extends SubsystemBase {
         config = new TalonFXConfiguration();
         config.Slot0.kP = 0.5;
         config.Slot0.kD = 0.1;
-        config.Slot0.kS = 0.150;
-        config.Slot0.kV = 2.571;
-        config.Slot0.kA = 0.030;
+        config.Slot0.kS = 0;
+        config.Slot0.kV = 0.681;
+        config.Slot0.kA = 0.0036;
 
-        config.MotionMagic.MotionMagicCruiseVelocity = 10;
-        config.MotionMagic.MotionMagicAcceleration = 5;
+        config.MotionMagic.MotionMagicCruiseVelocity = 1;
+        config.MotionMagic.MotionMagicAcceleration = 1;
        
-        config.Feedback.RotorToSensorRatio = 150.0 / 7.0;
+        config.Feedback.RotorToSensorRatio = 34.5;
 
         motor.getConfigurator().apply(config);
         angVelocitySignal = motor.getVelocity();
