@@ -38,13 +38,24 @@ public class TurretRotation extends SubsystemBase {
 
     /* Assigns StatusSignals to different methods part of the motor.get...() */
         private final DoubleSubscriber angleInput;
+
+        private final DoubleSubscriber kPInput;
+        private final DoubleSubscriber kDInput;
+        private final DoubleSubscriber kSInput;
+        private final DoubleSubscriber kVInput;
+        private final DoubleSubscriber kAInput;
+
+        private final DoubleSubscriber cruiseVelocityInput;
+        private final DoubleSubscriber accelerationInput;
+
+        private TalonFXConfiguration config;
+
 /**
 * Assignes the Status Signal variables to the different methods part of the motor.get...()
 */
     public TurretRotation() {
         motor = new TalonFX(2, new CANBus("drivetrain"));
-        TalonFXConfiguration config = new TalonFXConfiguration();
-
+        config = new TalonFXConfiguration();
         config.Slot0.kP = 0.5;
         config.Slot0.kD = 0.1;
         config.Slot0.kS = 0.150;
@@ -63,13 +74,60 @@ public class TurretRotation extends SubsystemBase {
         angAccelerationSignal = motor.getAcceleration();
         supplyCurrentSignal = motor.getSupplyCurrent();
 
+        // Tunable angle input, PID values, Motion Magic stuff
         angleInput = DogLog.tunable("Turret Rotation/Input Angle", 0.0, newAngle -> {
             moveTo(Radians.of(newAngle)).schedule();
+        });
+        
+        kPInput = DogLog.tunable("Turret Rotation/PID/kP", config.Slot0.kP, newKP -> {
+            updatePIDConfig();
+        });
+        
+        kDInput = DogLog.tunable("Turret Rotation/PID/kD", config.Slot0.kD, newKD -> {
+            updatePIDConfig();
+        });
+        
+        kSInput = DogLog.tunable("Turret Rotation/Feedforward/kS", config.Slot0.kS, newKS -> {
+            updatePIDConfig();
+        });
+        
+        kVInput = DogLog.tunable("Turret Rotation/Feedforward/kV", config.Slot0.kV, newKV -> {
+            updatePIDConfig();
+        });
+        
+        kAInput = DogLog.tunable("Turret Rotation/Feedforward/kA", config.Slot0.kA, newKA -> {
+            updatePIDConfig();
+        });
+        
+        cruiseVelocityInput = DogLog.tunable("Turret Rotation/Motion Magic/Cruise Velocity", 
+            config.MotionMagic.MotionMagicCruiseVelocity, newVel -> {
+            updatePIDConfig();
+        });
+        
+        accelerationInput = DogLog.tunable("Turret Rotation/Motion Magic/Acceleration", 
+            config.MotionMagic.MotionMagicAcceleration, newAccel -> {
+            updatePIDConfig();
         });
 
         if (RobotBase.isSimulation()) {
             simulation = new TurretSim(motor);
         }
+    }
+    
+    /**
+    * Updates motor configuration with current tunable values
+    */
+    private void updatePIDConfig() {
+        config.Slot0.kP = kPInput.get();
+        config.Slot0.kD = kDInput.get();
+        config.Slot0.kS = kSInput.get();
+        config.Slot0.kV = kVInput.get();
+        config.Slot0.kA = kAInput.get();
+        
+        config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocityInput.get();
+        config.MotionMagic.MotionMagicAcceleration = accelerationInput.get();
+        
+        motor.getConfigurator().apply(config);
     }
 
     @Override
