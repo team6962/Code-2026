@@ -16,7 +16,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -31,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
+
   private TalonFX motor;
 
   private StatusSignal<Angle> angleSignal;
@@ -50,7 +50,7 @@ public class Intake extends SubsystemBase {
     configuration.CurrentLimits.StatorCurrentLimitEnable = false;
     configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
     configuration.Feedback.RotorToSensorRatio = 5.0 / 0.05;
-    configuration.Slot0.kP = 0.36;
+    configuration.Slot0.kP = 0.35;
     motor.getConfigurator().apply(configuration);
 
     angleSignal = motor.getPosition();
@@ -62,35 +62,46 @@ public class Intake extends SubsystemBase {
     supplyCurrentSignal = motor.getSupplyCurrent();
 
     if (RobotBase.isSimulation()) {
-        simulation = new IntakeSim(motor);
+      simulation = new IntakeSim(motor);
     }
   }
 
   public Command extend() {
-    return startEnd(() -> {
-      motor.setControl(new PositionVoltage(1));
-    }, () -> {
-      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-    });
+    return startEnd(
+      () -> {
+        motor.setControl(new PositionVoltage(1));
+      },
+      () -> {
+        motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+      }
+    );
   }
 
   public Command retract() {
-    return startEnd(() -> {
-      motor.setControl(new PositionVoltage(0));
-    }, () -> {
-      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-    });
+    return startEnd(
+      () -> {
+        motor.setControl(new PositionVoltage(0));
+      },
+      () -> {
+        motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+      }
+    );
   }
 
   /**
    * Finds the linear velocity of the end of the intake. Positive values mean
    * that the intake is extending outwards, and negative values mean that the intake
    * is retracting inwards.
-   * 
+   *
    * @return The linear velocity as a LinearVelocity object.
    */
   public LinearVelocity getVelocity() {
-    return MetersPerSecond.of(BaseStatusSignal.getLatencyCompensatedValue(angularVelocitySignal, angularAccelerationSignal).in(RotationsPerSecond));
+    return MetersPerSecond.of(
+      BaseStatusSignal.getLatencyCompensatedValue(
+        angularVelocitySignal,
+        angularAccelerationSignal
+      ).in(RotationsPerSecond)
+    );
   }
 
   /**
@@ -98,16 +109,23 @@ public class Intake extends SubsystemBase {
    * @return The position as a Distance object.
    */
   public Distance getPosition() {
-  return Meters.of(BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal).in(Rotations));
+    return Meters.of(
+      BaseStatusSignal.getLatencyCompensatedValue(
+        angleSignal,
+        angularVelocitySignal
+      ).in(Rotations)
+    );
   }
 
   /**
    * Finds the linear acceleration of the end of the intake.
-   * 
+   *
    * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
-    return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
+    return MetersPerSecondPerSecond.of(
+      angularAccelerationSignal.getValueAsDouble()
+    );
   }
 
   /**
@@ -140,7 +158,14 @@ public class Intake extends SubsystemBase {
       simulation.update();
     }
 
-    BaseStatusSignal.refreshAll(angularVelocitySignal, voltageSignal, statorCurrentSignal, supplyCurrentSignal, angleSignal, angularAccelerationSignal);
+    BaseStatusSignal.refreshAll(
+      angularVelocitySignal,
+      voltageSignal,
+      statorCurrentSignal,
+      supplyCurrentSignal,
+      angleSignal,
+      angularAccelerationSignal
+    );
 
     DogLog.log("intake/position", getPosition());
     DogLog.log("intake/velocity", getVelocity());
