@@ -8,10 +8,7 @@ import static edu.wpi.first.units.Units.Radians;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.turret.TurretRotation;
@@ -32,7 +29,7 @@ public class RobotContainer {
   }
 
   public CommandSwerveDrive getSwerveDrive() {
-   return swerveDrive;
+    return swerveDrive;
   }
 
   public Command getAutonomousCommand() {
@@ -40,6 +37,6 @@ public class RobotContainer {
   }
 
   public void latePeriodic() {
-    // swerveDrive.latePeriodic();
+    swerveDrive.latePeriodic();
   }
 }
