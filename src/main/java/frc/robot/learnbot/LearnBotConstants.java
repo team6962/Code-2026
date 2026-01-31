@@ -166,8 +166,8 @@ public class LearnBotConstants {
                 new Transform3d(
                     new Translation3d(
                         Inches.of(1).in(Meters),
-                        Inches.of(-14).in(Meters),
-                        Inches.of(4.5).in(Meters)),
+                        Inches.of(-15).in(Meters),
+                        Inches.of(2.75).in(Meters)),
                     new Rotation3d(0, 0, -Math.PI / 2))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
