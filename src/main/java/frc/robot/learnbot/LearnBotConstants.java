@@ -35,6 +35,8 @@ import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
+import com.team6962.lib.vision.SphereCameraConstants;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -180,5 +182,26 @@ public class LearnBotConstants {
                 .setAvgLatencyMs(10)
                 .setLatencyStdDevMs(5))
         .withDrawWireframes(true);
+  }
+
+  public static SphereCameraConstants getSphereCameraConstants() {
+    return new SphereCameraConstants("SphereCamera")
+        .withClassId(1)
+        .withFOVHeight(Rotation2d.fromDegrees(48.9))
+        .withFOVWidth(Rotation2d.fromDegrees(70))
+        .withCameraHeightPixels(800)
+        .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
+        .withSphereTolerance(0.25)
+        .withSphereDiameter(Inches.of(5.91))
+        .withMaxTargets(50)
+        .withRobotToCameraTransform(
+            new Transform3d(
+                new Translation3d(
+                    Inches.of(1.0).in(Meters),
+                    Inches.of(-15.0).in(Meters),
+                    Inches.of(2.75).in(Meters)),
+                new Rotation3d(
+                    Math.PI, 0, -Math.PI / 2
+                )));
   }
 }

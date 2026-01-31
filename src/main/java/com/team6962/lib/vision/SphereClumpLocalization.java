@@ -4,25 +4,38 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
-import com.team6962.lib.swerve.MotionSwerveDrive;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
-public class FuelLocalization {
+import com.team6962.lib.swerve.MotionSwerveDrive;
 
-  private static final double MAX_FOV_RATIO = Math.PI / 2;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 
-  public static Translation2d getClumpPosition(
-      PhotonCamera camera, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot) {
+public class SphereClumpLocalization {
+  private MotionSwerveDrive swerveDrive;
+  private PhotonCamera camera;
+  private SphereCameraConstants cameraConstants;
+
+  public SphereClumpLocalization(MotionSwerveDrive swerveDrive, SphereCameraConstants cameraConstants) {
+    this.swerveDrive = swerveDrive;
+    this.camera = new PhotonCamera(cameraConstants.Name);
+    this.cameraConstants = cameraConstants;
+  }
+
+  public Translation2d getClumpPosition() {
+    // TODO: Switch to getAllUnreadResults()
+    @SuppressWarnings("removal")
     PhotonPipelineResult result = camera.getLatestResult();
     if (!result.hasTargets()) return null;
 
@@ -33,14 +46,14 @@ public class FuelLocalization {
     List<Translation2d> fuelLocations = new ArrayList<>();
     for (PhotonTrackedTarget target : targets) {
       if (target == null) continue;
-      Translation2d fuelLocation = getFuelPosition(target, swerveDrive, cameraToRobot);
+      Translation2d fuelLocation = getFuelPosition(target);
       if (fuelLocation == null) continue;
       fuelLocations.add(fuelLocation);
     }
-    for (int i = 0; i < Math.min(fuelLocations.size(), FuelCameraConstants.MAX_TARGETS); i++) {
+    for (int i = 0; i < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); i++) {
       double totalDistance = 0;
       Translation2d thisFuelPosition = fuelLocations.get(i);
-      for (int j = 0; j < Math.min(fuelLocations.size(), FuelCameraConstants.MAX_TARGETS); j++) {
+      for (int j = 0; j < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); j++) {
         if (i == j) continue;
 
         Translation2d otherFuelPosition = fuelLocations.get(j);
@@ -57,15 +70,12 @@ public class FuelLocalization {
     return bestPosition;
   }
 
-  public static Translation2d getFuelPosition(
-      PhotonTrackedTarget target, MotionSwerveDrive swerveDrive, Translation3d cameraToRobot) {
-
+  public Translation2d getFuelPosition(PhotonTrackedTarget target) {
     if (target == null || target.getDetectedObjectClassID() != 1)
       return null; // Check if detection is valid
 
-    Translation2d fuelPosition = new Translation2d(0, 0);
-
-    Angle horizontalOffset = Degrees.of(target.getYaw());
+    Angle yaw = Degrees.of(target.getYaw());
+    Angle pitch = Degrees.of(target.getPitch());
 
     double pixelHeight = getTargetHeight(target);
     double pixelWidth = getTargetWidth(target);
@@ -74,25 +84,24 @@ public class FuelLocalization {
     if (!isValidSphericalObject(pixelHeight, pixelWidth, pixelRatio)) return null;
 
     double angularHeight =
-        FuelCameraConstants.FOV_HEIGHT.getRadians()
-            * (pixelHeight / FuelCameraConstants.FUEL_CAMERA_HEIGHT_PIXELS);
-    if (angularHeight > MAX_FOV_RATIO) return null;
+        cameraConstants.FOVHeight.getRadians()
+            * (pixelHeight / cameraConstants.CameraHeightPixels);
+    if (angularHeight > Math.PI / 2) return null;
 
     Distance distance = calculateDistance(angularHeight);
-    if (distance.gt(FuelCameraConstants.MAX_DETECTION_RANGE)) return null;
+    if (distance.gt(cameraConstants.MaxDetectionRange)) return null;
 
-    Translation2d relativePosition =
-        calculateRelativePosition(distance, horizontalOffset, cameraToRobot);
+    Transform3d cameraRelativePosition = new Transform3d(new Translation3d(), new Rotation3d(0, pitch.in(Radians), yaw.in(Radians)))
+      .plus(new Transform3d(new Translation3d(distance.in(Meters), 0, 0), new Rotation3d()));
+    Transform3d robotRelativePosition = cameraConstants.RobotToCameraTransform.plus(cameraRelativePosition);
+    Pose3d robotPose = swerveDrive.getPosition3d();
+    Pose3d fieldRelativePosition = robotPose.plus(robotRelativePosition);
 
-    Pose2d robotPosition = swerveDrive.getPosition2d();
-    fuelPosition =
-        robotPosition.getTranslation().plus(relativePosition.rotateBy(robotPosition.getRotation()));
-
-    return fuelPosition;
+    return fieldRelativePosition.getTranslation().toTranslation2d();
   }
 
   // 0.0 is the NaN/Null value here
-  private static double getTargetHeight(PhotonTrackedTarget target) {
+  private double getTargetHeight(PhotonTrackedTarget target) {
     List<TargetCorner> corners = target.getMinAreaRectCorners();
     if (corners.size() < 4) return 0.0; // Ensure there are enough corners
 
@@ -105,7 +114,7 @@ public class FuelLocalization {
   }
 
   // 0.0 is the NaN/Null value here
-  private static double getTargetWidth(PhotonTrackedTarget target) {
+  private double getTargetWidth(PhotonTrackedTarget target) {
     List<TargetCorner> corners = target.getMinAreaRectCorners();
     if (corners.size() < 4) return 0.0; // Ensure there are enough corners
 
@@ -117,29 +126,21 @@ public class FuelLocalization {
     return Double.isNaN(width) ? 0.0 : width; // Ensure NaN is handled
   }
 
-  private static boolean isValidSphericalObject(
+  private boolean isValidSphericalObject(
       double pixelHeight, double pixelWidth, double pixelRatio) {
     if (pixelHeight <= 0 || pixelWidth <= 0) return false;
-    return Math.abs(pixelRatio - 1.0) <= FuelCameraConstants.SPHERE_TOLERANCE;
+    return Math.abs(pixelRatio - 1.0) <= cameraConstants.SphereTolerance;
   }
 
-  private static Distance calculateDistance(double targetFOVRatio) {
+  private Distance calculateDistance(double targetFOVRatio) {
     Distance absoluteDistance =
-        Meters.of((FuelCameraConstants.FUEL_DIAMETER.in(Meters) / 2) / Math.tan(targetFOVRatio));
+        Meters.of((cameraConstants.SphereDiameter.in(Meters) / 2) / Math.tan(targetFOVRatio));
     return Meters.of(
         Math.sqrt(
             Math.pow(absoluteDistance.in(Meters), 2)
                 - Math.pow(
-                    Meters.of(FuelCameraConstants.FUEL_CAMERA_POSITION.getY()).in(Meters)
-                        - (FuelCameraConstants.FUEL_DIAMETER.in(Meters)) / 2,
+                    Meters.of(cameraConstants.RobotToCameraTransform.getY()).in(Meters)
+                        - (cameraConstants.SphereDiameter.in(Meters)) / 2,
                     2)));
-  }
-
-  private static Translation2d calculateRelativePosition(
-      Distance distance, Angle horizontalOffset, Translation3d cameraToRobot) {
-    return new Translation2d(
-            distance.in(Meters) * Math.cos(horizontalOffset.in(Radians)),
-            -distance.in(Meters) * Math.sin(horizontalOffset.in(Radians)))
-        .plus(cameraToRobot.toTranslation2d());
   }
 }
