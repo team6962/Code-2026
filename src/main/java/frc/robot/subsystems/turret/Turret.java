@@ -21,10 +21,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/* This defines the Shooter Roller as a new Subsystem called motor.
- * The following StatusSignals represent certain stats of the motor */
+/** This defines the Shooter Roller as a new Subsystem called motor.
+The following StatusSignals represent certain stats of the motor */
 
-public class TurretRotation extends SubsystemBase {
+public class Turret extends SubsystemBase {
   private TalonFX motor;
   private StatusSignal<AngularVelocity> angVelocitySignal;
   private StatusSignal<Voltage> voltageSignal;
@@ -47,21 +47,23 @@ public class TurretRotation extends SubsystemBase {
 
   private TalonFXConfiguration config;
 
-  /** Assignes the Status Signal variables to the different methods part of the motor.get...() */
-  public TurretRotation() {
-    motor = new TalonFX(24, new CANBus("subsystems"));
+  /** Assigns Status Signal variables to the different methods part of the motor.get() */
+  public Turret() {
+    //Assigns PID values and sets motor config
+    motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
     config = new TalonFXConfiguration();
-    config.Slot0.kP = 0.7;
-    config.Slot0.kD = 0.025;
-    config.Slot0.kS = 0;
-    config.Slot0.kV = 4.2827;
-    config.Slot0.kA = 0;
+    config.Slot0.kP = TurretConstants.kP;
+    config.Slot0.kD = TurretConstants.kD;
+    config.Slot0.kS = TurretConstants.kS;
+    config.Slot0.kV = TurretConstants.kV;
+    config.Slot0.kA = TurretConstants.kA;
 
-    config.MotionMagic.MotionMagicCruiseVelocity = 1;
-    config.MotionMagic.MotionMagicAcceleration = 1;
+    // Assign motion magic constants
+    config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
+    config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
+    config.Feedback.SensorToMechanismRatio = TurretConstants.SENSOR_TO_MECHANISM_RATIO;
 
-    config.Feedback.SensorToMechanismRatio = 34.5;
-
+    // Apply motor configs and assign velocity signals
     motor.getConfigurator().apply(config);
     angVelocitySignal = motor.getVelocity();
     voltageSignal = motor.getMotorVoltage();
@@ -72,15 +74,15 @@ public class TurretRotation extends SubsystemBase {
     // Tunable angle input, PID values, Motion Magic stuff
     angleInput =
         DogLog.tunable(
-            "Turret Rotation/Input Angle",
-            0.0,
+            TurretConstants.TUNABLE_ANGLE_KEY,
+            TurretConstants.DEFAULT_ANGLE_INPUT,
             newAngle -> {
               moveTo(Radians.of(newAngle)).schedule();
             });
 
     kPInput =
         DogLog.tunable(
-            "Turret Rotation/PID/kP",
+            TurretConstants.TUNABLE_KP_KEY,
             config.Slot0.kP,
             newKP -> {
               updatePIDConfig();
@@ -88,7 +90,7 @@ public class TurretRotation extends SubsystemBase {
 
     kDInput =
         DogLog.tunable(
-            "Turret Rotation/PID/kD",
+            TurretConstants.TUNABLE_KD_KEY,
             config.Slot0.kD,
             newKD -> {
               updatePIDConfig();
@@ -96,7 +98,7 @@ public class TurretRotation extends SubsystemBase {
 
     kSInput =
         DogLog.tunable(
-            "Turret Rotation/Feedforward/kS",
+            TurretConstants.TUNABLE_KS_KEY,
             config.Slot0.kS,
             newKS -> {
               updatePIDConfig();
@@ -104,7 +106,7 @@ public class TurretRotation extends SubsystemBase {
 
     kVInput =
         DogLog.tunable(
-            "Turret Rotation/Feedforward/kV",
+            TurretConstants.TUNABLE_KV_KEY,
             config.Slot0.kV,
             newKV -> {
               updatePIDConfig();
@@ -112,7 +114,7 @@ public class TurretRotation extends SubsystemBase {
 
     kAInput =
         DogLog.tunable(
-            "Turret Rotation/Feedforward/kA",
+            TurretConstants.TUNABLE_KA_KEY,
             config.Slot0.kA,
             newKA -> {
               updatePIDConfig();
@@ -120,7 +122,7 @@ public class TurretRotation extends SubsystemBase {
 
     cruiseVelocityInput =
         DogLog.tunable(
-            "Turret Rotation/Motion Magic/Cruise Velocity",
+            TurretConstants.TUNABLE_CRUISE_VELOCITY_KEY,
             config.MotionMagic.MotionMagicCruiseVelocity,
             newVel -> {
               updatePIDConfig();
@@ -128,7 +130,7 @@ public class TurretRotation extends SubsystemBase {
 
     accelerationInput =
         DogLog.tunable(
-            "Turret Rotation/Motion Magic/Acceleration",
+            TurretConstants.TUNABLE_ACCELERATION_KEY,
             config.MotionMagic.MotionMagicAcceleration,
             newAccel -> {
               updatePIDConfig();
@@ -155,22 +157,23 @@ public class TurretRotation extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Updates simulation each periodic if a simulation exists
     if (simulation != null) {
       simulation.update();
     }
 
-    /* Motor Statistics are logged as Turret Rotation */
-    BaseStatusSignal.refreshAll(
-        angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
-    DogLog.log("Turret Rotation/Angular Velocity", getVelocity());
-    DogLog.log("Turret Rotation/Motor Voltage", getMotorVoltage());
-    DogLog.log("Turret Rotation/Motor Position angle", getPosition());
-    DogLog.log("Turret Rotation/Angular Acceleration", getAcceleration());
-    DogLog.log("Turret Rotation/Angular Supply Current", getSupplyCurrent());
+    /* Motor Statistics are refreshed logged as Turret Rotation each periodic */
+    BaseStatusSignal.refreshAll(angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
+    DogLog.log(TurretConstants.LOG_ANGULAR_VELOCITY, getVelocity());
+    DogLog.log(TurretConstants.LOG_MOTOR_VOLTAGE, getMotorVoltage());
+    DogLog.log(TurretConstants.LOG_MOTOR_POSITION, getPosition());
+    DogLog.log(TurretConstants.LOG_ANGULAR_ACCELERATION, getAcceleration());
+    DogLog.log(TurretConstants.LOG_SUPPLY_CURRENT, getSupplyCurrent());
 
-    LoggingUtil.log("Turret Rotation/Control Request", motor.getAppliedControl());
+    LoggingUtil.log(TurretConstants.LOG_CONTROL_REQUEST, motor.getAppliedControl());
   }
 
+  /* Getter methods for logged values */
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
   }
@@ -192,13 +195,14 @@ public class TurretRotation extends SubsystemBase {
         BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angVelocitySignal));
   }
 
-  /* Moves the motor to the target angle */
+  /* Moves the motor to the left for testing */
   public Command moveToleft() {
     return startEnd(
         () -> motor.setControl(new MotionMagicVoltage(1)),
         () -> motor.setControl(new MotionMagicVoltage(0)));
   }
 
+  /* Moves the motor based on an angle */
   public Command moveTo(Angle targetAngle) {
     return startEnd(
         () -> {
@@ -209,6 +213,7 @@ public class TurretRotation extends SubsystemBase {
         });
   }
 
+  /* Moves the motor based on a double */
   public Command moveTo(double targetAngle) {
     return startEnd(
         () -> {
