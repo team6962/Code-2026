@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
@@ -32,7 +33,15 @@ import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.config.StructureConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
+import com.team6962.lib.vision.AprilTagCameraConstants;
+import com.team6962.lib.vision.AprilTagVisionConstants;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class LearnBotConstants {
   public static DrivetrainConstants getDrivetrainConstants() {
@@ -147,5 +156,29 @@ public class LearnBotConstants {
                 .withSimulatedMotor(DCMotor.getKrakenX60(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184)))
         .withSteerEncoder(new SteerEncoderConstants().withDataFusion(DataFusionMethod.Remote));
+  }
+
+  public static AprilTagVisionConstants getAprilTagVisionConstants() {
+    return new AprilTagVisionConstants()
+        .withCameras(
+            new AprilTagCameraConstants(
+                "Color-2",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(1).in(Meters),
+                        Inches.of(-15).in(Meters),
+                        Inches.of(2.75).in(Meters)),
+                    new Rotation3d(Math.PI, 0, -Math.PI / 2))))
+        // Note that standard deviations are not fully tuned
+        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        .withCameraSimProperties(
+            new SimCameraProperties()
+                .setCalibration(1280, 800, Rotation2d.fromDegrees(70))
+                .setCalibError(0.29, 0.08)
+                .setFPS(30)
+                .setAvgLatencyMs(10)
+                .setLatencyStdDevMs(5))
+        .withDrawWireframes(true);
   }
 }

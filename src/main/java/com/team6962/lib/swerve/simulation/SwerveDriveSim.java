@@ -23,6 +23,9 @@ public class SwerveDriveSim {
   /** Simulations for each swerve module. */
   private SwerveModuleSim[] moduleSims;
 
+  /** Simulation for the odometry. */
+  private OdometrySim odometrySim;
+
   /** Simulation for the gyroscope. */
   private GyroscopeSim gyroscopeSim;
 
@@ -39,12 +42,18 @@ public class SwerveDriveSim {
         Arrays.stream(modules)
             .map(module -> new SwerveModuleSim(module))
             .toArray(SwerveModuleSim[]::new);
-    this.gyroscopeSim = new GyroscopeSim(constants, gyroscope, moduleSims);
+    this.odometrySim = new OdometrySim(constants, moduleSims);
+    this.gyroscopeSim = new GyroscopeSim(constants, gyroscope, odometrySim);
   }
 
   /** Returns the array of module simulations. */
   public SwerveModuleSim[] getModules() {
     return moduleSims;
+  }
+
+  /** Returns the odometry simulation. */
+  public OdometrySim getOdometry() {
+    return odometrySim;
   }
 
   /** Returns the gyroscope simulation. */
@@ -62,6 +71,9 @@ public class SwerveDriveSim {
     for (SwerveModuleSim moduleSim : moduleSims) {
       moduleSim.update(deltaTimeSeconds);
     }
+
+    // Update odometry simulation
+    odometrySim.update(deltaTimeSeconds);
 
     // Update gyroscope simulation
     gyroscopeSim.update(deltaTimeSeconds);
