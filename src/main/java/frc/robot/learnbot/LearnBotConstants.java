@@ -185,8 +185,8 @@ public class LearnBotConstants {
   }
 
   public static SphereCameraConstants getSphereCameraConstants() {
-    return new SphereCameraConstants("SphereCamera")
-        .withClassId(1)
+    return new SphereCameraConstants("Color-2")
+        .withClassId(0)
         .withFOVHeight(Rotation2d.fromDegrees(48.9))
         .withFOVWidth(Rotation2d.fromDegrees(70))
         .withCameraHeightPixels(800)

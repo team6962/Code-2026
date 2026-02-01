@@ -36,11 +36,12 @@ public class SphereClumpLocalization extends SubsystemBase {
   }
   @Override
   public void periodic() {
-      DogLog.log("vision/clump-translation", getClumpPosition());
+      DogLog.log("Vision/clump-translation", getClumpPosition());
   }
   public Translation2d getClumpPosition() {
     // TODO: Switch to getAllUnreadResults()
     PhotonPipelineResult result = camera.getLatestResult();
+    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/hasTargets", result.hasTargets());
     if (!result.hasTargets()) return null;
 
     Translation2d bestPosition = null;
@@ -54,9 +55,10 @@ public class SphereClumpLocalization extends SubsystemBase {
       Translation2d fuelLocation = getFuelPosition(target);
       if (fuelLocation == null) continue;
       fuelLocations.add(fuelLocation);
-      DogLog.log("vision/fuel-location/" + fuelIndex, fuelLocation);
+      DogLog.log("Vision/fuel-location/" + fuelIndex, fuelLocation);
       fuelIndex++;
     }
+    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/sphereCount", fuelIndex);
     for (int i = 0; i < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); i++) {
       double totalDistance = 0;
       Translation2d thisFuelPosition = fuelLocations.get(i);
@@ -78,7 +80,7 @@ public class SphereClumpLocalization extends SubsystemBase {
   }
 
   public Translation2d getFuelPosition(PhotonTrackedTarget target) {
-    if (target == null || target.getDetectedObjectClassID() != 1)
+    if (target == null || target.getDetectedObjectClassID() != cameraConstants.ClassId)
       return null; // Check if detection is valid
 
     Angle yaw = Degrees.of(target.getYaw());
