@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
@@ -162,7 +163,7 @@ public class SphereClumpLocalization extends SubsystemBase {
     if (angularHeight > Math.PI / 2) return null;
 
     // Estimate distance from the camera to the sphere using angular size and known diameter
-    Distance distance = calculateDistance(angularHeight);
+    Distance distance = calculateDistance(target);
     if (distance.gt(cameraConstants.MaxDetectionRange)) return null;
 
     /*
@@ -240,27 +241,39 @@ public class SphereClumpLocalization extends SubsystemBase {
   }
 
   /**
-   * Estimate the distance to the sphere from its apparent angular height in the camera.
+   * Estimate the planar distance from the robot to the detected sphere center.
    *
-   * Calculation notes:
-   * - The code computes absoluteDistance using SphereDiameter/2 divided
-   *   by tan(angularHeight). This effectively treats angularHeight as the angle between the camera
-   *   centerline and the sphere top/bottom (geometry approximation).
-   * - Then it corrects for the camera's vertical offset from the sphere's center (robot->camera Y)
-   *   and computes the horizontal distance via Pythagoras.
+   * This method:
+   * - Calls PhotonUtils.calculateDistanceToTargetMeters(...) to compute the straight-line
+   *   distance from the camera to the target center using:
+   *     - camera height above the robot reference (RobotToCameraTransform.getZ())
+   *     - target height above the robot reference (half the sphere diameter)
+   *     - camera pitch (rotation about Y from RobotToCameraTransform)
+   *     - measured target pitch from PhotonVision (target.getPitch())
+   * - Converts that straight-line distance into a 2D camera-relative translation using
+   *   PhotonUtils.estimateCameraToTargetTranslation(distanceMeters, yaw), which uses the
+   *   reported yaw to produce an (x,y) translation in the camera plane.
+   * - Adds the camera's XY translation (RobotToCameraTransform translation) to obtain a
+   *   robot-relative 2D translation to the target.
+   * - Returns the planar norm of that robot-relative translation as a Distance.
    *
-   * @param angularHeight angular height (radians)
-   * @return Distance object representing the computed range
+   * @param target PhotonTrackedTarget used to obtain measured pitch/yaw
+   * @return planar Distance from robot to sphere center (meters)
    */
-  private Distance calculateDistance(double angularHeight) {
-    Distance absoluteDistance =
-        Meters.of((cameraConstants.SphereDiameter.in(Meters) / 2) / Math.tan(angularHeight));
-    return Meters.of(
-        Math.sqrt(
-            Math.pow(absoluteDistance.in(Meters), 2)
-                - Math.pow(
-                    Meters.of(cameraConstants.RobotToCameraTransform.getY()).in(Meters)
-                        - (cameraConstants.SphereDiameter.in(Meters)) / 2,
-                    2)));
+  private Distance calculateDistance(PhotonTrackedTarget target) {
+    double pitchRadians = Math.toRadians(target.getPitch());
+    double distanceMeters = PhotonUtils.calculateDistanceToTargetMeters(
+        cameraConstants.RobotToCameraTransform.getZ(),
+        cameraConstants.SphereDiameter.in(Meters) / 2.0,
+        cameraConstants.RobotToCameraTransform.getRotation().getY(),
+        pitchRadians
+    );
+
+    Translation2d robotToTargetTranslation = PhotonUtils.estimateCameraToTargetTranslation(
+        distanceMeters,
+        Rotation2d.fromDegrees(target.getYaw())
+    ).plus(cameraConstants.RobotToCameraTransform.getTranslation().toTranslation2d());
+
+    return Meters.of(robotToTargetTranslation.getNorm());
   }
 }
