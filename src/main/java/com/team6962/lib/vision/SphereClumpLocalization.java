@@ -15,7 +15,9 @@ import org.photonvision.targeting.TargetCorner;
 import com.team6962.lib.swerve.MotionSwerveDrive;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,7 +38,11 @@ public class SphereClumpLocalization extends SubsystemBase {
   }
   @Override
   public void periodic() {
-      DogLog.log("Vision/clump-translation", getClumpPosition());
+    Translation2d clump = getClumpPosition();
+    
+    if (clump != null) {
+      swerveDrive.getFieldLogger().getField().getObject("Clump").setPose(new Pose2d(clump, new Rotation2d()));
+    }
   }
   public Translation2d getClumpPosition() {
     // TODO: Switch to getAllUnreadResults()
@@ -48,38 +54,39 @@ public class SphereClumpLocalization extends SubsystemBase {
     double lowestTotalDistance = Double.MAX_VALUE;
 
     List<PhotonTrackedTarget> targets = result.getTargets();
-    List<Translation2d> fuelLocations = new ArrayList<>();
-    int fuelIndex = 0;
+    List<Translation2d> sphereLocations = new ArrayList<>();
+    int sphereIndex = 0;
     for (PhotonTrackedTarget target : targets) {
       if (target == null) continue;
-      Translation2d fuelLocation = getFuelPosition(target);
-      if (fuelLocation == null) continue;
-      fuelLocations.add(fuelLocation);
-      DogLog.log("Vision/fuel-location/" + fuelIndex, fuelLocation);
-      fuelIndex++;
+      Translation2d sphereLocation = getSpherePosition(target);
+      if (sphereLocation == null) continue;
+      sphereLocations.add(sphereLocation);
+      DogLog.log("Vision/sphere-location/" + sphereIndex, sphereLocation);
+      sphereIndex++;
     }
-    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/sphereCount", fuelIndex);
-    for (int i = 0; i < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); i++) {
+    swerveDrive.getFieldLogger().getField().getObject("Sphere").setPoses(sphereLocations.stream().map(t -> new Pose2d(t, new Rotation2d())).toList());
+    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/sphereCount", sphereIndex);
+    for (int i = 0; i < Math.min(sphereLocations.size(), cameraConstants.MaxTargets); i++) {
       double totalDistance = 0;
-      Translation2d thisFuelPosition = fuelLocations.get(i);
-      for (int j = 0; j < Math.min(fuelLocations.size(), cameraConstants.MaxTargets); j++) {
+      Translation2d thisSpherePosition = sphereLocations.get(i);
+      for (int j = 0; j < Math.min(sphereLocations.size(), cameraConstants.MaxTargets); j++) {
         if (i == j) continue;
 
-        Translation2d otherFuelPosition = fuelLocations.get(j);
-        if (otherFuelPosition != null) {
-          double fuelDistance = thisFuelPosition.getDistance(otherFuelPosition);
-          totalDistance = totalDistance + fuelDistance;
+        Translation2d otherSpherePosition = sphereLocations.get(j);
+        if (otherSpherePosition != null) {
+          double sphereDistance = thisSpherePosition.getDistance(otherSpherePosition);
+          totalDistance = totalDistance + sphereDistance;
         }
       }
       if (totalDistance < lowestTotalDistance) {
         lowestTotalDistance = totalDistance;
-        bestPosition = thisFuelPosition;
+        bestPosition = thisSpherePosition;
       }
     }
     return bestPosition;
   }
 
-  public Translation2d getFuelPosition(PhotonTrackedTarget target) {
+  public Translation2d getSpherePosition(PhotonTrackedTarget target) {
     if (target == null || target.getDetectedObjectClassID() != cameraConstants.ClassId)
       return null; // Check if detection is valid
 

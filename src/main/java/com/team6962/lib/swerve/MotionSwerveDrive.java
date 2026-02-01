@@ -215,6 +215,10 @@ public class MotionSwerveDrive implements AutoCloseable {
     controlLoop.close();
   }
 
+  public FieldLogger getFieldLogger() {
+    return fieldLogger;
+  }
+
   /**
    * Gets the drivetrain constants used to configure this swerve drive's behavior.
    *

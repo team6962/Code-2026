@@ -89,4 +89,8 @@ public class FieldLogger implements SwerveComponent {
 
     field.getObject("Swerve Modules").setPoses(modulePoses);
   }
+
+  public Field2d getField() {
+    return field;
+  }
 }
