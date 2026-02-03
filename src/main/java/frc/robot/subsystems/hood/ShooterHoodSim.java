@@ -1,23 +1,19 @@
 package frc.robot.subsystems.hood;
 
-import com.ctre.phoenix6.sim.TalonFXSimState;
-
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class ShooterHoodSim {
     private TalonFXSimState motorSim;
@@ -28,8 +24,8 @@ public class ShooterHoodSim {
         physicsSim = new SingleJointedArmSim(
             ShooterHoodConstants.MOTOR_PHYSICS,
             ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio,
-            ShooterHoodConstants.MOI,
-            Inches.of(6.85).in(Meters),
+            ShooterHoodConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
+            ShooterHoodConstants.ARM_LENGTH.in(Meters),
             ShooterHoodConstants.MIN_ANGLE.in(Radians),
             ShooterHoodConstants.MAX_ANGLE.in(Radians),
             true,
@@ -59,6 +55,13 @@ public class ShooterHoodSim {
             invert(velocity, false)
                 .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
         );
+
+        motorSim.setRotorAcceleration(
+            invert(acceleration, false)
+                .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
+        );
+
+        lastVelocity = velocity;
     }
 
     private static double invert(double value, boolean shouldBeInverted) {
@@ -71,5 +74,9 @@ public class ShooterHoodSim {
 
     private static AngularVelocity invert(AngularVelocity velocity, boolean shouldBeInverted) {
         return shouldBeInverted ? velocity.unaryMinus() : velocity;
+    }
+
+    private static AngularAcceleration invert(AngularAcceleration acceleration, boolean shouldBeInverted) {
+        return shouldBeInverted ? acceleration.unaryMinus() : acceleration;
     }
 }   
