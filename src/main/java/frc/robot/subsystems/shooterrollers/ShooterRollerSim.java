@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ShooterRollerSim {
     private TalonFXSimState motorSim;
     private DCMotorSim physicsSim;
+    double gearing = 4/3;
     public ShooterRollerSim(TalonFX motor) {
         motorSim = motor.getSimState();
         physicsSim = new DCMotorSim(
@@ -24,7 +25,7 @@ public class ShooterRollerSim {
             DCMotor.getKrakenX60Foc(2), 
         //note: ask build what motor will be used
         //update: I guessed right first time so don't change it
-        0.000174,0.75),
+        0.000174,gearing),
             DCMotor.getKrakenX60Foc(2)    
         
         );
@@ -38,11 +39,11 @@ public class ShooterRollerSim {
         physicsSim.update(0.02);
         motorSim.setRawRotorPosition(
             invert(position,false)
-            .times(0.75)
+            .times(gearing)
         );
         motorSim.setRotorVelocity(
             invert(velocity,false)
-            .times(0.75)
+            .times(gearing)
         );
 
     }

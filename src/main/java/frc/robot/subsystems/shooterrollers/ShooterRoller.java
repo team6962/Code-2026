@@ -54,36 +54,23 @@ public class ShooterRoller extends SubsystemBase {
         shooterRollerMotor1 = new TalonFX(21,new CANBus("drive train"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
-        shooterRollerMotor1.getConfigurator().apply(
-            new TalonFXConfiguration()
+        TalonFXConfiguration config = new TalonFXConfiguration()
             .withSlot0(
                 new Slot0Configs()
-                    .withKV(0.12))
+                    .withKV(0.12)
+                    .withKP(0.01))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimitEnable(false)
                     .withSupplyCurrentLimitEnable(false)
-            )
+            );
 
             
-        );
+        shooterRollerMotor1.getConfigurator().apply(config);
         shooterRollerMotor2 = new TalonFX(22,new CANBus("drive train"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
-        shooterRollerMotor2.getConfigurator().apply(
-            new TalonFXConfiguration()
-            .withSlot0(
-                new Slot0Configs()
-                    .withKV(0.12))
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withStatorCurrentLimitEnable(false)
-                    .withSupplyCurrentLimitEnable(false)
-
-            )
-
-            
-        );
+        shooterRollerMotor2.getConfigurator().apply(config);
         // defines the variables we are keeping track of
         angVelocitySignal = shooterRollerMotor1.getVelocity();
         voltageSignal = shooterRollerMotor1.getMotorVoltage();
@@ -101,6 +88,9 @@ public class ShooterRoller extends SubsystemBase {
     }
     //makes the motor go
     public Command shoot(double targetVelocity){
+        /**
+         * positive voltage makes CAN ID 21 go counter clockwise, which is not what we want, please put a negative value so it goes clockwise since thats what is intended
+         */
         return startEnd(()->{
             //defines a local function to set motor voltage to make it go brrrrrrrrrrrrrrrrrrrrr
             shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
