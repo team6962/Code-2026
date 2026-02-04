@@ -8,8 +8,11 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -22,7 +25,7 @@ public final class ShooterHoodConstants {
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.04942);
 
   public static final Angle MIN_ANGLE = Degrees.of(17.95);
-  public static final Angle MAX_ANGLE = Degrees.of(52.95);
+  public static final Angle MAX_ANGLE = Degrees.of(52.95); 
   public static final Angle INITIAL_ANGLE = Degrees.of(0);
 
   public static final Angle END_TOLERANCE = Degrees.of(3);
@@ -32,7 +35,7 @@ public final class ShooterHoodConstants {
   public static final Distance ARM_LENGTH = Inches.of(6.85);
 
   /** Gravity compensation feedforward constant (volts). */
-  public static final double kG = 0.19;
+  public static final double kG = -0.19;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
@@ -55,5 +58,9 @@ public final class ShooterHoodConstants {
                   .withStatorCurrentLimit(Amps.of(60))
                   .withStatorCurrentLimitEnable(false)
                   .withSupplyCurrentLimit(Amps.of(60))
-                  .withSupplyCurrentLimitEnable(true));
+                  .withSupplyCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                .withInverted(InvertedValue.Clockwise_Positive)
+            );
 }

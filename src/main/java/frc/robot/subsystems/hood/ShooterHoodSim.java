@@ -35,7 +35,7 @@ public class ShooterHoodSim {
 
   public void update() {
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    double motorVoltage = invert(motorSim.getMotorVoltage(), false);
+    double motorVoltage = invert(motorSim.getMotorVoltage(), true);
 
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
@@ -45,15 +45,15 @@ public class ShooterHoodSim {
     AngularAcceleration acceleration = velocity.minus(lastVelocity).div(Seconds.of(0.02));
 
     motorSim.setRawRotorPosition(
-        invert(position, false)
+        invert(position, true)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     motorSim.setRotorVelocity(
-        invert(velocity, false)
+        invert(velocity, true)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     motorSim.setRotorAcceleration(
-        invert(acceleration, false)
+        invert(acceleration, true)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     lastVelocity = velocity;
