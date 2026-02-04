@@ -61,8 +61,10 @@ public class ShooterRoller extends SubsystemBase {
                     .withKP(0.01))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimitEnable(false)
-                    .withSupplyCurrentLimitEnable(false)
+                    .withStatorCurrentLimitEnable(true)
+                    .withStatorCurrentLimit(120)
+                    .withSupplyCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(80)
             );
 
             
