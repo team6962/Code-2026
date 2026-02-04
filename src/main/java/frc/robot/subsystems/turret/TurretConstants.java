@@ -1,5 +1,9 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import edu.wpi.first.units.measure.Angle;
+
 /** Constants for the Turret subsystem */
 public class TurretConstants {
   // Motor Configuration
@@ -45,4 +49,8 @@ public class TurretConstants {
 
   // Default Tunable Values
   public static final double DEFAULT_ANGLE_INPUT = 0.0;
+
+  // limit angles
+  public static final Angle MIN_ANGLE = Degrees.of(0);
+  public static final Angle MAX_ANGLE = Degrees.of(400);
 }

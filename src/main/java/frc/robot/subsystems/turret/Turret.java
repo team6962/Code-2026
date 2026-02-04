@@ -202,22 +202,22 @@ public class Turret extends SubsystemBase {
         () -> motor.setControl(new MotionMagicVoltage(0)));
   }
 
-  /* Moves the motor based on an angle */
-  public Command moveTo(Angle targetAngle) {
-    return startEnd(
-        () -> {
-          motor.setControl(new MotionMagicVoltage(targetAngle));
-        },
-        () -> {
-          motor.setControl(new MotionMagicVoltage(getPosition()));
-        });
+  private Angle clampPositionToSafeRange(Angle position) {
+    if (position.lt(TurretConstants.MIN_ANGLE)) {
+        return TurretConstants.MIN_ANGLE;
+    } else if (position.gt(TurretConstants.MAX_ANGLE)) {
+        return TurretConstants.MAX_ANGLE;
+    } else {
+        return position;
+    }
   }
 
   /* Moves the motor based on a double */
-  public Command moveTo(double targetAngle) {
+  public Command moveTo(Angle targetAngle) {
+    Angle clampedTargetPosition = clampPositionToSafeRange(targetAngle);
     return startEnd(
         () -> {
-          motor.setControl(new MotionMagicVoltage(targetAngle));
+          motor.setControl(new MotionMagicVoltage(clampedTargetPosition));
         },
         () -> {
           motor.setControl(new MotionMagicVoltage(getPosition()));
