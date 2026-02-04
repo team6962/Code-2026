@@ -24,6 +24,11 @@ public class TurretConstants {
   // Mechanical Consts
   public static final double SENSOR_TO_MECHANISM_RATIO = 34.5;
 
+  // Hall Effect Sensor Configuration
+  public static final int HALL_SENSOR_DIO_CHANNEL = 0; // Change this to match your CANdi DIO channel
+  public static final double ZERO_POSITION_ANGLE = 0.0; // The angle to set when hall sensor is triggered (in rotations)
+  public static final double ZEROING_SPEED = 0.1; // Speed at which to move during zeroing (rotations/sec)
+
   // Simulation Consts
   public static final double MOMENT_OF_INERTIA = 0.09803;
   public static final int NUM_MOTORS = 1;
@@ -46,6 +51,8 @@ public class TurretConstants {
   public static final String LOG_ANGULAR_ACCELERATION = "Turret Rotation/Angular Acceleration";
   public static final String LOG_SUPPLY_CURRENT = "Turret Rotation/Angular Supply Current";
   public static final String LOG_CONTROL_REQUEST = "Turret Rotation/Control Request";
+  public static final String LOG_HALL_SENSOR_TRIGGERED = "Turret Rotation/Hall Sensor Triggered";
+  public static final String LOG_IS_ZEROED = "Turret Rotation/Is Zeroed";
 
   // Default Tunable Values
   public static final double DEFAULT_ANGLE_INPUT = 0.0;
