@@ -28,10 +28,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 
 /**
- * Represents a simulated linear mechanism. This code is based on WPILib's
- * builtin {@link ElevatorSim} but has been extended to allow changing
- * characteristics at runtime and simulating a diagonal elevator or an elevator
- * with a constant force spring.
+ * Represents a simulated linear mechanism. This code is based on WPILib's builtin {@link
+ * ElevatorSim} but has been extended to allow changing characteristics at runtime and simulating a
+ * diagonal elevator or an elevator with a constant force spring.
  */
 public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   // Gearbox for the linear mechanism.
@@ -50,7 +49,8 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
    * Creates a simulated linear mechanism.
    *
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
-   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent reductions).
+   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent
+   *     reductions).
    * @param carriageMass The mass of the linear mechanism carriage.
    * @param drumRadius The radius of the drum that the linear mechanism spool is wrapped around.
    * @param minHeight The min allowable height of the linear mechanism.
@@ -87,7 +87,8 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
    * Creates a simulated linear mechanism.
    *
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
-   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent reductions).
+   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent
+   *     reductions).
    * @param carriageMass The mass of the linear mechanism carriage.
    * @param drumRadius The radius of the drum that the linear mechanism spool is wrapped around.
    * @param minHeight The min allowable position of the linear mechanism.
@@ -108,14 +109,14 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
       Distance startingHeight,
       double... measurementStdDevs) {
     this(
-      LinearSystemId.createElevatorSystem(gearbox, carriageMass.in(Kilograms), drumRadius.in(Meters), gearing),
-      gearbox,
-      minHeight,
-      maxHeight,
-      MetersPerSecondPerSecond.of(-9.81).times(Math.sin(angle.in(Radians))),
-      startingHeight,
-      measurementStdDevs
-    );
+        LinearSystemId.createElevatorSystem(
+            gearbox, carriageMass.in(Kilograms), drumRadius.in(Meters), gearing),
+        gearbox,
+        minHeight,
+        maxHeight,
+        MetersPerSecondPerSecond.of(-9.81).times(Math.sin(angle.in(Radians))),
+        startingHeight,
+        measurementStdDevs);
   }
 
   /**
@@ -155,16 +156,15 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   /**
    * Creates a simulated linear mechanism.
    *
-   * @param plant The linear system that represents the linear mechanism. This system can be created with
-   *     {@link edu.wpi.first.math.system.plant.LinearSystemId#createElevatorSystem(DCMotor, double,
-   *     double, double)}.
+   * @param plant The linear system that represents the linear mechanism. This system can be created
+   *     with {@link edu.wpi.first.math.system.plant.LinearSystemId#createElevatorSystem(DCMotor,
+   *     double, double, double)}.
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
    * @param minHeight The min allowable position of the linear mechanism.
    * @param maxHeight The max allowable position of the linear mechanism.
-   * @param constantAcceleration The constant acceleration to simulate, such as
-   *     gravity or a constant force spring. For a vertical elevator's gravity,
-   *     this should be set to -9.81 m/s^2. For no simulated constant acceleration, set
-   *     this to 0.
+   * @param constantAcceleration The constant acceleration to simulate, such as gravity or a
+   *     constant force spring. For a vertical elevator's gravity, this should be set to -9.81
+   *     m/s^2. For no simulated constant acceleration, set this to 0.
    * @param startingHeight The starting position of the linear mechanism.
    * @param measurementStdDevs The standard deviations of the measurements. Can be omitted if no
    *     noise is desired. If present must have 1 element for position.
@@ -196,10 +196,9 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
    * @param minHeight The min allowable position of the linear mechanism.
    * @param maxHeight The max allowable position of the linear mechanism.
-   * @param constantAcceleration The constant acceleration to simulate, such as
-   *     gravity or a constant force spring. For a vertical elevator's gravity,
-   *     this should be set to -9.81 m/s^2. For no simulated constant acceleration, set
-   *     this to 0.
+   * @param constantAcceleration The constant acceleration to simulate, such as gravity or a
+   *     constant force spring. For a vertical elevator's gravity, this should be set to -9.81
+   *     m/s^2. For no simulated constant acceleration, set this to 0.
    * @param startingHeight The starting position of the linear mechanism.
    * @param measurementStdDevs The standard deviations of the measurements. Can be omitted if no
    *     noise is desired. If present must have 1 element for position.
@@ -225,13 +224,13 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Updates the system's characteristics.
-   * 
+   *
    * @param plant The new linear system representing the linear mechanism.
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
    * @param minHeight The min allowable position of the linear mechanism.
    * @param maxHeight The max allowable position of the linear mechanism.
-   * @param constantAcceleration The constant acceleration to simulate, such as
-   *     gravity or a constant force spring. For a vertical elevator's gravity, this should be set to -9.81
+   * @param constantAcceleration The constant acceleration to simulate, such as gravity or a
+   *     constant force spring. For a vertical elevator's gravity, this should be set to -9.81
    *     m/s^2. For no simulated constant acceleration, set this to 0.
    */
   public void setCharacteristics(
@@ -252,7 +251,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
     a.set(1, 1, newA.get(1, 1));
     b.set(0, 0, newB.get(0, 0));
     b.set(1, 0, newB.get(1, 0));
-    
+
     m_gearbox = gearbox;
     m_minHeight = minHeight.in(Meters);
     m_maxHeight = maxHeight.in(Meters);
@@ -261,9 +260,10 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Updates the system's characteristics using physical parameters.
-   * 
+   *
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
-   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent reductions).
+   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent
+   *     reductions).
    * @param carriageMass The mass of the linear mechanism carriage.
    * @param drumRadius The radius of the drum that the linear mechanism spool is wrapped around.
    * @param minHeight The min allowable height of the linear mechanism.
@@ -291,9 +291,10 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Updates the system's characteristics using physical parameters with angle-based gravity.
-   * 
+   *
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
-   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent reductions).
+   * @param gearing The gearing of the linear mechanism (numbers greater than 1 represent
+   *     reductions).
    * @param carriageMass The mass of the linear mechanism carriage.
    * @param drumRadius The radius of the drum that the linear mechanism spool is wrapped around.
    * @param minHeight The min allowable height of the linear mechanism.
@@ -320,17 +321,17 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   }
 
   /**
-   * Updates the system's characteristics using system identification gains with constant acceleration.
-   * 
+   * Updates the system's characteristics using system identification gains with constant
+   * acceleration.
+   *
    * @param kV The velocity gain.
    * @param kA The acceleration gain.
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
    * @param minHeight The min allowable position of the linear mechanism.
    * @param maxHeight The max allowable position of the linear mechanism.
-   * @param constantAcceleration The constant acceleration to simulate, such as
-   *     gravity or a constant force spring. For a vertical elevator's gravity,
-   *     this should be set to -9.81 m/s^2. For no simulated constant acceleration, set
-   *     this to 0.
+   * @param constantAcceleration The constant acceleration to simulate, such as gravity or a
+   *     constant force spring. For a vertical elevator's gravity, this should be set to -9.81
+   *     m/s^2. For no simulated constant acceleration, set this to 0.
    */
   public void setCharacteristics(
       double kV,
@@ -348,8 +349,9 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   }
 
   /**
-   * Updates the system's characteristics using system identification gains with angle-based gravity.
-   * 
+   * Updates the system's characteristics using system identification gains with angle-based
+   * gravity.
+   *
    * @param kV The velocity gain.
    * @param kA The acceleration gain.
    * @param gearbox The type of and number of motors in the linear mechanism gearbox.
@@ -360,12 +362,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
    *     component along the mechanism's axis.
    */
   public void setCharacteristics(
-      double kV,
-      double kA,
-      DCMotor gearbox,
-      Distance minHeight,
-      Distance maxHeight,
-      Angle angle) {
+      double kV, double kA, DCMotor gearbox, Distance minHeight, Distance maxHeight, Angle angle) {
     setCharacteristics(
         LinearSystemId.identifyPositionSystem(kV, kA),
         gearbox,
@@ -375,8 +372,8 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   }
 
   /**
-   * Sets the linear mechanism's state. The new position will be limited between the minimum and maximum
-   * allowed positions.
+   * Sets the linear mechanism's state. The new position will be limited between the minimum and
+   * maximum allowed positions.
    *
    * @param positionMeters The new position in meters.
    * @param velocityMetersPerSecond New velocity in meters per second.
@@ -388,9 +385,9 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
   }
 
   /**
-   * Sets the linear mechanism's state. The new position will be limited between the minimum and maximum
-   * allowed positions.
-   * 
+   * Sets the linear mechanism's state. The new position will be limited between the minimum and
+   * maximum allowed positions.
+   *
    * @param position The new position.
    * @param velocity The new velocity.
    */
@@ -410,7 +407,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Returns whether the linear mechanism would hit the lower limit.
-   * 
+   *
    * @param position The linear mechanism position.
    * @return Whether the linear mechanism would hit the lower limit.
    */
@@ -430,7 +427,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Returns whether the linear mechanism would hit the upper limit.
-   * 
+   *
    * @param position The linear mechanism position.
    * @return Whether the linear mechanism would hit the upper limit.
    */
@@ -467,7 +464,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Returns the position of the linear mechanism.
-   * 
+   *
    * @return The position of the linear mechanism.
    */
   public Distance getPosition() {
@@ -485,7 +482,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Returns the velocity of the linear mechanism.
-   * 
+   *
    * @return The velocity of the linear mechanism.
    */
   public LinearVelocity getVelocity() {
@@ -512,7 +509,7 @@ public class LinearMechanismSim extends LinearSystemSim<N2, N1, N2> {
 
   /**
    * Returns the linear mechanism current draw.
-   * 
+   *
    * @return The linear mechanism current draw.
    */
   public Current getCurrentDraw() {
