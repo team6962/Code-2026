@@ -51,28 +51,17 @@ public class ShooterRoller extends SubsystemBase {
     //new goal: find a way to delete without causing error to reduce processing power
 
     public ShooterRoller() {
-        shooterRollerMotor1 = new TalonFX(21,new CANBus("subsystem"));
+        shooterRollerMotor1 = new TalonFX(ShooterRollerConstants.MOTOR_CAN_ID_1,new CANBus("subsystem"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
-        TalonFXConfiguration config = new TalonFXConfiguration()
-            .withSlot0(
-                new Slot0Configs()
-                    .withKV(0.12)
-                    .withKP(0.01))
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withStatorCurrentLimitEnable(true)
-                    .withStatorCurrentLimit(120)
-                    .withSupplyCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(80)
-            );
+        
 
             
-        shooterRollerMotor1.getConfigurator().apply(config);
-        shooterRollerMotor2 = new TalonFX(22,new CANBus("subsystem"));
+        shooterRollerMotor1.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
+        shooterRollerMotor2 = new TalonFX(ShooterRollerConstants.MOTOR_CAN_ID_2,new CANBus("subsystem"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
-        shooterRollerMotor2.getConfigurator().apply(config);
+        shooterRollerMotor2.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
         // defines the variables we are keeping track of
         angVelocitySignal = shooterRollerMotor1.getVelocity();
         voltageSignal = shooterRollerMotor1.getMotorVoltage();

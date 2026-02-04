@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooterrollers;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -17,16 +18,18 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ShooterRollerSim {
     private TalonFXSimState motorSim;
     private DCMotorSim physicsSim;
-    double gearing = 4/3;
+    
     public ShooterRollerSim(TalonFX motor) {
         motorSim = motor.getSimState();
         physicsSim = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(
-            DCMotor.getKrakenX60Foc(2), 
-        //note: ask build what motor will be used
-        //update: I guessed right first time so don't change it
-        0.000174,gearing),
-            DCMotor.getKrakenX60Foc(2)    
+            LinearSystemId.createDCMotorSystem(
+                ShooterRollerConstants.MOTOR_PHYSICS, 
+            //note: ask build what motor will be used
+            //update: I guessed right first time so don't change it
+                ShooterRollerConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
+                ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio
+            ),
+            ShooterRollerConstants.MOTOR_PHYSICS    
         
         );
     }
@@ -39,11 +42,11 @@ public class ShooterRollerSim {
         physicsSim.update(0.02);
         motorSim.setRawRotorPosition(
             invert(position,false)
-            .times(gearing)
+            .times(ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
         );
         motorSim.setRotorVelocity(
             invert(velocity,false)
-            .times(gearing)
+            .times(ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio)
         );
 
     }
