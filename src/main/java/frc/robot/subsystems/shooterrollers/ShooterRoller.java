@@ -51,7 +51,7 @@ public class ShooterRoller extends SubsystemBase {
     //new goal: find a way to delete without causing error to reduce processing power
 
     public ShooterRoller() {
-        shooterRollerMotor1 = new TalonFX(21,new CANBus("drive train"));
+        shooterRollerMotor1 = new TalonFX(21,new CANBus("subsystem"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
         TalonFXConfiguration config = new TalonFXConfiguration()
@@ -67,7 +67,7 @@ public class ShooterRoller extends SubsystemBase {
 
             
         shooterRollerMotor1.getConfigurator().apply(config);
-        shooterRollerMotor2 = new TalonFX(22,new CANBus("drive train"));
+        shooterRollerMotor2 = new TalonFX(22,new CANBus("subsystem"));
         //note: device id is temporary, find out which device id will be used for shooter rollers
         //update: fixed, device id is what it should be according to tech binder
         shooterRollerMotor2.getConfigurator().apply(config);
