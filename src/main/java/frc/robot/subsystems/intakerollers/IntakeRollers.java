@@ -52,32 +52,38 @@ public class IntakeRollers extends SubsystemBase {
     }
   }
 
-/** Returns command to make the motor move and stop */
-public Command move(Voltage voltage) {
-  return startEnd(
-      () -> {
-        intakeMotor.setControl(new VoltageOut(voltage));
-      },
-      () -> {
-        intakeMotor.setControl(new CoastOut());
-      });
-}
-/**
- * Returns command where motor intakes fuel
- * @return Command
- */
+  /** Returns command to make the motor move and stop */
+  public Command move(Voltage voltage) {
+    return startEnd(
+        () -> {
+          intakeMotor.setControl(new VoltageOut(voltage));
+        },
+        () -> {
+          intakeMotor.setControl(new CoastOut());
+        });
+  }
+
+  /**
+   * Returns command where motor intakes fuel
+   *
+   * @return Command
+   */
   public Command intake() {
     return move(Volts.of(12));
   }
-/**
- * Returns command where motor outtakes fuel
- * @return
- */
+
+  /**
+   * Returns command where motor outtakes fuel
+   *
+   * @return
+   */
   public Command outtake() {
     return move(Volts.of(-12));
   }
+
   /**
    * Returns a Command where motor moves at a target velocity
+   *
    * @param target (double)
    * @return Command
    */
@@ -90,29 +96,37 @@ public Command move(Voltage voltage) {
           intakeMotor.setControl(new CoastOut());
         });
   }
+
   /**
    * Takes status signal velocity and returns it as an AngularVelocity
+   *
    * @return AngularVelocity
    */
   public AngularVelocity getVelocity() {
     return velocitySignal.getValue();
   }
+
   /**
    * Takes status signal Stator Current and returns it as a Current
+   *
    * @return Current
    */
   public Current getStatorCurrent() {
     return statorCurrentSignal.getValue();
   }
+
   /**
    * Takes status signal Supply Current and returns it as a Current
+   *
    * @return Current
    */
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
   }
+
   /**
    * Takes status signal Applied Voltage and returns it as a Voltage
+   *
    * @return Voltage
    */
   public Voltage getAppliedVoltage() {

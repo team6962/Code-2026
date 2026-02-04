@@ -23,7 +23,6 @@ public class RobotContainer {
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-  
     intakeRollers = new IntakeRollers();
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));

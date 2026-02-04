@@ -9,10 +9,12 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class IntakeRollerSim {
   private TalonFXSimState intakeMotor;
   private DCMotorSim physicsSim;
-/**
- * simulates physics on given motor
- * @param motor (DCMotor)
- */
+
+  /**
+   * simulates physics on given motor
+   *
+   * @param motor (DCMotor)
+   */
   public IntakeRollerSim(TalonFX motor) {
     intakeMotor = motor.getSimState();
     physicsSim =
@@ -20,9 +22,8 @@ public class IntakeRollerSim {
             LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.001, 5),
             DCMotor.getKrakenX60(1));
   }
-  /**
-   * updates physicsSim
-   */
+
+  /** updates physicsSim */
   public void update() {
     intakeMotor.setSupplyVoltage(12);
     physicsSim.setInputVoltage(intakeMotor.getMotorVoltage());
