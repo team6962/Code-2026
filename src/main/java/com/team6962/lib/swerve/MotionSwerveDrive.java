@@ -178,6 +178,11 @@ public class MotionSwerveDrive implements AutoCloseable {
     gyroscope.update(deltaTimeSeconds);
     odometry.update(deltaTimeSeconds);
     localization.update(deltaTimeSeconds);
+
+    if (!constants.Simulation.EnablePoseEstimation && RobotBase.isSimulation()) {
+      localization.resetPosition(simulation.getOdometry().getPosition());
+    }
+
     fieldLogger.update(deltaTimeSeconds);
 
     SwerveMotion motion = motionManager.getActiveMotion();
