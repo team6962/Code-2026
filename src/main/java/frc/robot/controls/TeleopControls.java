@@ -1,19 +1,13 @@
 package frc.robot.controls;
 
-import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
-
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 

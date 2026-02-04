@@ -7,7 +7,6 @@ package frc.robot;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
@@ -37,7 +36,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
 
-    //return driveStraightAuto.getCommand();
+    // return driveStraightAuto.getCommand();
     return shooterRoller.shoot(15);
   }
 
