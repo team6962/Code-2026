@@ -4,17 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.TargetCorner;
-
 import com.team6962.lib.swerve.MotionSwerveDrive;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -26,11 +16,17 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.ArrayList;
+import java.util.List;
+import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
 
 /**
  * Subsystem responsible for locating a clump (collection) of spherical objects detected by a
- * PhotonVision camera. Converts per-target detections into field-relative 2D positions and picks
- * a best estimate for the clump center by selecting the detector with the lowest total pairwise
+ * PhotonVision camera. Converts per-target detections into field-relative 2D positions and picks a
+ * best estimate for the clump center by selecting the detector with the lowest total pairwise
  * distance to other detections.
  */
 public class SphereClumpLocalization extends SubsystemBase {
@@ -47,7 +43,8 @@ public class SphereClumpLocalization extends SubsystemBase {
    * @param swerveDrive drive subsystem used for robot pose & field visualization
    * @param cameraConstants calibration values (FOV, transform, sphere diameter, class id, etc.)
    */
-  public SphereClumpLocalization(MotionSwerveDrive swerveDrive, SphereCameraConstants cameraConstants) {
+  public SphereClumpLocalization(
+      MotionSwerveDrive swerveDrive, SphereCameraConstants cameraConstants) {
     this.swerveDrive = swerveDrive;
     this.camera = new PhotonCamera(cameraConstants.Name);
     this.cameraConstants = cameraConstants;
@@ -63,17 +60,19 @@ public class SphereClumpLocalization extends SubsystemBase {
 
     if (clump != null) {
       // update field visualization with the computed clump pose (zero rotation)
-      swerveDrive.getFieldLogger().getField().getObject("Clump").setPose(new Pose2d(clump, new Rotation2d()));
+      swerveDrive
+          .getFieldLogger()
+          .getField()
+          .getObject("Clump")
+          .setPose(new Pose2d(clump, new Rotation2d()));
     }
   }
 
   /**
    * Query the camera for targets and compute a best-guess clump position.
    *
-   * The algorithm:
-   * - Get latest result from PhotonVision
-   * - Convert each valid tracked target into a field-relative 2D translation
-   * - Publish all detected spheres to the field visualization
+   * <p>The algorithm: - Get latest result from PhotonVision - Convert each valid tracked target
+   * into a field-relative 2D translation - Publish all detected spheres to the field visualization
    * - Choose the sphere whose sum of distances to the other spheres (up to MaxTargets) is minimal
    *
    * @return best estimated clump position as a Translation2d, or null if none found/valid
@@ -101,7 +100,11 @@ public class SphereClumpLocalization extends SubsystemBase {
     }
 
     // Publish all detected spheres for visualization (Pose2d list)
-    swerveDrive.getFieldLogger().getField().getObject("Sphere").setPoses(sphereLocations.stream().map(t -> new Pose2d(t, new Rotation2d())).toList());
+    swerveDrive
+        .getFieldLogger()
+        .getField()
+        .getObject("Sphere")
+        .setPoses(sphereLocations.stream().map(t -> new Pose2d(t, new Rotation2d())).toList());
     DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/sphereCount", sphereIndex);
 
     // Select the sphere with the smallest summed distance to the other spheres.
@@ -129,12 +132,10 @@ public class SphereClumpLocalization extends SubsystemBase {
   /**
    * Convert a PhotonTrackedTarget (single detection) into a field-relative 2D translation.
    *
-   * Steps:
-   * - Validate detection class id and geometry (approximate sphere)
-   * - Compute angles to target from camera yaw/pitch
-   * - Estimate range using apparent angular size vs. known sphere diameter
-   * - Build a Transform3d from camera coordinates to the detected sphere
-   * - Transform to robot coordinates via RobotToCameraTransform and then to field coordinates
+   * <p>Steps: - Validate detection class id and geometry (approximate sphere) - Compute angles to
+   * target from camera yaw/pitch - Estimate range using apparent angular size vs. known sphere
+   * diameter - Build a Transform3d from camera coordinates to the detected sphere - Transform to
+   * robot coordinates via RobotToCameraTransform and then to field coordinates
    *
    * @param target the tracked target from PhotonVision
    * @return 2D field-relative translation, or null if invalid/out of range
@@ -157,13 +158,15 @@ public class SphereClumpLocalization extends SubsystemBase {
 
     // Convert pixel height to angular height relative to the camera vertical FOV
     double angularHeight =
-        cameraConstants.FOVHeight.getRadians()
-            * (pixelHeight / cameraConstants.CameraHeightPixels);
+        cameraConstants.FOVHeight.getRadians() * (pixelHeight / cameraConstants.CameraHeightPixels);
     // If angular size is larger than 90 degrees, something is wrong => discard
     if (angularHeight > Math.PI / 2) return null;
 
     // Estimate distance from the camera to the sphere using angular size and known diameter
     Distance distance = calculateDistance(target);
+    DogLog.log(
+        "Vision/Cameras/" + camera.getName() + "/Spheres/targetDistance",
+        calculateDistance(target));
     if (distance.gt(cameraConstants.MaxDetectionRange)) return null;
 
     /*
@@ -173,11 +176,14 @@ public class SphereClumpLocalization extends SubsystemBase {
      * The composition order places the object in front of the camera at the computed range and
      * oriented by the reported angles.
      */
-    Transform3d cameraRelativePosition = new Transform3d(new Translation3d(), new Rotation3d(0, pitch.in(Radians), yaw.in(Radians)))
-      .plus(new Transform3d(new Translation3d(distance.in(Meters), 0, 0), new Rotation3d()));
+    Transform3d cameraRelativePosition =
+        new Transform3d(new Translation3d(), new Rotation3d(0, pitch.in(Radians), yaw.in(Radians)))
+            .plus(new Transform3d(new Translation3d(distance.in(Meters), 0, 0), new Rotation3d()));
 
-    // Transform from camera-relative to robot-relative, then robot to field using current robot pose
-    Transform3d robotRelativePosition = cameraConstants.RobotToCameraTransform.plus(cameraRelativePosition);
+    // Transform from camera-relative to robot-relative, then robot to field using current robot
+    // pose
+    Transform3d robotRelativePosition =
+        cameraConstants.RobotToCameraTransform.plus(cameraRelativePosition);
     Pose3d robotPose = swerveDrive.getPosition3d();
     Pose3d fieldRelativePosition = robotPose.plus(robotRelativePosition);
 
@@ -234,8 +240,7 @@ public class SphereClumpLocalization extends SubsystemBase {
    * @param pixelRatio height/width ratio
    * @return true if the detection looks like a spherical object
    */
-  private boolean isValidSphericalObject(
-      double pixelHeight, double pixelWidth, double pixelRatio) {
+  private boolean isValidSphericalObject(double pixelHeight, double pixelWidth, double pixelRatio) {
     if (pixelHeight <= 0 || pixelWidth <= 0) return false;
     return Math.abs(pixelRatio - 1.0) <= cameraConstants.SphereTolerance;
   }
@@ -243,37 +248,31 @@ public class SphereClumpLocalization extends SubsystemBase {
   /**
    * Estimate the planar distance from the robot to the detected sphere center.
    *
-   * This method:
-   * - Calls PhotonUtils.calculateDistanceToTargetMeters(...) to compute the straight-line
-   *   distance from the camera to the target center using:
-   *     - camera height above the robot reference (RobotToCameraTransform.getZ())
-   *     - target height above the robot reference (half the sphere diameter)
-   *     - camera pitch (rotation about Y from RobotToCameraTransform)
-   *     - measured target pitch from PhotonVision (target.getPitch())
-   * - Converts that straight-line distance into a 2D camera-relative translation using
-   *   PhotonUtils.estimateCameraToTargetTranslation(distanceMeters, yaw), which uses the
-   *   reported yaw to produce an (x,y) translation in the camera plane.
-   * - Adds the camera's XY translation (RobotToCameraTransform translation) to obtain a
-   *   robot-relative 2D translation to the target.
-   * - Returns the planar norm of that robot-relative translation as a Distance.
+   * <p>This method: - Calls PhotonUtils.calculateDistanceToTargetMeters(...) to compute the
+   * straight-line distance from the camera to the target center using: - camera height above the
+   * robot reference (RobotToCameraTransform.getZ()) - target height above the robot reference (half
+   * the sphere diameter) - camera pitch (rotation about Y from RobotToCameraTransform) - measured
+   * target pitch from PhotonVision (target.getPitch()) - Converts that straight-line distance into
+   * a 2D camera-relative translation using
+   * PhotonUtils.estimateCameraToTargetTranslation(distanceMeters, yaw), which uses the reported yaw
+   * to produce an (x,y) translation in the camera plane. - Adds the camera's XY translation
+   * (RobotToCameraTransform translation) to obtain a robot-relative 2D translation to the target. -
+   * Returns the planar norm of that robot-relative translation as a Distance.
    *
    * @param target PhotonTrackedTarget used to obtain measured pitch/yaw
    * @return planar Distance from robot to sphere center (meters)
    */
   private Distance calculateDistance(PhotonTrackedTarget target) {
-    double pitchRadians = Math.toRadians(target.getPitch());
-    double distanceMeters = PhotonUtils.calculateDistanceToTargetMeters(
-        cameraConstants.RobotToCameraTransform.getZ(),
-        cameraConstants.SphereDiameter.in(Meters) / 2.0,
-        cameraConstants.RobotToCameraTransform.getRotation().getY(),
-        pitchRadians
-    );
-
-    Translation2d robotToTargetTranslation = PhotonUtils.estimateCameraToTargetTranslation(
-        distanceMeters,
-        Rotation2d.fromDegrees(target.getYaw())
-    ).plus(cameraConstants.RobotToCameraTransform.getTranslation().toTranslation2d());
-
-    return Meters.of(robotToTargetTranslation.getNorm());
+    double observedDiameter =
+        Math.sqrt(
+            (target.getArea() / 100)
+                * cameraConstants.CameraHeightPixels
+                * cameraConstants.CameraWidthPixels);
+    double meanFocalLength =
+        Math.sqrt(cameraConstants.CameraFocalLengthX * cameraConstants.CameraFocalLengthY);
+    Distance distanceMeters =
+        (Meters.of((cameraConstants.SphereDiameter).in(Meters)).times(meanFocalLength))
+            .divide(observedDiameter);
+    return distanceMeters;
   }
 }

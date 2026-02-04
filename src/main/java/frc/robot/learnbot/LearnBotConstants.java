@@ -36,7 +36,6 @@ import com.team6962.lib.swerve.config.TimingConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -190,6 +189,9 @@ public class LearnBotConstants {
         .withFOVHeight(Rotation2d.fromDegrees(48.9))
         .withFOVWidth(Rotation2d.fromDegrees(70))
         .withCameraHeightPixels(800)
+        .withCameraWidthPixels(1280)
+        .withFocalLengthX(907.41)
+        .withFocalLengthY(907.64)
         .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
         .withSphereTolerance(0.25)
         .withSphereDiameter(Inches.of(5.91))
@@ -200,8 +202,6 @@ public class LearnBotConstants {
                     Inches.of(1.0).in(Meters),
                     Inches.of(-15.0).in(Meters),
                     Inches.of(2.75).in(Meters)),
-                new Rotation3d(
-                    Math.PI, 0, -Math.PI / 2
-                )));
+                new Rotation3d(0, 0, -Math.PI / 2)));
   }
 }
