@@ -24,9 +24,9 @@ public class TurretSim {
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-            DCMotor.getKrakenX60Foc(TurretConstants.NUM_MOTORS),
-            TurretConstants.MOMENT_OF_INERTIA,
-            TurretConstants.SENSOR_TO_MECHANISM_RATIO),
+                DCMotor.getKrakenX60Foc(TurretConstants.NUM_MOTORS),
+                TurretConstants.MOMENT_OF_INERTIA,
+                TurretConstants.SENSOR_TO_MECHANISM_RATIO),
             DCMotor.getKrakenX60Foc(TurretConstants.NUM_MOTORS));
   }
 
@@ -42,8 +42,10 @@ public class TurretSim {
     // Handles physics simulation updates
     physicsSim.setInput(motorVoltage);
     physicsSim.update(TurretConstants.SIMULATION_UPDATE_PERIOD);
-    motorSim.setRawRotorPosition(invert(position, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
-    motorSim.setRotorVelocity(invert(velocity, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
+    motorSim.setRawRotorPosition(
+        invert(position, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
+    motorSim.setRotorVelocity(
+        invert(velocity, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
   }
 
   /** Defines helper methods */

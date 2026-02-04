@@ -24,9 +24,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-/** This defines the Shooter Roller as a new Subsystem called motor.
-The following StatusSignals represent certain stats of the motor */
-
+/**
+ * This defines the Shooter Roller as a new Subsystem called motor. The following StatusSignals
+ * represent certain stats of the motor
+ */
 public class Turret extends SubsystemBase {
   private TalonFX motor;
   private StatusSignal<AngularVelocity> angVelocitySignal;
@@ -57,13 +58,13 @@ public class Turret extends SubsystemBase {
 
   /** Assigns Status Signal variables to the different methods part of the motor.get() */
   public Turret() {
-    //Assigns PID values and sets motor config
+    // Assigns PID values and sets motor config
     motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
-    
+
     // Initialize hall effect sensor connected to candy dio port
     // Candi exposes digital inputs that can be read like regular dio
     hallSensor = new DigitalInput(TurretConstants.HALL_SENSOR_DIO_CHANNEL);
-    
+
     config = new TalonFXConfiguration();
     config.Slot0.kP = TurretConstants.kP;
     config.Slot0.kD = TurretConstants.kD;
@@ -186,7 +187,8 @@ public class Turret extends SubsystemBase {
     checkAndHandleZeroing();
 
     /* Motor Statistics are refreshed logged as Turret Rotation each periodic */
-    BaseStatusSignal.refreshAll(angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
+    BaseStatusSignal.refreshAll(
+        angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
     DogLog.log(TurretConstants.LOG_ANGULAR_VELOCITY, getVelocity());
     DogLog.log(TurretConstants.LOG_MOTOR_VOLTAGE, getMotorVoltage());
     DogLog.log(TurretConstants.LOG_MOTOR_POSITION, getPosition());
@@ -207,14 +209,14 @@ public class Turret extends SubsystemBase {
     // Read hall sensor state and returns false when magnet is present
     // Invert the logic so true is triggered
     boolean currentHallSensorState = !hallSensor.get();
-    
+
     DogLog.log(TurretConstants.LOG_HALL_SENSOR_TRIGGERED, currentHallSensorState);
 
     // Detect rising edge, i.e. entering hall sensor range
     if (currentHallSensorState && !lastHallSensorState) {
       // Zero the motor position when hall sensor is triggered
       motor.setPosition(TurretConstants.ZERO_POSITION_ANGLE);
-      
+
       if (!isZeroed) {
         // First time zeroing, switch to brake mode
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -227,7 +229,7 @@ public class Turret extends SubsystemBase {
     lastHallSensorState = currentHallSensorState;
   }
 
-  //Returns whether turret has been zeroed.
+  // Returns whether turret has been zeroed.
   public boolean isZeroed() {
     return isZeroed;
   }
@@ -258,56 +260,76 @@ public class Turret extends SubsystemBase {
   // Should be called during robot initialization.
   public Command zeroTurret() {
     return run(() -> {
-      if (!isZeroed) {
-        // Move slowly in positive direction to find the hall sensor
-        motor.setControl(new VelocityVoltage(TurretConstants.ZEROING_SPEED));
-      }
-    }).until(() -> isZeroed)
-      .finallyDo(() -> {
-        // Stop motor once zeroed
-        motor.stopMotor();
-      })
-      .withName("ZeroTurret");
+          if (!isZeroed) {
+            // Move slowly in positive direction to find the hall sensor
+            motor.setControl(new VelocityVoltage(TurretConstants.ZEROING_SPEED));
+          }
+        })
+        .until(() -> isZeroed)
+        .finallyDo(
+            () -> {
+              // Stop motor once zeroed
+              motor.stopMotor();
+            })
+        .withName("ZeroTurret");
   }
 
   /* Moves the motor to the left for testing */
   public Command moveToleft() {
     return startEnd(
-        () -> {
-          if (isZeroed) {
-            motor.setControl(new MotionMagicVoltage(1));
-          }
-        },
-        () -> {
-          if (isZeroed) {
-            motor.setControl(new MotionMagicVoltage(0));
-          }
-        }).onlyIf(() -> isZeroed);
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(1));
+              }
+            },
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(0));
+              }
+            })
+        .onlyIf(() -> isZeroed);
   }
 
   private Angle clampPositionToSafeRange(Angle position) {
     if (position.lt(TurretConstants.MIN_ANGLE)) {
-        return TurretConstants.MIN_ANGLE;
+      return TurretConstants.MIN_ANGLE;
     } else if (position.gt(TurretConstants.MAX_ANGLE)) {
-        return TurretConstants.MAX_ANGLE;
+      return TurretConstants.MAX_ANGLE;
     } else {
-        return position;
+      return position;
     }
   }
 
-  /* Moves the motor based on a double */
+  /* Moves the motor based on an angle */
   public Command moveTo(Angle targetAngle) {
     Angle clampedTargetPosition = clampPositionToSafeRange(targetAngle);
     return startEnd(
-        () -> {
-          if (isZeroed) {
-            motor.setControl(new MotionMagicVoltage(targetAngle));
-          }
-        },
-        () -> {
-          if (isZeroed) {
-            motor.setControl(new MotionMagicVoltage(getPosition()));
-          }
-        }).onlyIf(() -> isZeroed);
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(clampedTargetPosition));
+              }
+            },
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(getPosition()));
+              }
+            })
+        .onlyIf(() -> isZeroed);
+  }
+
+  /* Moves the motor based on a double */
+  public Command moveTo(double targetAngle) {
+    return startEnd(
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(targetAngle));
+              }
+            },
+            () -> {
+              if (isZeroed) {
+                motor.setControl(new MotionMagicVoltage(getPosition()));
+              }
+            })
+        .onlyIf(() -> isZeroed);
   }
 }

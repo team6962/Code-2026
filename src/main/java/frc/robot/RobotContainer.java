@@ -42,12 +42,14 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     // Only run autonomous command if turret is zeroed
-    return turretRotation.moveTo(Radians.of(3))
-        .beforeStarting(() -> {
-          if (!turretRotation.isZeroed()) {
-            System.err.println("WARNING: Turret not zeroed before autonomous!");
-          }
-        });
+    return turretRotation
+        .moveTo(Radians.of(3))
+        .beforeStarting(
+            () -> {
+              if (!turretRotation.isZeroed()) {
+                System.err.println("WARNING: Turret not zeroed before autonomous!");
+              }
+            });
   }
 
   public void latePeriodic() {
