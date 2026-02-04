@@ -19,8 +19,8 @@ public class IntakeRollerSim {
     intakeMotor = motor.getSimState();
     physicsSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.001, 5),
-            DCMotor.getKrakenX60(1));
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), IntakeRollersConstants.momentOfInertia, IntakeRollersConstants.gearRatio),
+            DCMotor.getKrakenX60Foc(1));
   }
 
   /** updates physicsSim */
@@ -29,8 +29,8 @@ public class IntakeRollerSim {
     physicsSim.setInputVoltage(intakeMotor.getMotorVoltage());
     physicsSim.update(0.02);
 
-    intakeMotor.setRawRotorPosition(physicsSim.getAngularPosition().times(5));
-    intakeMotor.setRotorVelocity(physicsSim.getAngularVelocity().times(5));
-    intakeMotor.setRotorAcceleration(physicsSim.getAngularAcceleration().times(5));
+    intakeMotor.setRawRotorPosition(physicsSim.getAngularPosition().times(IntakeRollersConstants.gearRatio));
+    intakeMotor.setRotorVelocity(physicsSim.getAngularVelocity().times(IntakeRollersConstants.gearRatio));
+    intakeMotor.setRotorAcceleration(physicsSim.getAngularAcceleration().times(IntakeRollersConstants.gearRatio));
   }
 }
