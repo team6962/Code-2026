@@ -11,16 +11,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.intakerollers.IntakeRollers;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+  private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
+    intakeRollers = new IntakeRollers();
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
