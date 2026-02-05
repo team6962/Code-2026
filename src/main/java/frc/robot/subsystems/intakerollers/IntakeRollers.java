@@ -29,13 +29,13 @@ public class IntakeRollers extends SubsystemBase {
 
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
-    this.intakeMotor = new TalonFX(IntakeRollersConstants.deviceId, new CANBus("subsystem")); // temporary
+    this.intakeMotor = new TalonFX(IntakeRollersConstants.DEVICE_ID, new CANBus("subsystem")); // temporary
     TalonFXConfiguration configuration = new TalonFXConfiguration();
-    configuration.Feedback.SensorToMechanismRatio = IntakeRollersConstants.gearRatio;
+    configuration.Feedback.SensorToMechanismRatio = IntakeRollersConstants.GEAR_RATIO;
     configuration.CurrentLimits.StatorCurrentLimitEnable = true;
     configuration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    configuration.CurrentLimits.StatorCurrentLimit = IntakeRollersConstants.statorCurrentLimit.in(Amps);
-    configuration.CurrentLimits.SupplyCurrentLimit = IntakeRollersConstants.supplyCurrentLimit.in(Amps);
+    configuration.CurrentLimits.StatorCurrentLimit = IntakeRollersConstants.STATOR_CURRENT_LIMIT.in(Amps);
+    configuration.CurrentLimits.SupplyCurrentLimit = IntakeRollersConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
     intakeMotor.getConfigurator().apply(configuration);
     this.velocitySignal = intakeMotor.getVelocity();
     this.statorCurrentSignal = intakeMotor.getStatorCurrent();
