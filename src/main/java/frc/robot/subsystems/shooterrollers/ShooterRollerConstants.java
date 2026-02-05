@@ -15,7 +15,9 @@ public final class ShooterRollerConstants {
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(2);
   public static final MomentOfInertia MOMENT_OF_INERTIA =
       KilogramSquareMeters.of(
-          0.003072714); // change later according to what Tyler will put on the tech binder tomorrow. update: fixed, should be what it should be according to Tyler, which is 10.5 inch squared pounds.
+          0.003072714); // change later according to what Tyler will put on the tech binder
+  // tomorrow. update: fixed, should be what it should be according to Tyler,
+  // which is 10.5 inch squared pounds.
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
