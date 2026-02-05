@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.intakeextension;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -11,9 +11,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
@@ -29,7 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Intake extends SubsystemBase {
+public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
 
@@ -41,80 +39,66 @@ public class Intake extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
 
-  private IntakeSim simulation;
+  private IntakeExtensionSim simulation;
 
-  public Intake() {
-    motor = new TalonFX(16);
-
-    TalonFXConfiguration configuration = new TalonFXConfiguration();
-    configuration.CurrentLimits.StatorCurrentLimitEnable = false;
-    configuration.CurrentLimits.SupplyCurrentLimitEnable = false;
-    configuration.Feedback.RotorToSensorRatio = 5.0 / 0.05;
-    configuration.Slot0.kP = 0.335;
-    motor.getConfigurator().apply(configuration);
+  public IntakeExtension() {
+    motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID);
+    motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
 
     angleSignal = motor.getPosition();
     angularVelocitySignal = motor.getVelocity();
     angularAccelerationSignal = motor.getAcceleration();
-
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
 
     if (RobotBase.isSimulation()) {
-      simulation = new IntakeSim(motor);
+      simulation = new IntakeExtensionSim(motor);
     }
   }
 
   public Command extend() {
     return startEnd(
-      () -> {
-        motor.setControl(new PositionVoltage(1));
-      },
-      () -> {
-        motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-      }
-    );
+        () -> {
+          motor.setControl(new PositionVoltage(1));
+        },
+        () -> {
+          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+        });
   }
 
   public Command retract() {
     return startEnd(
-      () -> {
-        motor.setControl(new PositionVoltage(0));
-      },
-      () -> {
-        motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-      }
-    );
+        () -> {
+          motor.setControl(new PositionVoltage(0));
+        },
+        () -> {
+          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+        });
   }
 
   /**
-   * Finds the linear velocity of the end of the intake. Positive values mean
-   * that the intake is extending outwards, and negative values mean that the intake
-   * is retracting inwards.
+   * Finds the linear velocity of the end of the intake. Positive values mean that the intake is
+   * extending outwards, and negative values mean that the intake is retracting inwards.
    *
    * @return The linear velocity as a LinearVelocity object.
    */
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
-      BaseStatusSignal.getLatencyCompensatedValue(
-        angularVelocitySignal,
-        angularAccelerationSignal
-      ).in(RotationsPerSecond)
-    );
+        BaseStatusSignal.getLatencyCompensatedValue(
+                angularVelocitySignal, angularAccelerationSignal)
+            .in(RotationsPerSecond));
   }
 
   /**
    * Finds the position of the intake.
+   *
    * @return The position as a Distance object.
    */
   public Distance getPosition() {
     return Meters.of(
-      BaseStatusSignal.getLatencyCompensatedValue(
-        angleSignal,
-        angularVelocitySignal
-      ).in(Rotations)
-    );
+        BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal)
+            .in(Rotations));
   }
 
   /**
@@ -123,13 +107,12 @@ public class Intake extends SubsystemBase {
    * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
-    return MetersPerSecondPerSecond.of(
-      angularAccelerationSignal.getValueAsDouble()
-    );
+    return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
   }
 
   /**
    * Voltage finds the voltage signal.
+   *
    * @return It returns the voltage signal.
    */
   public Voltage getVoltage() {
@@ -138,6 +121,7 @@ public class Intake extends SubsystemBase {
 
   /**
    * This method finds the stator current.
+   *
    * @return It returns the current.
    */
   public Current getStatorCurrent() {
@@ -146,6 +130,7 @@ public class Intake extends SubsystemBase {
 
   /**
    * This finds the supply current.
+   *
    * @return It returns the supply current.
    */
   public Current getSupplyCurrent() {
@@ -159,13 +144,12 @@ public class Intake extends SubsystemBase {
     }
 
     BaseStatusSignal.refreshAll(
-      angularVelocitySignal,
-      voltageSignal,
-      statorCurrentSignal,
-      supplyCurrentSignal,
-      angleSignal,
-      angularAccelerationSignal
-    );
+        angularVelocitySignal,
+        voltageSignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        angleSignal,
+        angularAccelerationSignal);
 
     DogLog.log("intake/position", getPosition());
     DogLog.log("intake/velocity", getVelocity());
