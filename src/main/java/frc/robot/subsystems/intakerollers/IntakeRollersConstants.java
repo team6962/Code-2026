@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 public class IntakeRollersConstants {
-  public static final double GEAR_RATIO = 32/18;
+  public static final double GEAR_RATIO = 32 / 18;
   public static final double MOMENT_OF_INERTIA = 0.00074271944;
   public static final int DEVICE_ID = 41;
 
