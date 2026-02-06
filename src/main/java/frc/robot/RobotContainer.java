@@ -12,11 +12,13 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
+import frc.robot.subsystems.shooterrollers.ShooterRoller;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+  private final ShooterRoller shooterRoller;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
@@ -34,6 +36,7 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+    shooterRoller = new ShooterRoller();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
