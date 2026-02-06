@@ -1,7 +1,7 @@
 package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -14,8 +14,8 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
+
 import dev.doglog.DogLog;
-import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -24,26 +24,35 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * This defines the Shooter Roller as a new Subsystem called motor. The following StatusSignals
- * represent certain stats of the motor
+ * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
+ * The turret uses a TalonFX motor controller and a hall effect sensor connected to a CANdi for
+ * absolute position zeroing. The turret can be controlled using Motion Magic position control to
+ * move to specific angles, and includes safety features to prevent movement before zeroing and to
+ * clamp target angles within a safe range. The subsystem also includes extensive logging of status
+ * signals and control requests for debugging and tuning purposes.
  */
 public class Turret extends SubsystemBase {
+  /** The motor that controls the turret */
   private TalonFX motor;
-  private StatusSignal<AngularVelocity> angVelocitySignal;
-  private StatusSignal<Voltage> voltageSignal;
-  private StatusSignal<Angle> angleSignal;
-  private StatusSignal<AngularAcceleration> angAccelerationSignal;
-  private StatusSignal<Current> supplyCurrentSignal;
-  private TurretSim simulation;
 
   /** The CANdi that connects the hall effect sensor to the CAN bus */
   private CANdi candi;
 
-  /** The status signal that indicates whether the hall effect sensor is triggered */
+  // Status signals for logging and control purposes
+  private StatusSignal<Angle> positionSignal;
+  private StatusSignal<AngularVelocity> velocitySignal;
+  private StatusSignal<AngularAcceleration> accelerationSignal;
+  private StatusSignal<Voltage> voltageSignal;
+  private StatusSignal<Current> statorCurrentSignal;
+  private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Boolean> hallSensorTriggeredSignal;
+
+  /** The simulation object that simulates the turret's behavior */
+  private TurretSim simulation;
 
   /**
    * Indicates whether the turret has been zeroed using the hall effect sensor. When false, the
@@ -57,18 +66,9 @@ public class Turret extends SubsystemBase {
    */
   private boolean hasHallSensorBeenTriggered = false;
 
-  /* Assigns StatusSignals to different methods part of the motor.get...() */
-  private final DoubleSubscriber angleInput;
-
-  private final DoubleSubscriber kPInput;
-  private final DoubleSubscriber kDInput;
-  private final DoubleSubscriber kSInput;
-  private final DoubleSubscriber kVInput;
-  private final DoubleSubscriber kAInput;
-
-  private final DoubleSubscriber cruiseVelocityInput;
-  private final DoubleSubscriber accelerationInput;
-
+  /**
+   * The current motor configuration
+   */
   private TalonFXConfiguration config;
 
   /** Assigns Status Signal variables to the different methods part of the motor.get() */
@@ -77,135 +77,95 @@ public class Turret extends SubsystemBase {
     motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
     // Initialize hall effect sensor connected to the CANdi DIO port
-    candi = new CANdi(TurretConstants.HALL_SENSOR_CANDI, new CANBus(TurretConstants.CAN_BUS_NAME));
-    hallSensorTriggeredSignal = candi.getS1Closed();
+    candi = new CANdi(TurretConstants.HALL_SENSOR_CANDI_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
+    // Configure the TalonFX motor controller
     config = new TalonFXConfiguration();
 
-    // Assign PID and feedforward constants from TurretConstants
     config.Slot0.kP = TurretConstants.kP;
     config.Slot0.kD = TurretConstants.kD;
     config.Slot0.kS = TurretConstants.kS;
     config.Slot0.kV = TurretConstants.kV;
     config.Slot0.kA = TurretConstants.kA;
 
-    // Assign motion magic constants
     config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
     config.Feedback.SensorToMechanismRatio = TurretConstants.SENSOR_TO_MECHANISM_RATIO;
 
-    // Apply neutral mode to use once the motor is zeroed. Before it is zeroed,
-    // the motor will be set to coast mode to allow for easier manual zeroing.
     config.MotorOutput.NeutralMode = TurretConstants.MOTOR_NEUTRAL_MODE;
 
-    // Apply motor inversion
     config.MotorOutput.Inverted = TurretConstants.MOTOR_INVERSION;
 
-    // Apply current limits
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.StatorCurrentLimit = TurretConstants.STATOR_CURRENT_LIMIT.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = TurretConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
 
-    // Apply motor configs
     motor.getConfigurator().apply(config);
 
     // Initialize status signals
-    angVelocitySignal = motor.getVelocity();
+    positionSignal = motor.getPosition();
+    velocitySignal = motor.getVelocity();
+    accelerationSignal = motor.getAcceleration();
     voltageSignal = motor.getMotorVoltage();
-    angleSignal = motor.getPosition();
-    angAccelerationSignal = motor.getAcceleration();
+    statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
+    hallSensorTriggeredSignal = candi.getS1Closed();
 
-    // Tunable angle input, PID values, Motion Magic stuff
-    angleInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_ANGLE_KEY,
-            TurretConstants.DEFAULT_ANGLE_INPUT,
-            newAngle -> {
-              if (isZeroed) {
-                moveTo(Radians.of(newAngle)).schedule();
-              }
-            });
+    // Tunable angle input, PID values, Motion Magic constraints
+    DogLog.tunable(
+        "Turret/Turret Position Target (Degrees)",
+        getPosition().in(Degrees),
+        newAngle -> {
+          if (isZeroed()) {
+            CommandScheduler.getInstance().schedule(moveTo(Degrees.of(newAngle)));
+          }
+        });
 
-    kPInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_KP_KEY,
+    DogLog.tunable(
+            "Turret/Turret kP",
             config.Slot0.kP,
-            newKP -> {
-              updatePIDConfig();
-            });
+            newKP -> motor.getConfigurator().apply(config.Slot0.withKP(newKP)));
 
-    kDInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_KD_KEY,
+    DogLog.tunable(
+            "Turret/Turret kD",
             config.Slot0.kD,
-            newKD -> {
-              updatePIDConfig();
-            });
+            newKD -> motor.getConfigurator().apply(config.Slot0.withKD(newKD)));
 
-    kSInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_KS_KEY,
+    DogLog.tunable(
+            "Turret/Turret kS",
             config.Slot0.kS,
-            newKS -> {
-              updatePIDConfig();
-            });
+            newKS -> motor.getConfigurator().apply(config.Slot0.withKS(newKS)));
 
-    kVInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_KV_KEY,
+    DogLog.tunable(
+            "Turret/Turret kV",
             config.Slot0.kV,
-            newKV -> {
-              updatePIDConfig();
-            });
+            newKV -> motor.getConfigurator().apply(config.Slot0.withKV(newKV)));
 
-    kAInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_KA_KEY,
+    DogLog.tunable(
+            "Turret/Turret kA",
             config.Slot0.kA,
-            newKA -> {
-              updatePIDConfig();
-            });
+            newKA -> motor.getConfigurator().apply(config.Slot0.withKA(newKA)));
 
-    cruiseVelocityInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_CRUISE_VELOCITY_KEY,
+    DogLog.tunable(
+            "Turret/Turret Cruise Velocity",
             config.MotionMagic.MotionMagicCruiseVelocity,
-            newVel -> {
-              updatePIDConfig();
-            });
+            newVel -> motor.getConfigurator().apply(config.MotionMagic.withMotionMagicCruiseVelocity(newVel)));
 
-    accelerationInput =
-        DogLog.tunable(
-            TurretConstants.TUNABLE_ACCELERATION_KEY,
+    DogLog.tunable(
+            "Turret/Turret Max Acceleration",
             config.MotionMagic.MotionMagicAcceleration,
-            newAccel -> {
-              updatePIDConfig();
-            });
+            newAccel -> motor.getConfigurator().apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
 
     // Set motor to coast mode before it has been zeroed, to allow for easier manual zeroing
     motor.setControl(new CoastOut());
 
     if (RobotBase.isSimulation()) {
       simulation = new TurretSim(motor);
-      // Auto zero in sim
+
+      // Assume the turret has been zeroed in simulation
       isZeroed = true;
     }
-  }
-
-  /** Updates motor configuration with current tunable values */
-  private void updatePIDConfig() {
-    config.Slot0.kP = kPInput.get();
-    config.Slot0.kD = kDInput.get();
-    config.Slot0.kS = kSInput.get();
-    config.Slot0.kV = kVInput.get();
-    config.Slot0.kA = kAInput.get();
-
-    config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocityInput.get();
-    config.MotionMagic.MotionMagicAcceleration = accelerationInput.get();
-
-    motor.getConfigurator().apply(config);
   }
 
   @Override
@@ -215,12 +175,18 @@ public class Turret extends SubsystemBase {
       simulation.update();
     }
 
+    // If the robot is disabled, set the motor to hold its current position to prevent it from moving
+    if (RobotState.isDisabled() && isZeroed()) {
+      setPositionControl(getPosition());
+    }
+
     // Refresh all status signals
     BaseStatusSignal.refreshAll(
-        angVelocitySignal,
+        positionSignal,
+        velocitySignal,
+        accelerationSignal,
         voltageSignal,
-        angleSignal,
-        angAccelerationSignal,
+        statorCurrentSignal,
         supplyCurrentSignal,
         hallSensorTriggeredSignal);
 
@@ -228,15 +194,16 @@ public class Turret extends SubsystemBase {
     updateTurretAbsolutePosition();
 
     // Log all status signals and the current control request to NetworkTables
-    DogLog.log(TurretConstants.LOG_ANGULAR_VELOCITY, getVelocity());
-    DogLog.log(TurretConstants.LOG_MOTOR_VOLTAGE, getMotorVoltage());
-    DogLog.log(TurretConstants.LOG_MOTOR_POSITION, getPosition());
-    DogLog.log(TurretConstants.LOG_ANGULAR_ACCELERATION, getAcceleration());
-    DogLog.log(TurretConstants.LOG_SUPPLY_CURRENT, getSupplyCurrent());
-    DogLog.log(TurretConstants.LOG_IS_ZEROED, isZeroed);
-    DogLog.log(TurretConstants.LOG_HALL_SENSOR_TRIGGERED, isHallSensorTriggered());
+    DogLog.log("Turret/Position", getPosition());
+    DogLog.log("Turret/Velocity", getVelocity());
+    DogLog.log("Turret/Acceleration", getAcceleration());
+    DogLog.log("Turret/AppliedVoltage", getAppliedVoltage());
+    DogLog.log("Turret/StatorCurrent", getStatorCurrent());
+    DogLog.log("Turret/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Turret/HallSensorTriggered", isHallSensorTriggered());
+    DogLog.log("Turret/IsZeroed", isZeroed());
 
-    LoggingUtil.log(TurretConstants.LOG_CONTROL_REQUEST, motor.getAppliedControl());
+    LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
   }
 
   /**
@@ -248,7 +215,7 @@ public class Turret extends SubsystemBase {
     // Don't attempt to zero using the hall sensor if the robot is enabled or
     // if the turret has already been zeroed (which is always true in simulation),
     // to avoid interfering with normal operation
-    if (RobotState.isEnabled() || isZeroed) {
+    if (RobotState.isEnabled() || isZeroed()) {
       return;
     }
 
@@ -297,12 +264,75 @@ public class Turret extends SubsystemBase {
     // the zeroing process is complete
     if (!isHallSensorTriggered() && hasHallSensorBeenTriggered) {
       isZeroed = true;
-
-      // Set motor to normal neutral mode (brake mode) after zeroing is complete to signal
-      // that the turret is ready for use and put it into its normal neutral state at the
-      // beginning of the match
-      motor.setControl(new NeutralOut());
     }
+  }
+
+  /**
+   * Gets the current position of the turret. An angle of 0 represents the turret facing the intake
+   * side of the robot, and increasing angles rotate the turret counterclockwise when looking from
+   * above.
+   *
+   * @return The current position of the turret as an Angle object
+   */
+  public Angle getPosition() {
+    return MeasureUtil.toAngle(
+        BaseStatusSignal.getLatencyCompensatedValue(positionSignal, velocitySignal));
+  }
+
+  /**
+   * Gets the current angular velocity of the turret. Positive values indicate counterclockwise
+   * rotation when looking from above.
+   *
+   * @return The current angular velocity of the turret as an AngularVelocity object
+   */
+  public AngularVelocity getVelocity() {
+    return BaseStatusSignal.getLatencyCompensatedValue(velocitySignal, accelerationSignal);
+  }
+
+  /**
+   * Gets the current angular acceleration of the turret.
+   *
+   * @return The current angular acceleration of the turret as an AngularAcceleration object
+   */
+  public AngularAcceleration getAcceleration() {
+    return accelerationSignal.getValue();
+  }
+
+  /**
+   * Gets the current applied voltage to the turret motor.
+   *
+   * @return The current applied voltage as a Voltage object
+   */
+  public Voltage getAppliedVoltage() {
+    return voltageSignal.getValue();
+  }
+
+  /**
+   * Gets the current stator current of the turret motor.
+   *
+   * @return The current stator current as a Current object
+   */
+  public Current getStatorCurrent() {
+    return statorCurrentSignal.getValue();
+  }
+
+  /**
+   * Gets the current supply current of the turret motor.
+   *
+   * @return The current supply current as a Current object
+   */
+  public Current getSupplyCurrent() {
+    return supplyCurrentSignal.getValue();
+  }
+
+  /**
+   * Gets whether the hall sensor is currently triggered. This can be used to detect when the turret
+   * is passing through the hall sensor range during zeroing.
+   *
+   * @return true if the hall sensor is triggered, false otherwise
+   */
+  public boolean isHallSensorTriggered() {
+    return hallSensorTriggeredSignal.getValue();
   }
 
   /**
@@ -316,37 +346,13 @@ public class Turret extends SubsystemBase {
   }
 
   /**
-   * Gets whether the hall sensor is currently triggered. This can be used to detect when the turret
-   * is passing through the hall sensor range during zeroing.
+   * Clamps the given position to be within the safe range defined by TurretConstants.MIN_ANGLE and
+   * TurretConstants.MAX_ANGLE. This is used to prevent commanding the turret to move beyond its
+   * physical limits, which could cause damage to the mechanism or the motor.
    *
-   * @return true if the hall sensor is triggered, false otherwise
+   * @param position The desired position to clamp
+   * @return The clamped position within the safe range
    */
-  public boolean isHallSensorTriggered() {
-    return hallSensorTriggeredSignal.getValue();
-  }
-
-  /* Getter methods for logged values */
-  public Current getSupplyCurrent() {
-    return supplyCurrentSignal.getValue();
-  }
-
-  public AngularAcceleration getAcceleration() {
-    return angAccelerationSignal.getValue();
-  }
-
-  public AngularVelocity getVelocity() {
-    return BaseStatusSignal.getLatencyCompensatedValue(angVelocitySignal, angAccelerationSignal);
-  }
-
-  public Voltage getMotorVoltage() {
-    return voltageSignal.getValue();
-  }
-
-  public Angle getPosition() {
-    return MeasureUtil.toAngle(
-        BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angVelocitySignal));
-  }
-
   private Angle clampPositionToSafeRange(Angle position) {
     if (position.lt(TurretConstants.MIN_ANGLE)) {
       return TurretConstants.MIN_ANGLE;
@@ -357,9 +363,18 @@ public class Turret extends SubsystemBase {
     }
   }
 
-  /* Moves the motor based on an angle */
+  /**
+   * Returns a Command that moves the turret to the specified target angle using Motion Magic
+   * position control. The target angle is first clamped to be within the safe range defined by
+   * TurretConstants. If the turret is not yet zeroed, the command will instead set the motor to
+   * neutral mode.
+   *
+   * @param targetAngle The target angle to move the turret to
+   * @return A Command that moves the turret to the specified target angle
+   */
   public Command moveTo(Angle targetAngle) {
     Angle clampedTargetPosition = clampPositionToSafeRange(targetAngle);
+
     return startEnd(
             () -> {
               setPositionControl(clampedTargetPosition);
@@ -377,10 +392,12 @@ public class Turret extends SubsystemBase {
    * @param targetAngle The target angle to move the turret to
    */
   private void setPositionControl(Angle targetAngle) {
-    if (isZeroed) {
+    if (isZeroed()) {
       motor.setControl(new MotionMagicVoltage(targetAngle));
-    } else {
+    } else if (RobotState.isEnabled()) {
       motor.setControl(new NeutralOut());
+    } else {
+      motor.setControl(new CoastOut());
     }
   }
 }
