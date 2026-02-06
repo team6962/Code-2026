@@ -15,19 +15,21 @@ public class ShooterRollerSim {
   private TalonFXSimState motorSim;
   private DCMotorSim physicsSim;
 
+  /*
+   * simulator for the shooter roller
+   */
   public ShooterRollerSim(TalonFX motor) {
     motorSim = motor.getSimState();
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 ShooterRollerConstants.MOTOR_PHYSICS,
-                // note: ask build what motor will be used
-                // update: I guessed right first time so don't change it
                 ShooterRollerConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
                 ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
             ShooterRollerConstants.MOTOR_PHYSICS);
   }
 
+  /** updates the simulation */
   public void update() {
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
     double motorVoltage = invert(motorSim.getMotorVoltage(), false);
