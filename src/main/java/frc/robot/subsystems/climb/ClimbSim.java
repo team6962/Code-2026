@@ -11,7 +11,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class ClimbSim {
     private TalonFXSimState climbMotor;
@@ -20,16 +19,17 @@ public class ClimbSim {
         climbMotor = motor.getSimState();
         physicsSim = new ElevatorSim(
             LinearSystemId.createElevatorSystem(
-                DCMotor.getKrakenX60(1),
-                Units.lbsToKilograms(10),
-                Units.inchesToMeters(1),
-                10.0
+                DCMotor.getKrakenX60Foc(1),
+                Units.lbsToKilograms(10),//mass
+                Units.inchesToMeters(1),//drum radius
+                10.0//gear ratio
             ),
             DCMotor.getKrakenX60Foc(1),
             0,
-            1,
-            false,
-            0);
+            1, //maxhegiht
+            true,
+            0
+            );
     }
     public void update(){
         climbMotor.setSupplyVoltage(12);

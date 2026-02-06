@@ -9,6 +9,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -25,6 +26,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climb extends SubsystemBase{
@@ -40,27 +42,9 @@ public class Climb extends SubsystemBase{
    private ClimbSim simulation;
 
    public Climb(){
-      motor = new TalonFX(30);
-      
-      TalonFXConfiguration configuration = new TalonFXConfiguration();
-      configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      configuration.CurrentLimits.StatorCurrentLimitEnable = true;
-      configuration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 10; //change later
-      configuration.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-      configuration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
-      configuration.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-      //These values are dummy values and are not to be used. Change later.
-      configuration.Slot0.kP = 2.4;
-      configuration.Slot0.kI = 0.0;
-      configuration.Slot0.kD = 0.0;
-      configuration.Slot0.kG = 0.5;
+      motor = new TalonFX(30); //motorID
 
-      configuration.Slot0.GravityType = GravityTypeValue.Elevator_Static;
-      configuration.MotionMagic.MotionMagicCruiseVelocity = 80.0;
-      configuration.MotionMagic.MotionMagicAcceleration = 160.0;
-      configuration.MotionMagic.MotionMagicJerk = 1000.0;
-
-      motor.getConfigurator().apply(configuration);
+      motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
       candi = new CANdi(30);
       accelerationSignal = motor.getAcceleration();
@@ -113,5 +97,20 @@ public class Climb extends SubsystemBase{
       DogLog.log("Climb/StatorCurrent", getStatorCurrent());
       DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
       DogLog.log("Climb/HallSignal", getHall());
+   }
+
+   public Command elevate(){
+      return startEnd(()->{motor.setControl(new PositionVoltage(1));},
+      ()->{motor.setControl(new PositionVoltage(getPosition().in(Meters)));});
+   }
+
+   public Command descend(){
+      return startEnd(()->{motor.setControl(new PositionVoltage(0));},
+      ()->{motor.setControl(new PositionVoltage(getPosition().in(Meters)));});
+   }
+
+   public Command pullUp(){
+      return startEnd(()->{motor.setControl(new PositionVoltage(0));},
+      ()->{motor.setControl(new PositionVoltage(getPosition().in(Meters)));});
    }
 }
