@@ -1,15 +1,17 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
@@ -19,8 +21,8 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -37,10 +39,23 @@ public class Turret extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private TurretSim simulation;
 
-  // Hall effect sensor for zeroing with candi connection
-  private DigitalInput hallSensor;
+  /** The CANdi that connects the hall effect sensor to the CAN bus */
+  private CANdi candi;
+
+  /** The status signal that indicates whether the hall effect sensor is triggered */
+  private StatusSignal<Boolean> hallSensorTriggeredSignal;
+
+  /**
+   * Indicates whether the turret has been zeroed using the hall effect sensor. When false, the
+   * motor should not move and should be set to coast mode to allow for easier manual zeroing.
+   */
   private boolean isZeroed = false;
-  private boolean lastHallSensorState = false;
+
+  /**
+   * Indicates whether the hall sensor has been triggered. Used to detect when the turret has
+   * finished being zeroed.
+   */
+  private boolean hasHallSensorBeenTriggered = false;
 
   /* Assigns StatusSignals to different methods part of the motor.get...() */
   private final DoubleSubscriber angleInput;
@@ -61,11 +76,13 @@ public class Turret extends SubsystemBase {
     // Assigns PID values and sets motor config
     motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
-    // Initialize hall effect sensor connected to candy dio port
-    // Candi exposes digital inputs that can be read like regular dio
-    hallSensor = new DigitalInput(TurretConstants.HALL_SENSOR_DIO_CHANNEL);
+    // Initialize hall effect sensor connected to the CANdi DIO port
+    candi = new CANdi(TurretConstants.HALL_SENSOR_CANDI, new CANBus(TurretConstants.CAN_BUS_NAME));
+    hallSensorTriggeredSignal = candi.getS1Closed();
 
     config = new TalonFXConfiguration();
+
+    // Assign PID and feedforward constants from TurretConstants
     config.Slot0.kP = TurretConstants.kP;
     config.Slot0.kD = TurretConstants.kD;
     config.Slot0.kS = TurretConstants.kS;
@@ -77,11 +94,23 @@ public class Turret extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
     config.Feedback.SensorToMechanismRatio = TurretConstants.SENSOR_TO_MECHANISM_RATIO;
 
-    // Set motor to coast mode before zeroing
-    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    // Apply neutral mode to use once the motor is zeroed. Before it is zeroed,
+    // the motor will be set to coast mode to allow for easier manual zeroing.
+    config.MotorOutput.NeutralMode = TurretConstants.MOTOR_NEUTRAL_MODE;
 
-    // Apply motor configs and assign velocity signals
+    // Apply motor inversion
+    config.MotorOutput.Inverted = TurretConstants.MOTOR_INVERSION;
+
+    // Apply current limits
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = TurretConstants.STATOR_CURRENT_LIMIT.in(Amps);
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = TurretConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
+
+    // Apply motor configs
     motor.getConfigurator().apply(config);
+
+    // Initialize status signals
     angVelocitySignal = motor.getVelocity();
     voltageSignal = motor.getMotorVoltage();
     angleSignal = motor.getPosition();
@@ -155,6 +184,9 @@ public class Turret extends SubsystemBase {
               updatePIDConfig();
             });
 
+    // Set motor to coast mode before it has been zeroed, to allow for easier manual zeroing
+    motor.setControl(new CoastOut());
+
     if (RobotBase.isSimulation()) {
       simulation = new TurretSim(motor);
       // Auto zero in sim
@@ -178,60 +210,119 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Updates simulation each periodic if a simulation exists
+    // Updates simulation each periodic cycle if a simulation object exists
     if (simulation != null) {
       simulation.update();
     }
 
-    // Check hall effect sensor and handle zeroing
-    checkAndHandleZeroing();
-
-    /* Motor Statistics are refreshed logged as Turret Rotation each periodic */
+    // Refresh all status signals
     BaseStatusSignal.refreshAll(
-        angVelocitySignal, voltageSignal, angleSignal, angAccelerationSignal, supplyCurrentSignal);
+        angVelocitySignal,
+        voltageSignal,
+        angleSignal,
+        angAccelerationSignal,
+        supplyCurrentSignal,
+        hallSensorTriggeredSignal);
+
+    // Check hall effect sensor and handle zeroing
+    updateTurretAbsolutePosition();
+
+    // Log all status signals and the current control request to NetworkTables
     DogLog.log(TurretConstants.LOG_ANGULAR_VELOCITY, getVelocity());
     DogLog.log(TurretConstants.LOG_MOTOR_VOLTAGE, getMotorVoltage());
     DogLog.log(TurretConstants.LOG_MOTOR_POSITION, getPosition());
     DogLog.log(TurretConstants.LOG_ANGULAR_ACCELERATION, getAcceleration());
     DogLog.log(TurretConstants.LOG_SUPPLY_CURRENT, getSupplyCurrent());
     DogLog.log(TurretConstants.LOG_IS_ZEROED, isZeroed);
+    DogLog.log(TurretConstants.LOG_HALL_SENSOR_TRIGGERED, isHallSensorTriggered());
 
     LoggingUtil.log(TurretConstants.LOG_CONTROL_REQUEST, motor.getAppliedControl());
   }
 
-  // Checks hall effect sensor state and handles zeroing on trigger
-  // Turret is zeroed when passing through hall sensor range
-  private void checkAndHandleZeroing() {
-    if (RobotBase.isSimulation()) {
-      return; // Skip in sim
+  /**
+   * Checks the hall effect sensor and updates the motor position and zeroing status accordingly.
+   * This method should be called periodically to ensure the turret can zero itself using the hall
+   * effect sensor.
+   */
+  private void updateTurretAbsolutePosition() {
+    // Don't attempt to zero using the hall sensor if the robot is enabled or
+    // if the turret has already been zeroed (which is always true in simulation),
+    // to avoid interfering with normal operation
+    if (RobotState.isEnabled() || isZeroed) {
+      return;
     }
 
-    // Read hall sensor state and returns false when magnet is present
-    // Invert the logic so true is triggered
-    boolean currentHallSensorState = !hallSensor.get();
+    // If the hall sensor is triggered but hasn't been triggered at all before, set the
+    // motor position to the hall sensor angle
+    if (isHallSensorTriggered() && !hasHallSensorBeenTriggered) {
+      hasHallSensorBeenTriggered = true;
 
-    DogLog.log(TurretConstants.LOG_HALL_SENSOR_TRIGGERED, currentHallSensorState);
-
-    // Detect rising edge, i.e. entering hall sensor range
-    if (currentHallSensorState && !lastHallSensorState) {
-      // Zero the motor position when hall sensor is triggered
-      motor.setPosition(TurretConstants.ZERO_POSITION_ANGLE);
-
-      if (!isZeroed) {
-        // First time zeroing, switch to brake mode
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motor.getConfigurator().apply(config);
-        isZeroed = true;
-        DogLog.log("Turret Rotation/Zeroing", "Turret zeroed successfully");
+      // Determine which angle to use for initial zeroing
+      Angle initialZeroAngle;
+      if (TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE == null
+          && TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
+        throw new IllegalStateException(
+            "At least one of MINIMUM_HALL_SENSOR_TRIGGER_ANGLE or MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE must be non-null for hall sensor zeroing to work.");
+      } else if (TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
+        initialZeroAngle = TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE;
+      } else if (TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
+        initialZeroAngle = TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE;
+      } else {
+        initialZeroAngle =
+            TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE
+                .plus(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)
+                .div(2);
       }
+
+      motor.setPosition(initialZeroAngle);
     }
 
-    lastHallSensorState = currentHallSensorState;
+    // If hall sensor is triggered at a lesser angle than ever before, set the
+    // motor position to the minimum angle that can trigger the hall sensor
+    if (isHallSensorTriggered()
+        && TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
+        && getPosition().lt(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE)) {
+      motor.setPosition(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE);
+    }
+
+    // If hall sensor is triggered at a greater angle than ever before, set the
+    // motor position to the maximum angle that can trigger the hall sensor
+    if (isHallSensorTriggered()
+        && TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
+        && getPosition().gt(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)) {
+      motor.setPosition(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE);
+    }
+
+    // If the hall sensor has exited the triggered range after being in it before,
+    // the zeroing process is complete
+    if (!isHallSensorTriggered() && hasHallSensorBeenTriggered) {
+      isZeroed = true;
+
+      // Set motor to normal neutral mode (brake mode) after zeroing is complete to signal
+      // that the turret is ready for use and put it into its normal neutral state at the
+      // beginning of the match
+      motor.setControl(new NeutralOut());
+    }
   }
 
-  // Returns whether turret has been zeroed.
+  /**
+   * Gets whether the turret has been zeroed using the hall effect sensor. When false, the turret
+   * does not know its actual position and is not ready for match start.
+   *
+   * @return true if the turret is zeroed, false otherwise
+   */
   public boolean isZeroed() {
     return isZeroed;
+  }
+
+  /**
+   * Gets whether the hall sensor is currently triggered. This can be used to detect when the turret
+   * is passing through the hall sensor range during zeroing.
+   *
+   * @return true if the hall sensor is triggered, false otherwise
+   */
+  public boolean isHallSensorTriggered() {
+    return hallSensorTriggeredSignal.getValue();
   }
 
   /* Getter methods for logged values */
@@ -256,40 +347,6 @@ public class Turret extends SubsystemBase {
         BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angVelocitySignal));
   }
 
-  // Command to zero the turret by slowly moving until the hall sensor is triggered.
-  // Should be called during robot initialization.
-  public Command zeroTurret() {
-    return run(() -> {
-          if (!isZeroed) {
-            // Move slowly in positive direction to find the hall sensor
-            motor.setControl(new VelocityVoltage(TurretConstants.ZEROING_SPEED));
-          }
-        })
-        .until(() -> isZeroed)
-        .finallyDo(
-            () -> {
-              // Stop motor once zeroed
-              motor.stopMotor();
-            })
-        .withName("ZeroTurret");
-  }
-
-  /* Moves the motor to the left for testing */
-  public Command moveToleft() {
-    return startEnd(
-            () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(1));
-              }
-            },
-            () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(0));
-              }
-            })
-        .onlyIf(() -> isZeroed);
-  }
-
   private Angle clampPositionToSafeRange(Angle position) {
     if (position.lt(TurretConstants.MIN_ANGLE)) {
       return TurretConstants.MIN_ANGLE;
@@ -305,31 +362,25 @@ public class Turret extends SubsystemBase {
     Angle clampedTargetPosition = clampPositionToSafeRange(targetAngle);
     return startEnd(
             () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(clampedTargetPosition));
-              }
+              setPositionControl(clampedTargetPosition);
             },
             () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(getPosition()));
-              }
+              setPositionControl(getPosition());
             })
-        .onlyIf(() -> isZeroed);
+        .onlyIf(this::isZeroed);
   }
 
-  /* Moves the motor based on a double */
-  public Command moveTo(double targetAngle) {
-    return startEnd(
-            () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(targetAngle));
-              }
-            },
-            () -> {
-              if (isZeroed) {
-                motor.setControl(new MotionMagicVoltage(getPosition()));
-              }
-            })
-        .onlyIf(() -> isZeroed);
+  /**
+   * Applies a Motion Magic position control request to move the turret to the target angle. If the
+   * turret is not yet zeroed, the motor is set to neutral mode instead.
+   *
+   * @param targetAngle The target angle to move the turret to
+   */
+  private void setPositionControl(Angle targetAngle) {
+    if (isZeroed) {
+      motor.setControl(new MotionMagicVoltage(targetAngle));
+    } else {
+      motor.setControl(new NeutralOut());
+    }
   }
 }

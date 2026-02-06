@@ -26,10 +26,6 @@ public class RobotContainer {
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
-
-    // Schedule turret zeroing command to run during robot init
-    // This will automatically zero the turret on robot enable
-    turretRotation.zeroTurret().ignoringDisable(true).schedule();
   }
 
   public CommandSwerveDrive getSwerveDrive() {

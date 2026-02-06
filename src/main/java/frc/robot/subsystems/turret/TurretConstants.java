@@ -1,8 +1,12 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 
 /** Constants for the Turret subsystem */
 public class TurretConstants {
@@ -24,13 +28,32 @@ public class TurretConstants {
   // Mechanical Consts
   public static final double SENSOR_TO_MECHANISM_RATIO = 34.5;
 
+  // Inverted value
+  public static final InvertedValue MOTOR_INVERSION = InvertedValue.Clockwise_Positive;
+
+  // Neutral mode
+  public static final NeutralModeValue MOTOR_NEUTRAL_MODE = NeutralModeValue.Brake;
+
+  // Current limits
+  public static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
+  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(60);
+
   // Hall Effect Sensor Configuration
-  public static final int HALL_SENSOR_DIO_CHANNEL =
-      0; // Change this to match your CANdi DIO channel
-  public static final double ZERO_POSITION_ANGLE =
-      0.0; // The angle to set when hall sensor is triggered (in rotations)
-  public static final double ZEROING_SPEED =
-      0.1; // Speed at which to move during zeroing (rotations/sec)
+  public static final int HALL_SENSOR_CANDI = 20;
+
+  /**
+   * The minimum angle that the turret can be at to trigger the hall sensor. This is used when the
+   * turret passes through the sensor moving from higher to lower angles. Set to null to disable
+   * zeroing when moving in this direction.
+   */
+  public static final Angle MINIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(0.0);
+
+  /**
+   * The maximum angle that the turret can be at to trigger the hall sensor. This is used when the
+   * turret passes through the sensor moving from lower to higher angles. Set to null to disable
+   * zeroing when moving in this direction.
+   */
+  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(5.0);
 
   // Simulation Consts
   public static final double MOMENT_OF_INERTIA = 0.09803;
