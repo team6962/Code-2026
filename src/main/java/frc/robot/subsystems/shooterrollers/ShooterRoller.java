@@ -29,23 +29,16 @@ public class ShooterRoller extends SubsystemBase {
   private StatusSignal<Voltage> voltageSignal;
   private ShooterRollerSim simulation;
 
-  // i don't know what this does ether, probably some safety feature
-  // update: it's apparently a feed forward thing to tell motors to get from point a to point b
-  // new goal: find a way to delete without causing error to reduce processing power
-
   public ShooterRoller() {
     shooterRollerMotor1 =
         new TalonFX(
             ShooterRollerConstants.MOTOR_CAN_ID_1, new CANBus(ShooterRollerConstants.CANBUS_NAME));
-    // note: device id is temporary, find out which device id will be used for shooter rollers
-    // update: fixed, device id is what it should be according to tech binder
 
     shooterRollerMotor1.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
     shooterRollerMotor2 =
         new TalonFX(
             ShooterRollerConstants.MOTOR_CAN_ID_2, new CANBus(ShooterRollerConstants.CANBUS_NAME));
-    // note: device id is temporary, find out which device id will be used for shooter rollers
-    // update: fixed, device id is what it should be according to tech binder
+
     shooterRollerMotor2.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
     // defines the variables we are keeping track of
     VelocitySignal = shooterRollerMotor1.getVelocity();
@@ -74,13 +67,10 @@ public class ShooterRoller extends SubsystemBase {
    * the build team
    */
   public Command shoot(double targetVelocity) {
-    /**
-     * positive voltage makes CAN ID 21 go counter clockwise, which is not what we want, please put
-     * a negative value so it goes clockwise since thats what is intended
-     */
+
     return startEnd(
         () -> {
-          // defines a local function to set motor voltage to make it go brrrrrrrrrrrrrrrrrrrrr
+          // defines a local function to set motor voltage to make it go
           shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
         },
         () -> {
