@@ -19,7 +19,7 @@ public class TurretConstants {
   public static final double kP = 0.7;
   public static final double kD = 0.025;
   public static final double kS = 0.0;
-  public static final double kV = 4.2827;
+  public static final double kV = 3.371;
   public static final double kA = 0.0;
 
   // Motion Magic constants

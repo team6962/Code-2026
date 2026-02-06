@@ -24,10 +24,10 @@ public class TurretSim {
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1),
+                DCMotor.getKrakenX44Foc(1),
                 TurretConstants.MOMENT_OF_INERTIA,
                 TurretConstants.SENSOR_TO_MECHANISM_RATIO),
-            DCMotor.getKrakenX60Foc(1));
+            DCMotor.getKrakenX44Foc(1));
   }
 
   /** This updates the simulated motors periodically */
