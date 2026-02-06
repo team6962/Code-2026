@@ -32,7 +32,8 @@ public class RobotContainer {
 
     intakeRollers = new IntakeRollers();
 
-    aprilTagVision = new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
+    aprilTagVision =
+        new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, LearnBotConstants.getSphereCameraConstants());
     teleopControls = new TeleopControls(this);
