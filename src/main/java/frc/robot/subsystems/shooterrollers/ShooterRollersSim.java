@@ -11,22 +11,22 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class ShooterRollerSim {
+public class ShooterRollersSim {
   private TalonFXSimState motorSim;
   private DCMotorSim physicsSim;
 
   /*
    * simulator for the shooter roller
    */
-  public ShooterRollerSim(TalonFX motor) {
+  public ShooterRollersSim(TalonFX motor) {
     motorSim = motor.getSimState();
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                ShooterRollerConstants.MOTOR_PHYSICS,
-                ShooterRollerConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
-                ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
-            ShooterRollerConstants.MOTOR_PHYSICS);
+                ShooterRollersConstants.MOTOR_PHYSICS,
+                ShooterRollersConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
+                ShooterRollersConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
+            ShooterRollersConstants.MOTOR_PHYSICS);
   }
 
   /** updates the simulation */
@@ -39,10 +39,10 @@ public class ShooterRollerSim {
     physicsSim.update(0.02);
     motorSim.setRawRotorPosition(
         invert(position, false)
-            .times(ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(ShooterRollersConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
     motorSim.setRotorVelocity(
         invert(velocity, false)
-            .times(ShooterRollerConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(ShooterRollersConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
   }
 
   private static Angle invert(Angle angle, boolean shouldBeInverted) {
