@@ -15,9 +15,9 @@ public class Preferences {
   public static final boolean enablePoseEstimationInSimulation = false;
 
   /**
-   * Whether to reorient the controls in simulation so that pressing the up key moves the robot
-   * up the screen in the Sim GUI. This is recommended to be true when testing using the Sim GUI,
-   * but should usually be false when visualizing with AdvantageScope's 3D field from a driver's
+   * Whether to reorient the controls in simulation so that pressing the up key moves the robot up
+   * the screen in the Sim GUI. This is recommended to be true when testing using the Sim GUI, but
+   * should usually be false when visualizing with AdvantageScope's 3D field from a driver's
    * perspective.
    */
   public static final boolean reorientControlsInSimulation = true;
@@ -35,7 +35,7 @@ public class Preferences {
 
   /**
    * Applies the preferences to the given teleop controls constants.
-   * 
+   *
    * @param constants The teleop controls constants to apply the preferences to.
    * @return The updated teleop controls constants.
    */

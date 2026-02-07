@@ -15,18 +15,16 @@ public class SimulationConstants {
    */
   public boolean EnablePoseEstimation = true;
 
-  /**
-   * Constructs a new SimulationConstants object with default values.
-   */
+  /** Constructs a new SimulationConstants object with default values. */
   public SimulationConstants() {}
 
   /**
-    * Sets whether pose estimation is enabled in simulation, and returns this SimulationConstants for
-    * chaining.
-    *
-    * @param enablePoseEstimation Whether to enable pose estimation in simulation
-    * @return This SimulationConstants object
-    */
+   * Sets whether pose estimation is enabled in simulation, and returns this SimulationConstants for
+   * chaining.
+   *
+   * @param enablePoseEstimation Whether to enable pose estimation in simulation
+   * @return This SimulationConstants object
+   */
   public SimulationConstants withEnablePoseEstimation(boolean enablePoseEstimation) {
     EnablePoseEstimation = enablePoseEstimation;
     return this;

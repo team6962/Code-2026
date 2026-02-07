@@ -33,7 +33,8 @@ public class TeleopControls {
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled());
 
     Command teleopSwerveCommand =
-        new XBoxTeleopSwerveCommand(robot.getSwerveDrive(), Preferences.apply(new XBoxTeleopSwerveConstants()));
+        new XBoxTeleopSwerveCommand(
+            robot.getSwerveDrive(), Preferences.apply(new XBoxTeleopSwerveConstants()));
 
     teleopEnabledTrigger.whileTrue(teleopSwerveCommand);
 
