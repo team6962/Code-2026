@@ -178,6 +178,11 @@ public class MotionSwerveDrive implements AutoCloseable {
     gyroscope.update(deltaTimeSeconds);
     odometry.update(deltaTimeSeconds);
     localization.update(deltaTimeSeconds);
+
+    if (!constants.Simulation.EnablePoseEstimation && RobotBase.isSimulation()) {
+      localization.resetPosition(simulation.getOdometry().getPosition());
+    }
+
     fieldLogger.update(deltaTimeSeconds);
 
     SwerveMotion motion = motionManager.getActiveMotion();
@@ -208,6 +213,16 @@ public class MotionSwerveDrive implements AutoCloseable {
     motionManager.close();
 
     controlLoop.close();
+  }
+
+  /**
+   * Gets the FieldLogger instance, which logs the robot's pose and module positions to a Field2d
+   * widget on the dashboard for visualization.
+   *
+   * @return The FieldLogger instance used for logging robot and module poses to the dashboard
+   */
+  public FieldLogger getFieldLogger() {
+    return fieldLogger;
   }
 
   /**

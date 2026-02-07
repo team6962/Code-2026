@@ -12,6 +12,7 @@ import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.util.SwerveComponent;
+import com.team6962.lib.vision.AprilTagVisionMeasurement;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -258,6 +259,18 @@ public class Localization implements SwerveComponent {
    */
   public synchronized void addVisionMeasurement(Pose2d pose, double timestampSeconds) {
     poseEstimator.addVisionMeasurement(new Pose3d(pose), timestampSeconds);
+  }
+
+  /**
+   * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
+   * while still accounting for measurement noise.
+   *
+   * @param measurement The vision measurement containing the pose, timestamp, and standard
+   *     deviations.
+   */
+  public synchronized void addVisionMeasurement(AprilTagVisionMeasurement measurement) {
+    addVisionMeasurement(
+        measurement.getPose(), measurement.getTimestamp(), measurement.getStdDevs());
   }
 
   /**

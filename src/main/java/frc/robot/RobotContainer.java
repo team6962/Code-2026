@@ -6,25 +6,40 @@ package frc.robot;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+import com.team6962.lib.vision.AprilTagVision;
+import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.hood.ShooterHood;
+import frc.robot.subsystems.intakerollers.IntakeRollers;
+import frc.robot.subsystems.shooterrollers.ShooterRoller;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
   private final ShooterHood shooterHood;
+  private final SphereClumpLocalization fuelClumpLocalization;
+  private final ShooterRoller shooterRoller;
+  private final IntakeRollers intakeRollers;
+  private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    swerveDrive =
+        new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
     shooterHood = new ShooterHood();
+    intakeRollers = new IntakeRollers();
+    shooterRoller = new ShooterRoller();
 
+    aprilTagVision =
+        new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
+    fuelClumpLocalization =
+        new SphereClumpLocalization(swerveDrive, LearnBotConstants.getSphereCameraConstants());
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -35,11 +50,19 @@ public class RobotContainer {
     return swerveDrive;
   }
 
+  public AprilTagVision getAprilTagVision() {
+    return aprilTagVision;
+  }
+
   public Command getAutonomousCommand() {
     return driveStraightAuto.getCommand();
   }
 
   public void latePeriodic() {
     swerveDrive.latePeriodic();
+  }
+
+  public SphereClumpLocalization getFuelLocalization() {
+    return fuelClumpLocalization;
   }
 }
