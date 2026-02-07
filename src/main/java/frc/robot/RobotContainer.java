@@ -28,9 +28,9 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
-        
+
     climb = new Climb();
-    
+
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
 
@@ -38,7 +38,6 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-
   }
 
   public CommandSwerveDrive getSwerveDrive() {
