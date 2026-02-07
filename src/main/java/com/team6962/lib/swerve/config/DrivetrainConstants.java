@@ -1,7 +1,9 @@
 package com.team6962.lib.swerve.config;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** A set of constants that configure the behavior of a swerve drivetrain. */
 public class DrivetrainConstants {
@@ -217,5 +219,127 @@ public class DrivetrainConstants {
    */
   public Distance getWheelRadius(Corner corner) {
     return getWheelRadius(corner.getIndex());
+  }
+
+  /**
+   * Gets the steer gear reduction of the specified swerve module. If the module has a specific
+   * steer gear reduction configured, that gear reduction is returned. Otherwise, the default steer
+   * gear reduction from the SteerMotorConstants is returned.
+   *
+   * @param index The index of the swerve module
+   * @return The steer gear reduction of the swerve module
+   */
+  public double getSteerGearReduction(int index) {
+    SwerveModuleConstants module = SwerveModules[index];
+    if (module.UniqueModuleConstants != null
+        && module.UniqueModuleConstants.SteerGearReduction != 0) {
+      return module.UniqueModuleConstants.SteerGearReduction;
+    } else {
+      return SteerMotor.GearReduction;
+    }
+  }
+
+  /**
+   * Gets the steer gear reduction of the specified swerve module. If the module has a specific
+   * steer gear reduction configured, that gear reduction is returned. Otherwise, the default steer
+   * gear reduction from the SteerMotorConstants is returned.
+   *
+   * @param corner The corner of the swerve drive
+   * @return The steer gear reduction of the swerve module
+   */
+  public double getSteerGearReduction(Corner corner) {
+    return getSteerGearReduction(corner.getIndex());
+  }
+
+  /**
+   * Gets the steer motor configuration for the specified swerve module. If the module has a
+   * specific steer motor configuration configured, that configuration is returned. Otherwise, the
+   * default steer motor configuration from the SteerMotorConstants is returned.
+   *
+   * @param index The index of the swerve module
+   * @return The steer motor configuration of the swerve module
+   */
+  public TalonFXConfiguration getSteerMotorConfig(int index) {
+    SwerveModuleConstants module = SwerveModules[index];
+    if (module.UniqueModuleConstants != null
+        && module.UniqueModuleConstants.SteerMotorConfig != null) {
+      return module.UniqueModuleConstants.SteerMotorConfig;
+    } else {
+      return SteerMotor.DeviceConfiguration;
+    }
+  }
+
+  /**
+   * Gets the steer motor configuration for the specified swerve module. If the module has a
+   * specific steer motor configuration configured, that configuration is returned. Otherwise, the
+   * default steer motor configuration from the SteerMotorConstants is returned.
+   *
+   * @param corner The corner of the swerve drive
+   * @return The steer motor configuration of the swerve module
+   */
+  public TalonFXConfiguration getSteerMotorConfig(Corner corner) {
+    return getSteerMotorConfig(corner.getIndex());
+  }
+
+  /**
+   * Gets the simulated moment of inertia of the steer mechanism for the specified swerve module. If
+   * the module has a specific simulated moment of inertia configured, that moment of inertia is
+   * returned. Otherwise, the default simulated moment of inertia from the SteerMotorConstants is
+   * returned.
+   *
+   * @param index The index of the swerve module
+   * @return The simulated moment of inertia of the steer mechanism for the swerve module
+   */
+  public MomentOfInertia getSteerMomentOfInertia(int index) {
+    SwerveModuleConstants module = SwerveModules[index];
+    if (module.UniqueModuleConstants != null
+        && module.UniqueModuleConstants.SteerMomentOfInertia != null) {
+      return module.UniqueModuleConstants.SteerMomentOfInertia;
+    } else {
+      return SteerMotor.SimulatedMomentOfInertia;
+    }
+  }
+
+  /**
+   * Gets the simulated moment of inertia of the steer mechanism for the specified swerve module. If
+   * the module has a specific simulated moment of inertia configured, that moment of inertia is
+   * returned. Otherwise, the default simulated moment of inertia from the SteerMotorConstants is
+   * returned.
+   *
+   * @param corner The corner of the swerve drive
+   * @return The simulated moment of inertia of the steer mechanism for the swerve module
+   */
+  public MomentOfInertia getSteerMomentOfInertia(Corner corner) {
+    return getSteerMomentOfInertia(corner.getIndex());
+  }
+
+  /**
+   * Gets the drive motor configuration for the specified swerve module. If the module has a
+   * specific drive motor configuration configured, that configuration is returned. Otherwise, the
+   * default drive motor configuration from the DriveMotorConstants is returned.
+   *
+   * @param index The index of the swerve module
+   * @return The drive motor configuration of the swerve module
+   */
+  public TalonFXConfiguration getDriveMotorConfig(int index) {
+    SwerveModuleConstants module = SwerveModules[index];
+    if (module.UniqueModuleConstants != null
+        && module.UniqueModuleConstants.DriveMotorConfig != null) {
+      return module.UniqueModuleConstants.DriveMotorConfig;
+    } else {
+      return DriveMotor.DeviceConfiguration;
+    }
+  }
+
+  /**
+   * Gets the drive motor configuration for the specified swerve module. If the module has a
+   * specific drive motor configuration configured, that configuration is returned. Otherwise, the
+   * default drive motor configuration from the DriveMotorConstants is returned.
+   *
+   * @param corner The corner of the swerve drive
+   * @return The drive motor configuration of the swerve module
+   */
+  public TalonFXConfiguration getDriveMotorConfig(Corner corner) {
+    return getDriveMotorConfig(corner.getIndex());
   }
 }

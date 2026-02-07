@@ -1,14 +1,26 @@
 package com.team6962.lib.swerve.simulation;
 
-import com.team6962.lib.swerve.config.DrivetrainConstants;
-import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
+import static edu.wpi.first.units.Units.Volts;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.team6962.lib.swerve.config.DrivetrainConstants;
+
+import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * Wrapper for MapleSim physics simulation that manages the 2026 game arena and swerve drive
@@ -69,20 +81,40 @@ public class MapleSim {
     // Register this arena as the global simulation instance so other components can access it
     SimulatedArena.overrideInstance(arena);
 
+    List<Supplier<SwerveModuleSimulation>> moduleSuppliers = new LinkedList<>();
+
+    for (int i = 0; i < drivetrainConstants.SwerveModules.length; i++) {
+      SwerveModuleSimulationConfig moduleConfig =
+          new SwerveModuleSimulationConfig(
+              drivetrainConstants.DriveMotor.SimulatedMotor,
+              drivetrainConstants.SteerMotor.SimulatedMotor,
+              drivetrainConstants.DriveMotor.GearReduction,
+              drivetrainConstants.getSteerGearReduction(i),
+              getKS(
+                  drivetrainConstants.getDriveMotorConfig(i),
+                  drivetrainConstants.DriveMotor.PositionSlot),
+              getKS(
+                  drivetrainConstants.getSteerMotorConfig(i),
+                  drivetrainConstants.SteerMotor.PositionSlot),
+              drivetrainConstants.getWheelRadius(i),
+              drivetrainConstants.getSteerMomentOfInertia(i),
+              drivetrainConstants.Structure.WheelCOF);
+
+      moduleSuppliers.add(() -> new SwerveModuleSimulation(moduleConfig));
+    }
+
+    @SuppressWarnings("unchecked")
+    Supplier<SwerveModuleSimulation>[] moduleSuppliersArray =
+        moduleSuppliers.toArray(new Supplier[0]);
+
     // Create the swerve drive simulation with the robot's specific configuration
     swerveSim =
         new SwerveDriveSimulation(
             DriveTrainSimulationConfig.Default()
                 // Configure the gyroscope (Pigeon2) for heading measurements
                 .withGyro(COTS.ofPigeon2())
-                // Configure each swerve module with Mark 4i characteristics, motor specs,
-                // wheel coefficient of friction, and drive gear ratio level
-                .withSwerveModule(
-                    COTS.ofMark4i(
-                        drivetrainConstants.DriveMotor.SimulatedMotor,
-                        drivetrainConstants.SteerMotor.SimulatedMotor,
-                        drivetrainConstants.Structure.WheelCOF,
-                        2))
+                // Configure each swerve module with the appropriate motor types, gear reductions, feedforward values, and physical properties
+                .withSwerveModules(moduleSuppliersArray)
                 // Set the drivetrain dimensions (distance between left/right wheels and front/back
                 // wheels)
                 .withTrackLengthTrackWidth(
@@ -162,5 +194,27 @@ public class MapleSim {
 
     // Log fuel positions for visualization in AdvantageScope or other logging tools
     DogLog.log("Drivetrain/Simulation/FuelPositions", fuelPoses);
+  }
+
+  /**
+   * Helper method to extract the static feedforward voltage (kS) from a TalonFX motor configuration
+   * for use in the physics simulation.
+   *
+   * @param config the TalonFX motor configuration containing the feedforward values
+   * @param slotIndex the index of the PID slot to extract the kS value from (typically 0 for
+   *     primary slot)
+   * @return the static feedforward voltage (kS) as a {@link Voltage} object
+   */
+  private Voltage getKS(TalonFXConfiguration config, int slotIndex) {
+    switch (slotIndex) {
+      case 0:
+        return Volts.of(config.Slot0.kS);
+      case 1:
+        return Volts.of(config.Slot1.kS);
+      case 2:
+        return Volts.of(config.Slot2.kS);
+      default:
+        throw new IllegalArgumentException("Invalid slot index: " + slotIndex);
+    }
   }
 }

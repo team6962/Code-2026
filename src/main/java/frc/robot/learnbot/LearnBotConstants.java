@@ -155,7 +155,7 @@ public class LearnBotConstants {
                 .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
                 .withPositionSlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60(1))
-                .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184)))
+                .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.03)))
         .withSteerEncoder(new SteerEncoderConstants().withDataFusion(DataFusionMethod.Remote));
   }
 
