@@ -14,7 +14,7 @@ import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
-import frc.robot.subsystems.shooterrollers.ShooterRoller;
+import frc.robot.subsystems.shooterrollers.ShooterRollers;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
@@ -22,7 +22,7 @@ public class RobotContainer {
   private final DriveStraightAuto driveStraightAuto;
   private final ShooterHood shooterHood;
   private final SphereClumpLocalization fuelClumpLocalization;
-  private final ShooterRoller shooterRoller;
+  private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
@@ -34,7 +34,7 @@ public class RobotContainer {
 
     shooterHood = new ShooterHood();
     intakeRollers = new IntakeRollers();
-    shooterRoller = new ShooterRoller();
+    shooterRollers = new ShooterRollers();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
@@ -68,5 +68,13 @@ public class RobotContainer {
 
   public ShooterHood getShooterHood() {
     return shooterHood;
+  }
+
+  public IntakeRollers getIntakeRollers() {
+    return intakeRollers;
+  }
+
+  public ShooterRollers getShooterRollers() {
+    return shooterRollers;
   }
 }

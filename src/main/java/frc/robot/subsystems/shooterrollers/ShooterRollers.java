@@ -15,10 +15,11 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
-public class ShooterRoller extends SubsystemBase {
+public class ShooterRollers extends SubsystemBase {
   private TalonFX shooterRollerMotor1;
   private TalonFX shooterRollerMotor2;
   private StatusSignal<AngularVelocity> VelocitySignal;
@@ -26,19 +27,19 @@ public class ShooterRoller extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
-  private ShooterRollerSim simulation;
+  private ShooterRollersSim simulation;
 
-  public ShooterRoller() {
+  public ShooterRollers() {
     shooterRollerMotor1 =
         new TalonFX(
-            ShooterRollerConstants.MOTOR_CAN_ID_1, new CANBus(ShooterRollerConstants.CANBUS_NAME));
+            ShooterRollersConstants.MOTOR_CAN_ID_1, new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-    shooterRollerMotor1.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
+    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
     shooterRollerMotor2 =
         new TalonFX(
-            ShooterRollerConstants.MOTOR_CAN_ID_2, new CANBus(ShooterRollerConstants.CANBUS_NAME));
+            ShooterRollersConstants.MOTOR_CAN_ID_2, new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-    shooterRollerMotor2.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
+    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
     // defines the variables we are keeping track of
     VelocitySignal = shooterRollerMotor1.getVelocity();
     voltageSignal = shooterRollerMotor1.getMotorVoltage();
@@ -50,13 +51,13 @@ public class ShooterRoller extends SubsystemBase {
         "shooterRoller / input velocity",
         0.0,
         newVelocity -> {
-          shoot(newVelocity).schedule();
+          CommandScheduler.getInstance().schedule(shoot(newVelocity));
         });
 
     shooterRollerMotor2.setControl(
         new Follower(shooterRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
     if (RobotBase.isSimulation()) {
-      simulation = new ShooterRollerSim(shooterRollerMotor1);
+      simulation = new ShooterRollersSim(shooterRollerMotor1);
     }
   }
 

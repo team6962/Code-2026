@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 /*
  * sets constants for the shooter roller
  */
-public final class ShooterRollerConstants {
+public final class ShooterRollersConstants {
   public static final int MOTOR_CAN_ID_1 = 21;
   public static final int MOTOR_CAN_ID_2 = 22;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(2);
