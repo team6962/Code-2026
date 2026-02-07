@@ -378,30 +378,52 @@ public class Turret extends SubsystemBase {
     }
   }
 
-  public static Angle optimizeTarget(Angle targetAngle, Angle currentAngle) {
+  /**
+   * Optimizes a target angle to take the shortest path from the current angle, while also ensuring
+   * the result is within the safe range defined by the given minimum and maximum angles.
+   *
+   * <p><b>IMPORTANT:</b> This method may output angles outside of the safe range if the turret's
+   * safe range is less than 360 degrees.
+   *
+   * @param targetAngle The desired target angle to optimize
+   * @param currentAngle The current angle of the turret, used to determine the shortest path
+   * @param minAngle The minimum safe angle for the turret
+   * @param maxAngle The maximum safe angle for the turret
+   * @return The optimized target angle, which is usually within the safe range
+   */
+  public static Angle optimizeTarget(
+      Angle targetAngle, Angle currentAngle, Angle minAngle, Angle maxAngle) {
     targetAngle = AngleMath.toDiscrete(targetAngle);
     targetAngle = AngleMath.toContinuous(targetAngle, currentAngle);
-    if (targetAngle.gt(TurretConstants.MAX_ANGLE)) {
+
+    if (targetAngle.gt(maxAngle)) {
       targetAngle = targetAngle.minus(Radians.of(2 * Math.PI));
     }
-    if (targetAngle.lt(TurretConstants.MIN_ANGLE)) {
+
+    if (targetAngle.lt(minAngle)) {
       targetAngle = targetAngle.plus(Radians.of(2 * Math.PI));
     }
+
     return targetAngle;
   }
 
   /**
-   * Returns a Command that moves the turret to the specified target angle. * Updates: 1. Uses
-   * AngleMath.toContinuous to find the shortest path relative to CURRENT position. 2. Clamps the
-   * result to safe limits.
+   * Creates a Command that moves the turret to the specified target angle.
+   *
+   * @param targetAngle The target angle to move the turret to
+   * @return A Command that moves the turret to the target angle when executed
    */
   public Command moveTo(Angle targetAngle) {
     return startEnd(
             () -> {
-              Angle clampedTargetPosition =
+              Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
-                      optimizeTarget(clampPositionToSafeRange(targetAngle), getPosition()));
-              setPositionControl(clampedTargetPosition);
+                      optimizeTarget(
+                          clampPositionToSafeRange(targetAngle),
+                          getPosition(),
+                          TurretConstants.MIN_ANGLE,
+                          TurretConstants.MAX_ANGLE));
+              setPositionControl(optimizedTargetPosition);
             },
             () -> {
               setPositionControl(getPosition());
