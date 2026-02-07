@@ -68,7 +68,7 @@ public class ShooterHood extends SubsystemBase {
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
 
     DogLog.tunable(
-        "Hood Motor/Hood Target Angle (Degrees)",
+        "Hood/Hood Target Angle (Degrees)",
         0.0,
         newAngle -> {
           CommandScheduler.getInstance().schedule(moveTo(Degrees.of(newAngle)));
@@ -76,9 +76,10 @@ public class ShooterHood extends SubsystemBase {
 
     if (RobotBase.isSimulation()) {
       simulation = new ShooterHoodSim(hoodMotor);
+      isZeroed = true;
+    } else {
+      hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
     }
-
-    hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
   }
 
   @Override
@@ -216,7 +217,7 @@ public class ShooterHood extends SubsystemBase {
   public Command moveTo(Angle targetAngle) {
     Angle clampedAngle = clampPositionToSafeRange(targetAngle);
 
-    DogLog.log("Hood Motor/Target Angle", clampedAngle.in(Degrees));
+    DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
 
     return startEnd(
         () -> {
