@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 
@@ -20,6 +21,8 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 
 public final class ShooterHoodConstants {
   public static final int MOTOR_CAN_ID = 20;
+  public static final int CANDI_CAN_ID = 20;
+  public static final String CANBUS = "subsystems";
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
 
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.04942);
@@ -53,6 +56,13 @@ public final class ShooterHoodConstants {
                   .withKV(6.5)
               // Don't add kG here, instead use ShooterHoodConstants.kG
               )
+          .withSoftwareLimitSwitch(
+            new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true)
+            .withReverseSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(MAX_ANGLE)
+            .withReverseSoftLimitThreshold(MIN_ANGLE)
+          )
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(60))

@@ -23,12 +23,13 @@ public class RobotContainer {
 
     swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
 
+    shooterHood = new ShooterHood();
+
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
 
-    shooterHood = new ShooterHood();
   }
 
   public CommandSwerveDrive getSwerveDrive() {

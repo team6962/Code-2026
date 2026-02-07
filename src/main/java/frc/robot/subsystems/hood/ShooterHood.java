@@ -3,17 +3,20 @@ package frc.robot.subsystems.hood;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
-import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -25,42 +28,31 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterHood extends SubsystemBase {
-  private TalonFX hoodMotor;
-  private CANdi candi = new CANdi(20, "canivore"); // CANbus name may need to be changed later
+  private final TalonFX hoodMotor;
+  private final CANdi candi; // CANbus name may need to be changed later
 
-  private StatusSignal<Angle> angle;
-  private StatusSignal<AngularVelocity> angVelocity;
-  private StatusSignal<AngularAcceleration> angAcceleration;
+  private final StatusSignal<Angle> angle;
+  private final StatusSignal<AngularVelocity> angVelocity;
+  private final StatusSignal<AngularAcceleration> angAcceleration;
 
   /**
    * Status signal for the profile reference (the intermediate target that the motion profile thinks
    * the hood should be at) in rotations
    */
-  private StatusSignal<Double> profileReferenceSignal;
+  private final StatusSignal<Double> profileReferenceSignal;
 
-  private StatusSignal<Voltage> voltage;
-  private StatusSignal<Current> current;
+  private final StatusSignal<Voltage> voltage;
+  private final StatusSignal<Current> current;
 
-  private StatusSignal<Boolean> candiTriggeredSignal;
+  private final StatusSignal<Boolean> candiTriggeredSignal;
 
   private ShooterHoodSim simulation;
-  private final DoubleSubscriber angleInput;
-
+  private boolean isZeroed = false;
   /** Initializes the motor and status signal */
   public ShooterHood() {
-    hoodMotor = new TalonFX(20); // change later
-    // TalonFXConfiguration config = new TalonFXConfiguration();
-    // config.Slot0.kP = 0.75;
-    // config.Slot0.kD = 0.1;
-    // config.Slot0.kS = 0.15;
-    // config.Slot0.kV = 2.571;
-    // config.Slot0.kA = 0.030;
-
-    // config.MotionMagic.MotionMagicCruiseVelocity = 10;
-    // config.MotionMagic.MotionMagicAcceleration = 5;
-
-    // config.Feedback.RotorToSensorRatio = 150.0 /7.0;
-
+    hoodMotor = new TalonFX(ShooterHoodConstants.MOTOR_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
+    candi = new CANdi(ShooterHoodConstants.CANDI_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
+   
     hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
 
     angVelocity = hoodMotor.getVelocity();
@@ -72,18 +64,19 @@ public class ShooterHood extends SubsystemBase {
 
     CANdiConfiguration candiConfig = new CANdiConfiguration();
     candi.getConfigurator().apply(candiConfig);
+    candiTriggeredSignal = candi.getS2Closed();
 
-    angleInput =
         DogLog.tunable(
-            "Hood Motor/Input Angle",
+            "Hood Motor/Hood Target Angle (Degrees)",
             0.0,
             newAngle -> {
-              setHoodAngle(newAngle).schedule();
+              setHoodAngle(Degrees.of(newAngle)).schedule();
             });
 
     if (RobotBase.isSimulation()) {
       simulation = new ShooterHoodSim(hoodMotor);
     }
+    hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
   }
 
   @Override
@@ -118,9 +111,11 @@ public class ShooterHood extends SubsystemBase {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
-    if (isCandiTriggered()) {
-      hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
+    if (isCandiTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
+      hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
+      isZeroed = true;
     }
+
   }
 
   public Angle clampPositionToSafeRange(Angle input) {
@@ -157,8 +152,8 @@ public class ShooterHood extends SubsystemBase {
     return candiTriggeredSignal.getValue();
   }
 
-  public Command setHoodAngle(double radians) {
-    Angle clampedAngle = clampPositionToSafeRange(Radians.of(radians));
+  public Command setHoodAngle(Angle targetAngle) {
+    Angle clampedAngle = clampPositionToSafeRange(targetAngle);
 
     DogLog.log("Hood Motor/Target Angle", clampedAngle.in(Degrees));
 
@@ -170,6 +165,17 @@ public class ShooterHood extends SubsystemBase {
           setPositionControl(getPosition());
         });
   }
+  public Command setVoltage(Voltage voltage) {
+    return runEnd(() -> {
+        if (isZeroed) {
+            hoodMotor.setControl(new VoltageOut(voltage.plus(Volts.of(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG))));
+        } else {
+            hoodMotor.setControl(new NeutralOut());
+        }
+    }, () -> {
+        setPositionControl(getPosition());
+    });
+  }
 
   /**
    * Applies a control request to move to a specific position with a MotionMagicVoltage control
@@ -179,8 +185,12 @@ public class ShooterHood extends SubsystemBase {
    * @param position The target position to move to.
    */
   private void setPositionControl(Angle position) {
-    hoodMotor.setControl(
+    if (isZeroed) {
+        hoodMotor.setControl(
         new MotionMagicVoltage(position)
             .withFeedForward(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG));
+    } else {
+        hoodMotor.setControl(new NeutralOut());
+    }
   }
 }
