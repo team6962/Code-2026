@@ -63,7 +63,7 @@ public class SphereCameraConstants {
 
   /**
    * Constructs a SphereCameraConstants with the specified camera name. Other fields need to be set
-   * via the 'with' methods before these constants can be used.
+   * via the 'with' methods or by assigning the fields before these constants can be used.
    *
    * @param name The name identifier for this sphere camera.
    */
