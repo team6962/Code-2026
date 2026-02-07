@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 
+import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -50,4 +51,6 @@ public class ClimbConstants{
             .withMotionMagicCruiseVelocity(80.0)
             .withMotionMagicAcceleration(160.0)
             .withMotionMagicJerk(1000.0));
+
+    public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
 }

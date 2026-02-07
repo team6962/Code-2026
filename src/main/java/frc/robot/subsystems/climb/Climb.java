@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -38,7 +39,7 @@ public class Climb extends SubsystemBase{
    private StatusSignal<Voltage> voltageSignal;
    private StatusSignal<Current> statorCurrentSignal;
    private StatusSignal<Current> supplyCurrentSignal;
-   private StatusSignal<Boolean> hallSignal;
+   private StatusSignal<Boolean> hallEffectSensorSignal;
    private ClimbSim simulation;
 
    public Climb(){
@@ -46,14 +47,15 @@ public class Climb extends SubsystemBase{
 
       motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
-      candi = new CANdi(30);
+      candi = new CANdi(30, "subsystems"); //change later to correct CAN id
+      candi.getConfigurator().apply(ClimbConstants.CANDI_CONFIGURATION);
       accelerationSignal = motor.getAcceleration();
       velocitySignal = motor.getVelocity();
       positionSignal = motor.getPosition();
       voltageSignal = motor.getMotorVoltage();
       statorCurrentSignal = motor.getStatorCurrent();
       supplyCurrentSignal = motor.getSupplyCurrent();
-      hallSignal = candi.getS1Closed();
+      hallEffectSensorSignal = candi.getS1Closed(); //we don't know if it is sensor 1 or sensor 2
       if (RobotBase.isSimulation()) {
          simulation = new ClimbSim(motor);
       }
@@ -83,20 +85,24 @@ public class Climb extends SubsystemBase{
       return supplyCurrentSignal.getValue();
    }
 
-   public boolean getHall(){
-      return hallSignal.getValue();
+   public boolean isHallEffectSensorTriggered(){
+      return hallEffectSensorSignal.getValue();
    }
 
    @Override
    public void periodic() {
-      BaseStatusSignal.refreshAll(accelerationSignal, velocitySignal, positionSignal, voltageSignal, statorCurrentSignal, supplyCurrentSignal, hallSignal);
+      BaseStatusSignal.refreshAll(accelerationSignal, velocitySignal, positionSignal, voltageSignal, statorCurrentSignal, supplyCurrentSignal, hallEffectSensorSignal);
       DogLog.log("Climb/Acceleration", getAcceleration());
       DogLog.log("Climb/Velocity", getVelocity());
       DogLog.log("Climb/Position", getPosition());
       DogLog.log("Climb/Voltage", getVoltage());
       DogLog.log("Climb/StatorCurrent", getStatorCurrent());
       DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
-      DogLog.log("Climb/HallSignal", getHall());
+      DogLog.log("Climb/HallSignal", isHallEffectSensorTriggered());
+
+      if (isHallEffectSensorTriggered()) {
+         motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
+      }
    }
 
    public Command elevate(){
