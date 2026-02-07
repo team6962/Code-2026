@@ -8,24 +8,39 @@ import static edu.wpi.first.units.Units.Radians;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+import com.team6962.lib.vision.AprilTagVision;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.intakerollers.IntakeRollers;
+import frc.robot.subsystems.shooterrollers.ShooterRoller;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
-  private final Turret turretRotation = new Turret();
-  double angleInRadians = Math.PI / 2;
+  private final Turret turret = new Turret();
+  private final DriveStraightAuto driveStraightAuto;
+  private final ShooterRoller shooterRoller;
+  private final IntakeRollers intakeRollers;
+  private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    swerveDrive = new CommandSwerveDrive(LearnBotConstants.getDrivetrainConstants());
+    intakeRollers = new IntakeRollers();
+    swerveDrive =
+        new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
+
+    aprilTagVision =
+        new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
+
+    driveStraightAuto = new DriveStraightAuto(this);
+    shooterRoller = new ShooterRoller();
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -33,19 +48,15 @@ public class RobotContainer {
   }
 
   public Turret getTurret() {
-    return turretRotation;
+    return turret;
+  }
+
+  public AprilTagVision getAprilTagVision() {
+    return aprilTagVision;
   }
 
   public Command getAutonomousCommand() {
-    // Only run autonomous command if turret is zeroed
-    return turretRotation
-        .moveTo(Radians.of(3))
-        .beforeStarting(
-            () -> {
-              if (!turretRotation.isZeroed()) {
-                System.err.println("WARNING: Turret not zeroed before autonomous!");
-              }
-            });
+    return driveStraightAuto.getCommand();
   }
 
   public void latePeriodic() {
