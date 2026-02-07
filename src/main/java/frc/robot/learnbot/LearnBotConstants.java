@@ -193,9 +193,9 @@ public class LearnBotConstants {
         .withFocalLengthX(907.41)
         .withFocalLengthY(907.64)
         .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
-        .withSphereTolerance(0.25)
+        .withSphereTolerance(0.1) // Note that this is not fully tuned and may need to be adjusted
         .withSphereDiameter(Inches.of(5.91))
-        .withMaxTargets(50)
+        .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
         .withRobotToCameraTransform(
             new Transform3d(
                 new Translation3d(
