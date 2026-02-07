@@ -15,7 +15,6 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -67,9 +66,7 @@ public class Turret extends SubsystemBase {
    */
   private boolean hasHallSensorBeenTriggered = false;
 
-  /**
-   * The current motor configuration
-   */
+  /** The current motor configuration */
   private TalonFXConfiguration config;
 
   /** Assigns Status Signal variables to the different methods part of the motor.get() */
@@ -78,14 +75,17 @@ public class Turret extends SubsystemBase {
     motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
     // Initialize hall effect sensor connected to the CANdi DIO port
-    candi = new CANdi(TurretConstants.HALL_SENSOR_CANDI_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
+    candi =
+        new CANdi(
+            TurretConstants.HALL_SENSOR_CANDI_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
     // Configure the TalonFX motor controller
     config = new TalonFXConfiguration();
 
     config.Slot0.kP = TurretConstants.kP;
     config.Slot0.kD = TurretConstants.kD;
-    config.Slot0.kS = RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
+    config.Slot0.kS =
+        RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
     config.Slot0.kV = TurretConstants.kV;
     config.Slot0.kA = TurretConstants.kA;
 
@@ -129,39 +129,45 @@ public class Turret extends SubsystemBase {
         });
 
     DogLog.tunable(
-            "Turret/Turret kP",
-            config.Slot0.kP,
-            newKP -> motor.getConfigurator().apply(config.Slot0.withKP(newKP)));
+        "Turret/Turret kP",
+        config.Slot0.kP,
+        newKP -> motor.getConfigurator().apply(config.Slot0.withKP(newKP)));
 
     DogLog.tunable(
-            "Turret/Turret kD",
-            config.Slot0.kD,
-            newKD -> motor.getConfigurator().apply(config.Slot0.withKD(newKD)));
+        "Turret/Turret kD",
+        config.Slot0.kD,
+        newKD -> motor.getConfigurator().apply(config.Slot0.withKD(newKD)));
 
     DogLog.tunable(
-            "Turret/Turret kS",
-            config.Slot0.kS,
-            newKS -> motor.getConfigurator().apply(config.Slot0.withKS(newKS)));
+        "Turret/Turret kS",
+        config.Slot0.kS,
+        newKS -> motor.getConfigurator().apply(config.Slot0.withKS(newKS)));
 
     DogLog.tunable(
-            "Turret/Turret kV",
-            config.Slot0.kV,
-            newKV -> motor.getConfigurator().apply(config.Slot0.withKV(newKV)));
+        "Turret/Turret kV",
+        config.Slot0.kV,
+        newKV -> motor.getConfigurator().apply(config.Slot0.withKV(newKV)));
 
     DogLog.tunable(
-            "Turret/Turret kA",
-            config.Slot0.kA,
-            newKA -> motor.getConfigurator().apply(config.Slot0.withKA(newKA)));
+        "Turret/Turret kA",
+        config.Slot0.kA,
+        newKA -> motor.getConfigurator().apply(config.Slot0.withKA(newKA)));
 
     DogLog.tunable(
-            "Turret/Turret Cruise Velocity",
-            config.MotionMagic.MotionMagicCruiseVelocity,
-            newVel -> motor.getConfigurator().apply(config.MotionMagic.withMotionMagicCruiseVelocity(newVel)));
+        "Turret/Turret Cruise Velocity",
+        config.MotionMagic.MotionMagicCruiseVelocity,
+        newVel ->
+            motor
+                .getConfigurator()
+                .apply(config.MotionMagic.withMotionMagicCruiseVelocity(newVel)));
 
     DogLog.tunable(
-            "Turret/Turret Max Acceleration",
-            config.MotionMagic.MotionMagicAcceleration,
-            newAccel -> motor.getConfigurator().apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
+        "Turret/Turret Max Acceleration",
+        config.MotionMagic.MotionMagicAcceleration,
+        newAccel ->
+            motor
+                .getConfigurator()
+                .apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
 
     // Set motor to coast mode before it has been zeroed, to allow for easier manual zeroing
     motor.setControl(new CoastOut());
@@ -181,7 +187,8 @@ public class Turret extends SubsystemBase {
       simulation.update();
     }
 
-    // If the robot is disabled, set the motor to hold its current position to prevent it from moving
+    // If the robot is disabled, set the motor to hold its current position to prevent it from
+    // moving
     if (RobotState.isDisabled() && isZeroed()) {
       setPositionControl(getPosition());
     }

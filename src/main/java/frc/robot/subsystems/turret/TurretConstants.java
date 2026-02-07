@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 
@@ -37,9 +36,10 @@ public class TurretConstants {
   /** The direction that is considered positive rotation for the motor. */
   public static final InvertedValue MOTOR_INVERSION = InvertedValue.Clockwise_Positive;
 
-  /** The neutral mode of the motor (e.g., brake or coast). This will only
-   * be used once the turret has been zeroed, as the turret is set to coast mode
-   * until it has been zeroed to allow it to be manually moved.
+  /**
+   * The neutral mode of the motor (e.g., brake or coast). This will only be used once the turret
+   * has been zeroed, as the turret is set to coast mode until it has been zeroed to allow it to be
+   * manually moved.
    */
   public static final NeutralModeValue MOTOR_NEUTRAL_MODE = NeutralModeValue.Brake;
 
@@ -58,14 +58,14 @@ public class TurretConstants {
   public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(5.0);
 
   /**
-   * The moment of inertia of the turret. This is used only for simulation and is not used in
-   * the actual robot code. This value is calculated from the turret CAD model and is in kg*m^2.
+   * The moment of inertia of the turret. This is used only for simulation and is not used in the
+   * actual robot code. This value is calculated from the turret CAD model and is in kg*m^2.
    */
   public static final double MOMENT_OF_INERTIA = 0.09803;
 
   /**
-   * The minimum angle that the turret can be at. This is used to prevent the turret from
-   * trying to move beyond its physical limits.
+   * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
+   * move beyond its physical limits.
    */
   public static final Angle MIN_ANGLE = Degrees.of(0);
 
