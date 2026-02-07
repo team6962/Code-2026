@@ -2,6 +2,7 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.wpi.first.units.measure.Angle;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 0.0) < DELTA || Math.abs(resultDegrees - 360.0) < DELTA;
-    assert isValid : "Result should be either 0 or 360 degrees, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be either 0 or 360 degrees, got: " + resultDegrees);
   }
 
   // ==================== Wraparound Tests ====================
@@ -80,8 +81,9 @@ class TurretTest {
 
     // Should pick the one closer to current (350)
     boolean isOptimized = distanceToWrapped < 30 || distanceToTarget < 30;
-    assert isOptimized
-        : "Result should be optimized to be close to current position, got: " + resultDegrees;
+    assertTrue(
+        isOptimized,
+        "Result should be optimized to be close to current position, got: " + resultDegrees);
   }
 
   @Test
@@ -115,7 +117,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 10.0) < DELTA || Math.abs(resultDegrees - 370.0) < DELTA;
-    assert isValid : "Result should respect max limit, got: " + resultDegrees;
+    assertTrue(isValid, "Result should respect max limit, got: " + resultDegrees);
   }
 
   @Test
@@ -133,7 +135,7 @@ class TurretTest {
     // -10 is within range [-180, 180]
     double resultDegrees = result.in(Degrees);
     boolean isInRange = resultDegrees >= -180.0 && resultDegrees <= 180.0;
-    assert isInRange : "Result should be within limits, got: " + resultDegrees;
+    assertTrue(isInRange, "Result should be within limits, got: " + resultDegrees);
   }
 
   // ==================== Limited Range Turret Tests ====================
@@ -159,7 +161,7 @@ class TurretTest {
     // Result could be 0 or 360, depending on optimization logic
     boolean isValid =
         Math.abs(resultDegrees - 0.0) < DELTA || Math.abs(resultDegrees - 360.0) < DELTA;
-    assert isValid : "Result should be 0 or 360 (both equivalent), got: " + resultDegrees;
+    assertTrue(isValid, "Result should be 0 or 360 (both equivalent), got: " + resultDegrees);
   }
 
   @Test
@@ -180,7 +182,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 180.0) < DELTA || Math.abs(resultDegrees - (-180.0)) < DELTA;
-    assert isValid : "Result should be 180 or -180 (both equivalent), got: " + resultDegrees;
+    assertTrue(isValid, "Result should be 180 or -180 (both equivalent), got: " + resultDegrees);
   }
 
   // ==================== Edge Cases ====================
@@ -270,7 +272,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 10.0) < DELTA || Math.abs(resultDegrees - 370.0) < DELTA;
-    assert isValid : "Result should be optimized, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be optimized, got: " + resultDegrees);
   }
 
   @Test
@@ -288,7 +290,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 270.0) < DELTA || Math.abs(resultDegrees - (-90.0)) < DELTA;
-    assert isValid : "Result should be optimized, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be optimized, got: " + resultDegrees);
   }
 
   // ==================== Boundary Tests ====================
@@ -307,7 +309,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - (-180.0)) < DELTA || Math.abs(resultDegrees - 180.0) < DELTA;
-    assert isValid : "Result should be at boundary, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be at boundary, got: " + resultDegrees);
   }
 
   @Test
@@ -324,7 +326,7 @@ class TurretTest {
     double resultDegrees = result.in(Degrees);
     boolean isValid =
         Math.abs(resultDegrees - 180.0) < DELTA || Math.abs(resultDegrees - (-180.0)) < DELTA;
-    assert isValid : "Result should be at boundary, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be at boundary, got: " + resultDegrees);
   }
 
   @Test
@@ -342,7 +344,7 @@ class TurretTest {
         Math.abs(resultDegrees - 0.0) < DELTA
             || Math.abs(resultDegrees - 360.0) < DELTA
             || Math.abs(resultDegrees - (-360.0)) < DELTA;
-    assert isValid : "Result should be optimized from boundary, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be optimized from boundary, got: " + resultDegrees);
   }
 
   @Test
@@ -360,6 +362,6 @@ class TurretTest {
         Math.abs(resultDegrees - 0.0) < DELTA
             || Math.abs(resultDegrees - 360.0) < DELTA
             || Math.abs(resultDegrees - (-360.0)) < DELTA;
-    assert isValid : "Result should be optimized from boundary, got: " + resultDegrees;
+    assertTrue(isValid, "Result should be optimized from boundary, got: " + resultDegrees);
   }
 }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.turret;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -35,17 +36,25 @@ public class TurretSim {
     // Sets the correct voltage values in the simulations and gets the angular velocity and position
     // angle
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    double motorVoltage = invert(motorSim.getMotorVoltage(), false);
-    Angle position = physicsSim.getAngularPosition();
-    AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
+
+    double motorVoltage =
+        invert(
+            motorSim.getMotorVoltage(),
+            TurretConstants.MOTOR_INVERSION == InvertedValue.Clockwise_Positive);
 
     // Handles physics simulation updates
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
+
+    Angle position = physicsSim.getAngularPosition();
+    AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
+
     motorSim.setRawRotorPosition(
-        invert(position, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
+        invert(position, TurretConstants.MOTOR_INVERSION == InvertedValue.Clockwise_Positive)
+            .times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
     motorSim.setRotorVelocity(
-        invert(velocity, false).times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
+        invert(velocity, TurretConstants.MOTOR_INVERSION == InvertedValue.Clockwise_Positive)
+            .times(TurretConstants.SENSOR_TO_MECHANISM_RATIO));
   }
 
   /** Defines helper methods */
