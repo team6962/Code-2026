@@ -29,10 +29,6 @@ public final class ShooterHoodConstants {
 
   public static final Angle MIN_ANGLE = Degrees.of(17.95);
   public static final Angle MAX_ANGLE = Degrees.of(52.95);
-  public static final Angle INITIAL_ANGLE = Degrees.of(0);
-
-  public static final Angle END_TOLERANCE = Degrees.of(3);
-  public static final Angle HOLD_TOLERANCE = Degrees.of(5);
 
   /** Distance between the pivot point and the center of mass of the hood. */
   public static final Distance ARM_LENGTH = Inches.of(6.85);
@@ -65,7 +61,7 @@ public final class ShooterHoodConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(60))
-                  .withStatorCurrentLimitEnable(false)
+                  .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
