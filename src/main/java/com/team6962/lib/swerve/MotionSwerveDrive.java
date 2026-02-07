@@ -216,6 +216,16 @@ public class MotionSwerveDrive implements AutoCloseable {
   }
 
   /**
+   * Gets the FieldLogger instance, which logs the robot's pose and module positions to a Field2d
+   * widget on the dashboard for visualization.
+   *
+   * @return The FieldLogger instance used for logging robot and module poses to the dashboard
+   */
+  public FieldLogger getFieldLogger() {
+    return fieldLogger;
+  }
+
+  /**
    * Gets the drivetrain constants used to configure this swerve drive's behavior.
    *
    * @return The drivetrain constants

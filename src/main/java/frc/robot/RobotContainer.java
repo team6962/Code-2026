@@ -7,6 +7,7 @@ package frc.robot;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
+import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
@@ -18,6 +19,7 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
+  private final SphereClumpLocalization fuelClumpLocalization;
   private final ShooterRoller shooterRoller;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
@@ -25,13 +27,15 @@ public class RobotContainer {
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    intakeRollers = new IntakeRollers();
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
+    intakeRollers = new IntakeRollers();
+
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
-
+    fuelClumpLocalization =
+        new SphereClumpLocalization(swerveDrive, LearnBotConstants.getSphereCameraConstants());
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -53,5 +57,9 @@ public class RobotContainer {
 
   public void latePeriodic() {
     swerveDrive.latePeriodic();
+  }
+
+  public SphereClumpLocalization getFuelLocalization() {
+    return fuelClumpLocalization;
   }
 }
