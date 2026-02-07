@@ -7,6 +7,8 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import com.team6962.lib.simulation.LinearMechanismSim;
+
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -16,22 +18,32 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 public class IntakeExtensionSim {
   private TalonFXSimState motorSim;
   private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
-  private ElevatorSim physicsSim;
+  private LinearMechanismSim physicsSim;
 
   public IntakeExtensionSim(TalonFX motor) {
     motorSim = motor.getSimState();
-    physicsSim =
-        new ElevatorSim(
-            LinearSystemId.createElevatorSystem(
-                (IntakeExtensionConstants.MOTOR_PHYSICS),
-                IntakeExtensionConstants.MOVING_MASS.in(Kilograms),
-                0.05,
-                IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
+    physicsSim = 
+        new LinearMechanismSim(
+            1.0, //fake num
+            2.0, //also fake
             IntakeExtensionConstants.MOTOR_PHYSICS,
-            IntakeExtensionConstants.MIN_POSITION.in(Meters),
-            IntakeExtensionConstants.MAX_POSITION.in(Meters),
-            true,
-            0);
+            IntakeExtensionConstants.MIN_POSITION,
+            IntakeExtensionConstants.MAX_POSITION,
+            IntakeExtensionConstants.ANGLE,
+            IntakeExtensionConstants.MIN_POSITION
+        );
+    // physicsSim =
+    //     new ElevatorSim(
+    //         LinearSystemId.createElevatorSystem(
+    //             (IntakeExtensionConstants.MOTOR_PHYSICS),
+    //             IntakeExtensionConstants.MOVING_MASS.in(Kilograms),
+    //             0.05,
+    //             IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
+    //         IntakeExtensionConstants.MOTOR_PHYSICS,
+    //         IntakeExtensionConstants.MIN_POSITION.in(Meters),
+    //         IntakeExtensionConstants.MAX_POSITION.in(Meters),
+    //         true,
+    //         0);
   }
 
   public void update() {
@@ -41,8 +53,8 @@ public class IntakeExtensionSim {
     AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getVelocityMetersPerSecond());
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
-    motorSim.setRawRotorPosition(invert(position, false).times(5.0 / 0.05));
-    motorSim.setRotorVelocity(invert(velocity, false).times(5.0 / 0.05));
+    motorSim.setRawRotorPosition(invert(position, false).times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+    motorSim.setRotorVelocity(invert(velocity, false).times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
   }
 
   private static double invert(double value, boolean shouldBeInverted) {
