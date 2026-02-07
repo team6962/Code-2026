@@ -100,12 +100,12 @@ public class Climb extends SubsystemBase{
    }
 
    public Command elevate(){
-      return startEnd(()->{motor.setControl(new PositionVoltage(1));},
+      return startEnd(()->{motor.setControl(new PositionVoltage(8));},
       ()->{motor.setControl(new PositionVoltage(getPosition().in(Meters)));});
    }
 
    public Command descend(){
-      return startEnd(()->{motor.setControl(new PositionVoltage(0));},
+      return startEnd(()->{motor.setControl(new PositionVoltage(0.0));},
       ()->{motor.setControl(new PositionVoltage(getPosition().in(Meters)));});
    }
 

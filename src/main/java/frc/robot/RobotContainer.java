@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 
 public class RobotContainer {
@@ -19,6 +20,7 @@ public class RobotContainer {
   private final DriveStraightAuto driveStraightAuto;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
+  private final Climb climb;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -26,7 +28,9 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
-
+        
+    climb = new Climb();
+    
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
 
@@ -34,6 +38,7 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -45,7 +50,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    // return driveStraightAuto.getCommand();
+    return climb.elevate();
   }
 
   public void latePeriodic() {
