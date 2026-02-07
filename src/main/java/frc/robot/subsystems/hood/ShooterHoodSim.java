@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
+/** Simulates the Shooter Hood subsystem */
 public class ShooterHoodSim {
   private TalonFXSimState motorSim;
   private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
@@ -30,7 +31,7 @@ public class ShooterHoodSim {
             ShooterHoodConstants.MIN_ANGLE.in(Radians),
             ShooterHoodConstants.MAX_ANGLE.in(Radians),
             true,
-            0);
+            ShooterHoodConstants.MIN_ANGLE.in(Radians));
   }
 
   public void update() {

@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -25,15 +24,16 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterHood extends SubsystemBase {
   private final TalonFX hoodMotor;
-  private final CANdi candi; // CANbus name may need to be changed later
+  private final CANdi candi;
 
-  private final StatusSignal<Angle> angle;
-  private final StatusSignal<AngularVelocity> angVelocity;
-  private final StatusSignal<AngularAcceleration> angAcceleration;
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+  private final StatusSignal<AngularAcceleration> accelerationSignal;
 
   /**
    * Status signal for the profile reference (the intermediate target that the motion profile thinks
@@ -41,10 +41,10 @@ public class ShooterHood extends SubsystemBase {
    */
   private final StatusSignal<Double> profileReferenceSignal;
 
-  private final StatusSignal<Voltage> voltage;
-  private final StatusSignal<Current> current;
-
-  private final StatusSignal<Boolean> candiTriggeredSignal;
+  private final StatusSignal<Voltage> voltageSignal;
+  private final StatusSignal<Current> supplyCurrentSignal;
+  private final StatusSignal<Current> statorCurrentSignal;
+  private final StatusSignal<Boolean> hallSensorTriggeredSignal;
 
   private ShooterHoodSim simulation;
   private boolean isZeroed = false;
@@ -56,28 +56,28 @@ public class ShooterHood extends SubsystemBase {
     candi = new CANdi(ShooterHoodConstants.CANDI_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
 
     hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
+    candi.getConfigurator().apply(ShooterHoodConstants.CANDI_CONFIGURATION);
 
-    angVelocity = hoodMotor.getVelocity();
-    voltage = hoodMotor.getMotorVoltage();
-    angAcceleration = hoodMotor.getAcceleration();
-    angle = hoodMotor.getPosition();
-    current = hoodMotor.getSupplyCurrent();
+    velocitySignal = hoodMotor.getVelocity();
+    voltageSignal = hoodMotor.getMotorVoltage();
+    accelerationSignal = hoodMotor.getAcceleration();
+    positionSignal = hoodMotor.getPosition();
+    statorCurrentSignal = hoodMotor.getStatorCurrent();
+    supplyCurrentSignal = hoodMotor.getSupplyCurrent();
+    hallSensorTriggeredSignal = candi.getS2Closed();
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
-
-    CANdiConfiguration candiConfig = new CANdiConfiguration();
-    candi.getConfigurator().apply(candiConfig);
-    candiTriggeredSignal = candi.getS2Closed();
 
     DogLog.tunable(
         "Hood Motor/Hood Target Angle (Degrees)",
         0.0,
         newAngle -> {
-          setHoodAngle(Degrees.of(newAngle)).schedule();
+          CommandScheduler.getInstance().schedule(moveTo(Degrees.of(newAngle)));
         });
 
     if (RobotBase.isSimulation()) {
       simulation = new ShooterHoodSim(hoodMotor);
     }
+
     hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
   }
 
@@ -94,18 +94,25 @@ public class ShooterHood extends SubsystemBase {
     }
 
     BaseStatusSignal.refreshAll(
-        angVelocity, voltage, angAcceleration, angle, current, profileReferenceSignal);
-    DogLog.log("Hood Motor/Angle", getPosition().in(Degrees));
-    DogLog.log("Hood Motor/Angular Velocity", getAngularVelocity());
-    DogLog.log("Hood Motor/Angular Acceleration", getAngularAcceleration());
-    DogLog.log("Hood Motor/Motor Voltage", getMotorVoltage());
-    DogLog.log("Hood Motor/Current", getSupply());
+        velocitySignal,
+        voltageSignal,
+        accelerationSignal,
+        positionSignal,
+        statorCurrentSignal,
+        supplyCurrentSignal,
+        profileReferenceSignal);
+    DogLog.log("Hood/Position", getPosition().in(Degrees), Degrees);
+    DogLog.log("Hood/Velocity", getVelocity());
+    DogLog.log("Hood/Acceleration", getAcceleration());
+    DogLog.log("Hood/AppliedVoltage", getAppliedVoltage());
+    DogLog.log("Hood/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Hood/StatorCurrent", getStatorCurrent());
     DogLog.log(
-        "Hood Motor/Profile Reference Angle",
+        "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
         Degrees);
 
-    LoggingUtil.log("Hood Motor/Control Request", hoodMotor.getAppliedControl());
+    LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
 
     // Update the currently applied control request with a new gravity feedforward
     // voltage if the control request is a MotionMagicVoltage
@@ -113,12 +120,18 @@ public class ShooterHood extends SubsystemBase {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
-    if (isCandiTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
+    if (isHallSensorTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
     }
   }
 
+  /**
+   * Clamps the given position to within the limiits of the hood.
+   *
+   * @param input angle to clamp
+   * @return the clamped angle
+   */
   public Angle clampPositionToSafeRange(Angle input) {
     if (input.gt(ShooterHoodConstants.MAX_ANGLE)) {
       return ShooterHoodConstants.MAX_ANGLE;
@@ -128,32 +141,79 @@ public class ShooterHood extends SubsystemBase {
     return input;
   }
 
-  /** Gets Angular Velocity and Motor Voltage */
+  /**
+   * Gets the hoods position. Increasing angles represent the hood moving upward, decreasing angles
+   * represent the hood moving downward.
+   *
+   * @return the hoods position
+   */
   public Angle getPosition() {
-    return MeasureUtil.toAngle(BaseStatusSignal.getLatencyCompensatedValue(angle, angVelocity));
+    return MeasureUtil.toAngle(
+        BaseStatusSignal.getLatencyCompensatedValue(positionSignal, velocitySignal));
   }
 
-  public AngularAcceleration getAngularAcceleration() {
-    return angAcceleration.getValue();
+  /**
+   * Gets the hoods velocity. Positive values represent the hood moving upward, negative values
+   * represent the hood moving downward.
+   *
+   * @return the hoods velocity
+   */
+  public AngularVelocity getVelocity() {
+    return BaseStatusSignal.getLatencyCompensatedValue(velocitySignal, accelerationSignal);
   }
 
-  public AngularVelocity getAngularVelocity() {
-    return BaseStatusSignal.getLatencyCompensatedValue(angVelocity, angAcceleration);
+  /**
+   * Gets the hoods acceleration.
+   *
+   * @return the hoods acceleration
+   */
+  public AngularAcceleration getAcceleration() {
+    return accelerationSignal.getValue();
   }
 
-  public Voltage getMotorVoltage() {
-    return voltage.getValue();
+  /**
+   * Gets the voltage applied to the motor
+   *
+   * @return the applied voltage
+   */
+  public Voltage getAppliedVoltage() {
+    return voltageSignal.getValue();
   }
 
-  public Current getSupply() {
-    return current.getValue();
+  /**
+   * Gets the motor supply current
+   *
+   * @return the supply current
+   */
+  public Current getSupplyCurrent() {
+    return supplyCurrentSignal.getValue();
   }
 
-  public boolean isCandiTriggered() {
-    return candiTriggeredSignal.getValue();
+  /**
+   * Gets the motor stator current
+   *
+   * @return the stator current
+   */
+  public Current getStatorCurrent() {
+    return statorCurrentSignal.getValue();
   }
 
-  public Command setHoodAngle(Angle targetAngle) {
+  /**
+   * Gets whether the hall sensor is near its minimum position
+   *
+   * @return true if the hall sensor is triggered
+   */
+  public boolean isHallSensorTriggered() {
+    return hallSensorTriggeredSignal.getValue();
+  }
+
+  /**
+   * Returns a command that moves the hood to the given target angle.
+   *
+   * @param targetAngle the target angle to move towards
+   * @return the command that moves to the target angle
+   */
+  public Command moveTo(Angle targetAngle) {
     Angle clampedAngle = clampPositionToSafeRange(targetAngle);
 
     DogLog.log("Hood Motor/Target Angle", clampedAngle.in(Degrees));
@@ -167,7 +227,13 @@ public class ShooterHood extends SubsystemBase {
         });
   }
 
-  public Command setVoltage(Voltage voltage) {
+  /**
+   * Moves the hood at the given voltage with additional gravity compensation applied.
+   *
+   * @param voltage the voltage to apply
+   * @return the command that runs the hood at that voltage
+   */
+  public Command moveAtVoltage(Voltage voltage) {
     return runEnd(
         () -> {
           if (isZeroed) {
