@@ -166,10 +166,10 @@ public class LearnBotConstants {
                 "Color-2",
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(1).in(Meters),
-                        Inches.of(-15).in(Meters),
-                        Inches.of(2.75).in(Meters)),
-                    new Rotation3d(Math.PI, 0, -Math.PI / 2))))
+                        Inches.of(-3.0).in(Meters),
+                        Inches.of(-3.0).in(Meters),
+                        Inches.of(16.25).in(Meters)),
+                    new Rotation3d(0, -(Math.PI * (24.0/180.0)) , -Math.PI / 2))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
@@ -199,9 +199,9 @@ public class LearnBotConstants {
         .withRobotToCameraTransform(
             new Transform3d(
                 new Translation3d(
-                    Inches.of(-1.0).in(Meters),
-                    Inches.of(-15.0).in(Meters),
-                    Inches.of(2.75).in(Meters)),
-                new Rotation3d(Math.PI, 0, -Math.PI / 2)));
+                    Inches.of(-3.0).in(Meters),
+                    Inches.of(-3.0).in(Meters),
+                    Inches.of(16.25).in(Meters)),
+                new Rotation3d(0, -(Math.PI * (24.0/180.0)) , -Math.PI / 2)));
   }
 }
