@@ -13,7 +13,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -28,7 +27,7 @@ public final class ShooterHoodConstants {
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.04942);
 
   public static final Angle MIN_ANGLE = Degrees.of(17.95);
-  public static final Angle MAX_ANGLE = Degrees.of(52.95); 
+  public static final Angle MAX_ANGLE = Degrees.of(52.95);
   public static final Angle INITIAL_ANGLE = Degrees.of(0);
 
   public static final Angle END_TOLERANCE = Degrees.of(3);
@@ -57,20 +56,16 @@ public final class ShooterHoodConstants {
               // Don't add kG here, instead use ShooterHoodConstants.kG
               )
           .withSoftwareLimitSwitch(
-            new SoftwareLimitSwitchConfigs()
-            .withForwardSoftLimitEnable(true)
-            .withReverseSoftLimitEnable(true)
-            .withForwardSoftLimitThreshold(MAX_ANGLE)
-            .withReverseSoftLimitThreshold(MIN_ANGLE)
-          )
+              new SoftwareLimitSwitchConfigs()
+                  .withForwardSoftLimitEnable(true)
+                  .withReverseSoftLimitEnable(true)
+                  .withForwardSoftLimitThreshold(MAX_ANGLE)
+                  .withReverseSoftLimitThreshold(MIN_ANGLE))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(60))
                   .withStatorCurrentLimitEnable(false)
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true))
-            .withMotorOutput(
-                new MotorOutputConfigs()
-                .withInverted(InvertedValue.Clockwise_Positive)
-            );
+          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 }

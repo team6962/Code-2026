@@ -29,7 +29,6 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-
   }
 
   public CommandSwerveDrive getSwerveDrive() {

@@ -48,11 +48,13 @@ public class ShooterHood extends SubsystemBase {
 
   private ShooterHoodSim simulation;
   private boolean isZeroed = false;
+
   /** Initializes the motor and status signal */
   public ShooterHood() {
-    hoodMotor = new TalonFX(ShooterHoodConstants.MOTOR_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
+    hoodMotor =
+        new TalonFX(ShooterHoodConstants.MOTOR_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
     candi = new CANdi(ShooterHoodConstants.CANDI_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
-   
+
     hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
 
     angVelocity = hoodMotor.getVelocity();
@@ -66,12 +68,12 @@ public class ShooterHood extends SubsystemBase {
     candi.getConfigurator().apply(candiConfig);
     candiTriggeredSignal = candi.getS2Closed();
 
-        DogLog.tunable(
-            "Hood Motor/Hood Target Angle (Degrees)",
-            0.0,
-            newAngle -> {
-              setHoodAngle(Degrees.of(newAngle)).schedule();
-            });
+    DogLog.tunable(
+        "Hood Motor/Hood Target Angle (Degrees)",
+        0.0,
+        newAngle -> {
+          setHoodAngle(Degrees.of(newAngle)).schedule();
+        });
 
     if (RobotBase.isSimulation()) {
       simulation = new ShooterHoodSim(hoodMotor);
@@ -115,7 +117,6 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
     }
-
   }
 
   public Angle clampPositionToSafeRange(Angle input) {
@@ -165,16 +166,22 @@ public class ShooterHood extends SubsystemBase {
           setPositionControl(getPosition());
         });
   }
+
   public Command setVoltage(Voltage voltage) {
-    return runEnd(() -> {
-        if (isZeroed) {
-            hoodMotor.setControl(new VoltageOut(voltage.plus(Volts.of(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG))));
-        } else {
+    return runEnd(
+        () -> {
+          if (isZeroed) {
+            hoodMotor.setControl(
+                new VoltageOut(
+                    voltage.plus(
+                        Volts.of(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG))));
+          } else {
             hoodMotor.setControl(new NeutralOut());
-        }
-    }, () -> {
-        setPositionControl(getPosition());
-    });
+          }
+        },
+        () -> {
+          setPositionControl(getPosition());
+        });
   }
 
   /**
@@ -186,11 +193,11 @@ public class ShooterHood extends SubsystemBase {
    */
   private void setPositionControl(Angle position) {
     if (isZeroed) {
-        hoodMotor.setControl(
-        new MotionMagicVoltage(position)
-            .withFeedForward(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG));
+      hoodMotor.setControl(
+          new MotionMagicVoltage(position)
+              .withFeedForward(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG));
     } else {
-        hoodMotor.setControl(new NeutralOut());
+      hoodMotor.setControl(new NeutralOut());
     }
   }
 }
