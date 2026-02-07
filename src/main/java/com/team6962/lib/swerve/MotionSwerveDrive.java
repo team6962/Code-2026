@@ -180,7 +180,7 @@ public class MotionSwerveDrive implements AutoCloseable {
     localization.update(deltaTimeSeconds);
 
     if (!constants.Simulation.EnablePoseEstimation && RobotBase.isSimulation()) {
-      localization.resetPosition(simulation.getOdometry().getPosition());
+      localization.resetPosition(simulation.getRobotPosition());
     }
 
     fieldLogger.update(deltaTimeSeconds);

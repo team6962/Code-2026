@@ -86,7 +86,7 @@ public class AprilTagVision extends SubsystemBase {
   public void periodic() {
     // Update vision simulation with current robot pose
     if (visionSystemSim != null) {
-      visionSystemSim.update(swerveDrive.getSimulation().getOdometry().getPosition());
+      visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
     }
 
     int measurements = 0;

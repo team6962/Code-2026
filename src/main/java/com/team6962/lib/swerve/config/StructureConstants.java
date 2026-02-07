@@ -24,6 +24,14 @@ public class StructureConstants {
    */
   public Distance WheelRadius = Inches.of(1.95);
 
+  /**
+   * The coefficient of friction between the wheels and the ground. This is used for simulation and
+   * can be tuned to match the actual performance of the robot on the field. A typical value for
+   * rubber wheels on carpet is around 1.0 to 1.5, but this can vary based on the specific wheel
+   * material and field surface.
+   */
+  public double WheelCOF = 1.426;
+
   /** The outer length of the robot from bumper to bumper, in the X direction (front to back). */
   public Distance OuterLength = Inches.of(35);
 
@@ -72,6 +80,19 @@ public class StructureConstants {
    */
   public StructureConstants withWheelRadius(Distance wheelRadius) {
     WheelRadius = wheelRadius;
+    return this;
+  }
+
+  /**
+   * Sets the coefficient of friction between the wheels and the ground, and returns this
+   * StructureConstants object for chaining. This is used for simulation and can be tuned to match
+   * the actual performance of the robot on the field.
+   *
+   * @param wheelCOF The coefficient of friction for the wheels
+   * @return This StructureConstants object
+   */
+  public StructureConstants withWheelCOF(double wheelCOF) {
+    WheelCOF = wheelCOF;
     return this;
   }
 
