@@ -2,6 +2,7 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -14,6 +15,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
+import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -376,20 +378,29 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public static Angle optimizeTarget(Angle targetAngle, Angle currentAngle) {
+    targetAngle = AngleMath.toDiscrete(targetAngle);
+    targetAngle = AngleMath.toContinuous(targetAngle, currentAngle);
+    if (targetAngle.gt(TurretConstants.MAX_ANGLE)) {
+      targetAngle = targetAngle.minus(Radians.of(2 * Math.PI));
+    }
+    if (targetAngle.lt(TurretConstants.MIN_ANGLE)) {
+      targetAngle = targetAngle.plus(Radians.of(2 * Math.PI));
+    }
+    return targetAngle;
+  }
+
   /**
-   * Returns a Command that moves the turret to the specified target angle using Motion Magic
-   * position control. The target angle is first clamped to be within the safe range defined by
-   * TurretConstants. If the turret is not yet zeroed, the command will instead set the motor to
-   * neutral mode.
-   *
-   * @param targetAngle The target angle to move the turret to
-   * @return A Command that moves the turret to the specified target angle
+   * Returns a Command that moves the turret to the specified target angle. * Updates: 1. Uses
+   * AngleMath.toContinuous to find the shortest path relative to CURRENT position. 2. Clamps the
+   * result to safe limits.
    */
   public Command moveTo(Angle targetAngle) {
-    Angle clampedTargetPosition = clampPositionToSafeRange(targetAngle);
-
     return startEnd(
             () -> {
+              Angle clampedTargetPosition =
+                  clampPositionToSafeRange(
+                      optimizeTarget(clampPositionToSafeRange(targetAngle), getPosition()));
               setPositionControl(clampedTargetPosition);
             },
             () -> {
