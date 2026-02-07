@@ -57,10 +57,20 @@ public class IntakeExtension extends SubsystemBase {
     }
   }
 
+  public Distance clampPositionToSafeRange(Distance input) {
+      if (input.gt(IntakeExtensionConstants.MAX_POSITION)) {
+          return IntakeExtensionConstants.MAX_POSITION;
+      }
+      else if (input.lt(IntakeExtensionConstants.MIN_POSITION)) {
+        return IntakeExtensionConstants.MIN_POSITION;
+      }
+      return input;
+  }
+
   public Command extend() {
     return startEnd(
         () -> {
-          motor.setControl(new PositionVoltage(1));
+          motor.setControl(new PositionVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
         },
         () -> {
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));
@@ -70,7 +80,7 @@ public class IntakeExtension extends SubsystemBase {
   public Command retract() {
     return startEnd(
         () -> {
-          motor.setControl(new PositionVoltage(0));
+          motor.setControl(new PositionVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters)));
         },
         () -> {
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));
