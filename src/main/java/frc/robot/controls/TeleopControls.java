@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Preferences;
 import frc.robot.RobotContainer;
 
 public class TeleopControls {
@@ -32,7 +33,8 @@ public class TeleopControls {
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled());
 
     Command teleopSwerveCommand =
-        new XBoxTeleopSwerveCommand(robot.getSwerveDrive(), new XBoxTeleopSwerveConstants());
+        new XBoxTeleopSwerveCommand(
+            robot.getSwerveDrive(), Preferences.apply(new XBoxTeleopSwerveConstants()));
 
     teleopEnabledTrigger.whileTrue(teleopSwerveCommand);
 

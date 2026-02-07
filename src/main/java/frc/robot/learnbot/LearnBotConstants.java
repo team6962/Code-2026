@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
@@ -32,7 +33,16 @@ import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.config.StructureConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.TimingConstants;
+import com.team6962.lib.vision.AprilTagCameraConstants;
+import com.team6962.lib.vision.AprilTagVisionConstants;
+import com.team6962.lib.vision.SphereCameraConstants;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class LearnBotConstants {
   public static DrivetrainConstants getDrivetrainConstants() {
@@ -147,5 +157,51 @@ public class LearnBotConstants {
                 .withSimulatedMotor(DCMotor.getKrakenX60(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184)))
         .withSteerEncoder(new SteerEncoderConstants().withDataFusion(DataFusionMethod.Remote));
+  }
+
+  public static AprilTagVisionConstants getAprilTagVisionConstants() {
+    return new AprilTagVisionConstants()
+        .withCameras(
+            new AprilTagCameraConstants(
+                "Color-2",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(1).in(Meters),
+                        Inches.of(-15).in(Meters),
+                        Inches.of(2.75).in(Meters)),
+                    new Rotation3d(Math.PI, 0, -Math.PI / 2))))
+        // Note that standard deviations are not fully tuned
+        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        .withCameraSimProperties(
+            new SimCameraProperties()
+                .setCalibration(1280, 800, Rotation2d.fromDegrees(70))
+                .setCalibError(0.29, 0.08)
+                .setFPS(30)
+                .setAvgLatencyMs(10)
+                .setLatencyStdDevMs(5))
+        .withDrawWireframes(true);
+  }
+
+  public static SphereCameraConstants getSphereCameraConstants() {
+    return new SphereCameraConstants("Color-2")
+        .withClassId(0)
+        .withFOVHeight(Rotation2d.fromDegrees(48.9))
+        .withFOVWidth(Rotation2d.fromDegrees(70))
+        .withCameraHeightPixels(800)
+        .withCameraWidthPixels(1280)
+        .withFocalLengthX(907.41)
+        .withFocalLengthY(907.64)
+        .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
+        .withSphereTolerance(0.1) // Note that this is not fully tuned and may need to be adjusted
+        .withSphereDiameter(Inches.of(5.91))
+        .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
+        .withRobotToCameraTransform(
+            new Transform3d(
+                new Translation3d(
+                    Inches.of(-1.0).in(Meters),
+                    Inches.of(-15.0).in(Meters),
+                    Inches.of(2.75).in(Meters)),
+                new Rotation3d(Math.PI, 0, -Math.PI / 2)));
   }
 }
