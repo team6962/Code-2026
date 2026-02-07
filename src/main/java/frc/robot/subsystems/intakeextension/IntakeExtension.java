@@ -13,6 +13,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -30,20 +31,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
+  private CANdi candi = new CANdi(30, "subsystems");//dummy number
 
   private StatusSignal<Angle> angleSignal;
   private StatusSignal<AngularVelocity> angularVelocitySignal;
   private StatusSignal<AngularAcceleration> angularAccelerationSignal;
 
   private StatusSignal<Voltage> voltageSignal;
+
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
+
+  private StatusSignal<Boolean> candiTriggeredSignal;
 
   private IntakeExtensionSim simulation;
 
   public IntakeExtension() {
     motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID);
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
+    candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
     angleSignal = motor.getPosition();
     angularVelocitySignal = motor.getVelocity();
@@ -51,6 +57,7 @@ public class IntakeExtension extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
+    candiTriggeredSignal = candi.getS1Closed(); //we dont know which candi sensor it is
 
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
@@ -147,10 +154,17 @@ public class IntakeExtension extends SubsystemBase {
     return supplyCurrentSignal.getValue();
   }
 
+  public Boolean getCANdiTriggered() {
+    return candiTriggeredSignal.getValue();
+  }
+
   @Override
   public void periodic() {
     if (simulation != null) {
       simulation.update();
+    }
+    if (getCANdiTriggered()) {
+        motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
 
     BaseStatusSignal.refreshAll(
@@ -159,7 +173,8 @@ public class IntakeExtension extends SubsystemBase {
         statorCurrentSignal,
         supplyCurrentSignal,
         angleSignal,
-        angularAccelerationSignal);
+        angularAccelerationSignal,
+        candiTriggeredSignal);
 
     DogLog.log("intake/position", getPosition());
     DogLog.log("intake/velocity", getVelocity());
@@ -168,5 +183,6 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("intake/voltage", getVoltage());
     DogLog.log("intake/statorCurrent", getStatorCurrent());
     DogLog.log("intake/supplyCurrent", getSupplyCurrent());
+    DogLog.log("intake/candiTriggered", getCANdiTriggered());
   }
 }
