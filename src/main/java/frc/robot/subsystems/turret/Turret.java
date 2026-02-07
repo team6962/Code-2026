@@ -85,7 +85,7 @@ public class Turret extends SubsystemBase {
 
     config.Slot0.kP = TurretConstants.kP;
     config.Slot0.kD = TurretConstants.kD;
-    config.Slot0.kS = TurretConstants.kS;
+    config.Slot0.kS = RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
     config.Slot0.kV = TurretConstants.kV;
     config.Slot0.kA = TurretConstants.kA;
 

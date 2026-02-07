@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 
@@ -16,9 +17,9 @@ public class TurretConstants {
   public static final String CAN_BUS_NAME = "subsystems";
 
   // PID constants
-  public static final double kP = 0.7;
+  public static final double kP = 1.5;
   public static final double kD = 0.025;
-  public static final double kS = 0.0;
+  public static final double kS = 0.155;
   public static final double kV = 3.371;
   public static final double kA = 0.0;
 
