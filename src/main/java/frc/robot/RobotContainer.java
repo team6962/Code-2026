@@ -65,4 +65,8 @@ public class RobotContainer {
   public SphereClumpLocalization getFuelLocalization() {
     return fuelClumpLocalization;
   }
+
+  public ShooterHood getShooterHood() {
+    return shooterHood;
+  }
 }
