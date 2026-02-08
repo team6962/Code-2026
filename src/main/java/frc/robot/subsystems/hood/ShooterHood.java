@@ -64,7 +64,7 @@ public class ShooterHood extends SubsystemBase {
     positionSignal = hoodMotor.getPosition();
     statorCurrentSignal = hoodMotor.getStatorCurrent();
     supplyCurrentSignal = hoodMotor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS2Closed();
+    hallSensorTriggeredSignal = candi.getS1Closed();
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
 
     DogLog.tunable(
@@ -78,7 +78,7 @@ public class ShooterHood extends SubsystemBase {
       simulation = new ShooterHoodSim(hoodMotor);
       isZeroed = true;
     } else {
-      hoodMotor.setPosition(ShooterHoodConstants.MAX_ANGLE);
+      hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
     }
   }
 
@@ -101,7 +101,8 @@ public class ShooterHood extends SubsystemBase {
         positionSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        profileReferenceSignal);
+        profileReferenceSignal,
+        hallSensorTriggeredSignal);
     DogLog.log("Hood/Position", getPosition().in(Degrees), Degrees);
     DogLog.log("Hood/Velocity", getVelocity());
     DogLog.log("Hood/Acceleration", getAcceleration());
