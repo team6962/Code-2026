@@ -32,20 +32,21 @@ public class ShooterRollers extends SubsystemBase {
 
   public ShooterRollers() {
     shooterRollerMotor1 =
-       new TalonFX(
-           ShooterRollersConstants.MOTOR_CAN_ID_1,
-           new CANBus(ShooterRollersConstants.CANBUS_NAME));
+        new TalonFX(
+            ShooterRollersConstants.MOTOR_CAN_ID_1,
+            new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-   shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
-   shooterRollerMotor2 =
-       new TalonFX(
-           ShooterRollersConstants.MOTOR_CAN_ID_2,
-           new CANBus(ShooterRollersConstants.CANBUS_NAME));
-  
-   ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    shooterRollerMotor2 =
+        new TalonFX(
+            ShooterRollersConstants.MOTOR_CAN_ID_2,
+            new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-   shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+    ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        InvertedValue.CounterClockwise_Positive;
+
+    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
     // defines the variables we are keeping track of
     VelocitySignal = shooterRollerMotor1.getVelocity();
