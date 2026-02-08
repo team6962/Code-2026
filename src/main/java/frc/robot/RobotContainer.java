@@ -12,20 +12,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
-import frc.robot.subsystems.hood.ShooterHood;
-import frc.robot.subsystems.intakerollers.IntakeRollers;
-import frc.robot.subsystems.shooterrollers.ShooterRollers;
-import frc.robot.subsystems.turret.Turret;
+// import frc.robot.subsystems.hood.ShooterHood;
+// import frc.robot.subsystems.intakerollers.IntakeRollers;
+// import frc.robot.subsystems.shooterrollers.ShooterRollers;
+// import frc.robot.subsystems.turret.Turret;
 
 public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
-  private final Turret turret;
+  // private final Turret turret;
   private final DriveStraightAuto driveStraightAuto;
-  private final ShooterHood shooterHood;
+  // private final ShooterHood shooterHood;
   private final SphereClumpLocalization fuelClumpLocalization;
-  private final ShooterRollers shooterRollers;
-  private final IntakeRollers intakeRollers;
+  // private final ShooterRollers shooterRollers;
+  // private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
   public RobotContainer() {
@@ -34,10 +34,10 @@ public class RobotContainer {
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
-    shooterHood = new ShooterHood();
-    intakeRollers = new IntakeRollers();
-    shooterRollers = new ShooterRollers();
-    turret = new Turret();
+    // shooterHood = new ShooterHood();
+    // intakeRollers = new IntakeRollers();
+    // shooterRollers = new ShooterRollers();
+    // turret = new Turret();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
@@ -54,9 +54,9 @@ public class RobotContainer {
     return swerveDrive;
   }
 
-  public Turret getTurret() {
-    return turret;
-  }
+  // public Turret getTurret() {
+  //   return turret;
+  // }
 
   public AprilTagVision getAprilTagVision() {
     return aprilTagVision;
@@ -74,15 +74,15 @@ public class RobotContainer {
     return fuelClumpLocalization;
   }
 
-  public ShooterHood getShooterHood() {
-    return shooterHood;
-  }
+  // public ShooterHood getShooterHood() {
+  //   return shooterHood;
+  // }
 
-  public IntakeRollers getIntakeRollers() {
-    return intakeRollers;
-  }
+  // public IntakeRollers getIntakeRollers() {
+  //   return intakeRollers;
+  // }
 
-  public ShooterRollers getShooterRollers() {
-    return shooterRollers;
-  }
+  // public ShooterRollers getShooterRollers() {
+  //   return shooterRollers;
+  // }
 }

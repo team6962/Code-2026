@@ -169,7 +169,7 @@ public class LearnBotConstants {
                         Inches.of(-3.0).in(Meters),
                         Inches.of(-3.0).in(Meters),
                         Inches.of(16.25).in(Meters)),
-                    new Rotation3d(0, -(Math.PI * (24.0/180.0)) , -Math.PI / 2))))
+                    new Rotation3d((Math.PI * (1.55/180.0)), -(Math.PI * (30.23/180.0)) , -Math.PI / 2))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
@@ -202,6 +202,6 @@ public class LearnBotConstants {
                     Inches.of(-3.0).in(Meters),
                     Inches.of(-3.0).in(Meters),
                     Inches.of(16.25).in(Meters)),
-                new Rotation3d(0, -(Math.PI * (24.0/180.0)) , -Math.PI / 2)));
+                new Rotation3d((Math.PI * (1.55/180.0)), -(Math.PI * (30.23/180.0)) , -Math.PI / 2)));
   }
 }
