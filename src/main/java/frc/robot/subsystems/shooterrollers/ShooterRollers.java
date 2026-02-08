@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -31,17 +32,21 @@ public class ShooterRollers extends SubsystemBase {
 
   public ShooterRollers() {
     shooterRollerMotor1 =
-        new TalonFX(
-            ShooterRollersConstants.MOTOR_CAN_ID_1,
-            new CANBus(ShooterRollersConstants.CANBUS_NAME));
+       new TalonFX(
+           ShooterRollersConstants.MOTOR_CAN_ID_1,
+           new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
-    shooterRollerMotor2 =
-        new TalonFX(
-            ShooterRollersConstants.MOTOR_CAN_ID_2,
-            new CANBus(ShooterRollersConstants.CANBUS_NAME));
+   shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
-    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+   shooterRollerMotor2 =
+       new TalonFX(
+           ShooterRollersConstants.MOTOR_CAN_ID_2,
+           new CANBus(ShooterRollersConstants.CANBUS_NAME));
+  
+   ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+   shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+
     // defines the variables we are keeping track of
     VelocitySignal = shooterRollerMotor1.getVelocity();
     voltageSignal = shooterRollerMotor1.getMotorVoltage();
