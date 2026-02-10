@@ -1,4 +1,4 @@
-package frc.robot.controls.shoot;
+package frc.robot.auto.shoot;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
