@@ -64,6 +64,7 @@ public final class ShooterHoodConstants {
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true))
-          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+          .withMotorOutput(
+              new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
 }

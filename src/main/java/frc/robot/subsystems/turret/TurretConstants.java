@@ -2,6 +2,7 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -34,7 +35,7 @@ public class TurretConstants {
   public static final double SENSOR_TO_MECHANISM_RATIO = 34.5;
 
   /** The direction that is considered positive rotation for the motor. */
-  public static final InvertedValue MOTOR_INVERSION = InvertedValue.Clockwise_Positive;
+  public static final InvertedValue MOTOR_INVERSION = InvertedValue.CounterClockwise_Positive;
 
   /**
    * The neutral mode of the motor (e.g., brake or coast). This will only be used once the turret
@@ -48,14 +49,14 @@ public class TurretConstants {
    * turret passes through the sensor moving from higher to lower angles. Set to null to disable
    * zeroing when moving in this direction.
    */
-  public static final Angle MINIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(0.0);
+  public static final Angle MINIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(-0.720971);
 
   /**
    * The maximum angle that the turret can be at to trigger the hall sensor. This is used when the
    * turret passes through the sensor moving from lower to higher angles. Set to null to disable
    * zeroing when moving in this direction.
    */
-  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(5.0);
+  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(-0.831418);
 
   /**
    * The moment of inertia of the turret. This is used only for simulation and is not used in the
