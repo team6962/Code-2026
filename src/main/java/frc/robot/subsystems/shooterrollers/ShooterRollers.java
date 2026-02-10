@@ -43,8 +43,12 @@ public class ShooterRollers extends SubsystemBase {
             ShooterRollersConstants.MOTOR_CAN_ID_2,
             new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
+    // Second motor is inverted from the first motor
     ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
-        InvertedValue.CounterClockwise_Positive;
+        ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
 
     shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
