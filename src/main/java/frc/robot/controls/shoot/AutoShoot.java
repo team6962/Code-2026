@@ -134,7 +134,13 @@ public class AutoShoot extends Command {
 
     // Account for the shooter's initial velocity during flight
     Time flightTime = Seconds.of(AutoShootConstants.flightTimeFunction.value(parameters));
-    displacement = displacement.plus(shooterVelocity.times(flightTime));
+    displacement =
+        displacement.plus(
+            shooterVelocity
+                .times(flightTime)
+                .times(
+                    AutoShootConstants.initialVelocityDisplacementScalarFunction.value(
+                        parameters)));
 
     // Calculate the final destination of the projectile
     Translation2d destination = shooterPose.getTranslation().plus(displacement);

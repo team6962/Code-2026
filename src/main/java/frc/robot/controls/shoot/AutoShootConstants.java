@@ -30,6 +30,15 @@ public class AutoShootConstants {
   public static final MultivariateFunction distanceFunction = new ConstantFunction(4);
 
   /**
+   * Function that takes in (hood angle, roller speed, target height) and returns initial velocity
+   * displacement scalar. This function is used to account for drag and the Magnus effect when
+   * shooting on the move. Uses SI units. This function must be carefully tuned to match the fuel's
+   * actual behavior.
+   */
+  public static final MultivariateFunction initialVelocityDisplacementScalarFunction =
+      new ConstantFunction(0.9);
+
+  /**
    * Function that takes in (distance to target) and returns roller speed. Uses SI units. This
    * function does not need to be tuned carefully, as long as it returns a speed that is high enough
    * to reach the target.
