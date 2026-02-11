@@ -17,15 +17,15 @@ public class TurretConstants {
   public static final String CAN_BUS_NAME = "subsystems";
 
   // PID constants
-  public static final double kP = 1.5;
-  public static final double kD = 0.025;
-  public static final double kS = 0.155;
-  public static final double kV = 3.371;
-  public static final double kA = 0.0;
+  public static final double kP = 150.0;
+  public static final double kD = 5.0;
+  public static final double kS = 0.315;
+  public static final double kV = 4.283;
+  public static final double kA = 0.2;
 
   // Motion Magic constants
-  public static final double MOTION_MAGIC_CRUISE_VELOCITY = 1.0;
-  public static final double MOTION_MAGIC_ACCELERATION = 1.0;
+  public static final double MOTION_MAGIC_CRUISE_VELOCITY = 10.0;
+  public static final double MOTION_MAGIC_ACCELERATION = 10.0;
 
   // Current limits
   public static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
@@ -56,7 +56,7 @@ public class TurretConstants {
    * turret passes through the sensor moving from lower to higher angles. Set to null to disable
    * zeroing when moving in this direction.
    */
-  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(-0.831418);
+  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(-0.664565);
 
   /**
    * The moment of inertia of the turret. This is used only for simulation and is not used in the
@@ -68,11 +68,11 @@ public class TurretConstants {
    * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MIN_ANGLE = Degrees.of(0);
+  public static final Angle MIN_ANGLE = Degrees.of(-276);
 
   /**
    * The maximum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MAX_ANGLE = Degrees.of(400);
+  public static final Angle MAX_ANGLE = Degrees.of(23);
 }
