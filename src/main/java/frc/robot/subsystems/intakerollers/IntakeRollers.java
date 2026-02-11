@@ -1,12 +1,10 @@
 package frc.robot.subsystems.intakerollers;
 
-import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -30,16 +28,9 @@ public class IntakeRollers extends SubsystemBase {
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
     this.intakeMotor =
-        new TalonFX(IntakeRollersConstants.deviceId, new CANBus("subsystem")); // temporary
-    TalonFXConfiguration configuration = new TalonFXConfiguration();
-    configuration.Feedback.SensorToMechanismRatio = IntakeRollersConstants.gearRatio;
-    configuration.CurrentLimits.StatorCurrentLimitEnable = true;
-    configuration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    configuration.CurrentLimits.StatorCurrentLimit =
-        IntakeRollersConstants.statorCurrentLimit.in(Amps);
-    configuration.CurrentLimits.SupplyCurrentLimit =
-        IntakeRollersConstants.supplyCurrentLimit.in(Amps);
-    intakeMotor.getConfigurator().apply(configuration);
+        new TalonFX(IntakeRollersConstants.DEVICE_ID, new CANBus("subsystem")); // temporary
+
+    intakeMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
     this.velocitySignal = intakeMotor.getVelocity();
     this.statorCurrentSignal = intakeMotor.getStatorCurrent();
     this.supplyCurrentSignal = intakeMotor.getSupplyCurrent();
