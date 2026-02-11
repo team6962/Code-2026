@@ -39,7 +39,7 @@ public class Climb extends SubsystemBase {
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
-    candi = new CANdi(30, "subsystems"); // change later to correct CAN id
+    candi = new CANdi(40, "subsystems");
     candi.getConfigurator().apply(ClimbConstants.CANDI_CONFIGURATION);
     accelerationSignal = motor.getAcceleration();
     velocitySignal = motor.getVelocity();
@@ -47,7 +47,7 @@ public class Climb extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallEffectSensorSignal = candi.getS1Closed(); // we don't know if it is sensor 1 or sensor 2
+    hallEffectSensorSignal = candi.getS2Closed();
     if (RobotBase.isSimulation()) {
       simulation = new ClimbSim(motor);
     }
