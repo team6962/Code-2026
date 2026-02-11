@@ -1,9 +1,14 @@
 package frc.robot.subsystems.hopper;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class HopperConstants {
     //kicker
@@ -13,15 +18,17 @@ public class HopperConstants {
     //belt floor
     public static final int BELT_FLOOR_MOTOR_CAN_ID = 30;
     public static final String BELT_FLOOR_CANBUS_NAME = "subsystem";
+    public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1);
+    public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.003072714); // temp change later
     public static final TalonFXConfiguration BELT_FLOOR_MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(4 / 3))
-          .withSlot0(new Slot0Configs().withKV(0.124137931).withKP(0.01))
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(4 / 3)) //temp change later
+          .withSlot0(new Slot0Configs().withKV(0.124137931).withKP(0.01))//temp change later
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)
-                  .withStatorCurrentLimit(120)
+                  .withStatorCurrentLimit(120) //temp change later
                   .withSupplyCurrentLimitEnable(true)
-                  .withSupplyCurrentLimit(80));
+                  .withSupplyCurrentLimit(80)); // temp change later
     
 }
