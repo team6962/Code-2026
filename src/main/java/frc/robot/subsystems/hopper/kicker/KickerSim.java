@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hopper;
+package frc.robot.subsystems.hopper.kicker;
 
 public class KickerSim {
 
