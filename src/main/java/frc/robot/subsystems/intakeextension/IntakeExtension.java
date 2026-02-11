@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
-  private CANdi candi = new CANdi(30, "subsystems");//dummy number
+  private CANdi candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
 
   private StatusSignal<Angle> angleSignal;
   private StatusSignal<AngularVelocity> angularVelocitySignal;
@@ -57,21 +57,24 @@ public class IntakeExtension extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    candiTriggeredSignal = candi.getS1Closed(); //we dont know which candi sensor it is
+    candiTriggeredSignal = candi.getS1Closed(); // we dont know which candi sensor it is
 
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
     }
   }
-
+  /**
+   * Makes sure the extension doesn't go over or under the maximum and minimum
+   * @param input
+   * @return Maximum, minimum, or the input
+   */
   public Distance clampPositionToSafeRange(Distance input) {
-      if (input.gt(IntakeExtensionConstants.MAX_POSITION)) {
-          return IntakeExtensionConstants.MAX_POSITION;
-      }
-      else if (input.lt(IntakeExtensionConstants.MIN_POSITION)) {
-        return IntakeExtensionConstants.MIN_POSITION;
-      }
-      return input;
+    if (input.gt(IntakeExtensionConstants.MAX_POSITION)) {
+      return IntakeExtensionConstants.MAX_POSITION;
+    } else if (input.lt(IntakeExtensionConstants.MIN_POSITION)) {
+      return IntakeExtensionConstants.MIN_POSITION;
+    }
+    return input;
   }
 
   public Command extend() {
@@ -154,6 +157,10 @@ public class IntakeExtension extends SubsystemBase {
     return supplyCurrentSignal.getValue();
   }
 
+  /**
+   * This finds out whether the CANdi was triggered
+   * @return true or false
+   */
   public Boolean getCANdiTriggered() {
     return candiTriggeredSignal.getValue();
   }
@@ -164,7 +171,7 @@ public class IntakeExtension extends SubsystemBase {
       simulation.update();
     }
     if (getCANdiTriggered()) {
-        motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+      motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
 
     BaseStatusSignal.refreshAll(

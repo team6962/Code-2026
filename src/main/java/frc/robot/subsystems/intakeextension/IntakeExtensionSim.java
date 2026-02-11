@@ -1,19 +1,15 @@
 package frc.robot.subsystems.intakeextension;
 
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.simulation.LinearMechanismSim;
-
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 public class IntakeExtensionSim {
   private TalonFXSimState motorSim;
@@ -22,16 +18,15 @@ public class IntakeExtensionSim {
 
   public IntakeExtensionSim(TalonFX motor) {
     motorSim = motor.getSimState();
-    physicsSim = 
+    physicsSim =
         new LinearMechanismSim(
-            1.0, //fake num
-            2.0, //also fake
+            1.0, // fake num
+            2.0, // also fake
             IntakeExtensionConstants.MOTOR_PHYSICS,
             IntakeExtensionConstants.MIN_POSITION,
             IntakeExtensionConstants.MAX_POSITION,
             IntakeExtensionConstants.ANGLE,
-            IntakeExtensionConstants.MIN_POSITION
-        );
+            IntakeExtensionConstants.MIN_POSITION);
     // physicsSim =
     //     new ElevatorSim(
     //         LinearSystemId.createElevatorSystem(
@@ -53,8 +48,12 @@ public class IntakeExtensionSim {
     AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getVelocityMetersPerSecond());
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
-    motorSim.setRawRotorPosition(invert(position, false).times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
-    motorSim.setRotorVelocity(invert(velocity, false).times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+    motorSim.setRawRotorPosition(
+        invert(position, IntakeExtensionConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted == InvertedValue.Clockwise_Positive)
+            .times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+    motorSim.setRotorVelocity(
+        invert(velocity, IntakeExtensionConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted == InvertedValue.Clockwise_Positive)
+            .times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
   }
 
   private static double invert(double value, boolean shouldBeInverted) {
