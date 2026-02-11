@@ -169,7 +169,8 @@ public class LearnBotConstants {
                         Inches.of(-3.0).in(Meters),
                         Inches.of(-3.0).in(Meters),
                         Inches.of(16.25).in(Meters)),
-                    new Rotation3d((Math.PI * (1.55/180.0)), -(Math.PI * (30.23/180.0)) , -Math.PI / 2))))
+                    new Rotation3d(
+                        (Math.PI * (1.55 / 180.0)), -(Math.PI * (30.23 / 180.0)), -Math.PI / 2))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
@@ -193,15 +194,15 @@ public class LearnBotConstants {
         .withFocalLengthX(907.41)
         .withFocalLengthY(907.64)
         .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
-        .withSphereTolerance(0.1) // Note that this is not fully tuned and may need to be adjusted
         .withSphereDiameter(Inches.of(5.91))
         .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
         .withRobotToCameraTransform(
             new Transform3d(
                 new Translation3d(
                     Inches.of(-3.0).in(Meters),
-                    Inches.of(-3.0).in(Meters),
+                    Inches.of(-2.0).in(Meters),
                     Inches.of(16.25).in(Meters)),
-                new Rotation3d((Math.PI * (1.55/180.0)), -(Math.PI * (30.23/180.0)) , -Math.PI / 2)));
+                new Rotation3d(
+                    (Math.PI), (Math.PI * (25 / 180.0)), -Math.PI / 2)));
   }
 }
