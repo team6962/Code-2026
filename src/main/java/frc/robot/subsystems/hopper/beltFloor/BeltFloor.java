@@ -3,8 +3,7 @@ package frc.robot.subsystems.hopper.beltFloor;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-
+import frc.robot.subsystems.hopper.HopperConstants;
 
 import com.ctre.phoenix6.CANBus;
 
@@ -13,7 +12,7 @@ public class BeltFloor extends SubsystemBase{
 
     public BeltFloor() {
         BeltFloorMotor = 
-            new TalonFX(BeltFloorConstants.BELT_FLOOR_MOTOR_CAN_ID, new CANBus(BeltFloorConstants.CANBUS_NAME));
-        BeltFloorMotor.getConfigurator().apply(BeltFloorConstants.MOTOR_CONFIGURATION);
+            new TalonFX(HopperConstants.BELT_FLOOR_MOTOR_CAN_ID, new CANBus(HopperConstants.BELT_FLOOR_CANBUS_NAME));
+        BeltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION);
     }
 }

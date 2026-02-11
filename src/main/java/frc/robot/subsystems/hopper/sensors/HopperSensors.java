@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.hopper.sensors;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANdi;
