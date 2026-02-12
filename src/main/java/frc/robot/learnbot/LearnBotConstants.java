@@ -202,7 +202,6 @@ public class LearnBotConstants {
                     Inches.of(-3.0).in(Meters),
                     Inches.of(-2.0).in(Meters),
                     Inches.of(16.25).in(Meters)),
-                new Rotation3d(
-                    (Math.PI), (Math.PI * (25 / 180.0)), -Math.PI / 2)));
+                new Rotation3d((Math.PI), (Math.PI * (25 / 180.0)), -Math.PI / 2)));
   }
 }
