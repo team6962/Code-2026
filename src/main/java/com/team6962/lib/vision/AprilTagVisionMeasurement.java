@@ -92,14 +92,14 @@ public class AprilTagVisionMeasurement {
   }
 
   /**
-   * Creates a new AprilTagVisionMeasurement whose pose is expressed relative to the supplied origin.
-   * 
-   * @param origin the pose to which the returned measurement's pose will be made relative; this pose
-   *     must be expressed in the same coordinate frame as {@code photonEstimate.estimatedPose}
-   * 
+   * Creates a new AprilTagVisionMeasurement whose pose is expressed relative to the supplied
+   * origin.
+   *
+   * @param origin the pose to which the returned measurement's pose will be made relative; this
+   *     pose must be expressed in the same coordinate frame as {@code photonEstimate.estimatedPose}
    * @return a new {@code AprilTagVisionMeasurement} whose {@code EstimatedRobotPose} is relative to
-   *     the given {@code origin}. Metadata (timestampSeconds, targetsUsed, strategy) and {@code stdDevs}
-   *     are preserved from the original measurement.
+   *     the given {@code origin}. Metadata (timestampSeconds, targetsUsed, strategy) and {@code
+   *     stdDevs} are preserved from the original measurement.
    */
   public AprilTagVisionMeasurement relativeTo(Pose3d origin) {
     Pose3d relativePose = photonEstimate.estimatedPose.relativeTo(origin);
