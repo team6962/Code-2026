@@ -23,10 +23,10 @@ public class BeltFloorSim {
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                HopperConstants.MOTOR_PHYSICS,
-                HopperConstants.MOMENT_OF_INERTIA.in(KilogramSquareMeters),
-                HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
-            HopperConstants.MOTOR_PHYSICS);
+                HopperConstants.BELT_FLOOR_MOTOR_PHYSICS,
+                HopperConstants.BELT_FLOOR_MOMENT_OF_INERTIA.in(KilogramSquareMeters),
+                HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio),
+            HopperConstants.BELT_FLOOR_MOTOR_PHYSICS);
   }
 
   /** updates the simulation */
@@ -39,10 +39,10 @@ public class BeltFloorSim {
     physicsSim.update(0.02);
     motorSim.setRawRotorPosition(
         invert(position, false)
-            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
     motorSim.setRotorVelocity(
         invert(velocity, false)
-            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
   }
 
   private static Angle invert(Angle angle, boolean shouldBeInverted) {

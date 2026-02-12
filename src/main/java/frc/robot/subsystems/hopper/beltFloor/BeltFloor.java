@@ -1,5 +1,10 @@
 package frc.robot.subsystems.hopper.beltFloor;
 
+import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -10,6 +15,8 @@ import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,17 +37,17 @@ public class BeltFloor extends SubsystemBase {
         new TalonFX(
             HopperConstants.BELT_FLOOR_MOTOR_CAN_ID,
             new CANBus(HopperConstants.BELT_FLOOR_CANBUS_NAME));
-    BeltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION);
+    BeltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
     VelocitySignal = BeltFloorMotor.getVelocity();
     voltageSignal = BeltFloorMotor.getMotorVoltage();
     AccelerationSignal = BeltFloorMotor.getAcceleration();
     supplyCurrentSignal = BeltFloorMotor.getSupplyCurrent();
     statorCurrentSignal = BeltFloorMotor.getStatorCurrent();
     DogLog.tunable(
-        "beltFloor / input voltage",
+        "Hopper/BeltFloor/AppliedVoltage",
         0.0,
         newVoltage -> {
-          roll(newVoltage).schedule();
+          feedDump(newVoltage).schedule();
         });
     if (RobotBase.isSimulation()) {
       simulation = new BeltFloorSim(BeltFloorMotor);
@@ -48,13 +55,10 @@ public class BeltFloor extends SubsystemBase {
   }
 
   /**
-   * this makes the motor go, positive voltage makes CAN ID 30 go counter clockwise, which is the
-   * intended direction to feed fuel into the shooter is, so use that direction to feed fuel into
-   * the shooter. Theoretically you could input a negative value to spin it the opposite way, but
-   * this would send the fuel backwards away from the shooter, which is probably a bad thing so
-   * don't do that.
+   * this makes the motor go, positive voltage makes CAN ID 30 go counter clockwise, which is used to feed 
+   * fuel to the shooter. If you want to dump instead, use a negative voltage to make the motor go clockwise.
    */
-  public Command roll(double targetVoltage) { // name temporary change later
+  public Command feedDump(double targetVoltage) { // name temporary change later
 
     return startEnd(
         () -> {
@@ -80,11 +84,12 @@ public class BeltFloor extends SubsystemBase {
         supplyCurrentSignal,
         statorCurrentSignal,
         AccelerationSignal);
-    DogLog.log("beltFloor/voltage", getMotorVoltage());
-    DogLog.log("beltFloor/angularVelocity", getAngularVelocity());
-    DogLog.log("beltFloor/statorCurrent", getStatorCurrent());
-    DogLog.log("beltFloor/angularAcceleration", getAngularAcceleration());
-    DogLog.log("beltFloor/supplyCurrent", getSupplyCurrent());
+    DogLog.log("Hopper/BeltFloor/Voltage", getMotorVoltage());
+    DogLog.log("Hopper/BeltFloor/AngularVelocity", getAngularVelocity());
+    DogLog.log("Hopper/BeltFloor/BeltVelocity", getLinearVelocity());
+    DogLog.log("Hopper/BeltFloor/StatorCurrent", getStatorCurrent());
+    DogLog.log("Hopper/BeltFloor/AngularAcceleration", getAngularAcceleration());
+    DogLog.log("Hopper/BeltFloor/SupplyCurrent", getSupplyCurrent());
   }
 
   /** gets the angular velocity */
@@ -95,6 +100,10 @@ public class BeltFloor extends SubsystemBase {
   /** gets the angular acceleration */
   public AngularAcceleration getAngularAcceleration() {
     return AccelerationSignal.getValue();
+  }
+  //**gets linear velocity from multiplying the angular velocity by the circumference of the pulley*/
+  public LinearVelocity getLinearVelocity() {
+    return InchesPerSecond.of((getAngularVelocity().in(RotationsPerSecond)) * 2.00 * Math.PI*HopperConstants.BELT_FLOOR_PULLEY_RADIUS);
   }
 
   /** gets the supply current */
