@@ -1,9 +1,7 @@
 package frc.robot.subsystems.hopper.beltFloor;
 
 import static edu.wpi.first.units.Units.InchesPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -15,7 +13,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -55,8 +52,9 @@ public class BeltFloor extends SubsystemBase {
   }
 
   /**
-   * this makes the motor go, positive voltage makes CAN ID 30 go counter clockwise, which is used to feed 
-   * fuel to the shooter. If you want to dump instead, use a negative voltage to make the motor go clockwise.
+   * this makes the motor go, positive voltage makes CAN ID 30 go counter clockwise, which is used
+   * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
+   * motor go clockwise.
    */
   public Command feedDump(double targetVoltage) { // name temporary change later
 
@@ -101,9 +99,15 @@ public class BeltFloor extends SubsystemBase {
   public AngularAcceleration getAngularAcceleration() {
     return AccelerationSignal.getValue();
   }
-  //**gets linear velocity from multiplying the angular velocity by the circumference of the pulley*/
+
+  // **gets linear velocity from multiplying the angular velocity by the circumference of the
+  // pulley*/
   public LinearVelocity getLinearVelocity() {
-    return InchesPerSecond.of((getAngularVelocity().in(RotationsPerSecond)) * 2.00 * Math.PI*HopperConstants.BELT_FLOOR_PULLEY_RADIUS);
+    return InchesPerSecond.of(
+        (getAngularVelocity().in(RotationsPerSecond))
+            * 2.00
+            * Math.PI
+            * HopperConstants.BELT_FLOOR_PULLEY_RADIUS);
   }
 
   /** gets the supply current */
