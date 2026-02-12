@@ -47,6 +47,12 @@ public class BeltFloor extends SubsystemBase{
     }
     }
 
+    /**
+   * this makes the motor go, positive voltage makes CAN ID 30 go counter clockwise, which is
+   * the intended direction to feed fuel into the shooter is, so use that direction to feed fuel into the shooter.
+   * Theoretically you could input a negative value to spin it the opposite way, but this would send the fuel backwards away from the shooter,
+   * which is probably a bad thing so don't do that.
+   */
     public Command roll(double targetVoltage) { //name temporary change later
 
     return startEnd(

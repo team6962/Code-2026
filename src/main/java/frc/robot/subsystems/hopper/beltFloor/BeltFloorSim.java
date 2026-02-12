@@ -14,12 +14,16 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.hopper.HopperConstants;
 
 
-
-
+/**
+   * class for simulator for the belt floor
+   */
 public class BeltFloorSim {
     private TalonFXSimState motorSim;
     private DCMotorSim physicsSim;
     
+    /**
+   * simulator for the belt floor
+   */
     public BeltFloorSim(TalonFX motor) {
     motorSim = motor.getSimState();
     physicsSim =
@@ -31,6 +35,8 @@ public class BeltFloorSim {
             HopperConstants.MOTOR_PHYSICS);
   }
 
+
+    /** updates the simulation */
     public void update() {
         motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
         double motorVoltage = invert(motorSim.getMotorVoltage(), false);
