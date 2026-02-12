@@ -20,6 +20,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 
 public class BeltFloor extends SubsystemBase{
     private TalonFX BeltFloorMotor;
@@ -39,22 +40,22 @@ public class BeltFloor extends SubsystemBase{
         supplyCurrentSignal = BeltFloorMotor.getSupplyCurrent();
         statorCurrentSignal = BeltFloorMotor.getStatorCurrent();
         DogLog.tunable(
-        "beltFloor / input velocity",
+        "beltFloor / input voltage",
         0.0,
-        newVelocity -> {
-          roll(newVelocity).schedule();
+        newVoltage -> {
+          roll(newVoltage).schedule();
         });
         if (RobotBase.isSimulation()) {
       simulation = new BeltFloorSim(BeltFloorMotor);
     }
     }
 
-    public Command roll(double targetVelocity) { //name temporary change later
+    public Command roll(double targetVoltage) { //name temporary change later
 
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          BeltFloorMotor.setControl(new VelocityVoltage(targetVelocity));
+          BeltFloorMotor.setControl(new VoltageOut(targetVoltage));
         },
         () -> {
           // defines a local function to stop motor
