@@ -3,9 +3,10 @@ package com.team6962.lib.vision;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import dev.doglog.DogLog;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -14,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.photonvision.simulation.VisionSystemSim;
 
 /**
@@ -35,13 +35,8 @@ public class AprilTagVision extends SubsystemBase {
   /** Vision simulation system for testing in simulation mode. */
   private VisionSystemSim visionSystemSim;
 
-  private static Optional<Alliance> alliance;
-
-  private static AprilTagFieldLayout origin =
+  private static AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
-  private static Pose3d originPose;
-  private boolean hasSetLayout = false;
 
   /**
    * Constructs an AprilTagVision subsystem with the given configuration.
@@ -104,41 +99,27 @@ public class AprilTagVision extends SubsystemBase {
       visionSystemSim.update(swerveDrive.getSimulation().getOdometry().getPosition());
     }
 
-    alliance =
-        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            ? Optional.of(Alliance.Red)
-            : Optional.of(Alliance.Blue);
+    Pose3d originPose =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+            ? Pose3d.kZero
+            : new Pose3d(
+                new Translation3d(fieldLayout.getFieldLength(), fieldLayout.getFieldWidth(), 0),
+                new Rotation3d(0, 0, Math.PI));
 
-    Boolean isRed;
-    if (alliance.get() == DriverStation.Alliance.Red) {
-      isRed = true;
-    } else {
-      isRed = false;
-    }
-
-    if (isRed) {
-      origin.setOrigin(OriginPosition.kRedAllianceWallRightSide);
-      originPose = origin.getOrigin();
-    } else {
-      origin.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
-      originPose = origin.getOrigin();
-    }
-
-    DogLog.log("/Vision/isRed", isRed);
     DogLog.log("/Vision/origin", originPose);
     int measurements = 0;
 
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
-        // Don't update rotation unless the conditions specified in vision constants are met
-        boolean canUpdateRotation = true;
+        measurement = measurement.relativeTo(originPose);
 
-        canUpdateRotation &=
-            !visionConstants.RequireDisabledForHeadingUpdate || RobotState.isDisabled();
-        canUpdateRotation &=
+        // Don't update rotation unless the conditions specified in vision constants are met
+        boolean canUpdateRotation =
             measurement.getPhotonEstimate().targetsUsed.size()
-                >= visionConstants.MinTagsForHeadingUpdate;
+                >= (RobotState.isEnabled()
+                    ? visionConstants.MinTagsForHeadingUpdateWhileEnabled
+                    : visionConstants.MinTagsForHeadingUpdateWhileDisabled);
 
         if (!canUpdateRotation) {
           measurement =

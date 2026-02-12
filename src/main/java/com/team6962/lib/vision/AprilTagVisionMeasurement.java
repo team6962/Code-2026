@@ -90,4 +90,17 @@ public class AprilTagVisionMeasurement {
 
     return new AprilTagVisionMeasurement(adjustedEstimate, this.stdDevs);
   }
+
+  public AprilTagVisionMeasurement relativeTo(Pose3d origin) {
+    Pose3d relativePose = photonEstimate.estimatedPose.relativeTo(origin);
+
+    EstimatedRobotPose relativeEstimate =
+        new EstimatedRobotPose(
+            relativePose,
+            photonEstimate.timestampSeconds,
+            photonEstimate.targetsUsed,
+            photonEstimate.strategy);
+
+    return new AprilTagVisionMeasurement(relativeEstimate, this.stdDevs);
+  }
 }
