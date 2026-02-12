@@ -66,8 +66,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // return driveStraightAuto.getCommand();
-    return beltFloor.feedDump(15);
+    return driveStraightAuto.getCommand();
+    
   }
 
   public void latePeriodic() {
