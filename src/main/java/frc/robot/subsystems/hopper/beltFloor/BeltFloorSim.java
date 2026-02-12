@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -13,18 +12,13 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.hopper.HopperConstants;
 
-
-/**
-   * class for simulator for the belt floor
-   */
+/** class for simulator for the belt floor */
 public class BeltFloorSim {
-    private TalonFXSimState motorSim;
-    private DCMotorSim physicsSim;
-    
-    /**
-   * simulator for the belt floor
-   */
-    public BeltFloorSim(TalonFX motor) {
+  private TalonFXSimState motorSim;
+  private DCMotorSim physicsSim;
+
+  /** simulator for the belt floor */
+  public BeltFloorSim(TalonFX motor) {
     motorSim = motor.getSimState();
     physicsSim =
         new DCMotorSim(
@@ -35,21 +29,20 @@ public class BeltFloorSim {
             HopperConstants.MOTOR_PHYSICS);
   }
 
-
-    /** updates the simulation */
-    public void update() {
-        motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-        double motorVoltage = invert(motorSim.getMotorVoltage(), false);
-        Angle position = physicsSim.getAngularPosition();
-        AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
-        physicsSim.setInput(motorVoltage);
-        physicsSim.update(0.02);
-        motorSim.setRawRotorPosition(
-            invert(position, false)
-                .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
-        motorSim.setRotorVelocity(
-            invert(velocity, false)
-                .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+  /** updates the simulation */
+  public void update() {
+    motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    double motorVoltage = invert(motorSim.getMotorVoltage(), false);
+    Angle position = physicsSim.getAngularPosition();
+    AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
+    physicsSim.setInput(motorVoltage);
+    physicsSim.update(0.02);
+    motorSim.setRawRotorPosition(
+        invert(position, false)
+            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+    motorSim.setRotorVelocity(
+        invert(velocity, false)
+            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
   }
 
   private static Angle invert(Angle angle, boolean shouldBeInverted) {
@@ -63,5 +56,4 @@ public class BeltFloorSim {
   private static double invert(double value, boolean shouldBeInverted) {
     return shouldBeInverted ? -value : value;
   }
-
 }
