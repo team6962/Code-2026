@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -48,6 +49,7 @@ public class ShooterHood extends SubsystemBase {
 
   private ShooterHoodSim simulation;
   private boolean isZeroed = false;
+  private double kG = ShooterHoodConstants.kG;
 
   /** Initializes the motor and status signal */
   public ShooterHood() {
@@ -74,6 +76,87 @@ public class ShooterHood extends SubsystemBase {
           CommandScheduler.getInstance().schedule(moveTo(Degrees.of(newAngle)));
         });
 
+    DogLog.tunable(
+        "Hood/Hood kP",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kP,
+        newKP -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.withKP(newKP));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood kD",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kD,
+        newKD -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.withKD(newKD));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood kS",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kS,
+        newKS -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.withKS(newKS));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood kV",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kV,
+        newKV -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.withKV(newKV));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood kA",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kA,
+        newKA -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.withKA(newKA));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood kG",
+        kG,
+        newKG -> {
+          kG = newKG;
+        });
+
+    DogLog.tunable(
+        "Hood/Hood Cruise Velocity",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity,
+        newCruiseVelocity -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(
+                  ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic
+                      .withMotionMagicCruiseVelocity(newCruiseVelocity));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood Acceleration",
+        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration,
+        newAcceleration -> {
+          hoodMotor
+              .getConfigurator()
+              .apply(
+                  ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.withMotionMagicAcceleration(
+                      newAcceleration));
+        });
+
+    DogLog.tunable(
+        "Hood/Hood Voltage",
+        0.0,
+        voltage -> {
+          CommandScheduler.getInstance().schedule(moveAtVoltage(Volts.of(voltage)));
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new ShooterHoodSim(hoodMotor);
       isZeroed = true;
@@ -87,7 +170,10 @@ public class ShooterHood extends SubsystemBase {
     // In disabled mode, set the motor's target position to the current position
     // This ensures that the motor will try to stay in place when re-enabled
     if (RobotState.isDisabled()) {
-      setPositionControl(getPosition());
+      if (isZeroed) setPositionControl(getPosition());
+      else
+        hoodMotor.setControl(
+            new CoastOut()); // Coast if not zeroed to allow manual movement for zeroing
     }
 
     if (simulation != null) {
@@ -240,9 +326,7 @@ public class ShooterHood extends SubsystemBase {
         () -> {
           if (isZeroed) {
             hoodMotor.setControl(
-                new VoltageOut(
-                    voltage.plus(
-                        Volts.of(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG))));
+                new VoltageOut(voltage.plus(Volts.of(Math.cos(getPosition().in(Radians)) * kG))));
           } else {
             hoodMotor.setControl(new NeutralOut());
           }
@@ -263,7 +347,7 @@ public class ShooterHood extends SubsystemBase {
     if (isZeroed) {
       hoodMotor.setControl(
           new MotionMagicVoltage(position)
-              .withFeedForward(Math.cos(getPosition().in(Radians)) * ShooterHoodConstants.kG));
+              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
       hoodMotor.setControl(new NeutralOut());
     }
