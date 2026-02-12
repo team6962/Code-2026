@@ -35,6 +35,7 @@ public class AprilTagVision extends SubsystemBase {
   /** Vision simulation system for testing in simulation mode. */
   private VisionSystemSim visionSystemSim;
 
+  /** The AprilTag field layout used for pose estimation. Loaded from WPILib's built-in layouts. */
   private static AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
@@ -99,6 +100,7 @@ public class AprilTagVision extends SubsystemBase {
       visionSystemSim.update(swerveDrive.getSimulation().getOdometry().getPosition());
     }
 
+    // Determine the origin pose based on alliance color (red and blue have mirrored field layouts)
     Pose3d originPose =
         DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
             ? Pose3d.kZero
@@ -112,6 +114,8 @@ public class AprilTagVision extends SubsystemBase {
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
+
+        // Adjust the measurement to be relative to the field origin based on alliance color
         measurement = measurement.relativeTo(originPose);
 
         // Don't update rotation unless the conditions specified in vision constants are met
