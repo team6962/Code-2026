@@ -24,15 +24,15 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 public final class IntakeExtensionConstants {
-  public static final int MOTOR_CAN_ID = 40;
+  public static final int MOTOR_CAN_ID = 25;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1);
-  public static final Mass MOVING_MASS = Pounds.of(11);
+  public static final Mass MOVING_MASS = Pounds.of(12);
   public static final MomentOfInertia MOMENT_OF_INERTIA =
       KilogramSquareMeters.of(5); // dummy number.
-  public static final Distance MAX_POSITION = Inches.of(10); // dummy number.
-  public static final Distance MIN_POSITION = Inches.of(0); // dummy number.
-  public static final Angle ANGLE = Degrees.of(-18);
-  public static final Double PINION_RADIUS = Units.inchesToMeters(0.5);
+  public static final Distance MAX_POSITION = Inches.of(9.879);
+  public static final Distance MIN_POSITION = Inches.of(0); 
+  public static final Angle ANGLE = Degrees.of(0);
+  public static final Distance PINION_RADIUS = Inches.of(0.5);
   public static final int CANDI_DEVICE_ID = 40;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
@@ -41,11 +41,17 @@ public final class IntakeExtensionConstants {
           .withMotionMagic(
               new MotionMagicConfigs()
                   // fake numbers
-                  .withMotionMagicCruiseVelocity(1)
-                  .withMotionMagicAcceleration(0.2)
+                  .withMotionMagicCruiseVelocity(0.05)
+                  .withMotionMagicAcceleration(0.05)
                   .withMotionMagicJerk(0))
           // fake numbers end here
-          .withSlot0(new Slot0Configs().withKP(0.335))
+          .withSlot0(
+              new Slot0Configs()
+                  .withKA(0.02)
+                  .withKD(0)
+                  .withKP(3.5)
+                  .withKG(-0.005)
+                  .withKV(7))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120))

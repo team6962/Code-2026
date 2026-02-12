@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -44,10 +45,12 @@ public class IntakeExtension extends SubsystemBase {
 
   private StatusSignal<Boolean> candiTriggeredSignal;
 
+  private StatusSignal<Double> closedLoopReferenceSignal;
+
   private IntakeExtensionSim simulation;
 
   public IntakeExtension() {
-    motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID);
+    motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
@@ -58,6 +61,7 @@ public class IntakeExtension extends SubsystemBase {
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
     candiTriggeredSignal = candi.getS1Closed(); // we dont know which candi sensor it is
+    closedLoopReferenceSignal = motor.getClosedLoopReference();
 
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
@@ -165,6 +169,10 @@ public class IntakeExtension extends SubsystemBase {
     return candiTriggeredSignal.getValue();
   }
 
+  public Double getClosedLoopReference() {
+    return closedLoopReferenceSignal.getValue();
+  }
+
   @Override
   public void periodic() {
     if (simulation != null) {
@@ -181,15 +189,16 @@ public class IntakeExtension extends SubsystemBase {
         supplyCurrentSignal,
         angleSignal,
         angularAccelerationSignal,
-        candiTriggeredSignal);
+        candiTriggeredSignal,
+        closedLoopReferenceSignal);
 
     DogLog.log("intake/position", getPosition());
     DogLog.log("intake/velocity", getVelocity());
     DogLog.log("intake/acceleration", getAcceleration());
-
     DogLog.log("intake/voltage", getVoltage());
     DogLog.log("intake/statorCurrent", getStatorCurrent());
     DogLog.log("intake/supplyCurrent", getSupplyCurrent());
     DogLog.log("intake/candiTriggered", getCANdiTriggered());
+    DogLog.log("intake/closedLoopReference", getClosedLoopReference());
   }
 }
