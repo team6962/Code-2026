@@ -67,8 +67,10 @@ public class IntakeExtension extends SubsystemBase {
       simulation = new IntakeExtensionSim(motor);
     }
   }
+
   /**
    * Makes sure the extension doesn't go over or under the maximum and minimum
+   *
    * @param input
    * @return Maximum, minimum, or the input
    */
@@ -163,6 +165,7 @@ public class IntakeExtension extends SubsystemBase {
 
   /**
    * This finds out whether the CANdi was triggered
+   *
    * @return true or false
    */
   public Boolean getCANdiTriggered() {
