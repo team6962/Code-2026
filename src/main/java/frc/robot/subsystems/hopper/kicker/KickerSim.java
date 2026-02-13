@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.hopper.HopperConstants;
 
@@ -11,6 +12,11 @@ public class KickerSim {
   private TalonFXSimState kickerMotor;
   private DCMotorSim physicsSim;
 
+  /**
+   * Creates physics sim for kicker motor
+   *
+   * @param motor
+   */
   public KickerSim(TalonFX motor) {
     kickerMotor = motor.getSimState();
     physicsSim =
@@ -23,7 +29,7 @@ public class KickerSim {
   }
 
   public void update() {
-    kickerMotor.setSupplyVoltage(12);
+    kickerMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(kickerMotor.getMotorVoltage());
     physicsSim.update(0.02);
 

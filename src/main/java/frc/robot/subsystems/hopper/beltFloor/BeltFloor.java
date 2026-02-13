@@ -11,8 +11,7 @@ public class BeltFloor extends SubsystemBase {
   public BeltFloor() {
     BeltFloorMotor =
         new TalonFX(
-            HopperConstants.BELT_FLOOR_MOTOR_CAN_ID,
-            new CANBus(HopperConstants.BELT_FLOOR_CANBUS_NAME));
+            HopperConstants.BELT_FLOOR_MOTOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     BeltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIGURATION);
   }
 }
