@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** The constants that define the drive motor behavior. */
-public class DriveMotorConstants {
+public class DriveMotorConstants implements Cloneable {
   /**
    * The TalonFX configuration for the drive motor. Some fields in this configuration may be
    * overriden by other settings, such as the gear reduction.
@@ -246,5 +246,14 @@ public class DriveMotorConstants {
   public DriveMotorConstants withMaxVelocity(LinearVelocity maxVelocity) {
     MaxVelocity = maxVelocity;
     return this;
+  }
+
+  @Override
+  public DriveMotorConstants clone() {
+    try {
+      return (DriveMotorConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

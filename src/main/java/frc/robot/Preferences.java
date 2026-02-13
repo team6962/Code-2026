@@ -1,7 +1,6 @@
 package frc.robot;
 
-import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
+import frc.robot.constants.EnabledSystems;
 
 public class Preferences {
   /**
@@ -23,24 +22,11 @@ public class Preferences {
   public static final boolean reorientControlsInSimulation = true;
 
   /**
-   * Applies the preferences to the given drivetrain constants.
+   * Which subsystems should be enabled. These subsystems will only be enabled if their
+   * corresponding flag in enabledSystems is true and they exist on the robot according to the robot
+   * constants. This is useful for testing individual subsystems without enabling the entire robot.
    *
-   * @param constants The drivetrain constants to apply the preferences to.
-   * @return The updated drivetrain constants.
+   * <p>By default, all subsystems are enabled.
    */
-  public static DrivetrainConstants apply(DrivetrainConstants constants) {
-    constants.Simulation.EnablePoseEstimation = enablePoseEstimationInSimulation;
-    return constants;
-  }
-
-  /**
-   * Applies the preferences to the given teleop controls constants.
-   *
-   * @param constants The teleop controls constants to apply the preferences to.
-   * @return The updated teleop controls constants.
-   */
-  public static XBoxTeleopSwerveConstants apply(XBoxTeleopSwerveConstants constants) {
-    constants.ReorientControlsInSimulation = reorientControlsInSimulation;
-    return constants;
-  }
+  public static final EnabledSystems enabledSystems = new EnabledSystems();
 }

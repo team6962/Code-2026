@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Distance;
  * detection parameters, and physical mounting position for a camera used to detect and locate
  * sphere game pieces on the field.
  */
-public class SphereCameraConstants {
+public class SphereCameraConstants implements Cloneable {
   /** The name identifier for this sphere detection camera. */
   public String Name = "SphereCamera";
 
@@ -204,7 +204,7 @@ public class SphereCameraConstants {
   }
 
   /**
-   * Sets the 3D transform of the camera relative to the robot's center.
+   * Sets the robot-to-camera transform.
    *
    * @param transform The camera transform.
    * @return This SphereCameraConstants instance for method chaining.
@@ -212,5 +212,14 @@ public class SphereCameraConstants {
   public SphereCameraConstants withRobotToCameraTransform(Transform3d transform) {
     this.RobotToCameraTransform = transform;
     return this;
+  }
+
+  @Override
+  public SphereCameraConstants clone() {
+    try {
+      return (SphereCameraConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

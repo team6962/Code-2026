@@ -6,7 +6,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** A set of constants that configure the behavior of a swerve drivetrain. */
-public class DrivetrainConstants {
+public class DrivetrainConstants implements Cloneable {
   /**
    * The name of the CAN bus that the drivetrain's devices are connected to. This defaults to an
    * empty string, which means the RIO CAN bus on a RoboRIO. If your drivetrain is using a different
@@ -341,5 +341,14 @@ public class DrivetrainConstants {
    */
   public TalonFXConfiguration getDriveMotorConfig(Corner corner) {
     return getDriveMotorConfig(corner.getIndex());
+  }
+
+  @Override
+  public DrivetrainConstants clone() {
+    try {
+      return (DrivetrainConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

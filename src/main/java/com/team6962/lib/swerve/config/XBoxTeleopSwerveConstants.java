@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.XboxController.Button;
  * Configuration constants for teleop control of a swerve drive using an Xbox controller. This
  * includes joystick mappings, button assignments, speed settings, and control tuning parameters.
  */
-public class XBoxTeleopSwerveConstants {
+public class XBoxTeleopSwerveConstants implements Cloneable {
   /**
    * The port number of the Xbox controller used to control the robot.
    *
@@ -395,5 +395,14 @@ public class XBoxTeleopSwerveConstants {
 
     /** The right trigger on the Xbox controller. */
     RightTrigger
+  }
+
+  @Override
+  public XBoxTeleopSwerveConstants clone() {
+    try {
+      return (XBoxTeleopSwerveConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

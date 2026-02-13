@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /** The constants that define the behavior of the swerve drive in simulation. */
-public class SimulationConstants {
+public class SimulationConstants implements Cloneable {
   /**
    * If true, the pose estimation will be enabled in simulation, which fuses vision measurements
    * with odometry and gyroscope data to estimate the robot's pose. If false, {@link
@@ -103,5 +103,14 @@ public class SimulationConstants {
   public SimulationConstants withInitialPose(Pose2d initialPose) {
     InitialPose = initialPose;
     return this;
+  }
+
+  @Override
+  public SimulationConstants clone() {
+    try {
+      return (SimulationConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

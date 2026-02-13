@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.Distance;
  * The constants for each of the swerve modules in the drivetrain, which include the CAN IDs of each
  * device, absolute encoder offsets, and optional wheel radii.
  */
-public class SwerveModuleConstants {
+public class SwerveModuleConstants implements Cloneable {
   /** The CAN ID of the drive motor for this module. */
   public int DriveMotorCANId = -1;
 
@@ -174,6 +174,15 @@ public class SwerveModuleConstants {
       }
 
       throw new IllegalArgumentException("Invalid corner index: " + index);
+    }
+  }
+
+  @Override
+  public SwerveModuleConstants clone() {
+    try {
+      return (SwerveModuleConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
     }
   }
 }

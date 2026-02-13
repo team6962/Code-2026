@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 /** The constants that define the steer encoder behavior. */
-public class SteerEncoderConstants {
+public class SteerEncoderConstants implements Cloneable {
   /**
    * The CANcoder configuration for the steer encoder. Some fields in this configuration may be
    * overriden by other setting.
@@ -75,6 +75,15 @@ public class SteerEncoderConstants {
 
     private DataFusionMethod(FeedbackSensorSourceValue feedbackSensorSource) {
       this.feedbackSensorSource = feedbackSensorSource;
+    }
+  }
+
+  @Override
+  public SteerEncoderConstants clone() {
+    try {
+      return (SteerEncoderConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
     }
   }
 }

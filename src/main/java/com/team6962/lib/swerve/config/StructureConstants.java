@@ -11,7 +11,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** The constants that define the physical structure of the drivetrain. */
-public class StructureConstants {
+public class StructureConstants implements Cloneable {
   /** The wheelbase of the robot, which is the distance between the front and back wheels. */
   public Distance WheelBase = Inches.of(22.75);
 
@@ -168,5 +168,14 @@ public class StructureConstants {
         new Translation2d(WheelBase.div(2), TrackWidth.div(-2)),
         new Translation2d(WheelBase.div(-2), TrackWidth.div(2)),
         new Translation2d(WheelBase.div(-2), TrackWidth.div(-2)));
+  }
+
+  @Override
+  public StructureConstants clone() {
+    try {
+      return (StructureConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }
