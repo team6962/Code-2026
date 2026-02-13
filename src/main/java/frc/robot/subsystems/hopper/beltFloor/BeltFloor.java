@@ -1,7 +1,7 @@
 package frc.robot.subsystems.hopper.beltfloor;
 
 import static edu.wpi.first.units.Units.InchesPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -104,9 +104,7 @@ public class BeltFloor extends SubsystemBase {
      *pulley */
   public LinearVelocity getLinearVelocity() {
     return InchesPerSecond.of(
-        (getAngularVelocity().in(RotationsPerSecond))
-            * 2.00
-            * Math.PI
+        (getAngularVelocity().in(RadiansPerSecond))
             * HopperConstants.BELT_FLOOR_PULLEY_RADIUS);
   }
 
