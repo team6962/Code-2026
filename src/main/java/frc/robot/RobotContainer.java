@@ -13,7 +13,6 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.hood.ShooterHood;
-import frc.robot.subsystems.hopper.beltFloor.BeltFloor;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
@@ -28,7 +27,7 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
-  private final BeltFloor beltFloor;
+
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -40,7 +39,6 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
-    beltFloor = new BeltFloor();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
@@ -67,6 +65,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return driveStraightAuto.getCommand();
+
   }
 
   public void latePeriodic() {
