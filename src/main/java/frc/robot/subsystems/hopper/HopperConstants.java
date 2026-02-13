@@ -35,7 +35,6 @@ public class HopperConstants {
                   .withStatorCurrentLimitEnable(true));
     
     //Sensors
-    public static final String SENSORS_CANBUS_NAME = "subsystem";
     public static final int KICKER_SENSOR_CAN_ID = 32;
     public static final int UPPER_HOPPER_CAN_ID = 33;
     public static final int LOWER_HOPPER_CAN_ID = 34;

@@ -23,15 +23,15 @@ public class HopperSensors extends SubsystemBase {
 
     public HopperSensors() {
         kickerSensor =
-            new CANrange(HopperConstants.KICKER_SENSOR_CAN_ID, new CANBus(HopperConstants.SENSORS_CANBUS_NAME));
+            new CANrange(HopperConstants.KICKER_SENSOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
         kickerSensor.getConfigurator().apply(HopperConstants.KICKER_SENSOR_CONFIGURATION);
 
         upperHopperSensor =
-            new CANrange(HopperConstants.UPPER_HOPPER_CAN_ID, new CANBus(HopperConstants.SENSORS_CANBUS_NAME));
+            new CANrange(HopperConstants.UPPER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
         upperHopperSensor.getConfigurator().apply(HopperConstants.UPPER_HOPPER_CONFIGURATION);
         
         lowerHopperSensor =
-            new CANrange(HopperConstants.LOWER_HOPPER_CAN_ID, new CANBus(HopperConstants.SENSORS_CANBUS_NAME));
+            new CANrange(HopperConstants.LOWER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
         lowerHopperSensor.getConfigurator().apply(HopperConstants.LOWER_HOPPER_CONFIGURATION);
 
         this.kickerDistance = kickerSensor.getDistance();
