@@ -13,7 +13,6 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.hood.ShooterHood;
-import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
@@ -29,8 +28,6 @@ public class RobotContainer {
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
-  private final Kicker kicker;
-
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
@@ -41,7 +38,6 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
-    kicker = new Kicker();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
