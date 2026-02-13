@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/** climb class for the robot to climb the ladder at the during the competition */
 public class Climb extends SubsystemBase {
   private TalonFX motor;
   private CANdi candi;
@@ -34,7 +35,7 @@ public class Climb extends SubsystemBase {
   private StatusSignal<Boolean> hallEffectSensorSignal;
   private ClimbSim simulation;
 
-  public Climb() { // creates climb class
+  public Climb() {
     motor = new TalonFX(ClimbConstants.MOTOR_ID); // motorID
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
@@ -104,6 +105,10 @@ public class Climb extends SubsystemBase {
 
     if (isHallEffectSensorTriggered()) {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
+    }
+
+    if (simulation != null) {
+      simulation.update();
     }
   }
 
