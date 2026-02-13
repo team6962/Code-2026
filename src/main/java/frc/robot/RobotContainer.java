@@ -28,7 +28,7 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
-  
+
   private final Kicker kicker;
 
   public RobotContainer() {
