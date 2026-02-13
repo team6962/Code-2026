@@ -1,5 +1,6 @@
 package frc.robot.subsystems.climb;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
@@ -8,7 +9,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.simulation.LinearMechanismSim;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class ClimbSim {
   private TalonFXSimState climbMotor;
@@ -25,35 +26,26 @@ public class ClimbSim {
             ClimbConstants.MIN_HEIGHT,
             ClimbConstants.MAX_HEIGHT,
             ClimbConstants.CONSTANT_ACCELERATION,
-            ClimbConstants.MIN_HEIGHT,
-            0 // not sure want this should be
-            );
-
-    // physicsSim = new ElevatorSim(
-    //     LinearSystemId.createElevatorSystem(
-    //         DCMotor.getKrakenX60Foc(1),
-    //         Units.lbsToKilograms(10),//mass
-    //         Units.inchesToMeters(1),//drum radius
-    //         10.0//gear ratio
-    //     ),
-    //     DCMotor.getKrakenX60Foc(1),
-    //     0,
-    //     1, //maxhegiht
-    //     true,
-    //     0
-    //     );
+            ClimbConstants.MIN_HEIGHT);
   }
 
   public void update() {
-    climbMotor.setSupplyVoltage(12);
+    climbMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(climbMotor.getMotorVoltage());
     climbMotor.setRawRotorPosition(
-        Radians.of(physicsSim.getPositionMeters() / Units.inchesToMeters(1) * 10));
+        Radians.of(
+            physicsSim.getPositionMeters()
+                / ClimbConstants.DRUM_RADIUS.in(Meters)
+                * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorVelocity(
         RadiansPerSecond.of(
-            physicsSim.getVelocityMetersPerSecond() / Units.inchesToMeters(1) * 10));
+            physicsSim.getVelocityMetersPerSecond()
+                / ClimbConstants.DRUM_RADIUS.in(Meters)
+                * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorAcceleration(
         RadiansPerSecondPerSecond.of(
-            physicsSim.getVelocityMetersPerSecond() / Units.inchesToMeters(1) * 10));
+            physicsSim.getVelocityMetersPerSecond()
+                / ClimbConstants.DRUM_RADIUS.in(Meters)
+                * ClimbConstants.GEAR_RATIO));
   }
 }

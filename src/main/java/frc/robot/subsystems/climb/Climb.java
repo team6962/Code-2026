@@ -34,13 +34,14 @@ public class Climb extends SubsystemBase {
   private StatusSignal<Boolean> hallEffectSensorSignal;
   private ClimbSim simulation;
 
-  public Climb() {
-    motor = new TalonFX(30); // motorID
+  public Climb() { // creates climb class
+    motor = new TalonFX(ClimbConstants.MOTOR_ID); // motorID
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
-    candi = new CANdi(40, "subsystems");
+    candi = new CANdi(ClimbConstants.CANDI_CAN_ID, ClimbConstants.CANBUS_NAME);
     candi.getConfigurator().apply(ClimbConstants.CANDI_CONFIGURATION);
+
     accelerationSignal = motor.getAcceleration();
     velocitySignal = motor.getVelocity();
     positionSignal = motor.getPosition();
@@ -58,11 +59,13 @@ public class Climb extends SubsystemBase {
   }
 
   public LinearVelocity getVelocity() {
-    return MetersPerSecond.of(velocitySignal.getValueAsDouble());
+    return MetersPerSecond.of(
+        BaseStatusSignal.getLatencyCompensatedValueAsDouble(velocitySignal, accelerationSignal));
   }
 
   public Distance getPosition() {
-    return Meters.of(positionSignal.getValueAsDouble());
+    return Meters.of(
+        BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal));
   }
 
   public Voltage getVoltage() {

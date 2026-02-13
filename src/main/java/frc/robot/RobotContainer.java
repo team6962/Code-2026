@@ -88,4 +88,8 @@ public class RobotContainer {
   public ShooterRollers getShooterRollers() {
     return shooterRollers;
   }
+
+  public Climb getClimb() {
+    return climb;
+  }
 }
