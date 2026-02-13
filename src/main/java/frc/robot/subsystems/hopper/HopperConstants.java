@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Amps;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -13,6 +14,9 @@ import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
+
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.measure.Distance;
 
 public class HopperConstants {
   public static final String CANBUS_NAME = "subsystems";
@@ -35,7 +39,9 @@ public class HopperConstants {
     public static final int KICKER_SENSOR_CAN_ID = 32;
     public static final int UPPER_HOPPER_CAN_ID = 33;
     public static final int LOWER_HOPPER_CAN_ID = 34;
-    
+    public static final Distance KICKER_SENSOR_THRESHOLD = Inches.of(1.0); //This isn't the correct distance
+    public static final Distance UPPER_HOPPER_SENSOR_THRESHOLD = Inches.of(1.0); //This isn't the correct distance
+    public static final Distance LOWER_HOPPER_SENSOR_THRESHOLD = Inches.of(1.0); //This isn't the correct distance
     
     public static final CANrangeConfiguration KICKER_SENSOR_CONFIGURATION = 
         new CANrangeConfiguration()
