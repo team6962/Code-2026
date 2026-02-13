@@ -11,6 +11,7 @@ import com.team6962.lib.simulation.LinearMechanismSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 
+/** climb sim runs a physics sim for the climb mechanism */
 public class ClimbSim {
   private TalonFXSimState climbMotor;
   private LinearMechanismSim physicsSim;

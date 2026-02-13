@@ -34,6 +34,7 @@ public class Climb extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Boolean> hallEffectSensorSignal;
   private ClimbSim simulation;
+  private boolean isZeroed;
 
   public Climb() {
     motor = new TalonFX(ClimbConstants.MOTOR_ID); // motorID
@@ -52,35 +53,45 @@ public class Climb extends SubsystemBase {
     hallEffectSensorSignal = candi.getS2Closed();
     if (RobotBase.isSimulation()) {
       simulation = new ClimbSim(motor);
+      isZeroed = true;
+    } else {
+      motor.setPosition(ClimbConstants.MAX_HEIGHT.in(Meters));
     }
   }
 
+  // gets the acceleration signal in meters per second^2
   public LinearAcceleration getAcceleration() {
     return MetersPerSecondPerSecond.of(accelerationSignal.getValueAsDouble());
   }
 
+  // gets the latency compensation neeeded with the velocity signal and acceleration signal
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
         BaseStatusSignal.getLatencyCompensatedValueAsDouble(velocitySignal, accelerationSignal));
   }
 
+  // gets the latency compensation needed with the current position signal and the velocity signal
   public Distance getPosition() {
     return Meters.of(
         BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal));
   }
 
+  // gets the value of the voltage signal
   public Voltage getVoltage() {
     return voltageSignal.getValue();
   }
 
+  // gets value of the stator current, which is the input current
   public Current getStatorCurrent() {
     return statorCurrentSignal.getValue();
   }
 
+  // gets value of the supply current, which is the total amount of current in the system
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
   }
 
+  // determines if the hall sensor is triggered
   public boolean isHallEffectSensorTriggered() {
     return hallEffectSensorSignal.getValue();
   }
@@ -101,10 +112,11 @@ public class Climb extends SubsystemBase {
     DogLog.log("Climb/Voltage", getVoltage());
     DogLog.log("Climb/StatorCurrent", getStatorCurrent());
     DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
-    DogLog.log("Climb/HallSignal", isHallEffectSensorTriggered());
+    DogLog.log("Climb/HallSensorTriggered", isHallEffectSensorTriggered());
 
-    if (isHallEffectSensorTriggered()) {
+    if (isHallEffectSensorTriggered() && getPosition().lt(ClimbConstants.MIN_HEIGHT)) {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
+      isZeroed = true;
     }
 
     if (simulation != null) {
@@ -115,7 +127,7 @@ public class Climb extends SubsystemBase {
   public Command elevate() {
     return startEnd(
         () -> {
-          motor.setControl(new PositionVoltage(8));
+          motor.setControl(new PositionVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
         },
         () -> {
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));
@@ -125,7 +137,7 @@ public class Climb extends SubsystemBase {
   public Command descend() {
     return startEnd(
         () -> {
-          motor.setControl(new PositionVoltage(0.0));
+          motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
         },
         () -> {
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));
@@ -135,7 +147,7 @@ public class Climb extends SubsystemBase {
   public Command pullUp() {
     return startEnd(
         () -> {
-          motor.setControl(new PositionVoltage(0));
+          motor.setControl(new PositionVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
         },
         () -> {
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));

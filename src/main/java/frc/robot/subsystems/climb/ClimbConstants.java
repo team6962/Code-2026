@@ -20,8 +20,7 @@ import edu.wpi.first.units.measure.Mass;
 
 public class ClimbConstants {
   public static final double GEAR_RATIO = 20.0;
-  public static final Mass MASS =
-      Pounds.of(2.1); // needs to be updated. idk what the value should be
+  public static final Mass MASS = Pounds.of(2.1);
   public static final Distance DRUM_RADIUS = Inches.of(0.375);
   public static final int CANDI_CAN_ID = 40;
   public static final int MOTOR_ID = 30;
@@ -29,19 +28,24 @@ public class ClimbConstants {
 
   public static final Distance MIN_HEIGHT = Inches.of(0);
   public static final Distance MAX_HEIGHT = Inches.of(25.045099);
+  public static final Distance PULL_UP_HEIGHT = Inches.of(0);
 
-  public static final LinearAcceleration CONSTANT_ACCELERATION =
-      MetersPerSecondPerSecond.of(1.0); // this number needs to be changed
+  public static final LinearAcceleration CONSTANT_ACCELERATION = MetersPerSecondPerSecond.of(-9.81);
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withMotorOutput(new MotorOutputConfigs())
-          .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true))
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimitEnable(true)
+                  .withSupplyCurrentLimitEnable(true)
+                  .withStatorCurrentLimit(120)
+                  .withSupplyCurrentLimit(80))
           .withSoftwareLimitSwitch(
               new SoftwareLimitSwitchConfigs()
                   .withForwardSoftLimitEnable(true)
                   .withReverseSoftLimitThreshold(0.0)
-                  .withForwardSoftLimitThreshold(25.045099) // change to elevator max height
+                  .withForwardSoftLimitThreshold(25.045099)
                   .withReverseSoftLimitEnable(true))
           .withFeedback(
               new FeedbackConfigs()
