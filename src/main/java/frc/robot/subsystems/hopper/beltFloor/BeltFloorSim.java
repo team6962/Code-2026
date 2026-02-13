@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hopper.beltFloor;
+package frc.robot.subsystems.hopper.beltfloor;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
