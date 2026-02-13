@@ -3,8 +3,9 @@ package frc.robot.subsystems.hopper.kicker;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.phoenix.StatusUtil;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
+/** The kicker class is responsible for controlling the kicker */
 public class Kicker extends SubsystemBase {
   private TalonFX kickerMotor;
   private StatusSignal<Voltage> appliedVoltageSignal;
@@ -27,29 +29,35 @@ public class Kicker extends SubsystemBase {
 
   public Kicker() {
 
-    this.kickerMotor = new TalonFX(HopperConstants.KICKER_DEVICE_ID);
+    this.kickerMotor =
+        new TalonFX(HopperConstants.KICKER_DEVICE_ID, new CANBus(HopperConstants.CANBUS_NAME));
     kickerMotor.getConfigurator().apply(HopperConstants.KICKER_MOTOR_CONFIGURATION);
-    this.appliedVoltageSignal = kickerMotor.getMotorVoltage();
-    this.statorCurrentSignal = kickerMotor.getStatorCurrent();
-    this.supplyCurrentSignal = kickerMotor.getSupplyCurrent();
-    this.motorVelocitySignal = kickerMotor.getVelocity();
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
     }
   }
 
-  /** Returns command to make the motor move and stop */
+  /**
+   * Returns command to make the motor move and stop
+   *
+   * @param voltage target voltage
+   * @return Command that runs at target voltage
+   */
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
           kickerMotor.setControl(new VoltageOut(voltage));
         },
         () -> {
-          kickerMotor.setControl(new CoastOut());
+          kickerMotor.setControl(new NeutralOut());
         });
   }
 
-  /** feeds fuel to the shooter return */
+  /**
+   * feeds fuel to the shooter return
+   *
+   * @return command that feeds fuel
+   */
   public Command feed() {
     return move(Volts.of(12)); // negative or positive to be tuned
   }
@@ -57,7 +65,7 @@ public class Kicker extends SubsystemBase {
   /**
    * passes fuel back to intake
    *
-   * @return command
+   * @return command that passes fuel back
    */
   public Command reverse() {
     return move(Volts.of(-12)); // negative or positive to be tuned
@@ -107,9 +115,9 @@ public class Kicker extends SubsystemBase {
     StatusUtil.check(
         BaseStatusSignal.refreshAll(
             motorVelocitySignal, statorCurrentSignal, supplyCurrentSignal, appliedVoltageSignal));
-    DogLog.log("kicker/angularVelocity", getVelocity());
-    DogLog.log("kicker/statorCurrent", getStatorCurrent());
-    DogLog.log("kicker/supplyCurrent", getSupplyCurrent());
-    DogLog.log("kicker/appliedVoltage", getAppliedVoltage());
+    DogLog.log("Kicker/AngularVelocity", getVelocity());
+    DogLog.log("Kicker/StatorCurrent", getStatorCurrent());
+    DogLog.log("Kicker/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Kicker/AppliedVoltage", getAppliedVoltage());
   }
 }
