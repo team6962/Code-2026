@@ -52,6 +52,7 @@ public class Turret extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Boolean> hallSensorTriggeredSignal;
+  private StatusSignal<Double> profilePositionSignal;
 
   /** The simulation object that simulates the turret's behavior */
   private TurretSim simulation;
@@ -119,6 +120,7 @@ public class Turret extends SubsystemBase {
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
     hallSensorTriggeredSignal = candi.getS2Closed();
+    profilePositionSignal = motor.getClosedLoopReference();
 
     // Tunable angle input, PID values, Motion Magic constraints
     DogLog.tunable(
@@ -203,7 +205,8 @@ public class Turret extends SubsystemBase {
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        hallSensorTriggeredSignal);
+        hallSensorTriggeredSignal,
+        profilePositionSignal);
 
     // Check hall effect sensor and handle zeroing
     updateTurretAbsolutePosition();
@@ -217,6 +220,10 @@ public class Turret extends SubsystemBase {
     DogLog.log("Turret/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Turret/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Turret/IsZeroed", isZeroed());
+    DogLog.log(
+        "Turret/ProfilePosition",
+        Rotations.of(profilePositionSignal.getValue()).in(Radians),
+        Radians);
 
     LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
   }
