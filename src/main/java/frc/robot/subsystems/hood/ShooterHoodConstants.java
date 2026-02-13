@@ -14,6 +14,8 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -34,22 +36,24 @@ public final class ShooterHoodConstants {
   public static final Distance ARM_LENGTH = Inches.of(6.85);
 
   /** Gravity compensation feedforward constant (volts). */
-  public static final double kG = 0.19;
+  public static final double kG = 0.22;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(176 / 3))
           .withMotionMagic(
               new MotionMagicConfigs()
-                  .withMotionMagicCruiseVelocity(1)
-                  .withMotionMagicAcceleration(0.2)
+                  .withMotionMagicCruiseVelocity(30.0)
+                  .withMotionMagicAcceleration(30.0)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                  // Tuned for simulation
-                  .withKP(15)
-                  .withKD(0.5)
-                  .withKV(6.5)
+                  .withKP(80.0)
+                  .withKD(1.0)
+                  .withKV(12.0 / (7368.0 / 60.0) * 176.0 / 3.0)
+                  .withKS(0.0)
+                  .withKA(0.03)
+                  .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
               // Don't add kG here, instead use ShooterHoodConstants.kG
               )
           .withSoftwareLimitSwitch(
@@ -65,6 +69,8 @@ public final class ShooterHoodConstants {
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
-              new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
+              new MotorOutputConfigs()
+                  .withInverted(InvertedValue.CounterClockwise_Positive)
+                  .withNeutralMode(NeutralModeValue.Brake));
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
 }
