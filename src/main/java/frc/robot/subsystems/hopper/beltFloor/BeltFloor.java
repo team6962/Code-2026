@@ -57,7 +57,7 @@ public class BeltFloor extends SubsystemBase {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  public Command feedDump(double targetVoltage) { 
+  public Command feedDump(double targetVoltage) {
 
     return startEnd(
         () -> {
@@ -101,8 +101,9 @@ public class BeltFloor extends SubsystemBase {
     return accelerationSignal.getValue();
   }
 
-  /**gets linear velocity from multiplying the angular velocity by the circumference of the
-     *pulley */
+  /**
+   * gets linear velocity from multiplying the angular velocity by the circumference of the pulley
+   */
   public LinearVelocity getLinearVelocity() {
     return InchesPerSecond.of(
         (getAngularVelocity().in(RadiansPerSecond))

@@ -28,7 +28,6 @@ public class RobotContainer {
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
 
-
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
@@ -65,7 +64,6 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return driveStraightAuto.getCommand();
-
   }
 
   public void latePeriodic() {
