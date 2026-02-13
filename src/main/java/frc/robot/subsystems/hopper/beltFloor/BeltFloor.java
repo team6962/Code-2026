@@ -21,25 +21,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
 public class BeltFloor extends SubsystemBase {
-  private TalonFX BeltFloorMotor;
-  private StatusSignal<AngularVelocity> VelocitySignal;
-  private StatusSignal<AngularAcceleration> AccelerationSignal;
+  private TalonFX beltFloorMotor;
+  private StatusSignal<AngularVelocity> velocitySignal;
+  private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
   private BeltFloorSim simulation;
 
   public BeltFloor() {
-    BeltFloorMotor =
+    beltFloorMotor =
         new TalonFX(
             HopperConstants.BELT_FLOOR_MOTOR_CAN_ID,
             new CANBus(HopperConstants.BELT_FLOOR_CANBUS_NAME));
-    BeltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
-    VelocitySignal = BeltFloorMotor.getVelocity();
-    voltageSignal = BeltFloorMotor.getMotorVoltage();
-    AccelerationSignal = BeltFloorMotor.getAcceleration();
-    supplyCurrentSignal = BeltFloorMotor.getSupplyCurrent();
-    statorCurrentSignal = BeltFloorMotor.getStatorCurrent();
+    beltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
+    velocitySignal = beltFloorMotor.getVelocity();
+    voltageSignal = beltFloorMotor.getMotorVoltage();
+    accelerationSignal = beltFloorMotor.getAcceleration();
+    supplyCurrentSignal = beltFloorMotor.getSupplyCurrent();
+    statorCurrentSignal = beltFloorMotor.getStatorCurrent();
     DogLog.tunable(
         "Hopper/BeltFloor/AppliedVoltage",
         0.0,
@@ -47,7 +47,7 @@ public class BeltFloor extends SubsystemBase {
           feedDump(newVoltage).schedule();
         });
     if (RobotBase.isSimulation()) {
-      simulation = new BeltFloorSim(BeltFloorMotor);
+      simulation = new BeltFloorSim(beltFloorMotor);
     }
   }
 
@@ -61,11 +61,11 @@ public class BeltFloor extends SubsystemBase {
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          BeltFloorMotor.setControl(new VoltageOut(targetVoltage));
+          beltFloorMotor.setControl(new VoltageOut(targetVoltage));
         },
         () -> {
           // defines a local function to stop motor
-          BeltFloorMotor.setControl(new CoastOut());
+          beltFloorMotor.setControl(new CoastOut());
         });
   }
 
@@ -77,11 +77,11 @@ public class BeltFloor extends SubsystemBase {
 
     // this will log stuff every once in a while
     BaseStatusSignal.refreshAll(
-        VelocitySignal,
+        velocitySignal,
         voltageSignal,
         supplyCurrentSignal,
         statorCurrentSignal,
-        AccelerationSignal);
+        accelerationSignal);
     DogLog.log("Hopper/BeltFloor/Voltage", getMotorVoltage());
     DogLog.log("Hopper/BeltFloor/AngularVelocity", getAngularVelocity());
     DogLog.log("Hopper/BeltFloor/BeltVelocity", getLinearVelocity());
@@ -92,12 +92,12 @@ public class BeltFloor extends SubsystemBase {
 
   /** gets the angular velocity */
   public AngularVelocity getAngularVelocity() {
-    return VelocitySignal.getValue();
+    return velocitySignal.getValue();
   }
 
   /** gets the angular acceleration */
   public AngularAcceleration getAngularAcceleration() {
-    return AccelerationSignal.getValue();
+    return accelerationSignal.getValue();
   }
 
   // **gets linear velocity from multiplying the angular velocity by the circumference of the
