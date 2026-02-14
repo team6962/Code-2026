@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
+import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
@@ -27,6 +28,7 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
+  private final Climb climb;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -34,6 +36,7 @@ public class RobotContainer {
     swerveDrive =
         new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
 
+    climb = new Climb();
     shooterHood = new ShooterHood();
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
@@ -84,5 +87,9 @@ public class RobotContainer {
 
   public ShooterRollers getShooterRollers() {
     return shooterRollers;
+  }
+
+  public Climb getClimb() {
+    return climb;
   }
 }
