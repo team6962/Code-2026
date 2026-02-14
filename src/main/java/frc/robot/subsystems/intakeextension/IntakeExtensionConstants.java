@@ -21,11 +21,12 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 public final class IntakeExtensionConstants {
+
   public static final int MOTOR_CAN_ID = 25;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1);
   public static final Mass MOVING_MASS = Pounds.of(12);
   public static final MomentOfInertia MOMENT_OF_INERTIA =
-      KilogramSquareMeters.of(5); // dummy number.
+    KilogramSquareMeters.of(5); // dummy number.
   public static final Distance MAX_POSITION = Inches.of(9.879);
   public static final Distance MIN_POSITION = Inches.of(0);
   public static final Angle ANGLE = Degrees.of(0);
@@ -33,23 +34,35 @@ public final class IntakeExtensionConstants {
   public static final int CANDI_DEVICE_ID = 40;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
-      new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(4.5))
-          .withMotionMagic(
-              new MotionMagicConfigs()
-                  // fake numbers
-                  .withMotionMagicCruiseVelocity(0.05)
-                  .withMotionMagicAcceleration(0.05)
-                  .withMotionMagicJerk(0))
-          // fake numbers end here
-          .withSlot0(new Slot0Configs().withKA(0.02).withKD(0).withKP(3.5).withKG(-0.005).withKV(7))
-          .withCurrentLimits(
-              new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(Amps.of(120))
-                  .withSupplyCurrentLimit(Amps.of(60))
-                  .withSupplyCurrentLimitEnable(true)
-                  .withStatorCurrentLimitEnable(true))
-          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+    new TalonFXConfiguration()
+      .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(4.5))
+      .withMotionMagic(
+        new MotionMagicConfigs()
+          // fake numbers
+          .withMotionMagicCruiseVelocity(0.36)
+          .withMotionMagicAcceleration(0.72)
+          .withMotionMagicJerk(0)
+      )
+      // fake numbers end here
+      .withSlot0(
+        new Slot0Configs()
+          .withKA(0.00)
+          .withKD(0.0)
+          .withKP(56.0)
+          .withKG(-0.0742)
+          .withKV(7)
+      )
+      .withCurrentLimits(
+        new CurrentLimitsConfigs()
+          .withStatorCurrentLimit(Amps.of(120))
+          .withSupplyCurrentLimit(Amps.of(60))
+          .withSupplyCurrentLimitEnable(true)
+          .withStatorCurrentLimitEnable(true)
+      )
+      .withMotorOutput(
+        new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
+      );
 
-  public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
+  public static final CANdiConfiguration CANDI_CONFIGURATION =
+    new CANdiConfiguration();
 }

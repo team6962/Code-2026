@@ -56,9 +56,9 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return intake.extend();
+    return driveStraightAuto.getCommand();
   }
-
+  
   public void latePeriodic() {
     swerveDrive.latePeriodic();
   }

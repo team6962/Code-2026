@@ -13,6 +13,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -32,7 +33,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
-  private CANdi candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
+  private CANdi candi = new CANdi(
+    IntakeExtensionConstants.CANDI_DEVICE_ID,
+    "subsystems"
+  );
 
   private StatusSignal<Angle> angleSignal;
   private StatusSignal<AngularVelocity> angularVelocitySignal;
@@ -50,7 +54,10 @@ public class IntakeExtension extends SubsystemBase {
   private IntakeExtensionSim simulation;
 
   public IntakeExtension() {
-    motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
+    motor = new TalonFX(
+      IntakeExtensionConstants.MOTOR_CAN_ID,
+      new CANBus("subsystems")
+    );
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
@@ -85,22 +92,26 @@ public class IntakeExtension extends SubsystemBase {
 
   public Command extend() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+      () -> {
+        motor.setControl(new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+      },
+      () -> {
+        motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+      }
+    );
   }
 
   public Command retract() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+      () -> {
+        motor.setControl(
+          new MotionMagicVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters))
+        );
+      },
+      () -> {
+        motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+      }
+    );
   }
 
   /**
@@ -111,9 +122,11 @@ public class IntakeExtension extends SubsystemBase {
    */
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
-        BaseStatusSignal.getLatencyCompensatedValue(
-                angularVelocitySignal, angularAccelerationSignal)
-            .in(RotationsPerSecond));
+      BaseStatusSignal.getLatencyCompensatedValue(
+        angularVelocitySignal,
+        angularAccelerationSignal
+      ).in(RotationsPerSecond)
+    );
   }
 
   /**
@@ -123,8 +136,11 @@ public class IntakeExtension extends SubsystemBase {
    */
   public Distance getPosition() {
     return Meters.of(
-        BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal)
-            .in(Rotations));
+      BaseStatusSignal.getLatencyCompensatedValue(
+        angleSignal,
+        angularVelocitySignal
+      ).in(Rotations)
+    );
   }
 
   /**
@@ -133,7 +149,9 @@ public class IntakeExtension extends SubsystemBase {
    * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
-    return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
+    return MetersPerSecondPerSecond.of(
+      angularAccelerationSignal.getValueAsDouble()
+    );
   }
 
   /**
@@ -186,14 +204,15 @@ public class IntakeExtension extends SubsystemBase {
     }
 
     BaseStatusSignal.refreshAll(
-        angularVelocitySignal,
-        voltageSignal,
-        statorCurrentSignal,
-        supplyCurrentSignal,
-        angleSignal,
-        angularAccelerationSignal,
-        candiTriggeredSignal,
-        closedLoopReferenceSignal);
+      angularVelocitySignal,
+      voltageSignal,
+      statorCurrentSignal,
+      supplyCurrentSignal,
+      angleSignal,
+      angularAccelerationSignal,
+      candiTriggeredSignal,
+      closedLoopReferenceSignal
+    );
 
     DogLog.log("intake/position", getPosition());
     DogLog.log("intake/velocity", getVelocity());
