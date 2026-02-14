@@ -8,6 +8,9 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
@@ -63,7 +66,9 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    return swerveDrive
+        .driveTo(new Pose2d(10, 5, Rotation2d.fromDegrees(360)), new ChassisSpeeds(-2, 2, 0))
+        .andThen(swerveDrive.drive(new ChassisSpeeds(-2, 2, 0)));
   }
 
   public void latePeriodic() {

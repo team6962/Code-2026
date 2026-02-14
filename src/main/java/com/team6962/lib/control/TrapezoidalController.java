@@ -100,6 +100,17 @@ public class TrapezoidalController {
   }
 
   /**
+   * Gets the current time scaling factor applied to the motion profile. Values greater than 1
+   * indicate the profile is stretched to take longer than the minimum time required by the physical
+   * constraints of the system.
+   *
+   * @return The time scaling factor
+   */
+  public double getTimeScale() {
+    return timeScale;
+  }
+
+  /**
    * Stretches the current motion profile to take the specified duration.
    *
    * @param duration The desired duration of the profile in seconds
@@ -135,22 +146,44 @@ public class TrapezoidalController {
    * @return The desired velocity that will cause the system to follow the motion profile
    */
   public double calculate(State current) {
-    double time = (Timer.getFPGATimestamp() - initialTime) / timeScale;
+    double realTime = Timer.getFPGATimestamp() - initialTime;
 
-    if (time > getDuration()) {
+    if (realTime > getDuration()) {
       if (goalState.velocity != 0) {
         return goalState.velocity;
       } else {
         return feedback.calculate(current.position, goalState.position);
       }
     } else {
-      State profileState = sampleAt(time);
+      State profileState = sampleAt(realTime);
 
       double feedbackOutput = feedback.calculate(current.position, profileState.position);
       double feedforward = profileState.velocity;
 
       return feedbackOutput + feedforward;
     }
+  }
+
+  /**
+   * Gets the target state of the profile at the current time.
+   *
+   * @return The target state at the current time
+   */
+  public TrapezoidProfile.State getCurrentTarget() {
+    double time = Timer.getFPGATimestamp() - initialTime;
+    return sampleAt(time);
+  }
+
+  /**
+   * Gets the error between the current position of the system and the current target position of
+   * the profile.
+   *
+   * @param currentPosition The current position of the system
+   * @return The error between the current position and the target position
+   */
+  public double getError(double currentPosition) {
+    State target = getCurrentTarget();
+    return target.position - currentPosition;
   }
 
   /**

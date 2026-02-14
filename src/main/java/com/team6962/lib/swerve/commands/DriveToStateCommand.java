@@ -10,6 +10,7 @@ import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -225,6 +226,9 @@ public class DriveToStateCommand extends Command {
       createMotionProfiles();
     }
 
+    // Current target pose for logging
+    Pose2d currentTarget = new Pose2d();
+
     // Calculate and apply velocity commands for translation and rotation
     if (translationController != null) {
       TranslationalVelocity outputTranslationalVelocity =
@@ -232,6 +236,11 @@ public class DriveToStateCommand extends Command {
               swerveDrive.getPosition2d().getTranslation(), swerveDrive.getTranslationalVelocity());
 
       swerveDrive.applyVelocityMotion(outputTranslationalVelocity);
+
+      // Add translation to current target pose
+      currentTarget =
+          new Pose2d(
+              translationController.getCurrentTarget(), swerveDrive.getPosition2d().getRotation());
     }
 
     if (headingController != null) {
@@ -243,7 +252,16 @@ public class DriveToStateCommand extends Command {
                       swerveDrive.getYawVelocity().in(RadiansPerSecond))));
 
       swerveDrive.applyVelocityMotion(outputAngularVelocity);
+
+      // Add rotation to current target pose
+      currentTarget =
+          new Pose2d(
+              currentTarget.getTranslation(),
+              Rotation2d.fromRadians(headingController.getCurrentTarget().position));
     }
+
+    // Log current target pose
+    swerveDrive.getFieldLogger().getField().getObject("Current Target").setPose(currentTarget);
   }
 
   @Override
