@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -37,7 +38,7 @@ public class Climb extends SubsystemBase {
   private boolean isZeroed;
 
   public Climb() {
-    motor = new TalonFX(ClimbConstants.MOTOR_ID); // motorID
+    motor = new TalonFX(ClimbConstants.MOTOR_ID);
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
@@ -113,6 +114,10 @@ public class Climb extends SubsystemBase {
     DogLog.log("Climb/StatorCurrent", getStatorCurrent());
     DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Climb/HallSensorTriggered", isHallEffectSensorTriggered());
+
+    if (RobotState.isDisabled()) {
+      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+    }
 
     if (isHallEffectSensorTriggered() && getPosition().lt(ClimbConstants.MIN_HEIGHT)) {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));

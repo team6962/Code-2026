@@ -45,7 +45,7 @@ public class ClimbConstants {
               new SoftwareLimitSwitchConfigs()
                   .withForwardSoftLimitEnable(true)
                   .withReverseSoftLimitThreshold(0.0)
-                  .withForwardSoftLimitThreshold(25.045099)
+                  .withForwardSoftLimitThreshold(MAX_HEIGHT.in(Meters))
                   .withReverseSoftLimitEnable(true))
           .withFeedback(
               new FeedbackConfigs()

@@ -1,9 +1,9 @@
 package frc.robot.subsystems.climb;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -34,17 +34,17 @@ public class ClimbSim {
     climbMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(climbMotor.getMotorVoltage());
     climbMotor.setRawRotorPosition(
-        Radians.of(
+        Rotations.of(
             physicsSim.getPositionMeters()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
                 * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorVelocity(
-        RadiansPerSecond.of(
+        RotationsPerSecond.of(
             physicsSim.getVelocityMetersPerSecond()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
                 * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorAcceleration(
-        RadiansPerSecondPerSecond.of(
+        RotationsPerSecondPerSecond.of(
             physicsSim.getVelocityMetersPerSecond()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
                 * ClimbConstants.GEAR_RATIO));
