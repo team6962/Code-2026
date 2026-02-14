@@ -9,6 +9,8 @@ import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
@@ -27,6 +29,7 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
+  private final SendableChooser<Command> autoChooser = new SendableChooser<>(); 
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -48,6 +51,14 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+    configAutonomousChooser();
+  }
+
+  private void configAutonomousChooser() {
+      /* Add more options later using this format:
+      autoChooser.addOption("NewOption", newOption.getCommand()); */
+      autoChooser.setDefaultOption("Drive Straight", driveStraightAuto.getCommand());
+      SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -63,7 +74,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return driveStraightAuto.getCommand();
+    return autoChooser.getSelected();
   }
 
   public void latePeriodic() {
