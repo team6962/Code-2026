@@ -135,16 +135,16 @@ public class TrapezoidalController {
    * @return The desired velocity that will cause the system to follow the motion profile
    */
   public double calculate(State current) {
-    double time = (Timer.getFPGATimestamp() - initialTime) / timeScale;
+    double elapsed = Timer.getFPGATimestamp() - initialTime;
 
-    if (time > getDuration()) {
+    if (elapsed > getDuration()) {
       if (goalState.velocity != 0) {
         return goalState.velocity;
       } else {
         return feedback.calculate(current.position, goalState.position);
       }
     } else {
-      State profileState = sampleAt(time);
+      State profileState = sampleAt(elapsed);
 
       double feedbackOutput = feedback.calculate(current.position, profileState.position);
       double feedforward = profileState.velocity;
@@ -178,8 +178,8 @@ public class TrapezoidalController {
    * @return The remaining time in seconds
    */
   public double getRemainingTime() {
-    double time = (Timer.getFPGATimestamp() - initialTime) * timeScale;
-    return Math.max(0, getDuration() - time);
+    double elapsed = Timer.getFPGATimestamp() - initialTime;
+    return Math.max(0, getDuration() - elapsed);
   }
 
   /**

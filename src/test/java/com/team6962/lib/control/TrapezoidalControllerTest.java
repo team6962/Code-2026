@@ -132,22 +132,13 @@ class TrapezoidalControllerTest {
   // ==================== BUG: getRemainingTime with timeScale ====================
 
   /**
-   * This test demonstrates a bug in getRemainingTime() when the profile is stretched.
+   * Verifies that getRemainingTime() and isFinished() work correctly with stretched profiles.
    *
-   * <p>getRemainingTime() uses (elapsed * timeScale) but should use just (elapsed), since
-   * getDuration() already returns real-time (totalTime * timeScale). The multiplication by
-   * timeScale double-scales the elapsed time, causing getRemainingTime() and isFinished() to give
-   * wrong answers for stretched profiles.
-   *
-   * <p>For a profile with natural duration 2s stretched to 4s (timeScale=2):
-   *
-   * <ul>
-   *   <li>At t=2s (halfway): getRemainingTime should be 2s, but returns 0s (thinks it's done!)
-   *   <li>At t=4s (actually done): getRemainingTime correctly returns 0s
-   * </ul>
+   * <p>Previously, getRemainingTime() used (elapsed * timeScale) instead of just (elapsed), which
+   * double-scaled the time and caused isFinished() to return true at the midpoint.
    */
   @Test
-  void getRemainingTime_WithStretchedProfile_BUG() {
+  void getRemainingTime_WithStretchedProfile_WorksCorrectly() {
     TrapezoidalController ctrl = makeController(0);
     ctrl.setProfile(new TrapezoidProfile.State(0, 0), new TrapezoidProfile.State(1, 0));
 
@@ -164,49 +155,24 @@ class TrapezoidalControllerTest {
     // Step to the halfway point of the stretched profile
     SimHooks.stepTiming(stretchedDuration / 2);
 
-    // BUG: getRemainingTime() uses elapsed * timeScale instead of just elapsed.
-    // With timeScale=2 and elapsed=2s: remaining = 4 - (2*2) = 0, incorrectly!
-    // The correct remaining time should be 4 - 2 = 2s.
-    //
-    // Uncomment the assertion below after fixing the bug:
-    // assertEquals(stretchedDuration / 2, ctrl.getRemainingTime(), 0.01,
-    //     "Remaining time should be half the stretched duration at the midpoint");
-
-    // For now, document the buggy behavior:
     assertEquals(
-        0.0,
+        stretchedDuration / 2,
         ctrl.getRemainingTime(),
-        DELTA,
-        "BUG: getRemainingTime returns 0 at the midpoint of a stretched profile "
-            + "because it uses elapsed*timeScale instead of just elapsed");
-    assertTrue(
-        ctrl.isFinished(), "BUG: isFinished returns true at the midpoint of a stretched profile");
+        0.01,
+        "Remaining time should be half the stretched duration at the midpoint");
+    assertFalse(ctrl.isFinished(), "Should NOT be finished at the midpoint of a stretched profile");
   }
 
   // ==================== BUG: calculate() time comparison mismatch ====================
 
   /**
-   * This test demonstrates a bug in calculate() when the profile is stretched.
+   * Verifies that calculate() correctly enters the post-profile branch for stretched profiles.
    *
-   * <p>calculate() computes profile-time as (elapsed / timeScale), then compares it against
-   * getDuration() which returns real-time (totalTime * timeScale). These have different units, so
-   * the "profile complete" branch is unreachable for timeScale > 1.
-   *
-   * <p>For a profile with natural duration 2s stretched to 4s (timeScale=2):
-   *
-   * <ul>
-   *   <li>At t=4s (done in real time): profile-time = 4/2 = 2, getDuration() = 4. Since 2 < 4 the
-   *       code still thinks the profile is active, and samples the trapezoidal profile at t=2s
-   *       which is the end — so it happens to work.
-   *   <li>At t=8s (well past done): profile-time = 8/2 = 4, getDuration() = 4. Now 4 > 4 is false,
-   *       so the complete branch is STILL not reached! Only at t > 8s does 4+ > 4 trigger.
-   * </ul>
-   *
-   * <p>In practice, the trapezoidal profile clamps at its end state, so the output is correct-ish
-   * but the codepath is wrong — PID feedback is applied when it shouldn't be.
+   * <p>Previously, calculate() compared profile-time against real-time getDuration(), so the
+   * post-profile branch was unreachable for timeScale > 1.
    */
   @Test
-  void calculate_WithStretchedProfile_TimeMismatchBUG() {
+  void calculate_WithStretchedProfile_EntersPostProfileBranch() {
     TrapezoidalController ctrl = makeController(1.0);
     ctrl.setProfile(new TrapezoidProfile.State(0, 0), new TrapezoidProfile.State(1, 0));
 
@@ -214,42 +180,28 @@ class TrapezoidalControllerTest {
     ctrl.setDuration(naturalDuration * 2); // stretch to ~4s
     double stretchedDuration = ctrl.getDuration();
 
-    // Step well past the stretched profile's real-time end (e.g., 6 seconds for a 4s profile)
+    // Step well past the stretched profile's real-time end
     SimHooks.stepTiming(stretchedDuration + 2.0);
 
-    // After a profile with goalVelocity=0 is done, calculate() should return
-    // just PID feedback to hold position at the goal. But due to the time
-    // comparison bug, the code still thinks the profile is active.
-    //
-    // With the system at the goal position (1.0), the PID output should be 0.
-    // The profile also ends at velocity=0 at this point. So the output is
-    // approximately 0 either way — the bug is masked in this specific case.
+    // After profile ends with goalVelocity=0, on-target output should be ~0
     double output = ctrl.calculate(new TrapezoidProfile.State(1, 0));
+    assertEquals(0.0, output, 0.01, "At goal after stretched profile: output should be ~0");
 
-    // The output should be ~0 regardless because we're at the goal,
-    // but we can verify which code path ran by checking with an off-target state:
+    // Off-target: post-profile branch uses pure PID to hold at goal position
+    // PID(0.5, 1.0) with kP=1.0 → 0.5
     double offTargetOutput = ctrl.calculate(new TrapezoidProfile.State(0.5, 0));
-
-    // If the post-profile branch ran: output = PID(0.5, 1.0) = 1.0 * (1.0-0.5) = 0.5
-    // If the in-profile branch ran: output = PID(0.5, profilePos) + profileVel
-    // Since profile is clamped at end: profilePos=1.0, profileVel=0/timeScale=0
-    // So output = PID(0.5, 1.0) + 0 = 0.5 — same result by coincidence!
-    //
-    // To truly distinguish, we need a nonzero goal velocity.
-    // See the next test for that case.
-    assertNotNull(
-        offTargetOutput, "calculate should not return null"); // basic sanity for this codepath
+    assertEquals(
+        0.5, offTargetOutput, 0.01, "Off-target after profile: should get pure PID feedback");
   }
 
   /**
-   * Demonstrates the time comparison bug with a nonzero goal velocity.
+   * Verifies that after a stretched profile with nonzero goal velocity, calculate() returns the
+   * goal velocity (the post-profile feedforward branch).
    *
-   * <p>When goalVelocity != 0, the post-profile branch should return goalState.velocity directly
-   * (constant feedforward). But because the comparison uses mismatched time units, the in-profile
-   * branch runs instead, and the output includes stale PID feedback.
+   * <p>Previously, the in-profile branch ran instead because of a time-unit mismatch.
    */
   @Test
-  void calculate_StretchedWithGoalVelocity_WrongBranchBUG() {
+  void calculate_StretchedWithGoalVelocity_ReturnsGoalVelocity() {
     TrapezoidalController ctrl = makeController(1.0);
     // Move from 0 to 1, arriving with velocity 0.5
     ctrl.setProfile(new TrapezoidProfile.State(0, 0), new TrapezoidProfile.State(1, 0.5));
@@ -263,23 +215,10 @@ class TrapezoidalControllerTest {
     // Step just past the stretched duration
     SimHooks.stepTiming(stretchedDuration + 0.5);
 
-    // After the profile is done with goalVelocity=0.5, calculate() should
-    // return exactly 0.5 (the goal velocity, no PID needed if at the goal).
-    //
-    // BUG: calculate() thinks the profile is still active because
-    // profileTime = (stretchedDuration+0.5) / timeScale = naturalDuration + 0.25
-    // getDuration() = naturalDuration * 2
-    // And naturalDuration + 0.25 < naturalDuration * 2 for any naturalDuration > 0.25
-    //
-    // So the in-profile branch runs, sampling a clamped profile state and adding PID.
+    // After profile with goalVelocity=0.5, at the goal position:
+    // the post-profile branch should return exactly the goal velocity.
     double output = ctrl.calculate(new TrapezoidProfile.State(1, 0.5));
-
-    // If correct post-profile branch ran: output = 0.5 (goal velocity)
-    // The in-profile branch may produce a different value due to stale profile sampling + PID
-    // We document the expected vs actual:
-    // (This assertion documents the bug — it passes because the bug exists)
-    // After fix, this value should be exactly 0.5:
-    assertNotNull(output, "Output should not be null");
+    assertEquals(0.5, output, DELTA, "Should return goal velocity after stretched profile ends");
   }
 
   // ==================== calculate: basic correctness ====================
