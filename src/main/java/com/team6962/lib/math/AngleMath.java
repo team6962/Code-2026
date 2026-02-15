@@ -21,9 +21,11 @@ public class AngleMath {
     double discreteRadians =
         continuousRadians - Math.floor(continuousRadians / (2 * Math.PI)) * (2 * Math.PI);
 
-    // Maps angles greater than π to negative angles, so the output range
-    // is -π to π instead of 0 to 2π
-    if (discreteRadians > Math.PI) {
+    // Maps angles greater than or equal to π to negative angles, so the
+    // output range is [-π, π) instead of [0, 2π). Using >= instead of >
+    // ensures that exactly π maps to -π, which is necessary for correct
+    // round-trip behavior with toContinuous at the ±180° boundary.
+    if (discreteRadians >= Math.PI) {
       discreteRadians -= 2 * Math.PI;
     }
 

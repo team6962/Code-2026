@@ -22,11 +22,11 @@ class AngleMathEdgeCaseTest {
   // ==================== toDiscrete: exact boundary behavior ====================
 
   @Test
-  void toDiscrete_ExactlyNeg180_ReturnsPi() {
-    // -180° is at the boundary. The implementation maps >π to negative,
-    // so exactly -π should stay at -π (or equivalently +π).
+  void toDiscrete_ExactlyNeg180_ReturnsNegPi() {
+    // -180° is at the boundary. The implementation maps >=π to negative,
+    // so both +180° and -180° map to -π.
     Angle result = AngleMath.toDiscrete(Degrees.of(-180));
-    assertEquals(Math.PI, Math.abs(result.in(Radians)), DELTA);
+    assertEquals(-Math.PI, result.in(Radians), DELTA);
   }
 
   @Test
@@ -111,49 +111,30 @@ class AngleMathEdgeCaseTest {
   }
 
   /**
-   * Documents a boundary bug: toDiscrete(π) returns +π (not wrapped to -π), and then
-   * toContinuous(+π, +π) returns 3π because Math.round(π/(2π)) = Math.round(0.5) = 1.
+   * Verifies that the round-trip toDiscrete → toContinuous works at exactly π.
    *
-   * <p>The root cause is that toDiscrete uses a strict {@code > π} check, so exactly π stays at +π.
-   * Then toContinuous rounds 0.5 up to 1 (Java's Math.round behavior), adding an extra 2π.
-   *
-   * <p>In practice this only affects the exact ±180° boundary, but it's the kind of edge case that
-   * causes intermittent bugs in turret targeting or odometry unwrapping.
+   * <p>Previously, toDiscrete used {@code > π} so exactly π stayed at +π, then toContinuous added
+   * an extra 2π because Math.round(0.5) = 1. Now toDiscrete uses {@code >= π} so π maps to -π, and
+   * the round-trip is correct.
    */
   @Test
-  void roundTrip_ExactlyPi_BUG_DoesNotRoundTrip() {
+  void roundTrip_ExactlyPi_Consistent() {
     Angle original = Radians.of(Math.PI);
     Angle discrete = AngleMath.toDiscrete(original);
     Angle recovered = AngleMath.toContinuous(discrete, original);
-
-    // BUG: recovered is 3π instead of π
-    // After fixing (e.g., using >= π in toDiscrete, or adjusting toContinuous rounding):
-    // assertEquals(Math.PI, recovered.in(Radians), DELTA);
-    assertEquals(
-        3 * Math.PI,
-        recovered.in(Radians),
-        DELTA,
-        "BUG: round-trip at exactly π returns 3π instead of π");
+    assertEquals(Math.PI, recovered.in(Radians), DELTA);
   }
 
   /**
-   * Same boundary bug for -π: toDiscrete(-π) returns +π (it wraps -π to the [0, 2π) range first,
-   * getting π, then the {@code > π} check is false so it stays at +π). Then toContinuous(+π, -π)
-   * returns +π instead of -π.
+   * Verifies that the round-trip toDiscrete → toContinuous works at exactly -π.
+   *
+   * <p>Previously, toDiscrete(-π) returned +π, causing a 2π sign error on round-trip.
    */
   @Test
-  void roundTrip_ExactlyNegPi_BUG_DoesNotRoundTrip() {
+  void roundTrip_ExactlyNegPi_Consistent() {
     Angle original = Radians.of(-Math.PI);
     Angle discrete = AngleMath.toDiscrete(original);
     Angle recovered = AngleMath.toContinuous(discrete, original);
-
-    // BUG: recovered is +π instead of -π (sign flipped, 2π error)
-    // After fixing:
-    // assertEquals(-Math.PI, recovered.in(Radians), DELTA);
-    assertEquals(
-        Math.PI,
-        recovered.in(Radians),
-        DELTA,
-        "BUG: round-trip at exactly -π returns +π instead of -π");
+    assertEquals(-Math.PI, recovered.in(Radians), DELTA);
   }
 }
