@@ -281,24 +281,34 @@ public class TranslationController {
   }
 
   /**
+   * Minimum distance (in meters) between initial and goal positions required to define a meaningful
+   * path direction. Below this threshold the direction is unreliable due to floating-point noise,
+   * so an arbitrary default direction is used instead. The value of 1e-6 m (1 micrometer) is well
+   * below any robot's positioning precision but well above the ~1e-16 m noise floor of IEEE 754
+   * doubles.
+   */
+  private static final double MIN_PATH_LENGTH = 1e-6;
+
+  /**
    * Gets the unit vector pointing in the direction from the initial position to the goal position.
-   * When the two positions are identical (zero-length path), returns a unit vector pointing in the
-   * +X direction as a default, since no meaningful direction exists.
+   * When the two positions are closer than {@link #MIN_PATH_LENGTH}, returns a unit vector pointing
+   * in the +X direction as a default, since no meaningful direction exists.
    *
    * @param initialPosition The initial position
    * @param goalPosition The goal position
    * @return The unit vector pointing from the initial position to the goal position, or (1,0) if
-   *     the positions are identical
+   *     the positions are too close to define a direction
    */
   private static Vector<N2> getPathDirectionVector(
       Translation2d initialPosition, Translation2d goalPosition) {
     Vector<N2> difference = goalPosition.minus(initialPosition).toVector();
     double norm = difference.norm();
 
-    if (norm == 0) {
-      // Zero-length path: return an arbitrary unit vector.
-      // The choice of direction doesn't matter because the distance
-      // traveled along this axis will be zero.
+    if (norm < MIN_PATH_LENGTH) {
+      // Path is too short to define a reliable direction — floating-point
+      // noise dominates the difference vector. Return an arbitrary unit
+      // vector; the choice doesn't matter because the distance traveled
+      // along this axis will be effectively zero.
       return new Vector<>(VecBuilder.fill(1, 0));
     }
 

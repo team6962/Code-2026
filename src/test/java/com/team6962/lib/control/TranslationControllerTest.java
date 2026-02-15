@@ -119,10 +119,9 @@ class TranslationControllerTest {
 
     TranslationalVelocity output = controller.calculate(start, TranslationalVelocity.ZERO);
 
-    // With the epsilon threshold fix, this is treated as a zero-distance path.
-    // Before the fix, the output had a noise-determined direction.
-    assertFalse(Double.isNaN(vx(output)), "Output should not be NaN");
-    assertFalse(Double.isNaN(vy(output)), "Output should not be NaN");
+    // Now with the epsilon threshold, this is treated as a zero-distance path.
+    assertEquals(0.0, vx(output), 0.001, "Near-zero path: X velocity should be ~0");
+    assertEquals(0.0, vy(output), 0.001, "Near-zero path: Y velocity should be ~0");
   }
 
   /**
