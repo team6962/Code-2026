@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import com.team6962.lib.math.MatrixUtil;
 import com.team6962.lib.math.TranslationalVelocity;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N2;
@@ -281,13 +282,26 @@ public class TranslationController {
 
   /**
    * Gets the unit vector pointing in the direction from the initial position to the goal position.
+   * When the two positions are identical (zero-length path), returns a unit vector pointing in the
+   * +X direction as a default, since no meaningful direction exists.
    *
    * @param initialPosition The initial position
    * @param goalPosition The goal position
-   * @return The unit vector pointing from the initial position to the goal position
+   * @return The unit vector pointing from the initial position to the goal position, or (1,0) if
+   *     the positions are identical
    */
   private static Vector<N2> getPathDirectionVector(
       Translation2d initialPosition, Translation2d goalPosition) {
-    return goalPosition.minus(initialPosition).toVector().unit();
+    Vector<N2> difference = goalPosition.minus(initialPosition).toVector();
+    double norm = difference.norm();
+
+    if (norm == 0) {
+      // Zero-length path: return an arbitrary unit vector.
+      // The choice of direction doesn't matter because the distance
+      // traveled along this axis will be zero.
+      return new Vector<>(VecBuilder.fill(1, 0));
+    }
+
+    return difference.unit();
   }
 }
