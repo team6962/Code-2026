@@ -89,4 +89,14 @@ public class FieldLogger implements SwerveComponent {
 
     field.getObject("Swerve Modules").setPoses(modulePoses);
   }
+
+  /**
+   * Gets the Field2d widget being used for visualization. This can be used to customize the field
+   * display (e.g. adding trajectories, targets, etc.) in addition to the robot and module poses.
+   *
+   * @return the Field2d widget for visualization
+   */
+  public Field2d getField() {
+    return field;
+  }
 }

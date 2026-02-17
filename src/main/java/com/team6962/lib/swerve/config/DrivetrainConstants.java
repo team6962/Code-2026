@@ -45,6 +45,9 @@ public class DrivetrainConstants {
   /** The constants that define the physical structure of the drivetrain. */
   public StructureConstants Structure = new StructureConstants();
 
+  /** The constants that define the behavior of the swerve drive in simulation. */
+  public SimulationConstants Simulation = new SimulationConstants();
+
   public DrivetrainConstants() {}
 
   /**
@@ -152,6 +155,18 @@ public class DrivetrainConstants {
    */
   public DrivetrainConstants withDriving(DrivingConstants driving) {
     Driving = driving;
+    return this;
+  }
+
+  /**
+   * Sets the simulation constants for the drivetrain, and returns this DrivetrainConstants for
+   * chaining.
+   *
+   * @param simulation The simulation constants
+   * @return This DrivetrainConstants object
+   */
+  public DrivetrainConstants withSimulation(SimulationConstants simulation) {
+    Simulation = simulation;
     return this;
   }
 
