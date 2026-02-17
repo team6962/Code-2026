@@ -28,13 +28,29 @@ public class HopperConstants {
                   .withStatorCurrentLimitEnable(true));
 
   // Sensors
-  public static final int KICKER_SENSOR_CAN_ID = 32;
-  public static final int UPPER_HOPPER_CAN_ID = 33;
-  public static final int LOWER_HOPPER_CAN_ID = 34;
-  public static final Distance KICKER_SENSOR_THRESHOLD =
+   /**
+   * The name of the CAN bus where the sensor devices are located.
+   * Ensure this matches the physical CANivore or bus name configured on the robot.
+   */
+  public static final String SENSORS_CANBUS_NAME = "subsystem";
+   // The CAN IDs for the sensors: kicker, upper hopper, and lower hopper.
+  public static final int KICKER_SENSOR_CAN_ID = 32; // This isn't the correct CAN ID
+  public static final int UPPER_HOPPER_CAN_ID = 33; // This isn't the correct CAN ID
+  public static final int LOWER_HOPPER_CAN_ID = 34; // This isn't the correct CAN ID
+
+  // Threshold distances for determining if the Kicker is full.
+  public static final Distance KICKER_SENSOR_FULL_THRESHOLD =
       Inches.of(1.0); // This isn't the correct distance
+
+  // Threshold distances for determining if the Kicker is empty
+  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD =
+      Inches.of(2.0); // This isn't the correct distance
+
+  // Threshold distances for determining if the Hopper is full
   public static final Distance UPPER_HOPPER_SENSOR_THRESHOLD =
       Inches.of(1.0); // This isn't the correct distance
+      
+  // Threshold distances for determining if the Hopper is empty
   public static final Distance LOWER_HOPPER_SENSOR_THRESHOLD =
       Inches.of(1.0); // This isn't the correct distance
 
