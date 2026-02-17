@@ -60,39 +60,97 @@ public class Climb extends SubsystemBase {
     }
   }
 
-  // gets the acceleration signal in meters per second^2
+  /**
+   * Returns the current linear acceleration reported by the climb subsystem.
+   *
+   * The value is read from the underlying acceleration signal and converted
+   * into a LinearAcceleration expressed in meters per second squared (m/s²).
+   *
+   * @return the current linear acceleration in meters per second squared
+   */
   public LinearAcceleration getAcceleration() {
     return MetersPerSecondPerSecond.of(accelerationSignal.getValueAsDouble());
   }
 
-  // gets the latency compensation neeeded with the velocity signal and acceleration signal
+  /**
+   * Returns the current climb velocity as a LinearVelocity measured in meters per second.
+   *
+   * <p>The returned value is produced by querying the underlying status signals and applying
+   * latency compensation (using both the velocity and acceleration signals) before converting
+   * the raw double result into a MetersPerSecond LinearVelocity instance.
+   *
+   * @return the latency-compensated climb velocity in meters per second
+   * @throws NullPointerException if the underlying status signals are not initialized
+   */
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
         BaseStatusSignal.getLatencyCompensatedValueAsDouble(velocitySignal, accelerationSignal));
   }
 
-  // gets the latency compensation needed with the current position signal and the velocity signal
+  /**
+   * Returns the current climb mechanism position as a Distance in meters.
+   * <p>The value is retrieved from the underlying BaseStatusSignal and is latency-compensated:
+   * the raw position reading is adjusted using the associated velocity signal to estimate the
+   * position at the current control-loop timestamp.
+   * 
+   * <p>No state is modified by this call.
+   *
+   * @return the climb position as a Distance measured in meters (non-null)
+   */
   public Distance getPosition() {
     return Meters.of(
         BaseStatusSignal.getLatencyCompensatedValueAsDouble(positionSignal, velocitySignal));
   }
 
-  // gets the value of the voltage signal
+  /**
+   * Returns the current voltage reading for the climb subsystem.
+   *
+   * Retrieves the most recent Voltage value from the internal voltage signal.
+   * This represents the instantaneous electrical potential reported by the
+   * subsystem's voltage source and can be used for monitoring or control logic.
+   *
+   * @return the current Voltage reading from the climb subsystem
+   */
   public Voltage getVoltage() {
     return voltageSignal.getValue();
   }
 
-  // gets value of the stator current, which is the input current
+  /**
+   * Returns the current measured at the motor stator for the climb subsystem.
+   *
+   * <p>This value is obtained from the underlying {@code statorCurrentSignal} provider and
+   * represents the instantaneous stator current for the climb motor. Calling this method does
+   * not modify the subsystem state.
+   *
+   * @return a {@code Current} object representing the measured stator current
+   */
   public Current getStatorCurrent() {
     return statorCurrentSignal.getValue();
   }
 
-  // gets value of the supply current, which is the total amount of current in the system
+ /**
+ * Returns the current supply current (the total current being drawn by the climb system).
+ *
+ * <p>The value is obtained from the internal {@code supplyCurrentSignal} and represents the
+ * instantaneous electrical current supplied to the climb motor/system. This method does not
+ * modify any subsystem state. Note that the returned {@link Current} reflects the most recently
+ * sampled measurement; for up-to-date readings ensure the underlying signals are refreshed
+ * (for example via {@code BaseStatusSignal.refreshAll(...)} in {@code periodic()}).
+ *
+ * @return a {@link Current} object representing the measured supply current (non-null)
+ */
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
   }
 
-  // determines if the hall sensor is triggered
+  /**
+   * Returns whether the Hall effect sensor is currently triggered.
+   *
+   * <p>This reads the underlying sensor signal and returns true when the
+   * sensor reports an active/triggered state and false when it is not.
+   *
+   * @return true if the Hall effect sensor is triggered (active); false otherwise
+   */
   public boolean isHallEffectSensorTriggered() {
     return hallEffectSensorSignal.getValue();
   }
@@ -107,6 +165,16 @@ public class Climb extends SubsystemBase {
         statorCurrentSignal,
         supplyCurrentSignal,
         hallEffectSensorSignal);
+
+    if (RobotState.isDisabled()) {
+      motor.setPosition(getPosition().in(Meters) * ClimbConstants.GEAR_RATIO);
+    }
+
+
+    if (simulation != null) {
+      simulation.update();
+    }
+
     DogLog.log("Climb/Acceleration", getAcceleration());
     DogLog.log("Climb/Velocity", getVelocity());
     DogLog.log("Climb/Position", getPosition());
@@ -123,12 +191,23 @@ public class Climb extends SubsystemBase {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
       isZeroed = true;
     }
-
-    if (simulation != null) {
-      simulation.update();
-    }
   }
 
+  /**
+   * Returns a command that raises the climb mechanism to its configured maximum height while active.
+   *
+   * <p>On command start, the climb motor control is set to a position controller targeting
+   * {@code ClimbConstants.MAX_HEIGHT} (converted to meters) using a PositionVoltage control mode.
+   * When the command ends or is interrupted, the motor control is set to the current position
+   * (in meters) to hold the mechanism in place and prevent drift.
+   *
+   * <p>The returned command follows a start-end lifecycle and does not automatically finish;
+   * it should be scheduled and later canceled or interrupted by higher-level logic when the
+   * desired behavior is complete.
+   *
+   * @return a {@code Command} that moves the climb to its maximum height while active and holds
+   *         position when ended
+   */
   public Command elevate() {
     return startEnd(
         () -> {
@@ -139,6 +218,18 @@ public class Climb extends SubsystemBase {
         });
   }
 
+  /**
+   * Creates a command that descends the climb mechanism to its configured minimum height.
+   *
+   * <p>On start, the command sets the climb motor control to a PositionVoltage target equal to
+   * ClimbConstants.MIN_HEIGHT (converted to meters). When the command ends or is interrupted, it
+   * sets the motor control to a PositionVoltage using the current measured position (in meters)
+   * so the mechanism holds its current pose and does not continue moving.
+   *
+   * <p>This command is non-blocking and intended to be scheduled on the command scheduler.
+   *
+   * @return a Command which moves the climb to its minimum height and switches to position-hold on end
+   */
   public Command descend() {
     return startEnd(
         () -> {
@@ -149,6 +240,20 @@ public class Climb extends SubsystemBase {
         });
   }
 
+  /**
+   * Creates a command that moves the climb mechanism to the configured "pull up" height.
+   *
+   * <p>When scheduled, the command sets the climb motor's control to a {@code PositionVoltage}
+   * targeting {@code ClimbConstants.PULL_UP_HEIGHT} (converted to meters). When the command ends
+   * or is interrupted, it resets the motor control to a {@code PositionVoltage} holding the
+   * climb's current position.
+   *
+   * @return a {@code Command} which, while active, drives the climb to the pull-up height and,
+   *         on end or interruption, commands the motor to hold its current position
+   * @see ClimbConstants#PULL_UP_HEIGHT
+   * @see PositionVoltage
+   * @see #getPosition()
+   */
   public Command pullUp() {
     return startEnd(
         () -> {
