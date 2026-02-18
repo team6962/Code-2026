@@ -441,7 +441,7 @@ public class Turret extends SubsystemBase {
   }
   
   public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
-    return startEnd(
+    return runEnd(
             () -> {
               Angle targetAngle = targetAngleSupplier.get();
               Angle optimizedTargetPosition =
