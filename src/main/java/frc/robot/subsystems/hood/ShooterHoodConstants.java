@@ -30,7 +30,7 @@ public final class ShooterHoodConstants {
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.04942);
 
   public static final Angle MIN_ANGLE = Degrees.of(17.95);
-  public static final Angle MAX_ANGLE = Degrees.of(52.95);
+  public static final Angle MAX_ANGLE = Degrees.of(50);
 
   /** Distance between the pivot point and the center of mass of the hood. */
   public static final Distance ARM_LENGTH = Inches.of(6.85);
