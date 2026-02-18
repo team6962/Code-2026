@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
@@ -22,6 +23,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
 public class BeltFloor extends SubsystemBase {
+  /**
+   * This class is for the belt floor subsystem, including velocitySignal,
+   * accelerationSignal, supplyCurrentSignal, statorCurrentSignal, and voltageSignal
+   */
   private TalonFX beltFloorMotor;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<AngularAcceleration> accelerationSignal;
@@ -30,22 +35,34 @@ public class BeltFloor extends SubsystemBase {
   private StatusSignal<Voltage> voltageSignal;
   private BeltFloorSim simulation;
 
+  /**
+   * Initializes the motor controller, configures status signals for logging,
+   * and sets up DogLog tunables for real-time testing.
+   */
   public BeltFloor() {
     beltFloorMotor =
         new TalonFX(
             HopperConstants.BELT_FLOOR_MOTOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     beltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
+
+    /**
+     * Assigning status signals to methods
+     * that retrieve the corresponding data from the motor controller
+     */
     velocitySignal = beltFloorMotor.getVelocity();
     voltageSignal = beltFloorMotor.getMotorVoltage();
     accelerationSignal = beltFloorMotor.getAcceleration();
     supplyCurrentSignal = beltFloorMotor.getSupplyCurrent();
     statorCurrentSignal = beltFloorMotor.getStatorCurrent();
+
+    // Setup tunable dashboard control for testing
     DogLog.tunable(
-        "Hopper/BeltFloor/AppliedVoltage",
-        0.0,
-        newVoltage -> {
-          feedDump(newVoltage).schedule();
-        });
+    "Hopper/BeltFloor/AppliedVoltage",
+    0.0,
+    newVoltageDouble -> {
+        Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
+        feedDump(target).schedule();
+    });
     if (RobotBase.isSimulation()) {
       simulation = new BeltFloorSim(beltFloorMotor);
     }
@@ -56,7 +73,7 @@ public class BeltFloor extends SubsystemBase {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  public Command feedDump(double targetVoltage) {
+  private Command feedDump(Voltage targetVoltage) {
 
     return startEnd(
         () -> {
@@ -75,7 +92,10 @@ public class BeltFloor extends SubsystemBase {
       simulation.update();
     }
 
-    // this will log stuff every once in a while
+    /** 
+     * this will log Voltage, AngularVelocity, BeltVelocity, StatorCurrent, 
+     * AngularAcceleration, and SupplyCurrent.
+    */
     BaseStatusSignal.refreshAll(
         velocitySignal,
         voltageSignal,
