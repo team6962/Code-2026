@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -307,6 +309,27 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
 
     return startEnd(
+        () -> {
+          setPositionControl(clampedAngle);
+        },
+        () -> {
+          setPositionControl(getPosition());
+        });
+  }
+
+  /**
+   * Returns a command that moves the hood to the given an inputted targetAngleSupplier.
+   *
+   * @param targetAngleSupplier the supplied target angle to move towards
+   * @return the command that moves to the supplied target angle
+   */
+
+  public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
+    Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get());
+
+    DogLog.log("Hood/TargetPositionWithSupplier", clampedAngle.in(Degrees));
+
+    return runEnd(
         () -> {
           setPositionControl(clampedAngle);
         },
