@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -423,6 +425,25 @@ public class Turret extends SubsystemBase {
   public Command moveTo(Angle targetAngle) {
     return startEnd(
             () -> {
+              Angle optimizedTargetPosition =
+                  clampPositionToSafeRange(
+                      optimizeTarget(
+                          clampPositionToSafeRange(targetAngle),
+                          getPosition(),
+                          TurretConstants.MIN_ANGLE,
+                          TurretConstants.MAX_ANGLE));
+              setPositionControl(optimizedTargetPosition);
+            },
+            () -> {
+              setPositionControl(getPosition());
+            })
+        .onlyIf(this::isZeroed);
+  }
+  
+  public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
+    return startEnd(
+            () -> {
+              Angle targetAngle = targetAngleSupplier.get();
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
