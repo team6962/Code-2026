@@ -439,14 +439,22 @@ public class Turret extends SubsystemBase {
         .onlyIf(this::isZeroed);
   }
 
+  /**
+   * Creates a command that continuously drives the turret to a target angle provided by the given
+   * supplier.
+   *
+   * @param targetAngleSupplier supplier that is sampled repeatedly to provide the desired target
+   *     {@code Angle}
+   * @return a {@code Command} that, while scheduled, continuously moves the turret toward the
+   *     supplied target angle
+   */
   public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
     return runEnd(
             () -> {
-              Angle targetAngle = targetAngleSupplier.get();
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          clampPositionToSafeRange(targetAngle),
+                          clampPositionToSafeRange(targetAngleSupplier.get()),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
