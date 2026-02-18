@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -30,6 +28,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /**
  * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
@@ -439,7 +438,7 @@ public class Turret extends SubsystemBase {
             })
         .onlyIf(this::isZeroed);
   }
-  
+
   public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
     return runEnd(
             () -> {

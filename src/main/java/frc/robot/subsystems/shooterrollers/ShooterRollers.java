@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
@@ -84,6 +85,28 @@ public class ShooterRollers extends SubsystemBase {
         () -> {
           // defines a local function to set motor voltage to make it go
           shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
+        },
+        () -> {
+          // defines a local function to stop motor
+          shooterRollerMotor1.setControl(new CoastOut());
+        });
+  }
+
+  /**
+   * Creates a command that drives the shooter roller to a dynamically supplied velocity while
+   * scheduled.
+   *
+   * @param targetVelocity supplier that provides the desired velocity setpoint (in the units
+   *     expected by VelocityVoltage)
+   * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
+   *     coasts the motor on end
+   */
+  public Command shootWithSupplier(Supplier<Double> targetVelocity) {
+
+    return runEnd(
+        () -> {
+          // defines a local function to set motor voltage to make it go
+          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.get()));
         },
         () -> {
           // defines a local function to stop motor
