@@ -8,7 +8,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
@@ -24,10 +23,11 @@ import frc.robot.subsystems.hopper.HopperConstants;
 
 public class BeltFloor extends SubsystemBase {
   /**
-   * This class is for the belt floor subsystem, including velocitySignal,
-   * accelerationSignal, supplyCurrentSignal, statorCurrentSignal, and voltageSignal
+   * This class is for the belt floor subsystem, including velocitySignal, accelerationSignal,
+   * supplyCurrentSignal, statorCurrentSignal, and voltageSignal
    */
   private TalonFX beltFloorMotor;
+
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
@@ -36,8 +36,8 @@ public class BeltFloor extends SubsystemBase {
   private BeltFloorSim simulation;
 
   /**
-   * Initializes the motor controller, configures status signals for logging,
-   * and sets up DogLog tunables for real-time testing.
+   * Initializes the motor controller, configures status signals for logging, and sets up DogLog
+   * tunables for real-time testing.
    */
   public BeltFloor() {
     beltFloorMotor =
@@ -46,8 +46,8 @@ public class BeltFloor extends SubsystemBase {
     beltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
 
     /**
-     * Assigning status signals to methods
-     * that retrieve the corresponding data from the motor controller
+     * Assigning status signals to methods that retrieve the corresponding data from the motor
+     * controller
      */
     velocitySignal = beltFloorMotor.getVelocity();
     voltageSignal = beltFloorMotor.getMotorVoltage();
@@ -57,12 +57,12 @@ public class BeltFloor extends SubsystemBase {
 
     // Setup tunable dashboard control for testing
     DogLog.tunable(
-    "Hopper/BeltFloor/AppliedVoltage",
-    0.0,
-    newVoltageDouble -> {
-        Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
-        feedDump(target).schedule();
-    });
+        "Hopper/BeltFloor/AppliedVoltage",
+        0.0,
+        newVoltageDouble -> {
+          Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
+          feedDump(target).schedule();
+        });
     if (RobotBase.isSimulation()) {
       simulation = new BeltFloorSim(beltFloorMotor);
     }
@@ -92,10 +92,10 @@ public class BeltFloor extends SubsystemBase {
       simulation.update();
     }
 
-    /** 
-     * this will log Voltage, AngularVelocity, BeltVelocity, StatorCurrent, 
-     * AngularAcceleration, and SupplyCurrent.
-    */
+    /**
+     * this will log Voltage, AngularVelocity, BeltVelocity, StatorCurrent, AngularAcceleration, and
+     * SupplyCurrent.
+     */
     BaseStatusSignal.refreshAll(
         velocitySignal,
         voltageSignal,
