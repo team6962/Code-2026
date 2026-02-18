@@ -58,7 +58,7 @@ public class Climb extends SubsystemBase {
     } else {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
     }
-  } 
+  }
 
   /**
    * Returns the current linear acceleration reported by the climb subsystem.
