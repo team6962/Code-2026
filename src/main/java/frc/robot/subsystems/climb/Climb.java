@@ -38,7 +38,7 @@ public class Climb extends SubsystemBase {
   private boolean isZeroed;
 
   public Climb() {
-    motor = new TalonFX(ClimbConstants.MOTOR_ID);
+    motor = new TalonFX(ClimbConstants.MOTOR_ID, ClimbConstants.CANBUS_NAME);
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
@@ -56,9 +56,9 @@ public class Climb extends SubsystemBase {
       simulation = new ClimbSim(motor);
       isZeroed = true;
     } else {
-      motor.setPosition(ClimbConstants.MAX_HEIGHT.in(Meters));
+      motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
     }
-  }
+  } 
 
   /**
    * Returns the current linear acceleration reported by the climb subsystem.
@@ -158,6 +158,11 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    if (simulation != null) {
+      simulation.update();
+    }
+
     BaseStatusSignal.refreshAll(
         accelerationSignal,
         velocitySignal,
@@ -168,11 +173,7 @@ public class Climb extends SubsystemBase {
         hallEffectSensorSignal);
 
     if (RobotState.isDisabled()) {
-      motor.setPosition(getPosition().in(Meters) * ClimbConstants.GEAR_RATIO);
-    }
-
-    if (simulation != null) {
-      simulation.update();
+      motor.setPosition(getPosition().in(Meters));
     }
 
     DogLog.log("Climb/Acceleration", getAcceleration());
