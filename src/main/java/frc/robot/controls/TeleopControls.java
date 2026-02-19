@@ -1,5 +1,7 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -66,11 +68,20 @@ public class TeleopControls {
     operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
-    operator.leftBumper().whileTrue(Commands.print("Unjam"));
-    operator.leftTrigger().whileTrue(Commands.print("Disable Shoot"));
+    operator.leftBumper().whileTrue(robot.getHopper().unjam()); // Unjam hopper
+    operator
+        .leftTrigger()
+        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0))); // Disable shoot
     operator.rightBumper().onTrue(Commands.print("Toggle Fine Control"));
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
-    operator.leftStick().whileTrue(Commands.print("Dump"));
+    operator
+        .leftStick()
+        .whileTrue(
+            Commands.parallel( // Dump fuel
+                    robot.getHopper().getKicker().reverse(),
+                    robot.getHopper().getBeltFloor().dump(),
+                    robot.getIntakeRollers().outtake())
+                .onlyIf(robot.getIntakeExtension()::isExtended));
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.rightStick().whileTrue(Commands.print("Retract Intake"));
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
