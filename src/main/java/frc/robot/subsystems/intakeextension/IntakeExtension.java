@@ -49,6 +49,8 @@ public class IntakeExtension extends SubsystemBase {
 
   private IntakeExtensionSim simulation;
 
+  public boolean isZeroed = false;
+
   public IntakeExtension() {
     motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
@@ -84,6 +86,7 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   public Command extend() {
+   if (isZeroed) {
     return startEnd(
             () -> {
               motor.setControl(
@@ -98,6 +101,13 @@ public class IntakeExtension extends SubsystemBase {
                     .isNear(
                         IntakeExtensionConstants.MAX_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE));
+    } else {
+      return run (
+        () -> {
+          motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+        }
+      );
+    }
   }
 
   public Command retract() {
@@ -197,6 +207,7 @@ public class IntakeExtension extends SubsystemBase {
     }
     if (getCANdiTriggered()) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+      isZeroed = true;
     }
 
     BaseStatusSignal.refreshAll(
