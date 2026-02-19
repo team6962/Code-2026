@@ -3,7 +3,6 @@ package frc.robot.subsystems.climb;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -33,6 +32,7 @@ public class ClimbSim {
   public void update() {
     climbMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(climbMotor.getMotorVoltage());
+    physicsSim.update(0.02);
     climbMotor.setRawRotorPosition(
         Rotations.of(
             physicsSim.getPositionMeters()
@@ -40,11 +40,6 @@ public class ClimbSim {
                 * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorVelocity(
         RotationsPerSecond.of(
-            physicsSim.getVelocityMetersPerSecond()
-                / ClimbConstants.DRUM_RADIUS.in(Meters)
-                * ClimbConstants.GEAR_RATIO));
-    climbMotor.setRotorAcceleration(
-        RotationsPerSecondPerSecond.of(
             physicsSim.getVelocityMetersPerSecond()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
                 * ClimbConstants.GEAR_RATIO));
