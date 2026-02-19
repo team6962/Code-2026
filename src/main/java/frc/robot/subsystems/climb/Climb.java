@@ -232,12 +232,12 @@ public class Climb extends SubsystemBase {
    */
   public Command descend() {
     return startEnd(
-            () -> {
-              motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
-            },
-            () -> {
-              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-            });
+        () -> {
+          motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+        },
+        () -> {
+          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+        });
   }
 
   /**
