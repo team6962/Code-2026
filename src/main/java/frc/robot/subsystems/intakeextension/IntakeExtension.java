@@ -208,6 +208,20 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   /**
+   * Determines whether the intake extension is considered fully extended.
+   *
+   * <p>This method compares the current extension position to the configured MAX_POSITION using
+   * POSITION_TOLERANCE to allow for small deviations.
+   *
+   * @return true if the current position is within POSITION_TOLERANCE of MAX_POSITION; false
+   *     otherwise
+   */
+  public boolean isExtended() {
+    return getPosition()
+        .isNear(IntakeExtensionConstants.MAX_POSITION, IntakeExtensionConstants.POSITION_TOLERANCE);
+  }
+
+  /**
    * This finds out whether the hall sensor is triggered, which happens when the intake is fully
    * retracted.
    *
