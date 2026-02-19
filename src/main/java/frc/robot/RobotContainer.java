@@ -21,6 +21,8 @@ import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
@@ -30,12 +32,14 @@ public class RobotContainer {
   private final TeleopControls teleopControls;
   private final Turret turret;
   private final DriveStraightAuto driveStraightAuto;
+  private final IntakeExtension intakeExtension;
   private final ShooterHood shooterHood;
   private final SphereClumpLocalization fuelClumpLocalization;
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
   private final Climb climb;
+  private final Hopper hopper;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   public RobotContainer() {
@@ -49,6 +53,8 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
+    intakeExtension = new IntakeExtension();
+    hopper = new Hopper();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
@@ -59,6 +65,7 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+
     configureAutonomousChooser();
   }
 
@@ -82,6 +89,10 @@ public class RobotContainer {
     }
 
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
+  }
+
+  public IntakeExtension getIntakeExtension() {
+    return intakeExtension;
   }
 
   public CommandSwerveDrive getSwerveDrive() {
@@ -122,5 +133,9 @@ public class RobotContainer {
 
   public Climb getClimb() {
     return climb;
+  }
+
+  public Hopper getHopper() {
+    return hopper;
   }
 }
