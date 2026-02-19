@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /**
  * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
@@ -427,6 +428,33 @@ public class Turret extends SubsystemBase {
                   clampPositionToSafeRange(
                       optimizeTarget(
                           clampPositionToSafeRange(targetAngle),
+                          getPosition(),
+                          TurretConstants.MIN_ANGLE,
+                          TurretConstants.MAX_ANGLE));
+              setPositionControl(optimizedTargetPosition);
+            },
+            () -> {
+              setPositionControl(getPosition());
+            })
+        .onlyIf(this::isZeroed);
+  }
+
+  /**
+   * Creates a command that continuously drives the turret to a target angle provided by the given
+   * supplier.
+   *
+   * @param targetAngleSupplier supplier that is sampled repeatedly to provide the desired target
+   *     {@code Angle}
+   * @return a {@code Command} that, while scheduled, continuously moves the turret toward the
+   *     supplied target angle
+   */
+  public Command moveTo(Supplier<Angle> targetAngleSupplier) {
+    return runEnd(
+            () -> {
+              Angle optimizedTargetPosition =
+                  clampPositionToSafeRange(
+                      optimizeTarget(
+                          clampPositionToSafeRange(targetAngleSupplier.get()),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
