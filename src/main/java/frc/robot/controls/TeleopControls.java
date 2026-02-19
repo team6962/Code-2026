@@ -50,7 +50,16 @@ public class TeleopControls {
     // driver.rightTrigger().onTrue(Commands.print("Boost"));
     driver.leftStick().whileTrue(Commands.print("Dump"));
     driver.back().whileTrue(Commands.print("Retract Intake")); // this might be switched with start
-    driver.rightStick().whileTrue(Commands.print("Intake and Drive To Fuel"));
+    driver
+        .rightStick()
+        .whileTrue(
+            this.robot
+                .getDriveToClumpCommand()
+                .driveToClump(
+                    this.robot.getIntakeExtension(),
+                    this.robot.getIntakeRollers(),
+                    this.robot.getFuelLocalization(),
+                    this.robot.getSwerveDrive()));
     driver.start().whileTrue(Commands.print("Run Intake!")); // this might be switched with back
 
     operator.a().onTrue(Commands.print("Lower Climb"));
