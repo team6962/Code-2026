@@ -1,4 +1,4 @@
-package frc.robot.learnbot;
+package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
@@ -37,8 +37,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.robot.constants.BaseRobotConstants;
-import frc.robot.constants.EnabledSystems;
+
 import org.photonvision.simulation.SimCameraProperties;
 
 public class LearnBotConstants extends BaseRobotConstants {

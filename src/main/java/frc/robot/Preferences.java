@@ -1,6 +1,8 @@
 package frc.robot;
 
+import frc.robot.constants.CompetitionBotConstants;
 import frc.robot.constants.EnabledSystems;
+import frc.robot.constants.RobotConstants;
 
 public class Preferences {
   /**
@@ -20,6 +22,13 @@ public class Preferences {
    * perspective.
    */
   public static final boolean reorientControlsInSimulation = true;
+
+  /**
+   * The robot constants to use in simulation. This should be set to a constants class that
+   * corresponds to the robot being simulated. This is used to determine which subsystems exist on
+   * the simulated robot and to provide the correct configuration values for those subsystems.
+   */
+  public static final RobotConstants simulatedRobot = new CompetitionBotConstants();
 
   /**
    * Which subsystems should be enabled. These subsystems will only be enabled if their

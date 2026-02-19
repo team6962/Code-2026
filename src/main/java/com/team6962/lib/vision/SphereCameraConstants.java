@@ -14,7 +14,7 @@ import edu.wpi.first.units.measure.Distance;
  */
 public class SphereCameraConstants implements Cloneable {
   /** The name identifier for this sphere detection camera. */
-  public String Name = "SphereCamera";
+  public String Name = "";
 
   /** The class id of the spheres. */
   public int ClassId = 1;

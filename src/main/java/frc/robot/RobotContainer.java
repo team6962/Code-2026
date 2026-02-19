@@ -10,9 +10,9 @@ import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.constants.LearnBotConstants;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
-import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRoller;
 
@@ -29,7 +29,7 @@ public class RobotContainer {
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    constants = new LearnBotConstants().withPreferences();
+    constants = RobotConstants.generate();
 
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
