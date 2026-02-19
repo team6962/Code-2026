@@ -101,7 +101,7 @@ public class ShooterRollers extends SubsystemBase {
    * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
    *     coasts the motor on end
    */
-  public Command shootWithSupplier(Supplier<Double> targetVelocity) {
+  public Command shoot(Supplier<Double> targetVelocity) {
 
     return runEnd(
         () -> {

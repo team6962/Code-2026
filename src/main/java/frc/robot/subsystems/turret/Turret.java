@@ -448,7 +448,7 @@ public class Turret extends SubsystemBase {
    * @return a {@code Command} that, while scheduled, continuously moves the turret toward the
    *     supplied target angle
    */
-  public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
+  public Command moveTo(Supplier<Angle> targetAngleSupplier) {
     return runEnd(
             () -> {
               Angle optimizedTargetPosition =
