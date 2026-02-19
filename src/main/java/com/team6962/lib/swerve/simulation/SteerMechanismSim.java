@@ -85,7 +85,7 @@ public class SteerMechanismSim {
    *     counter-clockwise-positive
    */
   private double getMotorInversionSign() {
-    return constants.SteerMotor.DeviceConfiguration.MotorOutput.Inverted
+    return constants.getSteerMotorConfig(corner).MotorOutput.Inverted
             == InvertedValue.Clockwise_Positive
         ? -1.0
         : 1.0;
@@ -136,6 +136,8 @@ public class SteerMechanismSim {
   public void updateAfterArena(double deltaTimeSeconds) {
     Angle offset = getEncoderOffset();
 
+    double gearReduction = constants.getSteerGearReduction(corner);
+
     // Update the motor controller simulation with the new position and
     // velocity from the physics simulation
     motorControllerSimulation.setRawRotorPosition(
@@ -143,11 +145,9 @@ public class SteerMechanismSim {
             .getSteerAbsoluteFacing()
             .getMeasure()
             .minus(offset)
-            .times(constants.SteerMotor.GearReduction * getMotorInversionSign()));
+            .times(gearReduction * getMotorInversionSign()));
     motorControllerSimulation.setRotorVelocity(
-        moduleSim
-            .getSteerAbsoluteEncoderSpeed()
-            .times(constants.SteerMotor.GearReduction * getMotorInversionSign()));
+        moduleSim.getSteerAbsoluteEncoderSpeed().times(gearReduction * getMotorInversionSign()));
 
     // Update the encoder simulation with the new position and velocity from
     // the physics simulation

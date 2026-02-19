@@ -27,6 +27,9 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController.GenericMotorC
  * synchronize state with the motor controller.
  */
 public class DriveMechanismSim {
+  /** Corner of the robot that this module occupies. */
+  private Corner corner;
+
   /** Drivetrain configuration containing motor and wheel constants. */
   private DrivetrainConstants constants;
 
@@ -49,6 +52,7 @@ public class DriveMechanismSim {
    */
   public DriveMechanismSim(
       Corner corner, DrivetrainConstants constants, TalonFX motorController, MapleSim mapleSim) {
+    this.corner = corner;
     this.constants = constants;
 
     this.motorControllerSimulation = motorController.getSimState();
@@ -65,7 +69,7 @@ public class DriveMechanismSim {
    *     counter-clockwise-positive
    */
   private double getMotorInversionSign() {
-    return constants.DriveMotor.DeviceConfiguration.MotorOutput.Inverted
+    return constants.getDriveMotorConfig(corner).MotorOutput.Inverted
             == InvertedValue.Clockwise_Positive
         ? -1.0
         : 1.0;
