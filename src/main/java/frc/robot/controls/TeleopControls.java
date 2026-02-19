@@ -13,11 +13,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Preferences;
 import frc.robot.RobotContainer;
+import frc.robot.auto.AutoClimb;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
+  private AutoClimb autoClimb;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
 
@@ -25,6 +27,7 @@ public class TeleopControls {
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
+    this.autoClimb = new AutoClimb(robot);
   }
 
   public void configureBindings() {
@@ -46,8 +49,8 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
     // driver.a().onTrue(Commands.print("Nothing"));
-    driver.b().onTrue(Commands.print("Climb"));
-    driver.x().onTrue(Commands.print("Unclimb"));
+    driver.b().onTrue(autoClimb.climb());
+    driver.x().onTrue(autoClimb.unclimb());
     // driver.y().onTrue(Commands.print("Reset Heading"));
     driver.leftBumper().whileTrue(Commands.print("Depot"));
     // driver.leftTrigger().onTrue(Commands.print("Super Boost"));

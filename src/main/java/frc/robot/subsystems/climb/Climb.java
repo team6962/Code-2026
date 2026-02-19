@@ -38,6 +38,7 @@ public class Climb extends SubsystemBase {
   private StatusSignal<Boolean> hallEffectSensorSignal;
   private ClimbSim simulation;
   private boolean isZeroed;
+  private boolean isClimbed;
 
   public Climb() {
     motor = new TalonFX(ClimbConstants.MOTOR_ID, ClimbConstants.CANBUS_NAME);
@@ -60,6 +61,8 @@ public class Climb extends SubsystemBase {
     } else {
       motor.setPosition(ClimbConstants.MIN_HEIGHT.in(Meters));
     }
+
+    setDefaultCommand(descend().onlyIf(() -> !isClimbed));
   }
 
   /**
@@ -211,9 +214,11 @@ public class Climb extends SubsystemBase {
   public Command elevate() {
     return startEnd(
             () -> {
+              DogLog.log("Climb/Command", "Elevate");
               motor.setControl(new PositionVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
             },
             () -> {
+              DogLog.log("Climb/Command", "None");
               motor.setControl(new PositionVoltage(getPosition().in(Meters)));
             })
         .onlyIf(() -> isZeroed);
@@ -235,9 +240,12 @@ public class Climb extends SubsystemBase {
   public Command descend() {
     return startEnd(
         () -> {
+          DogLog.log("Climb/Command", "Descend");
           motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+          isClimbed = false;
         },
         () -> {
+          DogLog.log("Climb/Command", "None");
           motor.setControl(new PositionVoltage(getPosition().in(Meters)));
         });
   }
@@ -259,9 +267,12 @@ public class Climb extends SubsystemBase {
   public Command pullUp() {
     return startEnd(
             () -> {
+              DogLog.log("Climb/Command", "PullUp");
               motor.setControl(new PositionVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
+              isClimbed = true;
             },
             () -> {
+              DogLog.log("Climb/Command", "None");
               motor.setControl(new PositionVoltage(getPosition().in(Meters)));
             })
         .onlyIf(() -> isZeroed);
