@@ -3,6 +3,7 @@ package frc.robot.subsystems.hopper.beltfloor;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -21,6 +22,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
+/**
+ * The {@class BeltFloor} class is responsible for controlling the moving belt floor at the bottom
+ * of the hopper that moves fuel into the queue.
+ */
 public class BeltFloor extends SubsystemBase {
   /**
    * This class is for the belt floor subsystem, including velocitySignal, accelerationSignal,
@@ -84,6 +89,24 @@ public class BeltFloor extends SubsystemBase {
           // defines a local function to stop motor
           beltFloorMotor.setControl(new CoastOut());
         });
+  }
+
+  /**
+   * Moves the belts to feed fuel from the hopper into the queue.
+   *
+   * @return A command that runs the belt floor motor to feed fuel.
+   */
+  public Command feed() {
+    return feedDump(Volts.of(12.0));
+  }
+
+  /**
+   * Moves the belts in reverse to dump fuel out of the hopper.
+   *
+   * @return A command that runs the belt floor motor to dump fuel.
+   */
+  public Command dump() {
+    return feedDump(Volts.of(-12.0));
   }
 
   @Override
