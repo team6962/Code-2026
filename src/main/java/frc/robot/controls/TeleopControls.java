@@ -5,10 +5,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -53,29 +51,53 @@ public class TeleopControls {
     teleopEnabledTrigger.whileTrue(teleopSwerveCommand);
 
     // Configure operator controls and automated driver controls
-    // driver.a().onTrue(Commands.print("Nothing"));
+
+    // Driver A is unused
+    // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
+    // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
+    // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
+
+    // Auto Climb and Unclimb
     driver.b().onTrue(autoClimb.climb());
     driver.x().onTrue(autoClimb.unclimb());
-    // driver.y().onTrue(Commands.print("Reset Heading"));
 
+    // Auto Depot
     driver
         .leftBumper()
         .whileTrue(
             Commands.sequence(
-                this.robot.getSwerveDrive().driveTo(new Pose2d(1.518, 5.947, new Rotation2d(Radians.of(Math.PI)))), // rough position estimate based on simulation, not exact
+                this.robot
+                    .getSwerveDrive()
+                    .driveTo(
+                        new Pose2d(
+                            1.518,
+                            5.947,
+                            new Rotation2d(
+                                Radians.of(
+                                    Math.PI)))), // rough position estimate based on simulation, not
+                // exact
                 this.robot.getIntakeExtension().extend(),
                 Commands.parallel(
-                    this.robot.getSwerveDrive().driveTo(new Pose2d(0.546, 5.947, new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
+                    this.robot
+                        .getSwerveDrive()
+                        .driveTo(
+                            new Pose2d(
+                                0.546,
+                                5.947,
+                                new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
                     this.robot.getIntakeRollers().intake())));
 
-    // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
+    // Auto Drive to Outpost
     driver.rightBumper().whileTrue(Commands.print("Outpost"));
-    // driver.rightTrigger().onTrue(Commands.print("Boost"));
+
+    // Dump fuel
     driver
         .leftStick()
         .whileTrue(
             Commands.parallel(
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
+
+    // Intake and drive to fuel clump
     driver
         .rightStick()
         .whileTrue(
@@ -86,17 +108,24 @@ public class TeleopControls {
                     this.robot.getIntakeRollers(),
                     this.robot.getFuelLocalization(),
                     this.robot.getSwerveDrive()));
+
+    // Intake without driving
     driver
         .start()
         .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
 
+    // Manual climb controls
     operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
-    operator.leftBumper().whileTrue(robot.getHopper().unjam()); // Unjam hopper
-    operator
-        .leftTrigger()
-        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0))); // Disable shoot
+
+    // Unjam hopper
+    operator.leftBumper().whileTrue(robot.getHopper().unjam());
+
+    // Disable shooting
+    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+
+    // Toggle fine control mode
     operator
         .rightBumper()
         .onTrue(
@@ -104,17 +133,15 @@ public class TeleopControls {
                 () -> {
                   fineControl = !fineControl;
                 }));
+
+    // Force shooting
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
-    operator
-        .leftStick()
-        .whileTrue(
-            Commands.parallel( // Dump fuel
-                    robot.getHopper().getKicker().reverse(),
-                    robot.getHopper().getBeltFloor().dump(),
-                    robot.getIntakeRollers().outtake())
-                .onlyIf(robot.getIntakeExtension()::isExtended));
+
+    // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
+
+    // Fine control
     operator
         .povUp()
         .whileTrue(
