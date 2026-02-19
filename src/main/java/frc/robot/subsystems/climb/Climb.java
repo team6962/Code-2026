@@ -172,10 +172,6 @@ public class Climb extends SubsystemBase {
         supplyCurrentSignal,
         hallEffectSensorSignal);
 
-    if (RobotState.isDisabled()) {
-      motor.setPosition(getPosition().in(Meters));
-    }
-
     DogLog.log("Climb/Acceleration", getAcceleration());
     DogLog.log("Climb/Velocity", getVelocity());
     DogLog.log("Climb/Position", getPosition());
@@ -212,12 +208,13 @@ public class Climb extends SubsystemBase {
    */
   public Command elevate() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              motor.setControl(new PositionVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
+        .onlyIf(() -> isZeroed);
   }
 
   /**
@@ -235,12 +232,13 @@ public class Climb extends SubsystemBase {
    */
   public Command descend() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
+        .onlyIf(() -> isZeroed);
   }
 
   /**
@@ -259,11 +257,12 @@ public class Climb extends SubsystemBase {
    */
   public Command pullUp() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              motor.setControl(new PositionVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
+        .onlyIf(() -> isZeroed);
   }
 }
