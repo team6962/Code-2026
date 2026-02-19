@@ -27,10 +27,6 @@ import frc.robot.subsystems.hopper.HopperConstants;
  * of the hopper that moves fuel into the queue.
  */
 public class BeltFloor extends SubsystemBase {
-  /**
-   * This class is for the belt floor subsystem, including velocitySignal, accelerationSignal,
-   * supplyCurrentSignal, statorCurrentSignal, and voltageSignal
-   */
   private TalonFX beltFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
