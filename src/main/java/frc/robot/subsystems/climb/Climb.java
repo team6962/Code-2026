@@ -222,7 +222,7 @@ public class Climb extends SubsystemBase {
                 getPosition()
                     .isNear(
                         ClimbConstants.MAX_HEIGHT,
-                        ClimbConstants.POSITION_TOLERANCE));
+                        ClimbConstants.POSITION_TOLERANCE))
         .onlyIf(() -> isZeroed);
   }
 
