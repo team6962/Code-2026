@@ -51,7 +51,14 @@ public class TeleopControls {
     // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
     driver.rightBumper().whileTrue(Commands.print("Outpost"));
     // driver.rightTrigger().onTrue(Commands.print("Boost"));
-    driver.leftStick().whileTrue(Commands.print("Dump"));
+    driver
+        .leftStick()
+        .whileTrue(
+            Commands.parallel(
+                this.robot.getIntakeRollers().outtake(),
+                this.robot.getHopper().dump()
+            )
+        );
     driver
         .rightStick()
         .whileTrue(
@@ -62,7 +69,11 @@ public class TeleopControls {
                     this.robot.getIntakeRollers(),
                     this.robot.getFuelLocalization(),
                     this.robot.getSwerveDrive()));
-    driver.start().whileTrue(Commands.print("Run Intake!")); // this might be switched with back
+    driver
+        .start()
+        .whileTrue(
+            this.robot.getIntakeRollers().intake()
+        ); // this might be switched with back
 
     operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
