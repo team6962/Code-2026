@@ -32,6 +32,7 @@ public final class IntakeExtensionConstants {
   public static final Angle ANGLE = Degrees.of(0);
   public static final Distance PINION_RADIUS = Inches.of(0.5);
   public static final int CANDI_DEVICE_ID = 40;
+  public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()

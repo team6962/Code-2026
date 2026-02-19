@@ -85,24 +85,36 @@ public class IntakeExtension extends SubsystemBase {
 
   public Command extend() {
     return startEnd(
-        () -> {
-          motor.setControl(
-              new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              motor.setControl(
+                  new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+            })
+        .until(
+            () ->
+                getPosition()
+                    .isNear(
+                        IntakeExtensionConstants.MAX_POSITION,
+                        IntakeExtensionConstants.POSITION_TOLERANCE));
   }
 
   public Command retract() {
     return startEnd(
-        () -> {
-          motor.setControl(
-              new MotionMagicVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              motor.setControl(
+                  new MotionMagicVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+            })
+        .until(
+            () ->
+                getPosition()
+                    .isNear(
+                        IntakeExtensionConstants.MIN_POSITION,
+                        IntakeExtensionConstants.POSITION_TOLERANCE));
   }
 
   /**
