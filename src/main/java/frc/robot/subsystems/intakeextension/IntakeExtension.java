@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
-  private CANdi candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
+  private CANdi candi;
 
   // The status signals' rotations actually represent meters of mechanism motion
   private StatusSignal<Angle> positionSignal;
@@ -52,6 +52,8 @@ public class IntakeExtension extends SubsystemBase {
   public IntakeExtension() {
     motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
+
+    candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, new CANBus("subsystems"));
     candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
     positionSignal = motor.getPosition();
@@ -217,13 +219,13 @@ public class IntakeExtension extends SubsystemBase {
         hallSensorTriggeredSignal,
         closedLoopReferenceSignal);
 
-    DogLog.log("intake/position", getPosition());
-    DogLog.log("intake/velocity", getVelocity());
-    DogLog.log("intake/acceleration", getAcceleration());
-    DogLog.log("intake/voltage", getVoltage());
-    DogLog.log("intake/statorCurrent", getStatorCurrent());
-    DogLog.log("intake/supplyCurrent", getSupplyCurrent());
-    DogLog.log("intake/candiTriggered", isHallSensorTriggered());
-    DogLog.log("intake/closedLoopReference", getClosedLoopReference());
+    DogLog.log("Intake/Position", getPosition());
+    DogLog.log("Intake/Velocity", getVelocity());
+    DogLog.log("Intake/Acceleration", getAcceleration());
+    DogLog.log("Intake/Voltage", getVoltage());
+    DogLog.log("Intake/StatorCurrent", getStatorCurrent());
+    DogLog.log("Intake/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
+    DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
   }
 }
