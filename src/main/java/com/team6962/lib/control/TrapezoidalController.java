@@ -32,11 +32,14 @@ import edu.wpi.first.wpilibj.Timer;
  * {@link #setDuration setDuration()} method with the desired duration.
  */
 public class TrapezoidalController {
+  /** The constraints for the trapezoidal motion profile. */
+  private final TrapezoidProfile.Constraints constraints;
+
   /** The trapezoidal motion profile used to generate setpoints. */
-  private final TrapezoidProfile profile;
+  private TrapezoidProfile profile;
 
   /** The PID controller used for feedback control. */
-  private final PIDController feedback;
+  private PIDController feedback;
 
   /** The initial time when the profile started, in seconds since the FPGA started. */
   private double initialTime;
@@ -45,20 +48,37 @@ public class TrapezoidalController {
   private TrapezoidProfile.State initialState, goalState;
 
   /**
-   * A scaling factor for the time duration of the profile. This value should always be greater than
-   * or equal to 1, making the profile take longer than or equal to the minimum time required by the
-   * physical constraints of the system.
+   * Creates a new TrapezoidalController with the specified PID gains, constraints, and update
+   * frequency.
+   * 
+   * @param kP The proportional gain
+   * @param kI The integral gain
+   * @param kD The derivative gain
+   * @param constraints The motion profile constraints (max velocity and acceleration)
+   * @param updateFrequency The frequency at which the controller is updated
    */
-  private double timeScale = 1.0;
-
   public TrapezoidalController(
       double kP,
       double kI,
       double kD,
       TrapezoidProfile.Constraints constraints,
       Frequency updateFrequency) {
+    this.constraints = constraints;
     this.profile = new TrapezoidProfile(constraints);
     this.feedback = new PIDController(kP, kI, kD, updateFrequency.asPeriod().in(Seconds));
+  }
+
+  /**
+   * Creates a new TrapezoidalController with the specified constraints and no feedback control. The difference between this
+   * and a raw {@link TrapezoidProfile} is that this class supports stretching the profile to take a specified duration.
+   * 
+   * @param constraints The motion profile constraints (max velocity and acceleration)
+   */
+  public TrapezoidalController(
+    TrapezoidProfile.Constraints constraints
+  ) {
+    this.constraints = constraints;
+    this.profile = new TrapezoidProfile(constraints);
   }
 
   /**
@@ -68,13 +88,12 @@ public class TrapezoidalController {
    * @param goal The goal state (target position and velocity)
    */
   public void setProfile(State initial, State goal) {
-    timeScale = 1.0;
     initialTime = Timer.getFPGATimestamp();
 
     this.initialState = initial;
     this.goalState = goal;
 
-    profile.calculate(0, initial, goal);
+    initializeProfile(1.0);
   }
 
   /**
@@ -90,24 +109,26 @@ public class TrapezoidalController {
     setDuration(duration);
   }
 
+  private void initializeProfile(double scalingFactor) {
+    TrapezoidProfile.Constraints scaledConstraints = constraints;
+
+    if (scalingFactor != 1.0) {
+      scaledConstraints =
+          new TrapezoidProfile.Constraints(
+              constraints.maxVelocity * scalingFactor, constraints.maxAcceleration * scalingFactor);
+    }
+
+    profile = new TrapezoidProfile(scaledConstraints);
+    profile.calculate(0, initialState, goalState);
+  }
+
   /**
    * Gets the duration of the current motion profile, in seconds.
    *
    * @return The duration of the profile in seconds
    */
   public double getDuration() {
-    return profile.totalTime() * timeScale;
-  }
-
-  /**
-   * Gets the current time scaling factor applied to the motion profile. Values greater than 1
-   * indicate the profile is stretched to take longer than the minimum time required by the physical
-   * constraints of the system.
-   *
-   * @return The time scaling factor
-   */
-  public double getTimeScale() {
-    return timeScale;
+    return profile.totalTime();
   }
 
   /**
@@ -116,27 +137,51 @@ public class TrapezoidalController {
    * @param duration The desired duration of the profile in seconds
    */
   public void setDuration(double duration) {
-    double unscaledDuration = profile.totalTime();
-
-    if (unscaledDuration == 0) {
-      timeScale = 1.0;
+    if (getDuration() == 0) {
       return;
     }
 
-    timeScale = duration / unscaledDuration;
+    // Upper bound is always 1
+    double upperConstraintBound = 1.0;
+
+    // Lower bound is found by repeatedly halving the constraints until the
+    // profile duration is greater than the desired duration
+    double lowerConstraintBound = 1.0;
+
+    while (getDuration() <= duration) {
+      lowerConstraintBound *= 0.5;
+      initializeProfile(lowerConstraintBound);
+    }
+
+    // Now we have an upper and lower bound on the constraint scaling factor, so we can use
+    // binary search to find the optimal scaling factor that gives us the desired duration
+    while (upperConstraintBound - lowerConstraintBound > 0.0000001) {
+      double midConstraintBound = (upperConstraintBound + lowerConstraintBound) / 2.;
+      initializeProfile(midConstraintBound);
+      if (Math.abs(sampleAt(0).position - initialState.position) > 0.001 ||
+          Math.abs(sampleAt(0).velocity - initialState.velocity) > 0.001 ||
+          Math.abs(sampleAt(getDuration()).position - goalState.position) > 0.001 ||
+          Math.abs(sampleAt(getDuration()).velocity - goalState.velocity) > 0.001) {
+        lowerConstraintBound = midConstraintBound;
+      } else if (getDuration() < duration) {
+        upperConstraintBound = midConstraintBound;
+      } else {
+        lowerConstraintBound = midConstraintBound;
+      }
+    }
+
+    // Initialize the profile with the final scaling factor
+    initializeProfile(upperConstraintBound);
   }
 
   /**
-   * Samples the motion profile at the given time, adjusting for the time scaling.
+   * Samples the motion profile at the given time.
    *
    * @param time The time at which to sample the profile, in seconds
    * @return The state of the profile at the given time
    */
-  private TrapezoidProfile.State sampleAt(double time) {
-    TrapezoidProfile.State originalState =
-        profile.calculate(time / timeScale, initialState, goalState);
-
-    return new TrapezoidProfile.State(originalState.position, originalState.velocity / timeScale);
+  public TrapezoidProfile.State sampleAt(double time) {
+    return profile.calculate(time, initialState, goalState);
   }
 
   /**
@@ -146,21 +191,25 @@ public class TrapezoidalController {
    * @return The desired velocity that will cause the system to follow the motion profile
    */
   public double calculate(State current) {
-    double realTime = Timer.getFPGATimestamp() - initialTime;
+    double time = Timer.getFPGATimestamp() - initialTime;
 
-    if (realTime > getDuration()) {
+    if (time > getDuration()) {
       if (goalState.velocity != 0) {
         return goalState.velocity;
-      } else {
+      } else if (feedback != null) {
         return feedback.calculate(current.position, goalState.position);
+      } else {
+        return 0.0;
       }
     } else {
-      State profileState = sampleAt(realTime);
+      State profileState = sampleAt(time);
+      double output = profileState.velocity; // Feedforward
 
-      double feedbackOutput = feedback.calculate(current.position, profileState.position);
-      double feedforward = profileState.velocity;
+      if (feedback != null) {
+        output += feedback.calculate(current.position, profileState.position); // Feedback
+      }
 
-      return feedbackOutput + feedforward;
+      return output;
     }
   }
 
@@ -199,7 +248,7 @@ public class TrapezoidalController {
   /**
    * Gets the PID controller used for feedback control.
    *
-   * @return The PID controller
+   * @return The PID controller, which may be null if no feedback control is being used
    */
   public PIDController getFeedback() {
     return feedback;
@@ -211,7 +260,7 @@ public class TrapezoidalController {
    * @return The remaining time in seconds
    */
   public double getRemainingTime() {
-    double time = (Timer.getFPGATimestamp() - initialTime) * timeScale;
+    double time = Timer.getFPGATimestamp() - initialTime;
     return Math.max(0, getDuration() - time);
   }
 

@@ -91,7 +91,7 @@ public class LearnBotConstants {
                 .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
                 .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
-                .withTranslationFeedbackKP(15)
+                .withTranslationFeedbackKP(10)
                 .withTranslationFeedbackKD(0.2)
                 .withAngleFeedbackKP(20)
                 .withAngleFeedbackKD(0.5))

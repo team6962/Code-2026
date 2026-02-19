@@ -26,11 +26,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  */
 public class StrafeVelocityProfile {
   private double maxAcceleration;
-  private TrapezoidProfile profile;
+  private TrapezoidalController profile;
 
   public StrafeVelocityProfile(TrapezoidProfile.Constraints constraints) {
     maxAcceleration = constraints.maxAcceleration;
-    profile = new TrapezoidProfile(constraints);
+    profile = new TrapezoidalController(constraints);
   }
 
   public TrapezoidProfile.State calculate(
@@ -43,7 +43,7 @@ public class StrafeVelocityProfile {
       return new TrapezoidProfile.State(
           initialVelocity * currentTime
               - 0.5 * Math.signum(initialVelocity) * maxAcceleration * currentTime * currentTime,
-          -Math.signum(initialVelocity) * maxAcceleration * currentTime);
+          initialVelocity - Math.signum(initialVelocity) * maxAcceleration * currentTime);
     } else if (currentTime > totalDuration - finalAccelerationTime) {
       double timeSinceStationary = currentTime - (totalDuration - finalAccelerationTime);
       // Accelerate from zero to the target velocity
@@ -77,16 +77,9 @@ public class StrafeVelocityProfile {
       TrapezoidProfile.State initialState = new TrapezoidProfile.State(initialDisplacement, 0);
       TrapezoidProfile.State goalState = new TrapezoidProfile.State(finalDisplacement, 0);
 
-      profile.calculate(currentTime, initialState, goalState);
+      profile.setProfile(initialState, goalState, totalDuration - initialAccelerationTime - finalAccelerationTime);
 
-      double profileTime = profile.totalTime();
-      double intendedTime = totalDuration - initialAccelerationTime - finalAccelerationTime;
-
-      TrapezoidProfile.State profileState =
-          profile.calculate(currentTime / intendedTime * profileTime, initialState, goalState);
-
-      return new TrapezoidProfile.State(
-          profileState.position, profileState.velocity / intendedTime * profileTime);
+      return profile.sampleAt(currentTime - initialAccelerationTime);
     }
   }
 }
