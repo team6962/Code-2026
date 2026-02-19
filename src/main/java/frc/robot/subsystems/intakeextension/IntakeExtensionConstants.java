@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.Voltage;
 
 public final class IntakeExtensionConstants {
 
@@ -29,6 +31,7 @@ public final class IntakeExtensionConstants {
   public static final Distance PINION_RADIUS = Inches.of(0.5);
   public static final int CANDI_DEVICE_ID = 40;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
+  public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
