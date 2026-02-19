@@ -126,6 +126,17 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
   }
 
   /**
+   * Creates a command that drives the robot at the specified velocity. The command requires both
+   * translation and rotation subsystems.
+   *
+   * @param velocity The desired chassis speeds
+   * @return A command that applies the velocity motion
+   */
+  public Command drive(ChassisSpeeds velocity) {
+    return runMotion(() -> applyVelocityMotion(velocity));
+  }
+
+  /**
    * Creates a command that drives the robot's translation at the velocity provided by the supplier.
    * The command only requires the translation subsystem, allowing rotation to be controlled
    * independently.
@@ -138,6 +149,17 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
   }
 
   /**
+   * Creates a command that drives the robot's translation at the specified velocity. The command
+   * only requires the translation subsystem, allowing rotation to be controlled independently.
+   *
+   * @param velocity The desired translational velocity
+   * @return A command that applies the translational velocity motion
+   */
+  public Command drive(TranslationalVelocity velocity) {
+    return runTranslation(() -> applyVelocityMotion(velocity));
+  }
+
+  /**
    * Creates a command that drives the robot's rotation at the angular velocity provided by the
    * supplier. The command only requires the rotation subsystem, allowing translation to be
    * controlled independently.
@@ -147,6 +169,18 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
    */
   public Command driveRotation(Supplier<AngularVelocity> angularVelocity) {
     return runRotation(() -> applyVelocityMotion(angularVelocity.get()));
+  }
+
+  /**
+   * Creates a command that drives the robot's rotation at the specified angular velocity. The
+   * command only requires the rotation subsystem, allowing translation to be controlled
+   * independently.
+   *
+   * @param angularVelocity The desired angular velocity
+   * @return A command that applies the rotational velocity motion
+   */
+  public Command drive(AngularVelocity angularVelocity) {
+    return runRotation(() -> applyVelocityMotion(angularVelocity));
   }
 
   /**
