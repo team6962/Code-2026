@@ -17,6 +17,7 @@ import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
@@ -34,6 +35,7 @@ public class RobotContainer {
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
   private final Climb climb;
+  private final Hopper hopper;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   public RobotContainer() {
@@ -48,6 +50,7 @@ public class RobotContainer {
     shooterRollers = new ShooterRollers();
     turret = new Turret();
     intakeExtension = new IntakeExtension();
+    hopper = new Hopper();
 
     aprilTagVision =
         new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
@@ -112,5 +115,9 @@ public class RobotContainer {
 
   public Climb getClimb() {
     return climb;
+  }
+
+  public Hopper getHopper() {
+    return hopper;
   }
 }
