@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
@@ -480,5 +481,22 @@ public class Turret extends SubsystemBase {
     } else {
       motor.setControl(new CoastOut());
     }
+  }
+
+  public Command moveAtVoltage(Voltage voltage) {
+    return startEnd(
+            () -> {
+              if (isZeroed()) {
+                motor.setControl(new VoltageOut(voltage));
+              } else if (RobotState.isEnabled()) {
+                motor.setControl(new NeutralOut());
+              } else {
+                motor.setControl(new CoastOut());
+              }
+            },
+            () -> {
+              setPositionControl(getPosition());
+            })
+        .onlyIf(() -> isZeroed());
   }
 }

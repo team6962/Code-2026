@@ -5,11 +5,13 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
@@ -117,6 +119,33 @@ public class IntakeExtension extends SubsystemBase {
                     .isNear(
                         IntakeExtensionConstants.MIN_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE));
+  }
+
+  /**
+   * Creates a command that moves the intake mechanism at the given voltage. This command will do
+   * nothing if the intake has not yet been zeroed and the voltage is positive.
+   *
+   * @param voltage The voltage to apply to the intake motor while the command is active. Positive
+   *     voltages will cause the mechanism to extend, while negative voltages will cause it to
+   *     retract.
+   * @return A command that moves the intake at the specified voltage.
+   */
+  public Command moveAtVoltage(Voltage voltage) {
+    return startEnd(
+            () -> {
+              if (isZeroed) {
+                motor.setControl(
+                    new VoltageOut(
+                        voltage.plus(
+                            Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
+              } else {
+                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              }
+            },
+            () -> {
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+            })
+        .onlyIf(() -> isZeroed || voltage.in(Volts) < 0);
   }
 
   /**
