@@ -1,9 +1,14 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -52,7 +57,17 @@ public class TeleopControls {
     driver.b().onTrue(autoClimb.climb());
     driver.x().onTrue(autoClimb.unclimb());
     // driver.y().onTrue(Commands.print("Reset Heading"));
-    driver.leftBumper().whileTrue(Commands.print("Depot"));
+
+    driver
+        .leftBumper()
+        .whileTrue(
+            Commands.sequence(
+                this.robot.getSwerveDrive().driveTo(new Pose2d(1.518, 5.947, new Rotation2d(Radians.of(Math.PI)))), // rough position estimate based on simulation, not exact
+                this.robot.getIntakeExtension().extend(),
+                Commands.parallel(
+                    this.robot.getSwerveDrive().driveTo(new Pose2d(0.546, 5.947, new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
+                    this.robot.getIntakeRollers().intake())));
+
     // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
     driver.rightBumper().whileTrue(Commands.print("Outpost"));
     // driver.rightTrigger().onTrue(Commands.print("Boost"));
