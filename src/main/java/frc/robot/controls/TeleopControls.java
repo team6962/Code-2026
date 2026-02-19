@@ -1,5 +1,7 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -11,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Preferences;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.hood.ShooterHoodConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
@@ -48,9 +51,9 @@ public class TeleopControls {
     driver.rightBumper().whileTrue(Commands.print("Outpost"));
     // driver.rightTrigger().onTrue(Commands.print("Boost"));
     driver.leftStick().whileTrue(Commands.print("Dump"));
-    driver.back().whileTrue(Commands.print("Retract Intake")); //this might be switched with start
+    driver.back().whileTrue(Commands.print("Retract Intake")); // this might be switched with start
     driver.rightStick().whileTrue(Commands.print("Intake and Drive To Fuel"));
-    driver.start().whileTrue(Commands.print("Run Intake!")); //this might be switched with back
+    driver.start().whileTrue(Commands.print("Run Intake!")); // this might be switched with back
 
     operator.a().onTrue(Commands.print("Lower Climb"));
     operator.b().onTrue(Commands.print("Lift Robot"));
@@ -61,12 +64,10 @@ public class TeleopControls {
     operator.rightBumper().onTrue(Commands.print("Toggle Fine Control"));
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
     operator.leftStick().whileTrue(Commands.print("Dump"));
-    operator.back().whileTrue(Commands.print("Pass Left")); //this might be switched with start
+    operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.rightStick().whileTrue(Commands.print("Retract Intake"));
-    operator.start().whileTrue(Commands.print("Pass Right")); //this might be switched with back
-    operator.povUp().whileTrue(Commands.print("FineControlHoodAngleUp"));
-    operator.povDown().whileTrue(Commands.print("FineControlHoodAngleDown"));
-    operator.povLeft().whileTrue(Commands.print("FineControlTurrentAngleCCW"));
-    operator.povRight().whileTrue(Commands.print("FineControlTurrentAngleCW"));
+    operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
+    operator.povUp().whileTrue(this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); //CHECK SIGN
+    operator.povDown().whileTrue(this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); //CHECK SIGN
   }
 }
