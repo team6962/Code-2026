@@ -54,14 +54,14 @@ import edu.wpi.first.units.measure.Frequency;
  */
 public class TranslationController {
   /** The trapezoidal controller that moves the system along the direct line to the goal. */
-  private TrapezoidalController directController;
+  private ProfiledController directController;
 
   /**
    * The strafe velocity controller that moves the system perpendicular to the direct line to the
    * goal (strafing). This is used in many cases when the initial velocity or target velocity is
    * nonzero.
    */
-  private StrafeVelocityController strafeController;
+  private ProfiledController strafeController;
 
   /** The initial translation of the system in 2D space. */
   private Translation2d initialPosition;
@@ -90,8 +90,10 @@ public class TranslationController {
       Frequency updateFrequency) {
     // Initialize controllers that use trapezoidal profiling and PID to
     // reach targets along each axis
-    this.directController = new TrapezoidalController(kP, kI, kD, constraints, updateFrequency);
-    this.strafeController = new StrafeVelocityController(kP, kI, kD, constraints, updateFrequency);
+    this.directController =
+        new ProfiledController(kP, kI, kD, new TrapezoidalProfile(constraints), updateFrequency);
+    this.strafeController =
+        new ProfiledController(kP, kI, kD, new StrafeProfile(constraints), updateFrequency);
   }
 
   /**
@@ -132,15 +134,20 @@ public class TranslationController {
 
     // Set the initial and final states for each controller
     directController.setProfile(
-        new TrapezoidProfile.State(
+        new MotionProfile.State(
             -goalPosition.minus(initialPosition).getNorm(),
             pathRelativeInitialVelocityVector.get(0)),
-        new TrapezoidProfile.State(0, pathRelativeGoalVelocityVector.get(0)));
+        new MotionProfile.State(0, pathRelativeGoalVelocityVector.get(0)));
 
     strafeController.setProfile(
-        pathRelativeInitialVelocityVector.get(1),
-        pathRelativeGoalVelocityVector.get(1),
+        new MotionProfile.State(0, pathRelativeInitialVelocityVector.get(1)),
+        new MotionProfile.State(0, pathRelativeGoalVelocityVector.get(1)),
         directController.getDuration());
+
+    // Synchronize the durations of the motion profiles
+    double maxDuration = getDuration();
+    directController.setDuration(maxDuration);
+    strafeController.setDuration(maxDuration);
   }
 
   /**
@@ -178,9 +185,7 @@ public class TranslationController {
   public Translation2d getCurrentTarget() {
     Vector<N3> pathRelativeTargetPosition =
         VecBuilder.fill(
-            directController.getCurrentTarget().position,
-            strafeController.getCurrentTarget().position,
-            1.0);
+            directController.sample().position, strafeController.sample().position, 1.0);
 
     // Convert the target position back to field-relative coordinates
     Matrix<N3, N3> pathToFieldPositionMatrix = getPathToFieldMatrix(initialPosition, goalPosition);
@@ -257,12 +262,12 @@ public class TranslationController {
     // along each axis
     double directTargetVelocity =
         directController.calculate(
-            new TrapezoidProfile.State(
+            new MotionProfile.State(
                 Meters.of(currentPosition.get(0)).in(Meters), currentVelocity.get(0)));
 
     double strafeTargetVelocity =
         strafeController.calculate(
-            new TrapezoidProfile.State(
+            new MotionProfile.State(
                 Meters.of(currentPosition.get(1)).in(Meters), currentVelocity.get(1)));
 
     return new TranslationalVelocity(directTargetVelocity, strafeTargetVelocity).toVector();

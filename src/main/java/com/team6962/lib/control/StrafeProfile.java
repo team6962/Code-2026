@@ -24,30 +24,87 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  *       move in an S shape around the path.
  * </ul>
  */
-public class StrafeVelocityProfile {
+public class StrafeProfile implements MotionProfile {
   private double maxAcceleration;
-  private TrapezoidalController profile;
+  private TrapezoidalProfile trapezoidalProfile;
+  private double initialVelocity, targetVelocity;
 
-  public StrafeVelocityProfile(TrapezoidProfile.Constraints constraints) {
+  public StrafeProfile(TrapezoidProfile.Constraints constraints) {
     maxAcceleration = constraints.maxAcceleration;
-    profile = new TrapezoidalController(constraints);
+    trapezoidalProfile = new TrapezoidalProfile(constraints);
   }
 
-  public TrapezoidProfile.State calculate(
-      double initialVelocity, double targetVelocity, double currentTime, double totalDuration) {
+  private double getInitialAccelerationTime() {
+    return Math.abs(initialVelocity) / maxAcceleration;
+  }
+
+  private double getFinalAccelerationTime() {
+    return Math.abs(targetVelocity) / maxAcceleration;
+  }
+
+  private double getInitialDisplacement() {
+    double initialAccelerationTime = getInitialAccelerationTime();
+    return initialVelocity * initialAccelerationTime
+        - 0.5
+            * Math.signum(initialVelocity)
+            * maxAcceleration
+            * initialAccelerationTime
+            * initialAccelerationTime;
+  }
+
+  private double getFinalDisplacement() {
+    double finalAccelerationTime = getFinalAccelerationTime();
+    return -0.5
+        * Math.signum(targetVelocity)
+        * maxAcceleration
+        * finalAccelerationTime
+        * finalAccelerationTime;
+  }
+
+  @Override
+  public void setDuration(double duration) {
+    trapezoidalProfile.setDuration(
+        duration - getInitialAccelerationTime() - getFinalAccelerationTime());
+  }
+
+  @Override
+  public double getDuration() {
+    return trapezoidalProfile.getDuration()
+        + getInitialAccelerationTime()
+        + getFinalAccelerationTime();
+  }
+
+  @Override
+  public void setProfile(State initial, State goal) {
+    if (Math.abs(initial.position) > 1e-6 || Math.abs(goal.position) > 1e-6) {
+      throw new IllegalArgumentException(
+          "StrafeVelocityProfile only supports profiles between states with zero displacement");
+    }
+
+    initialVelocity = initial.velocity;
+    targetVelocity = goal.velocity;
+
+    trapezoidalProfile.setProfile(
+        new MotionProfile.State(getInitialDisplacement(), 0),
+        new MotionProfile.State(getFinalDisplacement(), 0));
+  }
+
+  @Override
+  public MotionProfile.State sampleAt(double currentTime) {
     double initialAccelerationTime = Math.abs(initialVelocity) / maxAcceleration;
     double finalAccelerationTime = Math.abs(targetVelocity) / maxAcceleration;
+    double totalDuration = getDuration();
 
     if (currentTime < initialAccelerationTime) {
       // Decelerate from the initial velocity to zero
-      return new TrapezoidProfile.State(
+      return new MotionProfile.State(
           initialVelocity * currentTime
               - 0.5 * Math.signum(initialVelocity) * maxAcceleration * currentTime * currentTime,
           initialVelocity - Math.signum(initialVelocity) * maxAcceleration * currentTime);
     } else if (currentTime > totalDuration - finalAccelerationTime) {
       double timeSinceStationary = currentTime - (totalDuration - finalAccelerationTime);
       // Accelerate from zero to the target velocity
-      return new TrapezoidProfile.State(
+      return new MotionProfile.State(
           0.5
                   * Math.signum(targetVelocity)
                   * maxAcceleration
@@ -60,26 +117,7 @@ public class StrafeVelocityProfile {
                   * finalAccelerationTime,
           Math.signum(targetVelocity) * maxAcceleration * timeSinceStationary);
     } else {
-      double initialDisplacement =
-          initialVelocity * initialAccelerationTime
-              - 0.5
-                  * Math.signum(initialVelocity)
-                  * maxAcceleration
-                  * initialAccelerationTime
-                  * initialAccelerationTime;
-      double finalDisplacement =
-          -0.5
-              * Math.signum(targetVelocity)
-              * maxAcceleration
-              * finalAccelerationTime
-              * finalAccelerationTime;
-
-      TrapezoidProfile.State initialState = new TrapezoidProfile.State(initialDisplacement, 0);
-      TrapezoidProfile.State goalState = new TrapezoidProfile.State(finalDisplacement, 0);
-
-      profile.setProfile(initialState, goalState, totalDuration - initialAccelerationTime - finalAccelerationTime);
-
-      return profile.sampleAt(currentTime - initialAccelerationTime);
+      return trapezoidalProfile.sampleAt(currentTime - initialAccelerationTime);
     }
   }
 }
