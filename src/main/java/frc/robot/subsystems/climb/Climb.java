@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 
 /** climb class for the robot to climb the ladder at the during the competition */
 public class Climb extends SubsystemBase {
@@ -219,10 +218,7 @@ public class Climb extends SubsystemBase {
             })
         .until(
             () ->
-                getPosition()
-                    .isNear(
-                        ClimbConstants.MAX_HEIGHT,
-                        ClimbConstants.POSITION_TOLERANCE))
+                getPosition().isNear(ClimbConstants.MAX_HEIGHT, ClimbConstants.POSITION_TOLERANCE))
         .onlyIf(() -> isZeroed);
   }
 
@@ -241,18 +237,15 @@ public class Climb extends SubsystemBase {
    */
   public Command descend() {
     return startEnd(
-        () -> {
-          motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
-        },
-        () -> {
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        })
+            () -> {
+              motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+            },
+            () -> {
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
         .until(
             () ->
-                getPosition()
-                    .isNear(
-                        ClimbConstants.MIN_HEIGHT,
-                        ClimbConstants.POSITION_TOLERANCE));
+                getPosition().isNear(ClimbConstants.MIN_HEIGHT, ClimbConstants.POSITION_TOLERANCE));
   }
 
   /**
