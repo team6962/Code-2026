@@ -87,8 +87,14 @@ public class TeleopControls {
                                 new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
                     this.robot.getIntakeRollers().intake())));
 
-    // Auto Drive to Outpost
-    driver.rightBumper().whileTrue(Commands.print("Outpost"));
+    // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
+    
+    driver // Auto Drive to Outpost
+        .rightBumper()
+        .whileTrue(
+            this.robot.getSwerveDrive().driveTo(new Pose2d(0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough estimate
+
+    // driver.rightTrigger().onTrue(Commands.print("Boost"));
 
     // Dump fuel
     driver
