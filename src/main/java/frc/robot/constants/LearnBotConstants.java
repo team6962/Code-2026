@@ -37,7 +37,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
-
 import org.photonvision.simulation.SimCameraProperties;
 
 public class LearnBotConstants extends BaseRobotConstants {

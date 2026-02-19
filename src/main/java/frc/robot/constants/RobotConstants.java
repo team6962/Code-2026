@@ -1,14 +1,12 @@
 package frc.robot.constants;
 
-import frc.robot.Preferences;
-
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.Preferences;
 
 public interface RobotConstants {
   public DrivetrainConstants getDrivetrainConstants();
