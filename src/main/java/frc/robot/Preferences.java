@@ -1,7 +1,6 @@
 package frc.robot;
 
 import frc.robot.constants.CompetitionBotConstants;
-import frc.robot.constants.EnabledSystems;
 import frc.robot.constants.RobotConstants;
 
 public class Preferences {
@@ -29,13 +28,4 @@ public class Preferences {
    * the simulated robot and to provide the correct configuration values for those subsystems.
    */
   public static final RobotConstants simulatedRobot = new CompetitionBotConstants();
-
-  /**
-   * Which subsystems should be enabled. These subsystems will only be enabled if their
-   * corresponding flag in enabledSystems is true and they exist on the robot according to the robot
-   * constants. This is useful for testing individual subsystems without enabling the entire robot.
-   *
-   * <p>By default, all subsystems are enabled.
-   */
-  public static final EnabledSystems enabledSystems = new EnabledSystems();
 }

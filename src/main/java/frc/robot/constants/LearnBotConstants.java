@@ -225,9 +225,4 @@ public class LearnBotConstants extends BaseRobotConstants {
   public XBoxTeleopSwerveConstants getTeleopSwerveConstants() {
     return super.getTeleopSwerveConstants();
   }
-
-  @Override
-  public EnabledSystems getEnabledSystems() {
-    return super.getEnabledSystems().withSubsystems(false);
-  }
 }

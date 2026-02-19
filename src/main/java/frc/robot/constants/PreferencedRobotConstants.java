@@ -11,19 +11,16 @@ public class PreferencedRobotConstants implements RobotConstants {
   private XBoxTeleopSwerveConstants teleopSwerveConstants;
   private AprilTagVisionConstants aprilTagVisionConstants;
   private SphereCameraConstants sphereCameraConstants;
-  private EnabledSystems enabledSystems;
 
   public PreferencedRobotConstants(RobotConstants internalConstants) {
     drivetrainConstants = internalConstants.getDrivetrainConstants();
     teleopSwerveConstants = internalConstants.getTeleopSwerveConstants();
     aprilTagVisionConstants = internalConstants.getAprilTagVisionConstants();
     sphereCameraConstants = internalConstants.getSphereCameraConstants();
-    enabledSystems = internalConstants.getEnabledSystems();
 
     drivetrainConstants.Simulation.EnablePoseEstimation =
         Preferences.enablePoseEstimationInSimulation;
     teleopSwerveConstants.ReorientControlsInSimulation = Preferences.reorientControlsInSimulation;
-    enabledSystems = enabledSystems.and(Preferences.enabledSystems);
   }
 
   @Override
@@ -44,10 +41,5 @@ public class PreferencedRobotConstants implements RobotConstants {
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
     return sphereCameraConstants;
-  }
-
-  @Override
-  public EnabledSystems getEnabledSystems() {
-    return enabledSystems;
   }
 }

@@ -25,9 +25,4 @@ public class BaseRobotConstants implements RobotConstants {
   public XBoxTeleopSwerveConstants getTeleopSwerveConstants() {
     return new XBoxTeleopSwerveConstants();
   }
-
-  @Override
-  public EnabledSystems getEnabledSystems() {
-    return new EnabledSystems();
-  }
 }

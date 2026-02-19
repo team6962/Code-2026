@@ -17,8 +17,6 @@ public interface RobotConstants {
 
   public SphereCameraConstants getSphereCameraConstants();
 
-  public EnabledSystems getEnabledSystems();
-
   public static RobotConstants generate() {
     RobotConstants constants;
 
