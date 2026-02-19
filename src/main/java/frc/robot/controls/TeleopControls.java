@@ -63,10 +63,9 @@ public class TeleopControls {
                     this.robot.getSwerveDrive()));
     driver.start().whileTrue(Commands.print("Run Intake!")); // this might be switched with back
 
-    operator.a().onTrue(Commands.print("Lower Climb"));
-    operator.b().onTrue(Commands.print("Lift Robot"));
-    operator.x().onTrue(Commands.print("Unclimb"));
-    operator.y().onTrue(Commands.print("Raise Climb"));
+    operator.a().onTrue(robot.getClimb().descend()); // Lower climb
+    operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
+    operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
     operator.leftBumper().whileTrue(Commands.print("Unjam"));
     operator.leftTrigger().whileTrue(Commands.print("Disable Shoot"));
     operator.rightBumper().onTrue(Commands.print("Toggle Fine Control"));
@@ -80,8 +79,7 @@ public class TeleopControls {
         .whileTrue(
             this.robot
                 .getShooterHood()
-                .moveAtVoltage(
-                  ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
     operator
         .povDown()
         .whileTrue(
@@ -93,15 +91,13 @@ public class TeleopControls {
         .povLeft()
         .whileTrue(
             this.robot
-              .getTurret()
-              .moveAtVoltage(
-                    TurretConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+                .getTurret()
+                .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
     operator
         .povLeft()
         .whileTrue(
             this.robot
-              .getTurret()
-              .moveAtVoltage(
-                    TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
+                .getTurret()
+                .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
   }
 }
