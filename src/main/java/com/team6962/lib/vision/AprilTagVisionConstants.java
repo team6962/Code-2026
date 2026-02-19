@@ -44,11 +44,15 @@ public class AprilTagVisionConstants {
   /** Whether to draw wireframes for the simulated cameras. */
   public boolean DrawWireframes;
 
-  /** Whether the robot must be disabled to update the robot heading using vision. */
-  public boolean RequireDisabledForHeadingUpdate;
+  /**
+   * How many AprilTags must be detected to update the robot's heading using vision while enabled.
+   */
+  public int MinTagsForHeadingUpdateWhileEnabled;
 
-  /** How many AprilTags must be detected to update the robot's heading using vision. */
-  public int MinTagsForHeadingUpdate;
+  /**
+   * How many AprilTags must be detected to update the robot's heading using vision while disabled.
+   */
+  public int MinTagsForHeadingUpdateWhileDisabled;
 
   /** Constructs an AprilTagVisionConstants object with default values. */
   public AprilTagVisionConstants() {
@@ -60,8 +64,8 @@ public class AprilTagVisionConstants {
     FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     CameraSimProperties = new SimCameraProperties();
     DrawWireframes = false;
-    RequireDisabledForHeadingUpdate = true;
-    MinTagsForHeadingUpdate = 2;
+    MinTagsForHeadingUpdateWhileEnabled = 2;
+    MinTagsForHeadingUpdateWhileDisabled = 1;
   }
 
   /**
@@ -172,26 +176,26 @@ public class AprilTagVisionConstants {
   }
 
   /**
-   * Sets whether the robot must be disabled to update the robot heading using vision, and returns
-   * this AprilTagVisionConstants for chaining.
-   *
-   * @param requireDisabled True if the robot must be disabled, false otherwise.
-   * @return This AprilTagVisionConstants object.
-   */
-  public AprilTagVisionConstants withRequireDisabledForHeadingUpdate(boolean requireDisabled) {
-    this.RequireDisabledForHeadingUpdate = requireDisabled;
-    return this;
-  }
-
-  /**
-   * Sets how many AprilTags must be detected to update the robot's heading using vision, and
-   * returns this AprilTagVisionConstants for chaining.
+   * Sets how many AprilTags must be detected to update the robot's heading using vision while it's
+   * enabled, and returns this AprilTagVisionConstants for chaining.
    *
    * @param minTags The minimum number of tags required.
    * @return This AprilTagVisionConstants object.
    */
-  public AprilTagVisionConstants withMinTagsForHeadingUpdate(int minTags) {
-    this.MinTagsForHeadingUpdate = minTags;
+  public AprilTagVisionConstants withMinTagsForHeadingUpdateWhileEnabled(int minTags) {
+    this.MinTagsForHeadingUpdateWhileEnabled = minTags;
+    return this;
+  }
+
+  /**
+   * Sets how many AprilTags must be detected to update the robot's heading using vision while it's
+   * disabled, and returns this AprilTagVisionConstants for chaining.
+   *
+   * @param minTags The minimum number of tags required.
+   * @return This AprilTagVisionConstants object.
+   */
+  public AprilTagVisionConstants withMinTagsForHeadingUpdateWhileDisabled(int minTags) {
+    this.MinTagsForHeadingUpdateWhileDisabled = minTags;
     return this;
   }
 }
