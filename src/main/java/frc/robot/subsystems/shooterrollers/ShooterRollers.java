@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooterrollers;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -18,6 +20,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
@@ -63,7 +66,7 @@ public class ShooterRollers extends SubsystemBase {
         "shooterRoller / input velocity",
         0.0,
         newVelocity -> {
-          CommandScheduler.getInstance().schedule(shoot(newVelocity));
+          CommandScheduler.getInstance().schedule(shoot(RotationsPerSecond.of(newVelocity)));
         });
 
     shooterRollerMotor2.setControl(
@@ -78,12 +81,36 @@ public class ShooterRollers extends SubsystemBase {
    * what we want, please put a negative value so it goes clockwise since thats what is intended by
    * the build team
    */
-  public Command shoot(double targetVelocity) {
+  public Command shoot(AngularVelocity targetVelocity) {
 
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
+        },
+        () -> {
+          // defines a local function to stop motor
+          shooterRollerMotor1.setControl(new CoastOut());
+        });
+  }
+
+  /**
+   * Creates a command that drives the shooter roller to a dynamically supplied velocity while
+   * scheduled.
+   *
+   * @param targetVelocity supplier that provides the desired velocity setpoint (in the units
+   *     expected by VelocityVoltage)
+   * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
+   *     coasts the motor on end
+   */
+  public Command shoot(Supplier<AngularVelocity> targetVelocity) {
+
+    return runEnd(
+        () -> {
+          // defines a local function to set motor voltage to make it go
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
