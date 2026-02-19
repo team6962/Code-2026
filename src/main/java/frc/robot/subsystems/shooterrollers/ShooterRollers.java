@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
@@ -64,7 +67,7 @@ public class ShooterRollers extends SubsystemBase {
         "shooterRoller / input velocity",
         0.0,
         newVelocity -> {
-          CommandScheduler.getInstance().schedule(shoot(newVelocity));
+          CommandScheduler.getInstance().schedule(shoot(RotationsPerSecond.of(newVelocity)));
         });
 
     shooterRollerMotor2.setControl(
@@ -79,12 +82,12 @@ public class ShooterRollers extends SubsystemBase {
    * what we want, please put a negative value so it goes clockwise since thats what is intended by
    * the build team
    */
-  public Command shoot(double targetVelocity) {
+  public Command shoot(AngularVelocity targetVelocity) {
 
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
+          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
@@ -101,12 +104,12 @@ public class ShooterRollers extends SubsystemBase {
    * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
    *     coasts the motor on end
    */
-  public Command shoot(Supplier<Double> targetVelocity) {
+  public Command shoot(Supplier<AngularVelocity> targetVelocity) {
 
     return runEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.get()));
+          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
