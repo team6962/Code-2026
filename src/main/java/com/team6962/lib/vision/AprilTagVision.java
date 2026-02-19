@@ -2,6 +2,13 @@ package com.team6962.lib.vision;
 
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import dev.doglog.DogLog;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,6 +34,10 @@ public class AprilTagVision extends SubsystemBase {
 
   /** Vision simulation system for testing in simulation mode. */
   private VisionSystemSim visionSystemSim;
+
+  /** The AprilTag field layout used for pose estimation. Loaded from WPILib's built-in layouts. */
+  private static AprilTagFieldLayout fieldLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
   /**
    * Constructs an AprilTagVision subsystem with the given configuration.
@@ -89,19 +100,30 @@ public class AprilTagVision extends SubsystemBase {
       visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
     }
 
+    // Determine the origin pose based on alliance color (red and blue have mirrored field layouts)
+    Pose3d originPose =
+        DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+            ? Pose3d.kZero
+            : new Pose3d(
+                new Translation3d(fieldLayout.getFieldLength(), fieldLayout.getFieldWidth(), 0),
+                new Rotation3d(0, 0, Math.PI));
+
+    DogLog.log("/Vision/origin", originPose);
     int measurements = 0;
 
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
-        // Don't update rotation unless the conditions specified in vision constants are met
-        boolean canUpdateRotation = true;
 
-        canUpdateRotation &=
-            !visionConstants.RequireDisabledForHeadingUpdate || RobotState.isDisabled();
-        canUpdateRotation &=
+        // Adjust the measurement to be relative to the field origin based on alliance color
+        measurement = measurement.relativeTo(originPose);
+
+        // Don't update rotation unless the conditions specified in vision constants are met
+        boolean canUpdateRotation =
             measurement.getPhotonEstimate().targetsUsed.size()
-                >= visionConstants.MinTagsForHeadingUpdate;
+                >= (RobotState.isEnabled()
+                    ? visionConstants.MinTagsForHeadingUpdateWhileEnabled
+                    : visionConstants.MinTagsForHeadingUpdateWhileDisabled);
 
         if (!canUpdateRotation) {
           measurement =

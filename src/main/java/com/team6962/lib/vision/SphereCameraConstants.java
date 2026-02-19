@@ -47,7 +47,7 @@ public class SphereCameraConstants implements Cloneable {
    * Tolerance for sphere detection algorithm. This affects how closely a detected object must match
    * a spherical shape to be considered a sphere piece.
    */
-  public double SphereTolerance = 0.1;
+  public double SphereTolerance = 0.25;
 
   /** The diameter of a sphere game piece. */
   public Distance SphereDiameter = Inches.of(5.91);

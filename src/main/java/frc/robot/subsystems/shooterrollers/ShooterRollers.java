@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooterrollers;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -7,6 +9,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -15,10 +18,12 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
-public class ShooterRoller extends SubsystemBase {
+public class ShooterRollers extends SubsystemBase {
   private TalonFX shooterRollerMotor1;
   private TalonFX shooterRollerMotor2;
   private StatusSignal<AngularVelocity> VelocitySignal;
@@ -26,19 +31,30 @@ public class ShooterRoller extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
-  private ShooterRollerSim simulation;
+  private ShooterRollersSim simulation;
 
-  public ShooterRoller() {
+  public ShooterRollers() {
     shooterRollerMotor1 =
         new TalonFX(
-            ShooterRollerConstants.MOTOR_CAN_ID_1, new CANBus(ShooterRollerConstants.CANBUS_NAME));
+            ShooterRollersConstants.MOTOR_CAN_ID_1,
+            new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-    shooterRollerMotor1.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
+    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+
     shooterRollerMotor2 =
         new TalonFX(
-            ShooterRollerConstants.MOTOR_CAN_ID_2, new CANBus(ShooterRollerConstants.CANBUS_NAME));
+            ShooterRollersConstants.MOTOR_CAN_ID_2,
+            new CANBus(ShooterRollersConstants.CANBUS_NAME));
 
-    shooterRollerMotor2.getConfigurator().apply(ShooterRollerConstants.MOTOR_CONFIGURATION);
+    // Second motor is inverted from the first motor
+    ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
+
     // defines the variables we are keeping track of
     VelocitySignal = shooterRollerMotor1.getVelocity();
     voltageSignal = shooterRollerMotor1.getMotorVoltage();
@@ -50,13 +66,13 @@ public class ShooterRoller extends SubsystemBase {
         "shooterRoller / input velocity",
         0.0,
         newVelocity -> {
-          shoot(newVelocity).schedule();
+          CommandScheduler.getInstance().schedule(shoot(RotationsPerSecond.of(newVelocity)));
         });
 
     shooterRollerMotor2.setControl(
         new Follower(shooterRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
     if (RobotBase.isSimulation()) {
-      simulation = new ShooterRollerSim(shooterRollerMotor1);
+      simulation = new ShooterRollersSim(shooterRollerMotor1);
     }
   }
 
@@ -65,12 +81,36 @@ public class ShooterRoller extends SubsystemBase {
    * what we want, please put a negative value so it goes clockwise since thats what is intended by
    * the build team
    */
-  public Command shoot(double targetVelocity) {
+  public Command shoot(AngularVelocity targetVelocity) {
 
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity));
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
+        },
+        () -> {
+          // defines a local function to stop motor
+          shooterRollerMotor1.setControl(new CoastOut());
+        });
+  }
+
+  /**
+   * Creates a command that drives the shooter roller to a dynamically supplied velocity while
+   * scheduled.
+   *
+   * @param targetVelocity supplier that provides the desired velocity setpoint (in the units
+   *     expected by VelocityVoltage)
+   * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
+   *     coasts the motor on end
+   */
+  public Command shoot(Supplier<AngularVelocity> targetVelocity) {
+
+    return runEnd(
+        () -> {
+          // defines a local function to set motor voltage to make it go
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
