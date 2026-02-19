@@ -37,7 +37,7 @@ public class Kicker extends SubsystemBase {
     statorCurrentSignal = kickerMotor.getStatorCurrent();
     supplyCurrentSignal = kickerMotor.getSupplyCurrent();
     appliedVoltageSignal = kickerMotor.getMotorVoltage();
-    
+
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
     }
