@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.auto.DriveToClump;
 import frc.robot.controls.TeleopControls;
 import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.climb.Climb;
@@ -119,5 +120,9 @@ public class RobotContainer {
 
   public Hopper getHopper() {
     return hopper;
+  }
+
+  public DriveToClump getDriveToClumpCommand() {
+    return new DriveToClump();
   }
 }
