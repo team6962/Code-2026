@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooterrollers;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -18,9 +20,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
@@ -87,7 +86,8 @@ public class ShooterRollers extends SubsystemBase {
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
@@ -109,7 +109,8 @@ public class ShooterRollers extends SubsystemBase {
     return runEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
+          shooterRollerMotor1.setControl(
+              new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
         },
         () -> {
           // defines a local function to stop motor
