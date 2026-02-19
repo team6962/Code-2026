@@ -33,6 +33,7 @@ public class TeleopControls {
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     this.autoClimb = new AutoClimb(robot);
+    this.driveToClump = new DriveToClump(robot);
   }
 
   public void configureBindings() {
