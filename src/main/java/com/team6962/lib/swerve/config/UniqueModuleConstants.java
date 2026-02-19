@@ -45,4 +45,55 @@ public class UniqueModuleConstants {
    * configuration from the swerve drive's configuration will be used instead.
    */
   public TalonFXConfiguration DriveMotorConfig;
+
+  /** Constructs a new UniqueModuleConstants object with default values. */
+  public UniqueModuleConstants() {}
+
+  /**
+   * Sets the steer gear reduction for this module, and returns this UniqueModuleConstants for
+   * chaining.
+   *
+   * @param steerGearReduction The gear reduction from the steer motor to the steer mechanism
+   * @return This UniqueModuleConstants object
+   */
+  public UniqueModuleConstants withSteerGearReduction(double steerGearReduction) {
+    SteerGearReduction = steerGearReduction;
+    return this;
+  }
+
+  /**
+   * Sets the TalonFX configuration for the steer motor of this module, and returns this
+   * UniqueModuleConstants for chaining.
+   *
+   * @param steerMotorConfig The TalonFX configuration for the steer motor
+   * @return This UniqueModuleConstants object
+   */
+  public UniqueModuleConstants withSteerMotorConfig(TalonFXConfiguration steerMotorConfig) {
+    SteerMotorConfig = steerMotorConfig;
+    return this;
+  }
+
+  /**
+   * Sets the moment of inertia of the steer mechanism for simulation, and returns this
+   * UniqueModuleConstants for chaining.
+   *
+   * @param steerMomentOfInertia The moment of inertia including rotor and gearing
+   * @return This UniqueModuleConstants object
+   */
+  public UniqueModuleConstants withSteerMomentOfInertia(MomentOfInertia steerMomentOfInertia) {
+    SteerMomentOfInertia = steerMomentOfInertia;
+    return this;
+  }
+
+  /**
+   * Sets the TalonFX configuration for the drive motor of this module, and returns this
+   * UniqueModuleConstants for chaining.
+   *
+   * @param driveMotorConfig The TalonFX configuration for the drive motor
+   * @return This UniqueModuleConstants object
+   */
+  public UniqueModuleConstants withDriveMotorConfig(TalonFXConfiguration driveMotorConfig) {
+    DriveMotorConfig = driveMotorConfig;
+    return this;
+  }
 }
