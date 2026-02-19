@@ -39,7 +39,34 @@ public class TeleopControls {
     teleopEnabledTrigger.whileTrue(teleopSwerveCommand);
 
     // Configure operator controls and automated driver controls
-    driver.a().onTrue(Commands.print("Ping!"));
-    operator.a().onTrue(Commands.print("Pong!"));
+    // driver.a().onTrue(Commands.print("Nothing"));
+    driver.b().onTrue(Commands.print("Climb"));
+    driver.x().onTrue(Commands.print("Unclimb"));
+    // driver.y().onTrue(Commands.print("Reset Heading"));
+    driver.leftBumper().whileTrue(Commands.print("Depot"));
+    // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
+    driver.rightBumper().whileTrue(Commands.print("Outpost"));
+    // driver.rightTrigger().onTrue(Commands.print("Boost"));
+    driver.leftStick().whileTrue(Commands.print("Dump"));
+    driver.back().whileTrue(Commands.print("Retract Intake")); //this might be switched with start
+    driver.rightStick().whileTrue(Commands.print("Intake and Drive To Fuel"));
+    driver.start().whileTrue(Commands.print("Run Intake!")); //this might be switched with back
+
+    operator.a().onTrue(Commands.print("Lower Climb"));
+    operator.b().onTrue(Commands.print("Lift Robot"));
+    operator.x().onTrue(Commands.print("Unclimb"));
+    operator.y().onTrue(Commands.print("Raise Climb"));
+    operator.leftBumper().whileTrue(Commands.print("Unjam"));
+    operator.leftTrigger().whileTrue(Commands.print("Disable Shoot"));
+    operator.rightBumper().onTrue(Commands.print("Toggle Fine Control"));
+    operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
+    operator.leftStick().whileTrue(Commands.print("Dump"));
+    operator.back().whileTrue(Commands.print("Pass Left")); //this might be switched with start
+    operator.rightStick().whileTrue(Commands.print("Retract Intake"));
+    operator.start().whileTrue(Commands.print("Pass Right")); //this might be switched with back
+    operator.povUp().whileTrue(Commands.print("FineControlHoodAngleUp"));
+    operator.povDown().whileTrue(Commands.print("FineControlHoodAngleDown"));
+    operator.povLeft().whileTrue(Commands.print("FineControlTurrentAngleCCW"));
+    operator.povRight().whileTrue(Commands.print("FineControlTurrentAngleCW"));
   }
 }
