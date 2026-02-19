@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /**
  * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
@@ -439,6 +441,33 @@ public class Turret extends SubsystemBase {
   }
 
   /**
+   * Creates a command that continuously drives the turret to a target angle provided by the given
+   * supplier.
+   *
+   * @param targetAngleSupplier supplier that is sampled repeatedly to provide the desired target
+   *     {@code Angle}
+   * @return a {@code Command} that, while scheduled, continuously moves the turret toward the
+   *     supplied target angle
+   */
+  public Command moveTo(Supplier<Angle> targetAngleSupplier) {
+    return runEnd(
+            () -> {
+              Angle optimizedTargetPosition =
+                  clampPositionToSafeRange(
+                      optimizeTarget(
+                          clampPositionToSafeRange(targetAngleSupplier.get()),
+                          getPosition(),
+                          TurretConstants.MIN_ANGLE,
+                          TurretConstants.MAX_ANGLE));
+              setPositionControl(optimizedTargetPosition);
+            },
+            () -> {
+              setPositionControl(getPosition());
+            })
+        .onlyIf(this::isZeroed);
+  }
+
+  /**
    * Applies a Motion Magic position control request to move the turret to the target angle. If the
    * turret is not yet zeroed, the motor is set to neutral mode instead.
    *
@@ -452,5 +481,22 @@ public class Turret extends SubsystemBase {
     } else {
       motor.setControl(new CoastOut());
     }
+  }
+
+  public Command moveAtVoltage(Voltage voltage) {
+    return startEnd(
+            () -> {
+              if (isZeroed()) {
+                motor.setControl(new VoltageOut(voltage));
+              } else if (RobotState.isEnabled()) {
+                motor.setControl(new NeutralOut());
+              } else {
+                motor.setControl(new CoastOut());
+              }
+            },
+            () -> {
+              setPositionControl(getPosition());
+            })
+        .onlyIf(() -> isZeroed());
   }
 }
