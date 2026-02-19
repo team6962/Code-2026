@@ -47,6 +47,13 @@ public class Hopper extends SubsystemBase {
   }
 
   /**
+   * Command to unjam the hopper, which runs the belt floor and kicker in reverse.
+   */
+  public Command unjam() {
+    return Commands.parallel(beltFloor.dump(), kicker.reverse());
+  }
+
+  /**
    * Command to eject the hopper, which runs the belt floor and kicker in reverse for a short time
    * or until the hopper is empty
    *
@@ -80,4 +87,5 @@ public class Hopper extends SubsystemBase {
   public HopperSensors getSensors() {
     return sensors;
   }
+  
 }
