@@ -1,15 +1,18 @@
 package frc.robot.auto;
 
-import com.team6962.lib.swerve.CommandSwerveDrive;
-import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.intakeextension.IntakeExtension;
-import frc.robot.subsystems.intakerollers.IntakeRollers;
+import frc.robot.RobotContainer;
 import java.util.Set;
 
 public class DriveToClump {
+  private RobotContainer robot;
+
+  public DriveToClump(RobotContainer robot) {
+    this.robot = robot;
+  }
+
   /**
    * Creates a command that repeatedly attempts to drive the robot to a detected clump of fuel while
    * running the intake rollers when the intake is extended.
@@ -40,29 +43,26 @@ public class DriveToClump {
    *     intake rollers while driving to the fuel clump; returns {@code Commands.none()} for
    *     iterations where no action is taken
    */
-  public Command driveToClump(
-      IntakeExtension intakeExtension,
-      IntakeRollers intakeRollers,
-      SphereClumpLocalization fuelClumpLocalization,
-      CommandSwerveDrive swerveDrive) {
+  public Command driveToClump() {
     return Commands.defer(
             () -> {
-              Translation2d fuelPosition = fuelClumpLocalization.getClumpPosition();
+              Translation2d fuelPosition = robot.getFuelLocalization().getClumpPosition();
               if (fuelPosition == null) {
                 return Commands.none();
               }
 
               return Commands.either(
                   Commands.parallel(
-                      intakeRollers.run(intakeRollers::intake), swerveDrive.driveTo(fuelPosition)),
+                      robot.getIntakeRollers().run(robot.getIntakeRollers()::intake),
+                      robot.getSwerveDrive().driveTo(fuelPosition)),
                   Commands.none(),
-                  intakeExtension::isExtended);
+                  robot.getIntakeExtension()::isExtended);
             },
             Set.of(
-                intakeExtension,
-                intakeRollers,
-                swerveDrive.useTranslation(),
-                swerveDrive.useRotation()))
+                robot.getIntakeExtension(),
+                robot.getIntakeRollers(),
+                robot.getSwerveDrive().useTranslation(),
+                robot.getSwerveDrive().useRotation()))
         .repeatedly();
   }
 }

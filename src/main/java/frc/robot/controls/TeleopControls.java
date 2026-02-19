@@ -17,12 +17,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Preferences;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
+import frc.robot.auto.DriveToClump;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
   private AutoClimb autoClimb;
+  private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
 
@@ -108,16 +110,7 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    driver
-        .rightStick()
-        .whileTrue(
-            this.robot
-                .getDriveToClumpCommand()
-                .driveToClump(
-                    this.robot.getIntakeExtension(),
-                    this.robot.getIntakeRollers(),
-                    this.robot.getFuelLocalization(),
-                    this.robot.getSwerveDrive()));
+    driver.rightStick().whileTrue(driveToClump.driveToClump());
 
     // Intake without driving
     driver
