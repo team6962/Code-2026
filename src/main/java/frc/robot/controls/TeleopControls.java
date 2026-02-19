@@ -1,7 +1,5 @@
 package frc.robot.controls;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -67,7 +65,18 @@ public class TeleopControls {
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.rightStick().whileTrue(Commands.print("Retract Intake"));
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
-    operator.povUp().whileTrue(this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); //CHECK SIGN
-    operator.povDown().whileTrue(this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); //CHECK SIGN
+    operator
+        .povUp()
+        .whileTrue(
+            this.robot
+                .getShooterHood()
+                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+    operator
+        .povDown()
+        .whileTrue(
+            this.robot
+                .getShooterHood()
+                .moveAtVoltage(
+                    ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
   }
 }
