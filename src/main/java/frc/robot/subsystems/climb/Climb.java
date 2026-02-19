@@ -237,8 +237,7 @@ public class Climb extends SubsystemBase {
             },
             () -> {
               motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-            })
-        .onlyIf(() -> isZeroed);
+            });
   }
 
   /**
