@@ -18,9 +18,9 @@ public class Hopper extends SubsystemBase {
 
   /** Constructor for the Hopper subsystem, which initializes the belt floor, kicker, and sensors */
   public Hopper() {
-    this.beltFloor = new BeltFloor();
-    this.kicker = new Kicker();
-    this.sensors = new HopperSensors();
+    beltFloor = new BeltFloor();
+    kicker = new Kicker();
+    sensors = new HopperSensors();
   }
 
   /**
@@ -39,11 +39,8 @@ public class Hopper extends SubsystemBase {
    * @return
    */
   public Command feed() {
-    Command FeedSystem = Commands.parallel(beltFloor.feed(), kicker.feed());
-    return Commands.either(
-        FeedSystem.withTimeout(0.25),
-        FeedSystem.until(sensors::isKickerEmpty),
-        sensors::isKickerEmpty);
+    return Commands.sequence(
+        load(), Commands.parallel(beltFloor.feed(), kicker.feed()).until(this::isEmpty));
   }
 
   /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */
@@ -71,17 +68,17 @@ public class Hopper extends SubsystemBase {
     return sensors.isHopperEmpty() && sensors.isKickerEmpty();
   }
 
-  // Getters for the belt floor(check BeltFloor.java) for more information.
+  /** Getters for the belt floor(check BeltFloor.java) for more information. */
   public BeltFloor getBeltFloor() {
     return beltFloor;
   }
 
-  // Getters for the belt floor(check Kicker.java) for more information.
+  /** Getters for the kicker(check Kicker.java) for more information. */
   public Kicker getKicker() {
     return kicker;
   }
 
-  // Getters for the belt floor(check hopperSensors.java) for more information.
+  /** Getters for the hopper sensors(check hopperSensors.java) for more information. */
   public HopperSensors getSensors() {
     return sensors;
   }
