@@ -3,11 +3,13 @@ package frc.robot.subsystems.turret;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 
 /** Constants for the Turret subsystem */
 public class TurretConstants {
@@ -75,4 +77,12 @@ public class TurretConstants {
    * move beyond its physical limits.
    */
   public static final Angle MAX_ANGLE = Degrees.of(23);
+
+  /**
+   * The voltage to apply to the turret motor when the operator is manually controlling the turret
+   * with fine control (e.g., holding a button to slowly rotate the turret). This should be low
+   * enough to allow for precise control, but high enough to overcome static friction and move the
+   * turret at a reasonable speed.
+   */
+  public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
 }

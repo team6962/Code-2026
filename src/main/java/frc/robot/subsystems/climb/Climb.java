@@ -3,10 +3,12 @@ package frc.robot.subsystems.climb;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import dev.doglog.DogLog;
@@ -263,5 +265,28 @@ public class Climb extends SubsystemBase {
               motor.setControl(new PositionVoltage(getPosition().in(Meters)));
             })
         .onlyIf(() -> isZeroed);
+  }
+
+  /**
+   * Creates a command that moves the climb mechanism at the given voltage. This command will do
+   * nothing if the climb has not yet been zeroed and the voltage is positive.
+   *
+   * @param voltage The voltage to apply to the climb motor while the command is active. Positive
+   *     voltages will cause the mechanism to extend, while negative voltages will cause it to
+   *     retract.
+   * @return a Command which applies the specified voltage to the climb motor while active and holds
+   *     position on end
+   */
+  public Command moveAtVoltage(Voltage voltage) {
+    return startEnd(
+            () -> {
+              motor.setControl(
+                  new VoltageOut(
+                      voltage.plus(Volts.of(ClimbConstants.MOTOR_CONFIGURATION.Slot0.kG))));
+            },
+            () -> {
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
+        .onlyIf(() -> isZeroed || voltage.in(Volts) < 0);
   }
 }
