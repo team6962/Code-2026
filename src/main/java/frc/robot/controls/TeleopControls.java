@@ -52,7 +52,6 @@ public class TeleopControls {
     driver.rightBumper().whileTrue(Commands.print("Outpost"));
     // driver.rightTrigger().onTrue(Commands.print("Boost"));
     driver.leftStick().whileTrue(Commands.print("Dump"));
-    driver.back().whileTrue(Commands.print("Retract Intake")); // this might be switched with start
     driver
         .rightStick()
         .whileTrue(
@@ -83,7 +82,6 @@ public class TeleopControls {
                     robot.getIntakeRollers().outtake())
                 .onlyIf(robot.getIntakeExtension()::isExtended));
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
-    operator.rightStick().whileTrue(Commands.print("Retract Intake"));
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
     operator
         .povUp()
@@ -110,5 +108,12 @@ public class TeleopControls {
             this.robot
                 .getTurret()
                 .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
+
+    // Intake extension and retraction
+    Trigger intakeRetract = operator.rightStick().or(driver.back());
+    Trigger intakeExtend = intakeRetract.negate().and(RobotState::isTeleop);
+
+    intakeRetract.whileTrue(robot.getIntakeExtension().retract());
+    intakeExtend.onTrue(robot.getIntakeExtension().extend());
   }
 }
