@@ -20,7 +20,7 @@ public class RobotContainer {
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final DriveStraightAuto driveStraightAuto;
-  private final IntakeExtension intake;
+  private final IntakeExtension intakeExtension;
   private final SphereClumpLocalization fuelClumpLocalization;
   private final ShooterRoller shooterRoller;
   private final IntakeRollers intakeRollers;
@@ -43,8 +43,12 @@ public class RobotContainer {
 
     driveStraightAuto = new DriveStraightAuto(this);
 
-    intake = new IntakeExtension();
+    intakeExtension = new IntakeExtension();
     shooterRoller = new ShooterRoller();
+  }
+
+  public IntakeExtension getIntakeExtension() {
+    return intakeExtension;
   }
 
   public CommandSwerveDrive getSwerveDrive() {

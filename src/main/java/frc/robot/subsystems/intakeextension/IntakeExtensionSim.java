@@ -8,7 +8,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.simulation.LinearMechanismSim;
-import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
@@ -16,7 +15,6 @@ import edu.wpi.first.wpilibj.RobotController;
 public class IntakeExtensionSim {
 
   private TalonFXSimState motorSim;
-  private AngularVelocity lastVelocity = RadiansPerSecond.of(0);
   private LinearMechanismSim physicsSim;
 
   public IntakeExtensionSim(TalonFX motor) {
@@ -31,18 +29,6 @@ public class IntakeExtensionSim {
             IntakeExtensionConstants.MAX_POSITION,
             IntakeExtensionConstants.ANGLE,
             IntakeExtensionConstants.MIN_POSITION);
-    // physicsSim =
-    //     new ElevatorSim(
-    //         LinearSystemId.createElevatorSystem(
-    //             (IntakeExtensionConstants.MOTOR_PHYSICS),
-    //             IntakeExtensionConstants.MOVING_MASS.in(Kilograms),
-    //             0.05,
-    //             IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio),
-    //         IntakeExtensionConstants.MOTOR_PHYSICS,
-    //         IntakeExtensionConstants.MIN_POSITION.in(Meters),
-    //         IntakeExtensionConstants.MAX_POSITION.in(Meters),
-    //         true,
-    //         0);
   }
 
   public void update() {
@@ -52,7 +38,6 @@ public class IntakeExtensionSim {
             motorSim.getMotorVoltage(),
             IntakeExtensionConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
                 == InvertedValue.Clockwise_Positive);
-    DogLog.log("intake/simMotorVoltage", motorVoltage);
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
     Angle position =
@@ -62,8 +47,6 @@ public class IntakeExtensionSim {
         RadiansPerSecond.of(
             physicsSim.getVelocityMetersPerSecond()
                 / IntakeExtensionConstants.PINION_RADIUS.in(Meters));
-    DogLog.log("intake/simPosition", position);
-    DogLog.log("intake/simVelocity", velocity);
     motorSim.setRawRotorPosition(
         invert(
                 position,

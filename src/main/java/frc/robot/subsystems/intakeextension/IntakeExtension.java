@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.intakeextension;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -29,21 +25,23 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/** This subsystem controls the extension of the intake out of the robot and back in. */
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
   private CANdi candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
 
-  private StatusSignal<Angle> angleSignal;
-  private StatusSignal<AngularVelocity> angularVelocitySignal;
-  private StatusSignal<AngularAcceleration> angularAccelerationSignal;
+  // The status signals' rotations actually represent meters of mechanism motion
+  private StatusSignal<Angle> positionSignal;
+  private StatusSignal<AngularVelocity> linearVelocitySignal;
+  private StatusSignal<AngularAcceleration> linearAccelerationSignal;
 
   private StatusSignal<Voltage> voltageSignal;
 
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
 
-  private StatusSignal<Boolean> candiTriggeredSignal;
+  private StatusSignal<Boolean> hallSensorTriggeredSignal;
 
   private StatusSignal<Double> closedLoopReferenceSignal;
 
@@ -56,37 +54,30 @@ public class IntakeExtension extends SubsystemBase {
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
-    angleSignal = motor.getPosition();
-    angularVelocitySignal = motor.getVelocity();
-    angularAccelerationSignal = motor.getAcceleration();
+    positionSignal = motor.getPosition();
+    linearVelocitySignal = motor.getVelocity();
+    linearAccelerationSignal = motor.getAcceleration();
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    candiTriggeredSignal = candi.getS1Closed(); // we dont know which candi sensor it is
+    hallSensorTriggeredSignal = candi.getS1Closed();
     closedLoopReferenceSignal = motor.getClosedLoopReference();
 
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
+      isZeroed = true;
+    } else {
+      motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
   }
 
   /**
-   * Makes sure the extension doesn't go over or under the maximum and minimum
+   * Extends the intake outwards until it reaches the maximum position, then holds it there. Only
+   * runs if the intake is zeroed, which happens when the CANdi is triggered.
    *
-   * @param input
-   * @return Maximum, minimum, or the input
+   * @return A command that extends the intake.
    */
-  public Distance clampPositionToSafeRange(Distance input) {
-    if (input.gt(IntakeExtensionConstants.MAX_POSITION)) {
-      return IntakeExtensionConstants.MAX_POSITION;
-    } else if (input.lt(IntakeExtensionConstants.MIN_POSITION)) {
-      return IntakeExtensionConstants.MIN_POSITION;
-    }
-    return input;
-  }
-
   public Command extend() {
-   if (isZeroed) {
     return startEnd(
             () -> {
               motor.setControl(
@@ -100,16 +91,15 @@ public class IntakeExtension extends SubsystemBase {
                 getPosition()
                     .isNear(
                         IntakeExtensionConstants.MAX_POSITION,
-                        IntakeExtensionConstants.POSITION_TOLERANCE));
-    } else {
-      return run (
-        () -> {
-          motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-        }
-      );
-    }
+                        IntakeExtensionConstants.POSITION_TOLERANCE))
+        .onlyIf(() -> isZeroed);
   }
 
+  /**
+   * Retracts the intake inwards until it reaches the minimum position, then holds it there.
+   *
+   * @return A command that retracts the intake.
+   */
   public Command retract() {
     return startEnd(
             () -> {
@@ -135,8 +125,7 @@ public class IntakeExtension extends SubsystemBase {
    */
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
-        BaseStatusSignal.getLatencyCompensatedValue(
-                angularVelocitySignal, angularAccelerationSignal)
+        BaseStatusSignal.getLatencyCompensatedValue(linearVelocitySignal, linearAccelerationSignal)
             .in(RotationsPerSecond));
   }
 
@@ -147,7 +136,7 @@ public class IntakeExtension extends SubsystemBase {
    */
   public Distance getPosition() {
     return Meters.of(
-        BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal)
+        BaseStatusSignal.getLatencyCompensatedValue(positionSignal, linearVelocitySignal)
             .in(Rotations));
   }
 
@@ -157,7 +146,7 @@ public class IntakeExtension extends SubsystemBase {
    * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
-    return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
+    return MetersPerSecondPerSecond.of(linearAccelerationSignal.getValueAsDouble());
   }
 
   /**
@@ -188,16 +177,23 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   /**
-   * This finds out whether the CANdi was triggered
+   * This finds out whether the hall sensor is triggered, which happens when the intake is fully
+   * retracted.
    *
-   * @return true or false
+   * @return true if the hall sensor is triggered, and false otherwise.
    */
-  public Boolean getCANdiTriggered() {
-    return candiTriggeredSignal.getValue();
+  private boolean isHallSensorTriggered() {
+    return hallSensorTriggeredSignal.getValue();
   }
 
-  public Double getClosedLoopReference() {
-    return closedLoopReferenceSignal.getValue();
+  /**
+   * This finds the closed loop reference, which is the current position where the motion profile
+   * expects the intake to be.
+   *
+   * @return The closed loop reference
+   */
+  private Distance getClosedLoopReference() {
+    return Meters.of(closedLoopReferenceSignal.getValue());
   }
 
   @Override
@@ -205,19 +201,20 @@ public class IntakeExtension extends SubsystemBase {
     if (simulation != null) {
       simulation.update();
     }
-    if (getCANdiTriggered()) {
+
+    if (isHallSensorTriggered() && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
       isZeroed = true;
     }
 
     BaseStatusSignal.refreshAll(
-        angularVelocitySignal,
+        linearVelocitySignal,
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        angleSignal,
-        angularAccelerationSignal,
-        candiTriggeredSignal,
+        positionSignal,
+        linearAccelerationSignal,
+        hallSensorTriggeredSignal,
         closedLoopReferenceSignal);
 
     DogLog.log("intake/position", getPosition());
@@ -226,7 +223,7 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("intake/voltage", getVoltage());
     DogLog.log("intake/statorCurrent", getStatorCurrent());
     DogLog.log("intake/supplyCurrent", getSupplyCurrent());
-    DogLog.log("intake/candiTriggered", getCANdiTriggered());
+    DogLog.log("intake/candiTriggered", isHallSensorTriggered());
     DogLog.log("intake/closedLoopReference", getClosedLoopReference());
   }
 }
