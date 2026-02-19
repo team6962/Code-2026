@@ -21,6 +21,8 @@ public class TeleopControls {
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
 
+  private boolean fineControl = false;
+
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
   }
@@ -55,10 +57,7 @@ public class TeleopControls {
         .leftStick()
         .whileTrue(
             Commands.parallel(
-                this.robot.getIntakeRollers().outtake(),
-                this.robot.getHopper().dump()
-            )
-        );
+                this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
     driver
         .rightStick()
         .whileTrue(
@@ -71,9 +70,7 @@ public class TeleopControls {
                     this.robot.getSwerveDrive()));
     driver
         .start()
-        .whileTrue(
-            this.robot.getIntakeRollers().intake()
-        ); // this might be switched with back
+        .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
 
     operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
@@ -82,7 +79,13 @@ public class TeleopControls {
     operator
         .leftTrigger()
         .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0))); // Disable shoot
-    operator.rightBumper().onTrue(Commands.print("Toggle Fine Control"));
+    operator
+        .rightBumper()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  fineControl = !fineControl;
+                }));
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
     operator
         .leftStick()

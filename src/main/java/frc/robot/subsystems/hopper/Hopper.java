@@ -24,9 +24,10 @@ public class Hopper extends SubsystemBase {
   }
 
   /** Command to dump the hopper, which runs the belt floor and kicker in reverse. */
-  public Command dump()  {
+  public Command dump() {
     return Commands.parallel(beltFloor.dump(), kicker.reverse());
   }
+
   /**
    * Command to load the hopper, which runs the belt floor and kicker until the kicker is full
    *
