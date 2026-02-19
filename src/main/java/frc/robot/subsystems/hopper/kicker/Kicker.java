@@ -32,6 +32,12 @@ public class Kicker extends SubsystemBase {
     this.kickerMotor =
         new TalonFX(HopperConstants.KICKER_DEVICE_ID, new CANBus(HopperConstants.CANBUS_NAME));
     kickerMotor.getConfigurator().apply(HopperConstants.KICKER_MOTOR_CONFIGURATION);
+
+    motorVelocitySignal = kickerMotor.getVelocity();
+    statorCurrentSignal = kickerMotor.getStatorCurrent();
+    supplyCurrentSignal = kickerMotor.getSupplyCurrent();
+    appliedVoltageSignal = kickerMotor.getMotorVoltage();
+    
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
     }
