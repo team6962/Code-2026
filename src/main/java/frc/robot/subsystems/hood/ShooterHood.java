@@ -323,12 +323,10 @@ public class ShooterHood extends SubsystemBase {
    * @return the command that moves to the supplied target angle
    */
   public Command moveToTargetWithSupplier(Supplier<Angle> targetAngleSupplier) {
-    Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get());
-
-    DogLog.log("Hood/TargetPositionWithSupplier", clampedAngle.in(Degrees));
-
     return runEnd(
         () -> {
+          Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get());
+          DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
           setPositionControl(clampedAngle);
         },
         () -> {
