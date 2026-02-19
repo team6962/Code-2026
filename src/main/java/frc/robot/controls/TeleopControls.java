@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Preferences;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
+import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
@@ -70,7 +71,8 @@ public class TeleopControls {
         .whileTrue(
             this.robot
                 .getShooterHood()
-                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+                .moveAtVoltage(
+                  ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
     operator
         .povDown()
         .whileTrue(
@@ -78,5 +80,19 @@ public class TeleopControls {
                 .getShooterHood()
                 .moveAtVoltage(
                     ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
+    operator
+        .povLeft()
+        .whileTrue(
+            this.robot
+              .getTurret()
+              .moveAtVoltage(
+                    TurretConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+    operator
+        .povLeft()
+        .whileTrue(
+            this.robot
+              .getTurret()
+              .moveAtVoltage(
+                    TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
   }
 }
