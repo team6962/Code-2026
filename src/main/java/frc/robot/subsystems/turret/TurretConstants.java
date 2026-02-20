@@ -7,6 +7,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -20,7 +22,7 @@ public class TurretConstants {
 
   // PID constants
   public static final double kP = 150.0;
-  public static final double kD = 5.0;
+  public static final double kD = 3.0;
   public static final double kS = 0.315;
   public static final double kV = 4.283;
   public static final double kA = 0.2;
@@ -61,12 +63,6 @@ public class TurretConstants {
   public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(-0.664565);
 
   /**
-   * The moment of inertia of the turret. This is used only for simulation and is not used in the
-   * actual robot code. This value is calculated from the turret CAD model and is in kg*m^2.
-   */
-  public static final double MOMENT_OF_INERTIA = 0.09803;
-
-  /**
    * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
@@ -85,4 +81,20 @@ public class TurretConstants {
    * turret at a reasonable speed.
    */
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
+
+  // Simulation
+  public static final DCMotor SIMULATED_MOTOR = DCMotor.getKrakenX44Foc(1);
+  public static final double MOMENT_OF_INERTIA = 0.09803; // kg*m^2, calculated in CAD
+
+  public static final double simulationKV =
+      SIMULATED_MOTOR.nominalVoltageVolts
+          / Units.radiansToRotations(SIMULATED_MOTOR.freeSpeedRadPerSec)
+          * SENSOR_TO_MECHANISM_RATIO;
+  public static final double simulationKA =
+      MOMENT_OF_INERTIA
+          * SIMULATED_MOTOR.nominalVoltageVolts
+          / SIMULATED_MOTOR.stallTorqueNewtonMeters
+          / SENSOR_TO_MECHANISM_RATIO
+          * 2
+          * Math.PI;
 }
