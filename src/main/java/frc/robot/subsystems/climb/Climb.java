@@ -221,6 +221,9 @@ public class Climb extends SubsystemBase {
               DogLog.log("Climb/Command", "None");
               motor.setControl(new PositionVoltage(getPosition().in(Meters)));
             })
+        .until(
+            () ->
+                getPosition().isNear(ClimbConstants.MAX_HEIGHT, ClimbConstants.POSITION_TOLERANCE))
         .onlyIf(() -> isZeroed);
   }
 
@@ -239,15 +242,18 @@ public class Climb extends SubsystemBase {
    */
   public Command descend() {
     return startEnd(
-        () -> {
-          DogLog.log("Climb/Command", "Descend");
-          motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
-          isClimbed = false;
-        },
-        () -> {
-          DogLog.log("Climb/Command", "None");
-          motor.setControl(new PositionVoltage(getPosition().in(Meters)));
-        });
+            () -> {
+              DogLog.log("Climb/Command", "Descend");
+              motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+              isClimbed = false;
+            },
+            () -> {
+              DogLog.log("Climb/Command", "None");
+              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+            })
+        .until(
+            () ->
+                getPosition().isNear(ClimbConstants.MIN_HEIGHT, ClimbConstants.POSITION_TOLERANCE));
   }
 
   /**
