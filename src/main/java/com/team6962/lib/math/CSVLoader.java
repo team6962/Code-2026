@@ -8,7 +8,8 @@ import org.apache.commons.io.FileUtils;
 public class CSVLoader {
   public static double[][] loadCSV(String path) throws IOException {
     path = Filesystem.getDeployDirectory() + "/" + path;
-    String csv = FileUtils.readFileToString(new File(path), "UTF-8"); // Read the CSV file as a string
+    String csv =
+        FileUtils.readFileToString(new File(path), "UTF-8"); // Read the CSV file as a string
     String[] lines = csv.split("\n"); // Splits the strings along lines
     double[][] data = new double[lines.length][];
     for (int i = 0; i < lines.length; i++) {
