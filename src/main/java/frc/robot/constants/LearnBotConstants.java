@@ -1,4 +1,4 @@
-package frc.robot.learnbot;
+package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
@@ -23,16 +23,11 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.phoenix.control.ControlOutputType;
 import com.team6962.lib.phoenix.control.PositionMotionProfileType;
 import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
-import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.config.DrivingConstants;
 import com.team6962.lib.swerve.config.GyroscopeConstants;
-import com.team6962.lib.swerve.config.SteerEncoderConstants;
 import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
-import com.team6962.lib.swerve.config.SteerMotorConstants;
-import com.team6962.lib.swerve.config.StructureConstants;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
-import com.team6962.lib.swerve.config.TimingConstants;
+import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
@@ -42,15 +37,21 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotBase;
 import org.photonvision.simulation.SimCameraProperties;
 
-public class LearnBotConstants {
-  public static DrivetrainConstants getDrivetrainConstants() {
-    return new DrivetrainConstants()
+public class LearnBotConstants extends BaseRobotConstants {
+  @Override
+  public DrivetrainConstants getDrivetrainConstants() {
+    DrivetrainConstants baseConstants = super.getDrivetrainConstants();
+
+    return baseConstants
         .withCANBusName("drivetrain")
         .withGyroscope(new GyroscopeConstants().withCANId(0))
         .withStructure(
-            new StructureConstants()
+            baseConstants
+                .Structure
+                .clone()
                 .withTrackWidth(Inches.of(22.75))
                 .withWheelBase(Inches.of(22.75))
                 .withRobotMass(Pounds.of(40))
@@ -80,13 +81,17 @@ public class LearnBotConstants {
                   .withSteerEncoderOffset(Radians.of(0.322 + Math.PI))
             })
         .withTiming(
-            new TimingConstants()
+            baseConstants
+                .Timing
+                .clone()
                 .withControlLoopFrequency(Hertz.of(100))
                 .withSignalUpdateRate(Hertz.of(100))
                 .withTimesyncControlRequests(false)
                 .withUseThreadedControlLoop(true))
         .withDriving(
-            new DrivingConstants()
+            baseConstants
+                .Driving
+                .clone()
                 .withMaxLinearVelocity(MetersPerSecond.of(4))
                 .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
@@ -96,7 +101,9 @@ public class LearnBotConstants {
                 .withAngleFeedbackKP(20)
                 .withAngleFeedbackKD(0.5))
         .withDriveMotor(
-            new DriveMotorConstants()
+            baseConstants
+                .DriveMotor
+                .clone()
                 .withDeviceConfiguration(
                     new TalonFXConfiguration()
                         .withMotionMagic(
@@ -125,7 +132,9 @@ public class LearnBotConstants {
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))
                 .withMaxVelocity(MetersPerSecond.of(4.474)))
         .withSteerMotor(
-            new SteerMotorConstants()
+            baseConstants
+                .SteerMotor
+                .clone()
                 .withDeviceConfiguration(
                     new TalonFXConfiguration()
                         .withMotorOutput(
@@ -145,9 +154,9 @@ public class LearnBotConstants {
                                 .withKS(0.15)
                                 .withKV(2.5714) // theoretical value for trapezoidal commutation
                                 .withKA(0.03)
-                                .withKP(18.592)
+                                .withKP(RobotBase.isReal() ? 18.592 : 5)
                                 .withKI(0.0)
-                                .withKD(0.972)
+                                .withKD(RobotBase.isReal() ? 0.972 : 0.5)
                                 .withStaticFeedforwardSign(
                                     StaticFeedforwardSignValue.UseVelocitySign)))
                 .withGearReduction(150.0 / 7.0)
@@ -155,12 +164,17 @@ public class LearnBotConstants {
                 .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
                 .withPositionSlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60(1))
-                .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184)))
-        .withSteerEncoder(new SteerEncoderConstants().withDataFusion(DataFusionMethod.Remote));
+                .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.03)))
+        .withSteerEncoder(
+            super.getDrivetrainConstants()
+                .SteerEncoder
+                .clone()
+                .withDataFusion(DataFusionMethod.Remote));
   }
 
-  public static AprilTagVisionConstants getAprilTagVisionConstants() {
-    return new AprilTagVisionConstants()
+  @Override
+  public AprilTagVisionConstants getAprilTagVisionConstants() {
+    return super.getAprilTagVisionConstants()
         .withCameras(
             new AprilTagCameraConstants(
                 "Color-2",
@@ -185,8 +199,10 @@ public class LearnBotConstants {
         .withMinTagsForHeadingUpdateWhileDisabled(1);
   }
 
-  public static SphereCameraConstants getSphereCameraConstants() {
-    return new SphereCameraConstants("Color-2")
+  @Override
+  public SphereCameraConstants getSphereCameraConstants() {
+    return super.getSphereCameraConstants()
+        .withName("Color-2")
         .withClassId(0)
         .withFOVHeight(Rotation2d.fromDegrees(48.9))
         .withFOVWidth(Rotation2d.fromDegrees(70))
@@ -204,5 +220,10 @@ public class LearnBotConstants {
                     Inches.of(-2.0).in(Meters),
                     Inches.of(16.25).in(Meters)),
                 new Rotation3d(0, 0, -Math.PI / 2)));
+  }
+
+  @Override
+  public XBoxTeleopSwerveConstants getTeleopSwerveConstants() {
+    return super.getTeleopSwerveConstants();
   }
 }

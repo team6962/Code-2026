@@ -15,7 +15,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
  * Configuration constants for swerve drive motion control, including velocity and acceleration
  * limits, as well as feedback controller gains for translational and angular motion.
  */
-public class DrivingConstants {
+public class DrivingConstants implements Cloneable {
   /**
    * The maximum linear velocity when in precise driving mode, which provides finer control at lower
    * speeds.
@@ -208,5 +208,14 @@ public class DrivingConstants {
     return new TrapezoidProfile.Constraints(
         MaxAngularVelocity.in(RadiansPerSecond),
         MaxAngularAcceleration.in(RadiansPerSecondPerSecond));
+  }
+
+  @Override
+  public DrivingConstants clone() {
+    try {
+      return (DrivingConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }
