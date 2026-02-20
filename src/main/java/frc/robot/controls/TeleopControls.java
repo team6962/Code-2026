@@ -62,8 +62,6 @@ public class TeleopControls {
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
-    // Left Trigger is used for super boost (configured by XBoxTeleopSwerveCommand)
-    // Right Trigger is used for boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
     driver.b().onTrue(autoClimb.climb());
