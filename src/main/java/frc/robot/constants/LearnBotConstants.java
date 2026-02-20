@@ -37,6 +37,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotBase;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class LearnBotConstants extends BaseRobotConstants {
@@ -153,9 +154,9 @@ public class LearnBotConstants extends BaseRobotConstants {
                                 .withKS(0.15)
                                 .withKV(2.5714) // theoretical value for trapezoidal commutation
                                 .withKA(0.03)
-                                .withKP(18.592)
+                                .withKP(RobotBase.isReal() ? 18.592 : 5)
                                 .withKI(0.0)
-                                .withKD(0.972)
+                                .withKD(RobotBase.isReal() ? 0.972 : 0.5)
                                 .withStaticFeedforwardSign(
                                     StaticFeedforwardSignValue.UseVelocitySign)))
                 .withGearReduction(150.0 / 7.0)

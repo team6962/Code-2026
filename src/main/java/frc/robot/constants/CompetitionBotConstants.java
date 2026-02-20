@@ -26,6 +26,7 @@ import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.GyroscopeConstants;
 import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
+import com.team6962.lib.swerve.config.UniqueModuleConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
@@ -36,6 +37,103 @@ public class CompetitionBotConstants extends BaseRobotConstants {
   public DrivetrainConstants getDrivetrainConstants() {
     DrivetrainConstants baseConstants = super.getDrivetrainConstants();
 
+    TalonFXConfiguration baseDriveMotorConfig =
+        new TalonFXConfiguration()
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicCruiseVelocity(14.4)
+                    .withMotionMagicAcceleration(21.2))
+            .withSlot0(
+                new Slot0Configs()
+                    .withKP(0.017)
+                    .withKI(0.0017)
+                    .withKD(0.0017)
+                    .withKV(0.7324)
+                    .withKA(0.00067)
+                    .withKS(0.0288)
+                    .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(Amps.of(120))
+                    .withSupplyCurrentLimit(Amps.of(80)))
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+
+    TalonFXConfiguration baseSteerMotorConfig =
+        new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(Amps.of(120))
+                    .withSupplyCurrentLimit(Amps.of(60)))
+            .withMotionMagic(
+                new MotionMagicConfigs().withMotionMagicExpo_kV(2).withMotionMagicExpo_kA(0.25));
+
+    // MODULE PROPERTIES (TODO: Check in CAD)
+    //                        MK4c MK4nA MK4nB
+    // Steer Motor Inversion: CCW  CW    CW
+    // Steer Motor Ratio:     12.8 18.75 18.75
+    // Drive Motor Inversion: CCW  CW    CCW
+    // MOI:                   0.000861933929 0.0012006085 0.0012006085
+
+    TalonFXConfiguration mk4cDriveMotorConfig = baseDriveMotorConfig.clone();
+    mk4cDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    TalonFXConfiguration mk4cSteerMotorConfig = baseSteerMotorConfig.clone();
+    mk4cSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4cSteerMotorConfig.Feedback.RotorToSensorRatio = 12.8;
+    mk4cSteerMotorConfig.Slot0 =
+        new Slot0Configs()
+            .withKP(10) // Not tuned
+            .withKI(0.01) // Not tuned
+            .withKD(0.25) // Not tuned
+            .withKS(0.25) // Not tuned
+            .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
+            .withKA(
+                0.03 * 12.0 / 12.8 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+
+    UniqueModuleConstants mk4cConstants =
+        new UniqueModuleConstants()
+            .withSteerGearReduction(12.8)
+            .withSteerMotorConfig(mk4cSteerMotorConfig)
+            .withSteerMomentOfInertia(KilogramSquareMeters.of(0.03))
+            .withDriveMotorConfig(mk4cDriveMotorConfig);
+
+    TalonFXConfiguration mk4nADriveMotorConfig = baseDriveMotorConfig.clone();
+    mk4nADriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    TalonFXConfiguration mk4nASteerMotorConfig = baseSteerMotorConfig.clone();
+    mk4nASteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
+    mk4nASteerMotorConfig.Slot0 =
+        new Slot0Configs()
+            .withKP(10) // Not tuned
+            .withKI(0.01) // Not tuned
+            .withKD(0.25) // Not tuned
+            .withKS(0.25) // Not tuned
+            .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
+            .withKA(
+                0.03 * 12.0 / 18.75 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+
+    UniqueModuleConstants mk4nAConstants =
+        new UniqueModuleConstants()
+            .withSteerGearReduction(18.75)
+            .withSteerMotorConfig(mk4nASteerMotorConfig)
+            .withSteerMomentOfInertia(KilogramSquareMeters.of(0.03))
+            .withDriveMotorConfig(mk4nADriveMotorConfig);
+
+    TalonFXConfiguration mk4nBDriveMotorConfig = mk4nADriveMotorConfig.clone();
+    mk4nBDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    TalonFXConfiguration mk4nBSteerMotorConfig = mk4nASteerMotorConfig.clone();
+    mk4nBSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    UniqueModuleConstants mk4nBConstants =
+        new UniqueModuleConstants()
+            .withSteerGearReduction(mk4nAConstants.SteerGearReduction)
+            .withSteerMotorConfig(mk4nBSteerMotorConfig)
+            .withSteerMomentOfInertia(mk4nAConstants.SteerMomentOfInertia)
+            .withDriveMotorConfig(mk4nBDriveMotorConfig);
+
     return baseConstants
         .withCANBusName("drivetrain")
         .withGyroscope(new GyroscopeConstants().withCANId(10))
@@ -45,31 +143,35 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withTrackWidth(Inches.of(21.75))
                 .withWheelBase(Inches.of(21.75))
-                .withRobotMass(Pounds.of(120)) // Estimated from CAD
-                .withRobotMomentOfInertia(KilogramSquareMeters.of(5.785)) // Estimated from CAD
-                .withWheelRadius(Inches.of(3.9053 / 2))) // Measured with used wheels
+                .withRobotMass(Pounds.of(135)) // Estimated
+                .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
+                .withWheelRadius(Inches.of(1.95265))) // Measured with used wheels
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
                   .withDriveMotorCANId(10)
                   .withSteerMotorCANId(11)
                   .withSteerEncoderCANId(10)
-                  .withSteerEncoderOffset(Radians.of(0)), // Not tuned
+                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withUniqueModuleConstants(mk4nBConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(12)
                   .withSteerMotorCANId(13)
                   .withSteerEncoderCANId(11)
-                  .withSteerEncoderOffset(Radians.of(0)), // Not tuned
+                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withUniqueModuleConstants(mk4nAConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(14)
                   .withSteerMotorCANId(15)
                   .withSteerEncoderCANId(12)
-                  .withSteerEncoderOffset(Radians.of(0)), // Not tuned
+                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withUniqueModuleConstants(mk4cConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(16)
                   .withSteerMotorCANId(17)
                   .withSteerEncoderCANId(13)
                   .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withUniqueModuleConstants(mk4cConstants)
             })
         .withTiming(
             baseConstants
@@ -95,28 +197,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             baseConstants
                 .DriveMotor
                 .clone()
-                .withDeviceConfiguration(
-                    new TalonFXConfiguration()
-                        .withMotionMagic(
-                            new MotionMagicConfigs()
-                                .withMotionMagicCruiseVelocity(14.4)
-                                .withMotionMagicAcceleration(21.2))
-                        .withSlot0(
-                            new Slot0Configs()
-                                .withKP(0.017)
-                                .withKI(0.0017)
-                                .withKD(0.0017)
-                                .withKV(0.7324)
-                                .withKA(0.00067)
-                                .withKS(0.0288)
-                                .withStaticFeedforwardSign(
-                                    StaticFeedforwardSignValue.UseVelocitySign))
-                        .withCurrentLimits(
-                            new CurrentLimitsConfigs()
-                                .withStatorCurrentLimit(Amps.of(120))
-                                .withSupplyCurrentLimit(Amps.of(80)))
-                        .withMotorOutput(
-                            new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake)))
+                .withDeviceConfiguration(baseDriveMotorConfig)
                 .withGearReduction(5.9)
                 .withOutputType(ControlOutputType.VoltageFOC)
                 .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
@@ -129,40 +210,20 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .SteerMotor
                 .clone()
                 .withDeviceConfiguration(
-                    new TalonFXConfiguration()
-                        .withMotorOutput(
-                            new MotorOutputConfigs()
-                                .withInverted(InvertedValue.Clockwise_Positive)
-                                .withNeutralMode(NeutralModeValue.Brake))
-                        .withCurrentLimits(
-                            new CurrentLimitsConfigs()
-                                .withStatorCurrentLimit(Amps.of(120))
-                                .withSupplyCurrentLimit(Amps.of(60)))
-                        .withMotionMagic(
-                            new MotionMagicConfigs()
-                                .withMotionMagicExpo_kV(2.072)
-                                .withMotionMagicExpo_kA(0.259))
-                        .withSlot0(
-                            new Slot0Configs()
-                                .withKS(0.15)
-                                .withKV(2.66)
-                                .withKA(0.03)
-                                .withKP(18.592)
-                                .withKI(0.0)
-                                .withKD(0.972)
-                                .withStaticFeedforwardSign(
-                                    StaticFeedforwardSignValue.UseVelocitySign)))
-                .withGearReduction(150.0 / 7.0)
+                    baseSteerMotorConfig) // Unused because all modules are given unique constants
+                .withGearReduction(12.8) // Unused because all modules are given unique constants
                 .withOutputType(ControlOutputType.VoltageFOC)
                 .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
                 .withPositionSlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
-                .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000184)))
+                .withSimulatedMomentOfInertia(
+                    KilogramSquareMeters.of(
+                        0.03))) // Unused because all modules are given unique constants
         .withSteerEncoder(
             super.getDrivetrainConstants()
                 .SteerEncoder
                 .clone()
-                .withDataFusion(DataFusionMethod.Fused));
+                .withDataFusion(DataFusionMethod.Remote));
   }
 
   @Override
