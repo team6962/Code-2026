@@ -16,16 +16,16 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 
 public class ShooterFunctions {
 
-  private static final String path = "hoodangledata.csv";
-  private static final String path2 = "flywheelvelocitydata.csv";
+  private static final String anglePath = "hoodangledata.csv";
+  private static final String velocityPath = "flywheelvelocitydata.csv";
 
-  private MultivariateFunction shooterFunction;
-  private UnivariateFunction flywheelFunction;
+  private MultivariateFunction hoodAngleFunction;
+  private UnivariateFunction flywheelVelocityFunction;
 
   public ShooterFunctions() {
     try {
-      this.shooterFunction = loadShooterData();
-      this.flywheelFunction = loadFlywheelData();
+      this.hoodAngleFunction = loadShooterData();
+      this.flywheelVelocityFunction = loadFlywheelData();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -33,14 +33,6 @@ public class ShooterFunctions {
 
   /**
    * Loads shooter calibration data from a CSV file and returns an interpolating function.
-   *
-   * <p>The CSV file referenced by the instance field {@code path} is loaded via {@code
-   * CSVLoader.loadCSV(path)}. Each row of the CSV is expected to contain at least three numeric
-   * columns: the first two columns are treated as the independent variables and the third column as
-   * the dependent variable. The method converts the CSV rows into a 2-by-N input array and an
-   * N-length output array and uses {@code MicrosphereInterpolator} to create a {@link
-   * org.apache.commons.math3.analysis.MultivariateFunction} that represents the interpolation of
-   * the provided data.
    *
    * <p>The returned {@code MultivariateFunction} accepts a {@code double[]} of length 2 and returns
    * an interpolated scalar value for that 2D input.
@@ -51,7 +43,7 @@ public class ShooterFunctions {
    */
   private MultivariateFunction loadShooterData() throws IOException {
     MicrosphereInterpolator interpolator = new MicrosphereInterpolator();
-    double[][] data = CSVLoader.loadCSV(path);
+    double[][] data = CSVLoader.loadCSV(anglePath);
     double[][] x = new double[2][data.length];
     for (int i = 0; i < data.length; i++) {
       x[0][i] = data[i][0];
@@ -68,19 +60,13 @@ public class ShooterFunctions {
    * Loads two-column numeric data from the CSV file referenced by the field {@code path2} and
    * returns a spline-based interpolating function.
    *
-   * <p>The CSV is expected to be parsed by {@code CSVLoader.loadCSV(path2)} into a {@code
-   * double[][]} where each row contains exactly two values: the first column is the independent
-   * variable (x) and the second column is the dependent variable (y). The method constructs arrays
-   * of x and y values and uses {@code SplineInterpolator} to create an {@code UnivariateFunction}
-   * that interpolates the provided points.
-   *
    * @return an {@code UnivariateFunction} representing the spline interpolation of the CSV data
    *     (f(x) ≈ y)
    * @throws IOException if an I/O error occurs while reading the CSV file at {@code path2}
    */
   private UnivariateFunction loadFlywheelData() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
-    double[][] data = CSVLoader.loadCSV(path2);
+    double[][] data = CSVLoader.loadCSV(velocityPath);
     double[] x = new double[data.length];
     for (int i = 0; i < data.length; i++) {
       x[i] = data[i][0];
@@ -98,8 +84,8 @@ public class ShooterFunctions {
    * @return the configured MultivariateFunction used to compute shooter setpoints, or {@code null}
    *     if no function has been configured
    */
-  public MultivariateFunction getShooterFunction() {
-    return shooterFunction;
+  public MultivariateFunction getHoodAngleFunction() {
+    return hoodAngleFunction;
   }
 
   /**
@@ -114,7 +100,8 @@ public class ShooterFunctions {
    */
   public Angle getHoodAngle(Distance distance, AngularVelocity velocity) {
     return Degrees.of(
-        shooterFunction.value(new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
+        hoodAngleFunction.value(
+            new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
   }
 
   /**
@@ -126,6 +113,6 @@ public class ShooterFunctions {
    * @return the required flywheel angular velocity as an AngularVelocity (rotations per second)
    */
   public AngularVelocity getFlywheelVelocity(Distance distance, Angle angle) {
-    return RotationsPerSecond.of(flywheelFunction.value(distance.in(Inches)));
+    return RotationsPerSecond.of(flywheelVelocityFunction.value(distance.in(Inches)));
   }
 }
