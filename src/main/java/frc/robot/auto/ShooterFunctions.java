@@ -4,75 +4,128 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.team6962.lib.math.CSVLoader;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import java.io.IOException;
-
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.MicrosphereInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 
-import com.team6962.lib.math.CSVLoader;
+public class ShooterFunctions {
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
+  private static final String path = "hoodangledata.csv";
+  private static final String path2 = "flywheelvelocitydata.csv";
 
-public class ShooterFunctions{
+  private MultivariateFunction shooterFunction;
+  private UnivariateFunction flywheelFunction;
 
-    private static final String path = "hoodangledata.csv";
-    private static final String path2 = "flywheelvelocitydata.csv";
-
-    private MultivariateFunction shooterFunction;
-    private UnivariateFunction flywheelFunction;
-
-    public ShooterFunctions() {
-        try {
-            this.shooterFunction = loadShooterData();
-            this.flywheelFunction = loadFlywheelData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+  public ShooterFunctions() {
+    try {
+      this.shooterFunction = loadShooterData();
+      this.flywheelFunction = loadFlywheelData();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    private MultivariateFunction loadShooterData() throws IOException {
-        MicrosphereInterpolator interpolator = new MicrosphereInterpolator();
-        double[][] data = CSVLoader.loadCSV(path);
-        double[][] x = new double[2][data.length];
-        for (int i = 0; i < data.length; i++) {
-            x[0][i] = data[i][0];
-            x[1][i] = data[i][1];
-        }
-        double[] y = new double[data.length];
-        for (int i = 0; i < data.length; i++) {
-            y[i] = data[i][2];
-        }
-        return interpolator.interpolate(x, y);
+  /**
+   * Loads shooter calibration data from a CSV file and returns an interpolating function.
+   *
+   * <p>The CSV file referenced by the instance field {@code path} is loaded via {@code
+   * CSVLoader.loadCSV(path)}. Each row of the CSV is expected to contain at least three numeric
+   * columns: the first two columns are treated as the independent variables and the third column as
+   * the dependent variable. The method converts the CSV rows into a 2-by-N input array and an
+   * N-length output array and uses {@code MicrosphereInterpolator} to create a {@link
+   * org.apache.commons.math3.analysis.MultivariateFunction} that represents the interpolation of
+   * the provided data.
+   *
+   * <p>The returned {@code MultivariateFunction} accepts a {@code double[]} of length 2 and returns
+   * an interpolated scalar value for that 2D input.
+   *
+   * @return a {@code MultivariateFunction} that interpolates the 2-dimensional input to a scalar
+   *     output using the data loaded from the CSV file
+   * @throws IOException if an I/O error occurs while reading the CSV file at {@code path}
+   */
+  private MultivariateFunction loadShooterData() throws IOException {
+    MicrosphereInterpolator interpolator = new MicrosphereInterpolator();
+    double[][] data = CSVLoader.loadCSV(path);
+    double[][] x = new double[2][data.length];
+    for (int i = 0; i < data.length; i++) {
+      x[0][i] = data[i][0];
+      x[1][i] = data[i][1];
     }
+    double[] y = new double[data.length];
+    for (int i = 0; i < data.length; i++) {
+      y[i] = data[i][2];
+    }
+    return interpolator.interpolate(x, y);
+  }
 
-    private UnivariateFunction loadFlywheelData() throws IOException {
-        SplineInterpolator interpolator = new SplineInterpolator();
-        double[][] data = CSVLoader.loadCSV(path2);
-        double[] x = new double[data.length];
-        for (int i = 0; i < data.length; i++) {
-            x[i] = data[i][0];
-        }
-        double[] y = new double[data.length];
-        for (int i = 0; i < data.length; i++) {
-            y[i] = data[i][1];
-        }
-        return interpolator.interpolate(x, y);
+  /**
+   * Loads two-column numeric data from the CSV file referenced by the field {@code path2} and
+   * returns a spline-based interpolating function.
+   *
+   * <p>The CSV is expected to be parsed by {@code CSVLoader.loadCSV(path2)} into a {@code
+   * double[][]} where each row contains exactly two values: the first column is the independent
+   * variable (x) and the second column is the dependent variable (y). The method constructs arrays
+   * of x and y values and uses {@code SplineInterpolator} to create an {@code UnivariateFunction}
+   * that interpolates the provided points.
+   *
+   * @return an {@code UnivariateFunction} representing the spline interpolation of the CSV data
+   *     (f(x) ≈ y)
+   * @throws IOException if an I/O error occurs while reading the CSV file at {@code path2}
+   */
+  private UnivariateFunction loadFlywheelData() throws IOException {
+    SplineInterpolator interpolator = new SplineInterpolator();
+    double[][] data = CSVLoader.loadCSV(path2);
+    double[] x = new double[data.length];
+    for (int i = 0; i < data.length; i++) {
+      x[i] = data[i][0];
     }
-    
-    public MultivariateFunction getShooterFunction() {
-        return shooterFunction;
+    double[] y = new double[data.length];
+    for (int i = 0; i < data.length; i++) {
+      y[i] = data[i][1];
     }
+    return interpolator.interpolate(x, y);
+  }
 
-    public Angle getHoodAngle(Distance distance, AngularVelocity velocity) {
-        return Degrees.of(shooterFunction.value(new double[]{distance.in(Inches), velocity.in(RotationsPerSecond)}));
-    }
+  /**
+   * Returns the MultivariateFunction used by the shooter subsystem to compute shooter setpoints.
+   *
+   * @return the configured MultivariateFunction used to compute shooter setpoints, or {@code null}
+   *     if no function has been configured
+   */
+  public MultivariateFunction getShooterFunction() {
+    return shooterFunction;
+  }
 
-    public AngularVelocity getFlywheelVelocity(Distance distance, Angle angle) {
-        return RotationsPerSecond.of(flywheelFunction.value(distance.in(Inches)));
-    }
+  /**
+   * Calculates the hood angle required to score given the current distance to the target and the
+   * shooter wheel angular velocity.
+   *
+   * @param distance the distance to the target (will be converted to inches for the internal
+   *     calculation)
+   * @param velocity the shooter wheel angular velocity (will be converted to rotations per second
+   *     for the internal calculation)
+   * @return an Angle representing the hood setpoint in degrees needed for the shot
+   */
+  public Angle getHoodAngle(Distance distance, AngularVelocity velocity) {
+    return Degrees.of(
+        shooterFunction.value(new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
+  }
 
+  /**
+   * Calculates the required flywheel angular velocity to reach a target at the specified distance
+   * and shooter angle.
+   *
+   * @param distance the distance to the target; will be converted to inches before evaluation
+   * @param angle the shooter/target angle (currently unused by this method)
+   * @return the required flywheel angular velocity as an AngularVelocity (rotations per second)
+   */
+  public AngularVelocity getFlywheelVelocity(Distance distance, Angle angle) {
+    return RotationsPerSecond.of(flywheelFunction.value(distance.in(Inches)));
+  }
 }
