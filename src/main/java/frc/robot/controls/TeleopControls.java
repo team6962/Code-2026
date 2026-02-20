@@ -62,6 +62,8 @@ public class TeleopControls {
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
+    // Left Trigger is used for super boost (configured by XBoxTeleopSwerveCommand)
+    // Right Trigger is used for boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
     driver.b().onTrue(autoClimb.climb());
@@ -93,8 +95,6 @@ public class TeleopControls {
                                 new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
                     this.robot.getIntakeRollers().intake())));
 
-    // driver.leftTrigger().onTrue(Commands.print("Super Boost"));
-
     driver // Auto Drive to Outpost
         .rightBumper()
         .whileTrue(
@@ -103,8 +103,6 @@ public class TeleopControls {
                 .driveTo(
                     new Pose2d(
                         0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough estimate
-
-    // driver.rightTrigger().onTrue(Commands.print("Boost"));
 
     // Dump fuel
     driver
