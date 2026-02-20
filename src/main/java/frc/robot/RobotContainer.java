@@ -89,6 +89,8 @@ public class RobotContainer {
               .andThen(swerveDrive.drive(new ChassisSpeeds(-2, 2, 0))));
     }
 
+    autoChooser.addOption("Calibrate Wheel Size", swerveDrive.calibrateWheelSize());
+
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
