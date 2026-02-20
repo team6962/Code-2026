@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -18,7 +19,9 @@ import frc.robot.Preferences;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
 import frc.robot.auto.DriveToClump;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
+import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
@@ -148,29 +151,57 @@ public class TeleopControls {
     // Fine control
     operator
         .povUp()
+        .and(() -> fineControl)
         .whileTrue(
-            this.robot
-                .getShooterHood()
-                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+            this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE));
+
     operator
         .povDown()
+        .and(() -> fineControl)
         .whileTrue(
             this.robot
                 .getShooterHood()
-                .moveAtVoltage(
-                    ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
+                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+
     operator
         .povLeft()
+        .and(() -> fineControl)
+        .whileTrue(this.robot.getTurret().moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE));
+
+    operator
+        .povLeft()
+        .and(() -> fineControl)
         .whileTrue(
             this.robot
                 .getTurret()
-                .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE)); // CHECK SIGN
+                .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+
     operator
-        .povLeft()
+        .axisGreaterThan(Axis.kLeftX.value, 0.5)
+        .and(() -> fineControl)
         .whileTrue(
             this.robot
-                .getTurret()
-                .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus())); // CHECK SIGN
+                .getIntakeExtension()
+                .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE));
+
+    operator
+        .axisLessThan(Axis.kLeftX.value, -0.5)
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot
+                .getIntakeExtension()
+                .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+
+    operator
+        .axisGreaterThan(Axis.kRightY.value, 0.5)
+        .and(() -> fineControl)
+        .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
+
+    operator
+        .axisLessThan(Axis.kRightY.value, -0.5)
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Intake extension and retraction
     Trigger intakeRetract = operator.rightStick().or(driver.back());
