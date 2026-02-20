@@ -96,10 +96,10 @@ public class LearnBotConstants extends BaseRobotConstants {
                 .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
                 .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
-                .withTranslationFeedbackKP(0.5)
-                .withTranslationFeedbackKD(0.1)
-                .withAngleFeedbackKP(0.25)
-                .withAngleFeedbackKD(0.05))
+                .withTranslationFeedbackKP(10)
+                .withTranslationFeedbackKD(0.2)
+                .withAngleFeedbackKP(20)
+                .withAngleFeedbackKD(0.5))
         .withDriveMotor(
             baseConstants
                 .DriveMotor

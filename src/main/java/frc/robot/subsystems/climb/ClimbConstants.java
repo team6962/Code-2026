@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -17,6 +18,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.Voltage;
 
 public class ClimbConstants {
   public static final double GEAR_RATIO = 20.0;
@@ -25,10 +27,13 @@ public class ClimbConstants {
   public static final int CANDI_CAN_ID = 40;
   public static final int MOTOR_ID = 30;
   public static final String CANBUS_NAME = "subsystems";
+  public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
 
   public static final Distance MIN_HEIGHT = Inches.of(0);
   public static final Distance MAX_HEIGHT = Inches.of(25.045099);
   public static final Distance PULL_UP_HEIGHT = Inches.of(0);
+
+  public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
 
   public static final LinearAcceleration CONSTANT_ACCELERATION = MetersPerSecondPerSecond.of(-9.81);
 

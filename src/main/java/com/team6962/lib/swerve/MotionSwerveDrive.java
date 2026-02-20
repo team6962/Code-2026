@@ -189,6 +189,7 @@ public class MotionSwerveDrive implements AutoCloseable {
 
     if (motion != null) {
       motion.update(deltaTimeSeconds);
+      motion.logTelemetry("Drivetrain/Motion");
     }
 
     for (SwerveModule module : modules) {

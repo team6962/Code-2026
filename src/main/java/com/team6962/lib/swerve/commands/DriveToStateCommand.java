@@ -4,15 +4,17 @@ import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.team6962.lib.control.MotionProfile;
+import com.team6962.lib.control.ProfiledController;
 import com.team6962.lib.control.TranslationController;
-import com.team6962.lib.control.TrapezoidalController;
+import com.team6962.lib.control.TrapezoidalProfile;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,7 +34,7 @@ public class DriveToStateCommand extends Command {
   private TranslationController translationController;
 
   /** Controller for rotational motion. */
-  private TrapezoidalController headingController;
+  private ProfiledController headingController;
 
   /** Whether to finish automatically when the target is reached. */
   private boolean finishWhenReached = true;
@@ -161,11 +163,11 @@ public class DriveToStateCommand extends Command {
 
     if (target.angle != null) {
       headingController =
-          new TrapezoidalController(
+          new ProfiledController(
               swerveDrive.getConstants().Driving.AngleFeedbackKP,
               swerveDrive.getConstants().Driving.AngleFeedbackKI,
               swerveDrive.getConstants().Driving.AngleFeedbackKD,
-              swerveDrive.getConstants().Driving.getRotationConstraints(),
+              new TrapezoidalProfile(swerveDrive.getConstants().Driving.getRotationConstraints()),
               Hertz.of(50));
 
       addRequirements(swerveDrive.useRotation());
@@ -199,9 +201,9 @@ public class DriveToStateCommand extends Command {
       targetAngle = AngleMath.toContinuous(targetAngle, swerveDrive.getYaw());
 
       headingController.setProfile(
-          new TrapezoidProfile.State(
+          new MotionProfile.State(
               swerveDrive.getYaw().in(Radians), swerveDrive.getYawVelocity().in(RadiansPerSecond)),
-          new TrapezoidProfile.State(
+          new MotionProfile.State(
               targetAngle.in(Radians), target.angularVelocity.in(RadiansPerSecond)));
     }
 
@@ -225,6 +227,9 @@ public class DriveToStateCommand extends Command {
       createMotionProfiles();
     }
 
+    // Current target pose for logging
+    Pose2d currentTarget = new Pose2d();
+
     // Calculate and apply velocity commands for translation and rotation
     if (translationController != null) {
       TranslationalVelocity outputTranslationalVelocity =
@@ -232,18 +237,32 @@ public class DriveToStateCommand extends Command {
               swerveDrive.getPosition2d().getTranslation(), swerveDrive.getTranslationalVelocity());
 
       swerveDrive.applyVelocityMotion(outputTranslationalVelocity);
+
+      // Add translation to current target pose
+      currentTarget =
+          new Pose2d(
+              translationController.getCurrentTarget(), swerveDrive.getPosition2d().getRotation());
     }
 
     if (headingController != null) {
       AngularVelocity outputAngularVelocity =
           RadiansPerSecond.of(
               headingController.calculate(
-                  new TrapezoidProfile.State(
+                  new MotionProfile.State(
                       swerveDrive.getYaw().in(Radians),
                       swerveDrive.getYawVelocity().in(RadiansPerSecond))));
 
       swerveDrive.applyVelocityMotion(outputAngularVelocity);
+
+      // Add rotation to current target pose
+      currentTarget =
+          new Pose2d(
+              currentTarget.getTranslation(),
+              Rotation2d.fromRadians(headingController.sample().position));
     }
+
+    // Log current target pose
+    swerveDrive.getFieldLogger().getField().getObject("Current Target").setPose(currentTarget);
   }
 
   @Override
