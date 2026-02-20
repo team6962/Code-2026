@@ -1,5 +1,6 @@
 package frc.robot.subsystems.climb;
 
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
@@ -7,10 +8,11 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.LoggingUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -32,6 +34,7 @@ public class Climb extends SubsystemBase {
   private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<Angle> positionSignal;
+  private StatusSignal<Double> profilePositionSignal;
   private StatusSignal<Voltage> voltageSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
@@ -43,6 +46,34 @@ public class Climb extends SubsystemBase {
   public Climb() {
     motor = new TalonFX(ClimbConstants.MOTOR_ID, ClimbConstants.CANBUS_NAME);
 
+    if (RobotBase.isSimulation()) {
+      ClimbConstants.MOTOR_CONFIGURATION.Slot0.kG =
+          -ClimbConstants.CONSTANT_ACCELERATION.in(MetersPerSecondPerSecond)
+              * ClimbConstants.SIMULATED_MOTOR.rOhms
+              * ClimbConstants.DRUM_RADIUS.in(Meters)
+              * ClimbConstants.MASS.in(Kilograms)
+              / ClimbConstants.GEAR_RATIO
+              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp
+              * 2.0
+              * Math.PI;
+
+      ClimbConstants.MOTOR_CONFIGURATION.Slot0.kS = 0; // No friction in simulation, so kS = 0
+
+      ClimbConstants.MOTOR_CONFIGURATION.Slot0.kV =
+          ClimbConstants.GEAR_RATIO
+              / ClimbConstants.SIMULATED_MOTOR.KvRadPerSecPerVolt
+              / ClimbConstants.DRUM_RADIUS.in(Meters);
+
+      ClimbConstants.MOTOR_CONFIGURATION.Slot0.kA =
+          ClimbConstants.SIMULATED_MOTOR.rOhms
+              * ClimbConstants.MASS.in(Kilograms)
+              * ClimbConstants.DRUM_RADIUS.in(Meters)
+              / ClimbConstants.GEAR_RATIO
+              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp
+              * 2.0
+              * Math.PI;
+    }
+
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
     candi = new CANdi(ClimbConstants.CANDI_CAN_ID, ClimbConstants.CANBUS_NAME);
@@ -51,6 +82,7 @@ public class Climb extends SubsystemBase {
     accelerationSignal = motor.getAcceleration();
     velocitySignal = motor.getVelocity();
     positionSignal = motor.getPosition();
+    profilePositionSignal = motor.getClosedLoopReference();
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
@@ -175,7 +207,8 @@ public class Climb extends SubsystemBase {
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        hallEffectSensorSignal);
+        hallEffectSensorSignal,
+        profilePositionSignal);
 
     DogLog.log("Climb/Acceleration", getAcceleration());
     DogLog.log("Climb/Velocity", getVelocity());
@@ -184,9 +217,11 @@ public class Climb extends SubsystemBase {
     DogLog.log("Climb/StatorCurrent", getStatorCurrent());
     DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Climb/HallSensorTriggered", isHallEffectSensorTriggered());
+    DogLog.log("Climb/ProfilePosition", profilePositionSignal.getValue());
+    LoggingUtil.log("Climb/ControlRequest", motor.getAppliedControl());
 
     if (RobotState.isDisabled()) {
-      motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+      motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
     }
 
     if (isHallEffectSensorTriggered() && getPosition().lt(ClimbConstants.MIN_HEIGHT)) {
@@ -215,11 +250,11 @@ public class Climb extends SubsystemBase {
     return startEnd(
             () -> {
               DogLog.log("Climb/Command", "Elevate");
-              motor.setControl(new PositionVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
+              motor.setControl(new MotionMagicVoltage(ClimbConstants.MAX_HEIGHT.in(Meters)));
             },
             () -> {
               DogLog.log("Climb/Command", "None");
-              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
             })
         .until(
             () ->
@@ -244,12 +279,12 @@ public class Climb extends SubsystemBase {
     return startEnd(
             () -> {
               DogLog.log("Climb/Command", "Descend");
-              motor.setControl(new PositionVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
+              motor.setControl(new MotionMagicVoltage(ClimbConstants.MIN_HEIGHT.in(Meters)));
               isClimbed = false;
             },
             () -> {
               DogLog.log("Climb/Command", "None");
-              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
             })
         .until(
             () ->
@@ -259,27 +294,27 @@ public class Climb extends SubsystemBase {
   /**
    * Creates a command that moves the climb mechanism to the configured "pull up" height.
    *
-   * <p>When scheduled, the command sets the climb motor's control to a {@code PositionVoltage}
+   * <p>When scheduled, the command sets the climb motor's control to a {@code MotionMagicVoltage}
    * targeting {@code ClimbConstants.PULL_UP_HEIGHT} (converted to meters). When the command ends or
-   * is interrupted, it resets the motor control to a {@code PositionVoltage} holding the climb's
+   * is interrupted, it resets the motor control to a {@code MotionMagicVoltage} holding the climb's
    * current position.
    *
    * @return a {@code Command} which, while active, drives the climb to the pull-up height and, on
    *     end or interruption, commands the motor to hold its current position
    * @see ClimbConstants#PULL_UP_HEIGHT
-   * @see PositionVoltage
+   * @see MotionMagicVoltage
    * @see #getPosition()
    */
   public Command pullUp() {
     return startEnd(
             () -> {
               DogLog.log("Climb/Command", "PullUp");
-              motor.setControl(new PositionVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
+              motor.setControl(new MotionMagicVoltage(ClimbConstants.PULL_UP_HEIGHT.in(Meters)));
               isClimbed = true;
             },
             () -> {
               DogLog.log("Climb/Command", "None");
-              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
             })
         .onlyIf(() -> isZeroed);
   }
@@ -302,7 +337,7 @@ public class Climb extends SubsystemBase {
                       voltage.plus(Volts.of(ClimbConstants.MOTOR_CONFIGURATION.Slot0.kG))));
             },
             () -> {
-              motor.setControl(new PositionVoltage(getPosition().in(Meters)));
+              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
             })
         .onlyIf(() -> isZeroed || voltage.in(Volts) < 0);
   }
