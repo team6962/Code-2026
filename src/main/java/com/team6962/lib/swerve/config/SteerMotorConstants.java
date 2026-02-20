@@ -9,7 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** The constants that define the steer motor behavior. */
-public class SteerMotorConstants {
+public class SteerMotorConstants implements Cloneable {
   /**
    * The TalonFX configuration for the steer motor. Some fields in this configuration may be
    * overriden by other settings, such as the gear reduction.
@@ -167,15 +167,24 @@ public class SteerMotorConstants {
   }
 
   /**
-   * Sets the moment of inertia of the steer mechanism for simulation, and returns this
+   * Sets the simulated moment of inertia for the steer mechanism, and returns this
    * SteerMotorConstants for chaining.
    *
-   * @param simulatedMomentOfInertia The moment of inertia for simulation
+   * @param simulatedMomentOfInertia The simulated moment of inertia
    * @return This SteerMotorConstants object
    */
   public SteerMotorConstants withSimulatedMomentOfInertia(
       MomentOfInertia simulatedMomentOfInertia) {
     SimulatedMomentOfInertia = simulatedMomentOfInertia;
     return this;
+  }
+
+  @Override
+  public SteerMotorConstants clone() {
+    try {
+      return (SteerMotorConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
-import frc.robot.learnbot.LearnBotConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.Hopper;
@@ -28,6 +28,7 @@ import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
 
 public class RobotContainer {
+  private final RobotConstants constants;
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
   private final Turret turret;
@@ -45,8 +46,9 @@ public class RobotContainer {
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
-    swerveDrive =
-        new CommandSwerveDrive(Preferences.apply(LearnBotConstants.getDrivetrainConstants()));
+    constants = RobotConstants.generate();
+
+    swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
     climb = new Climb();
     shooterHood = new ShooterHood();
@@ -56,10 +58,9 @@ public class RobotContainer {
     intakeExtension = new IntakeExtension();
     hopper = new Hopper();
 
-    aprilTagVision =
-        new AprilTagVision(swerveDrive, LearnBotConstants.getAprilTagVisionConstants());
+    aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
-        new SphereClumpLocalization(swerveDrive, LearnBotConstants.getSphereCameraConstants());
+        new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
 
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
@@ -89,6 +90,10 @@ public class RobotContainer {
     }
 
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
+  }
+
+  public RobotConstants getConstants() {
+    return constants;
   }
 
   public IntakeExtension getIntakeExtension() {

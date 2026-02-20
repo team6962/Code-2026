@@ -3,7 +3,7 @@ package com.team6962.lib.vision;
 import edu.wpi.first.math.geometry.Transform3d;
 
 /** Configuration constants for an AprilTag camera. */
-public class AprilTagCameraConstants {
+public class AprilTagCameraConstants implements Cloneable {
   /** The name of the camera. */
   public String Name;
 
