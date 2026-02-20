@@ -97,7 +97,7 @@ public class AprilTagVision extends SubsystemBase {
   public void periodic() {
     // Update vision simulation with current robot pose
     if (visionSystemSim != null) {
-      visionSystemSim.update(swerveDrive.getSimulation().getOdometry().getPosition());
+      visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
     }
 
     // Determine the origin pose based on alliance color (red and blue have mirrored field layouts)

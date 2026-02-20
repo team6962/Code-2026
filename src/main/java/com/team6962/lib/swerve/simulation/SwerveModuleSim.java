@@ -1,7 +1,6 @@
 package com.team6962.lib.swerve.simulation;
 
 import com.team6962.lib.swerve.module.SwerveModule;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -16,8 +15,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * state in WPILib's {@link SwerveModulePosition} and {@link SwerveModuleState} formats for use with
  * kinematics and odometry.
  *
- * <p>The {@link #update(double)} method delegates to both mechanism simulations and should be
- * called periodically to advance the physics simulation.
+ * <p>The {@link #updateBeforeArena(double)} and {@link #updateAfterArena(double)} methods delegate
+ * to both mechanism simulations and should be called periodically to advance the physics
+ * simulation.
  */
 public class SwerveModuleSim {
   /** Simulation for the drive mechanism. */
@@ -31,18 +31,20 @@ public class SwerveModuleSim {
    *
    * @param module the swerve module to simulate
    */
-  public SwerveModuleSim(SwerveModule module) {
+  public SwerveModuleSim(SwerveModule module, MapleSim mapleSim) {
     driveMechanismSim =
         new DriveMechanismSim(
             module.getCorner(),
             module.getConstants(),
-            module.getDriveMechanism().getMotorController());
+            module.getDriveMechanism().getMotorController(),
+            mapleSim);
     steerMechanismSim =
         new SteerMechanismSim(
             module.getCorner(),
             module.getConstants(),
             module.getSteerMechanism().getMotorController(),
-            module.getSteerMechanism().getEncoder());
+            module.getSteerMechanism().getEncoder(),
+            mapleSim);
   }
 
   /** Returns the drive mechanism simulation. */
@@ -55,25 +57,25 @@ public class SwerveModuleSim {
     return steerMechanismSim;
   }
 
-  /** Returns the module position (distance traveled and wheel angle). */
-  public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(
-        driveMechanismSim.getPosition(), new Rotation2d(steerMechanismSim.getAngularPosition()));
-  }
-
-  /** Returns the module state (velocity and wheel angle). */
-  public SwerveModuleState getState() {
-    return new SwerveModuleState(
-        driveMechanismSim.getVelocity(), new Rotation2d(steerMechanismSim.getAngularPosition()));
-  }
-
   /**
-   * Updates both mechanism simulations.
+   * Updates both mechanism simulations before the arena update, passing the motor controller
+   * outputs to the physics simulation.
    *
    * @param deltaTimeSeconds time elapsed since the last update
    */
-  public void update(double deltaTimeSeconds) {
-    driveMechanismSim.update(deltaTimeSeconds);
-    steerMechanismSim.update(deltaTimeSeconds);
+  public void updateBeforeArena(double deltaTimeSeconds) {
+    driveMechanismSim.updateBeforeArena(deltaTimeSeconds);
+    steerMechanismSim.updateBeforeArena(deltaTimeSeconds);
+  }
+
+  /**
+   * Updates both mechanism simulations after the arena update, passing data from the physics
+   * simulation back to the motor controller simulations.
+   *
+   * @param deltaTimeSeconds time elapsed since the last update
+   */
+  public void updateAfterArena(double deltaTimeSeconds) {
+    driveMechanismSim.updateAfterArena(deltaTimeSeconds);
+    steerMechanismSim.updateAfterArena(deltaTimeSeconds);
   }
 }

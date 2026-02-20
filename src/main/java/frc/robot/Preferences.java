@@ -1,7 +1,7 @@
 package frc.robot;
 
-import com.team6962.lib.swerve.config.DrivetrainConstants;
-import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
+import frc.robot.constants.CompetitionBotConstants;
+import frc.robot.constants.RobotConstants;
 
 public class Preferences {
   /**
@@ -23,24 +23,9 @@ public class Preferences {
   public static final boolean reorientControlsInSimulation = true;
 
   /**
-   * Applies the preferences to the given drivetrain constants.
-   *
-   * @param constants The drivetrain constants to apply the preferences to.
-   * @return The updated drivetrain constants.
+   * The robot constants to use in simulation. This should be set to a constants class that
+   * corresponds to the robot being simulated. This is used to determine which subsystems exist on
+   * the simulated robot and to provide the correct configuration values for those subsystems.
    */
-  public static DrivetrainConstants apply(DrivetrainConstants constants) {
-    constants.Simulation.EnablePoseEstimation = enablePoseEstimationInSimulation;
-    return constants;
-  }
-
-  /**
-   * Applies the preferences to the given teleop controls constants.
-   *
-   * @param constants The teleop controls constants to apply the preferences to.
-   * @return The updated teleop controls constants.
-   */
-  public static XBoxTeleopSwerveConstants apply(XBoxTeleopSwerveConstants constants) {
-    constants.ReorientControlsInSimulation = reorientControlsInSimulation;
-    return constants;
-  }
+  public static final RobotConstants simulatedRobot = new CompetitionBotConstants();
 }
