@@ -51,10 +51,6 @@ public class ShooterFunctions {
       this.flywheelVelocityFunctionHub = loadFlywheelDataHub();
       this.hoodAngleFunctionPass = loadHoodAngleDataPass();
       this.flywheelVelocityFunctionPass = loadFlywheelDataPass();
-      loadHoodAngleDataHub();
-      loadFlywheelDataHub();
-      loadHoodAngleDataPass();
-      loadFlywheelDataPass();
     } catch (IOException e) {
       e.printStackTrace();
     }
