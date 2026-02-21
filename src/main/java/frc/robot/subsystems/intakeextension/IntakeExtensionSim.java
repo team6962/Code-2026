@@ -22,7 +22,7 @@ public class IntakeExtensionSim {
     physicsSim =
         new LinearMechanismSim(
             IntakeExtensionConstants.MOTOR_PHYSICS,
-            IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio,
+            IntakeExtensionConstants.GEAR_RATIO,
             IntakeExtensionConstants.MOVING_MASS,
             IntakeExtensionConstants.PINION_RADIUS,
             IntakeExtensionConstants.MIN_POSITION,
@@ -52,13 +52,13 @@ public class IntakeExtensionSim {
                 position,
                 IntakeExtensionConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
                     == InvertedValue.Clockwise_Positive)
-            .times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(IntakeExtensionConstants.GEAR_RATIO));
     motorSim.setRotorVelocity(
         invert(
                 velocity,
                 IntakeExtensionConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
                     == InvertedValue.Clockwise_Positive)
-            .times(IntakeExtensionConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
+            .times(IntakeExtensionConstants.GEAR_RATIO));
   }
 
   private static double invert(double value, boolean shouldBeInverted) {

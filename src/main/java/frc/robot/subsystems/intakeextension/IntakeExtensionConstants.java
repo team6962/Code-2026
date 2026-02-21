@@ -3,6 +3,7 @@ package frc.robot.subsystems.intakeextension;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -32,15 +33,19 @@ public final class IntakeExtensionConstants {
   public static final int CANDI_DEVICE_ID = 40;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
+  public static final double GEAR_RATIO = 4.5;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
-          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(4.5))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withSensorToMechanismRatio(
+                      GEAR_RATIO / PINION_RADIUS.in(Meters) / (2 * Math.PI)))
           .withMotionMagic(
               new MotionMagicConfigs()
                   // fake numbers
-                  .withMotionMagicCruiseVelocity(0.36)
-                  .withMotionMagicAcceleration(0.72)
+                  .withMotionMagicCruiseVelocity(10)
+                  .withMotionMagicAcceleration(10)
                   .withMotionMagicJerk(0))
           // fake numbers end here
           .withSlot0(
