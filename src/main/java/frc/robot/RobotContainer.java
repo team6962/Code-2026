@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.auto.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
 import frc.robot.subsystems.climb.Climb;
@@ -44,6 +45,7 @@ public class RobotContainer {
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private final ShooterFunctions shooterFunctions;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -68,6 +70,13 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+
+    try {
+      shooterFunctions = new ShooterFunctions();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
 
     configureAutonomousChooser();
 
@@ -148,6 +157,10 @@ public class RobotContainer {
 
   public Hopper getHopper() {
     return hopper;
+  }
+
+  public ShooterFunctions getShooterFunctions() {
+    return shooterFunctions;
   }
 
   public RobotVisualizer getVisualizer() {
