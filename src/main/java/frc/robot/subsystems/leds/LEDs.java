@@ -123,7 +123,7 @@ public class LEDs extends SubsystemBase {
         });
   }
 
-  /* Sets the gradient green and pink for Auton state.*/
+  /* Sets the gradient to alliance color + yellow while autonomous. */
   public Command autonColors() {
     return Commands.either(
         runEnd(
