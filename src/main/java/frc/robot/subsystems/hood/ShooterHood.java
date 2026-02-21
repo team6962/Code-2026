@@ -196,6 +196,7 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/AppliedVoltage", getAppliedVoltage());
     DogLog.log("Hood/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
+    DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log(
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),

@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 public class ShooterRollers extends SubsystemBase {
   private TalonFX shooterRollerMotor1;
   private TalonFX shooterRollerMotor2;
-  private StatusSignal<AngularVelocity> VelocitySignal;
-  private StatusSignal<AngularAcceleration> AccelerationSignal;
+  private StatusSignal<AngularVelocity> velocitySignal;
+  private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
@@ -56,9 +56,9 @@ public class ShooterRollers extends SubsystemBase {
     shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
     // defines the variables we are keeping track of
-    VelocitySignal = shooterRollerMotor1.getVelocity();
+    velocitySignal = shooterRollerMotor1.getVelocity();
     voltageSignal = shooterRollerMotor1.getMotorVoltage();
-    AccelerationSignal = shooterRollerMotor1.getAcceleration();
+    accelerationSignal = shooterRollerMotor1.getAcceleration();
     supplyCurrentSignal = shooterRollerMotor1.getSupplyCurrent();
     statorCurrentSignal = shooterRollerMotor1.getStatorCurrent();
 
@@ -126,11 +126,11 @@ public class ShooterRollers extends SubsystemBase {
 
     // this will log stuff every once in a while
     BaseStatusSignal.refreshAll(
-        VelocitySignal,
+        velocitySignal,
         voltageSignal,
         supplyCurrentSignal,
         statorCurrentSignal,
-        AccelerationSignal);
+        accelerationSignal);
     DogLog.log("shooterRoller/voltage", getMotorVoltage());
     DogLog.log("shooterRoller/angularVelocity", getAngularVelocity());
     DogLog.log("shooterRoller/statorCurrent", getStatorCurrent());
@@ -140,12 +140,12 @@ public class ShooterRollers extends SubsystemBase {
 
   /** gets the angular velocity */
   public AngularVelocity getAngularVelocity() {
-    return VelocitySignal.getValue();
+    return velocitySignal.getValue();
   }
 
   /** gets the angular acceleration */
   public AngularAcceleration getAngularAcceleration() {
-    return AccelerationSignal.getValue();
+    return accelerationSignal.getValue();
   }
 
   /** gets the supply current */
