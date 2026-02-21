@@ -144,7 +144,7 @@ public class LEDs extends SubsystemBase {
           },       () -> {
         clearLeds();
       }),
-          () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)
+          () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue)
         ); 
       }
 
