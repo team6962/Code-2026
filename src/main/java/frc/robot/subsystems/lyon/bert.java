@@ -1,4 +1,4 @@
-package frc.robot.subsystems.LEDs;
+package frc.robot.subsystems.lyon;
 
 import static edu.wpi.first.units.Units.Hertz;
 
@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** A class that sets the colors on the LED strip. */
-public class LEDs extends SubsystemBase {
+public class bert extends SubsystemBase {
   /**
    * The object that communicates with the LED driver, which is a device that connects the RoboRIO's
    * PWM port to the LEDs.
@@ -25,9 +25,9 @@ public class LEDs extends SubsystemBase {
   private AddressableLEDBuffer colorBuffer;
 
   /** This constructor initializes the LED subsystem. */
-  public LEDs() {
-    this.addressableLeds = new AddressableLED(LedsConstants.pwmPort);
-    this.colorBuffer = new AddressableLEDBuffer(LedsConstants.length);
+  public bert() {
+    this.addressableLeds = new AddressableLED(fred.pwmPort);
+    this.colorBuffer = new AddressableLEDBuffer(fred.length);
   }
 
   /**
