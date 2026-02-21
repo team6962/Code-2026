@@ -189,9 +189,7 @@ public class ShooterFunctions {
     if (isDistanceWithinValidHubRange(distance)) {
       return Degrees.of(
           hoodAngleFunctionHub.value(
-              new double[] {
-                distance.in(Inches), velocity.in(RotationsPerSecond)
-              }));
+              new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
     } else
       return Degrees.of(
           hoodAngleFunctionHub.value(
