@@ -6,6 +6,7 @@ import com.team6962.lib.swerve.module.SwerveModule;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Simulates a complete swerve drivetrain including all modules and the gyroscope.
@@ -29,6 +30,9 @@ public class SwerveDriveSim {
 
   /** Simulation for the gyroscope. */
   private GyroscopeSim gyroscopeSim;
+
+  /** Lock for synchronizing access to the arena simulation. */
+  private ReentrantLock arenaLock = new ReentrantLock();
 
   /**
    * Creates a new swerve drive simulation.
@@ -60,7 +64,12 @@ public class SwerveDriveSim {
 
   /** Returns the robot's current pose as computed by the MapleSim physics simulation. */
   public Pose2d getRobotPosition() {
-    return mapleSim.getSwerveSim().getSimulatedDriveTrainPose();
+    try {
+      arenaLock.lock();
+      return mapleSim.getSwerveSim().getSimulatedDriveTrainPose();
+    } finally {
+      arenaLock.unlock();
+    }
   }
 
   /**
@@ -83,21 +92,36 @@ public class SwerveDriveSim {
   }
 
   /**
+   * Gets the lock used to synchronize access to the arena simulation. This should be used when
+   * directly accessing the MapleSim instance to ensure thread safety with the swerve control loop.
+   *
+   * @return the {@link ReentrantLock} used to synchronize access to the arena simulation
+   */
+  public ReentrantLock getArenaLock() {
+    return arenaLock;
+  }
+
+  /**
    * Updates all module and gyroscope simulations.
    *
    * @param deltaTimeSeconds time elapsed since the last update
    */
   public void update(double deltaTimeSeconds) {
-    for (SwerveModuleSim moduleSim : moduleSims) {
-      moduleSim.updateBeforeArena(deltaTimeSeconds);
+    try {
+      arenaLock.lock();
+      for (SwerveModuleSim moduleSim : moduleSims) {
+        moduleSim.updateBeforeArena(deltaTimeSeconds);
+      }
+
+      mapleSim.update(deltaTimeSeconds);
+
+      for (SwerveModuleSim moduleSim : moduleSims) {
+        moduleSim.updateAfterArena(deltaTimeSeconds);
+      }
+
+      gyroscopeSim.update(deltaTimeSeconds);
+    } finally {
+      arenaLock.unlock();
     }
-
-    mapleSim.update(deltaTimeSeconds);
-
-    for (SwerveModuleSim moduleSim : moduleSims) {
-      moduleSim.updateAfterArena(deltaTimeSeconds);
-    }
-
-    gyroscopeSim.update(deltaTimeSeconds);
   }
 }
