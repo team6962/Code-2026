@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoPassing;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
@@ -47,6 +48,7 @@ public class RobotContainer {
   private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
+  private final AutoPassing autoPassing;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   public RobotContainer() {
@@ -68,12 +70,15 @@ public class RobotContainer {
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
 
+    autoPassing = new AutoPassing(this);
+    
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-
+    
     configureAutonomousChooser();
+    
 
     visualizer = new RobotVisualizer(this);
   }
@@ -122,31 +127,12 @@ public class RobotContainer {
     return aprilTagVision;
   }
 
+  public AutoPassing getAutoPassing() {
+    return autoPassing;
+  }
+
   public Command getAutonomousCommand() {
-    // return autoChooser.getSelected();
-
-    // (1.525, 7.022)
-
-
-    return Commands.sequence(
-        getTurret().moveTo(
-          () -> {
-            // Get translation to the left side of the field
-            return new Translation2d(
-              1.525 - getSwerveDrive().getPosition2d().getX(),
-              7.022 - getSwerveDrive().getPosition2d().getY()
-            ).getAngle().getMeasure() // Convert the Translation2d into an angle
-            .minus( // Subtract the robot's current heading to get the angle that the turret should rotate to
-              getSwerveDrive().getHeading()
-            );
-          }
-        )
-        // should point to the left side of the field from the drive station's perspective
-        // getShooterHood().moveTo(ShooterHoodConstants.MAX_ANGLE),
-        // getShooterRollers().shoot(RotationsPerSecond.of(1)) // arbitrary shooting speed for now
-        );
-
-    // return getTurret().moveTo(Radians.of(Math.PI / 2));
+    return autoChooser.getSelected();
   }
 
   public void latePeriodic() {
