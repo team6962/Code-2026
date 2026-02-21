@@ -360,6 +360,7 @@ public class ShooterFunctions {
     double distanceInInches = distance.in(Inches);
     return distanceInInches >= minDistanceHub && distanceInInches <= maxDistanceHub;
   }
+
   /**
    * Determines whether the given velocity falls within the configured valid range.
    *
