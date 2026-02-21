@@ -91,8 +91,8 @@ public class Turret extends SubsystemBase {
     config.Slot0.kD = TurretConstants.kD;
     config.Slot0.kS =
         RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
-    config.Slot0.kV = TurretConstants.kV;
-    config.Slot0.kA = TurretConstants.kA;
+    config.Slot0.kV = RobotBase.isReal() ? TurretConstants.kV : TurretConstants.simulationKV;
+    config.Slot0.kA = RobotBase.isReal() ? TurretConstants.kA : TurretConstants.simulationKA;
 
     config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
@@ -102,7 +102,7 @@ public class Turret extends SubsystemBase {
 
     config.MotorOutput.Inverted = TurretConstants.MOTOR_INVERSION;
 
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = RobotBase.isReal();
     config.CurrentLimits.StatorCurrentLimit = TurretConstants.STATOR_CURRENT_LIMIT.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = TurretConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
