@@ -1,5 +1,7 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -25,13 +27,18 @@ public class AutoClimb {
   public static double CENTER_OF_TOWER = 3.745706;
 
   /** The velocity at which the robot should be moving at when it reaches the prepare climb pose. */
-  public static LinearVelocity ENTER_VELOCITY = MetersPerSecond.of(0.0);
+  public static LinearVelocity ENTER_VELOCITY = MetersPerSecond.of(1.0);
 
   /**
    * The distance away from the pole that the robot should be when it reaches the prepare climb
    * pose.
    */
   public static Distance ENTER_DISTANCE = Meters.of(0.3);
+
+  /**
+   * The distance away from the pole that the robot should be when it reaches the align climb pose.
+   */
+  public static Distance ALIGN_DISTANCE = Meters.of(0.1);
 
   /**
    * The distance that the robot should be from the pole when it is considered to have left the
@@ -102,8 +109,8 @@ public class AutoClimb {
     return driveToClimbPose(side, ENTER_DISTANCE.unaryMinus(), ENTER_VELOCITY);
   }
 
-  public Command driveToPrepareClimbStopped(ClimbSide side) {
-    return driveToClimbPose(side, ENTER_DISTANCE.unaryMinus(), MetersPerSecond.of(0));
+  public Command driveToAlignClimb(ClimbSide side) {
+    return driveToClimbPose(side, ALIGN_DISTANCE.unaryMinus(), MetersPerSecond.of(0));
   }
 
   public Command driveOverPole(ClimbSide side) {
@@ -124,7 +131,27 @@ public class AutoClimb {
           return Commands.sequence(
               Commands.deadline(driveToPrepareClimb(side), robot.getClimb().elevate()),
               Commands.deadline(
-                  robot.getClimb().elevate(), driveToPrepareClimbStopped(side).repeatedly()),
+                  robot.getClimb().elevate(),
+                  driveToAlignClimb(side)
+                      .repeatedly()
+                      .until(
+                          () ->
+                              robot
+                                  .getSwerveDrive()
+                                  .isNear(
+                                      getClimbPose(side, ALIGN_DISTANCE.unaryMinus()),
+                                      Inches.of(0.125),
+                                      Degrees.of(2)))),
+              driveToAlignClimb(side)
+                  .repeatedly()
+                  .until(
+                      () ->
+                          robot
+                              .getSwerveDrive()
+                              .isNear(
+                                  getClimbPose(side, ALIGN_DISTANCE.unaryMinus()),
+                                  Inches.of(0.125),
+                                  Degrees.of(2))),
               driveOverPole(side),
               robot.getClimb().pullUp());
         },

@@ -27,6 +27,7 @@ import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.visualizer.RobotVisualizer;
 
 public class RobotContainer {
   private final RobotConstants constants;
@@ -42,6 +43,7 @@ public class RobotContainer {
   private final AprilTagVision aprilTagVision;
   private final Climb climb;
   private final Hopper hopper;
+  private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
 
@@ -77,6 +79,8 @@ public class RobotContainer {
     }
 
     configureAutonomousChooser();
+
+    visualizer = new RobotVisualizer(this);
   }
 
   private void configureAutonomousChooser() {
@@ -157,5 +161,9 @@ public class RobotContainer {
 
   public ShooterFunctions getShooterFunctions() {
     return shooterFunctions;
+  }
+  
+  public RobotVisualizer getVisualizer() {
+    return visualizer;
   }
 }
