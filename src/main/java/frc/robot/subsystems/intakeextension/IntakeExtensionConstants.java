@@ -24,7 +24,7 @@ import edu.wpi.first.units.measure.Voltage;
 public final class IntakeExtensionConstants {
 
   public static final int MOTOR_CAN_ID = 40;
-  public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1);
+  public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
   public static final Mass MOVING_MASS = Pounds.of(12);
   public static final Distance MAX_POSITION = Inches.of(9.879);
   public static final Distance MIN_POSITION = Inches.of(0);

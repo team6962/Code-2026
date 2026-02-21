@@ -1,8 +1,10 @@
 package frc.robot.subsystems.intakeextension;
 
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -53,6 +55,33 @@ public class IntakeExtension extends SubsystemBase {
 
   public IntakeExtension() {
     motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
+
+    if (RobotBase.isSimulation()) {
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG =
+          -Math.sin(IntakeExtensionConstants.ANGLE.in(Radians))
+              * -9.81
+              * IntakeExtensionConstants.MOTOR_PHYSICS.rOhms
+              * IntakeExtensionConstants.PINION_RADIUS.in(Meters)
+              * IntakeExtensionConstants.MOVING_MASS.in(Kilograms)
+              / IntakeExtensionConstants.GEAR_RATIO
+              / IntakeExtensionConstants.MOTOR_PHYSICS.KtNMPerAmp;
+
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kS =
+          0; // No friction in simulation, so kS = 0
+
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kV =
+          IntakeExtensionConstants.GEAR_RATIO
+              / IntakeExtensionConstants.MOTOR_PHYSICS.KvRadPerSecPerVolt
+              / IntakeExtensionConstants.PINION_RADIUS.in(Meters);
+
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kA =
+          IntakeExtensionConstants.MOTOR_PHYSICS.rOhms
+              * IntakeExtensionConstants.MOVING_MASS.in(Kilograms)
+              * IntakeExtensionConstants.PINION_RADIUS.in(Meters)
+              / IntakeExtensionConstants.GEAR_RATIO
+              / IntakeExtensionConstants.MOTOR_PHYSICS.KtNMPerAmp;
+    }
+
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
 
     candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, new CANBus("subsystems"));
