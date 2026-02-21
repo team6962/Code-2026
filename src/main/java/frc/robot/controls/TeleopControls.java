@@ -204,7 +204,8 @@ public class TeleopControls {
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
     intakeRetract.whileTrue(robot.getIntakeExtension().retract());
-    intakeExtend.onTrue(robot.getIntakeExtension().extend());
+    intakeExtend.onTrue(
+        robot.getIntakeExtension().extend().alongWith(robot.getIntakeRollers().intake()));
 
     // Climb retraction
     Command autodescend = robot.getClimb().descend();
