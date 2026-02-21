@@ -162,7 +162,7 @@ public class RobotContainer {
   public ShooterFunctions getShooterFunctions() {
     return shooterFunctions;
   }
-  
+
   public RobotVisualizer getVisualizer() {
     return visualizer;
   }
