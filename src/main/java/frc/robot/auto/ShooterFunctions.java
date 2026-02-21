@@ -360,7 +360,13 @@ public class ShooterFunctions {
     double distanceInInches = distance.in(Inches);
     return distanceInInches >= minDistanceHub && distanceInInches <= maxDistanceHub;
   }
-
+  /**
+   * Determines whether the given velocity falls within the configured valid range.
+   *
+   * @param distance the Distance to check; will be converted to inches for comparison
+   * @param velocity the AngularVelocity to check
+   * @return true if the velocity is within the valid range for the given distance
+   */
   public boolean isVelocityWithinValidHubRange(Distance distance, AngularVelocity velocity) {
     double velocityInRPS = velocity.in(RotationsPerSecond);
     return velocityInRPS >= minVelocityHub.value(distance.in(Inches))
