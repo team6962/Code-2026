@@ -68,6 +68,13 @@ public class RobotContainer {
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
 
+    try {
+      shooterFunctions = new ShooterFunctions();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+
     autoPassing = new AutoPassing(this);
 
     teleopControls = new TeleopControls(this);
@@ -75,12 +82,6 @@ public class RobotContainer {
 
     driveStraightAuto = new DriveStraightAuto(this);
 
-    try {
-      shooterFunctions = new ShooterFunctions();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw e;
-    }
 
     configureAutonomousChooser();
 
