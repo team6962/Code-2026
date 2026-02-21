@@ -5,9 +5,12 @@ import static edu.wpi.first.units.Units.Hertz;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** A class that sets the colors on the LED strip. */
@@ -51,7 +54,7 @@ public class LEDs extends SubsystemBase {
     return runEnd(
             () -> {
               for (int i = 0; i < colorBuffer.getLength(); i++) {
-                colorBuffer.setRGB(i, 255, 255, 0);
+                colorBuffer.setRGB(i, 204, 255, 0);
               }
               addressableLeds.setData(colorBuffer);
             },
@@ -80,9 +83,9 @@ public class LEDs extends SubsystemBase {
   public Command teleopBlue() {
     return runEnd(
         () -> {
-          Color lightBlue = new Color(0, 100, 255);
-          Color darkBlue = new Color(0, 0, 50);
-          LEDPattern pattern = createContinuousGradient(lightBlue, darkBlue, Hertz.of(1)); // T.B.D
+          Color blue = new Color(0, 0, 255);
+          Color cyan = new Color(0, 255, 255);
+          LEDPattern pattern = createContinuousGradient(blue, cyan, Hertz.of(1)); // T.B.D
           pattern.applyTo(colorBuffer);
           addressableLeds.setData(colorBuffer);
         },
@@ -95,9 +98,9 @@ public class LEDs extends SubsystemBase {
   public Command teleopRed() {
     return runEnd(
         () -> {
-          Color lightRed = new Color(255, 0, 0);
-          Color darkRed = new Color(50, 0, 0);
-          LEDPattern pattern = createContinuousGradient(lightRed, darkRed, Hertz.of(1)); // T.B.D
+          Color red = new Color(255, 0, 0);
+          Color pink = new Color(255, 0, 255);
+          LEDPattern pattern = createContinuousGradient(red, pink, Hertz.of(1)); // T.B.D
           pattern.applyTo(colorBuffer);
           addressableLeds.setData(colorBuffer);
         },
@@ -122,16 +125,29 @@ public class LEDs extends SubsystemBase {
 
   /* Sets the gradient green and pink for Auton state.*/
   public Command autonColors() {
-    return runEnd(
-        () -> {
-          Color green = new Color(0, 100, 0);
-          Color pink = new Color(255, 192, 203);
-          LEDPattern pattern = createContinuousGradient(green, pink, Hertz.of(1)); // T.B.D
-          pattern.applyTo(colorBuffer);
-          addressableLeds.setData(colorBuffer);
-        },
-        () -> {
-          clearLeds();
-        });
+        return Commands.either(
+          runEnd(() -> {
+            Color yellow = new Color(204,255,0);
+            Color blue = new Color(0,255,255);
+            LEDPattern pattern = createContinuousGradient(blue, yellow, Hertz.of(1)); // T.B.D
+            pattern.applyTo(colorBuffer);
+            addressableLeds.setData(colorBuffer);
+          },       () -> {
+        clearLeds();
+      }),
+          runEnd(() -> {
+            Color yellow = new Color(204,255,0);
+            Color red = new Color(255,0,0);
+            LEDPattern pattern = createContinuousGradient(red, yellow, Hertz.of(1)); // T.B.D
+            pattern.applyTo(colorBuffer);
+            addressableLeds.setData(colorBuffer);
+          },       () -> {
+        clearLeds();
+      }),
+          () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)
+        ); 
+      }
+
+    
   }
-}
+
