@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.Distance;
  * The constants for each of the swerve modules in the drivetrain, which include the CAN IDs of each
  * device, absolute encoder offsets, and optional wheel radii.
  */
-public class SwerveModuleConstants {
+public class SwerveModuleConstants implements Cloneable {
   /** The CAN ID of the drive motor for this module. */
   public int DriveMotorCANId = -1;
 
@@ -34,14 +34,15 @@ public class SwerveModuleConstants {
    */
   public Distance WheelRadius = null;
 
+  /**
+   * Optional constants that are unique to this module, such as a different motor configuration or
+   * different PID constants. If this is null, the module constants from the swerve drive's
+   * configuration will be used instead.
+   */
+  public UniqueModuleConstants UniqueModuleConstants = null;
+
   /** Constructs a SwerveModuleConstants object with default values. */
-  public SwerveModuleConstants() {
-    DriveMotorCANId = -1;
-    SteerMotorCANId = -1;
-    SteerEncoderCANId = -1;
-    SteerEncoderOffset = Radians.of(0);
-    WheelRadius = null;
-  }
+  public SwerveModuleConstants() {}
 
   /**
    * Sets the CAN ID of the drive motor, and returns this SwerveModuleConstants for chaining.
@@ -95,6 +96,18 @@ public class SwerveModuleConstants {
    */
   public SwerveModuleConstants withWheelRadius(Distance wheelRadius) {
     WheelRadius = wheelRadius;
+    return this;
+  }
+
+  /**
+   * Sets the unique module constants, and returns this SwerveModuleConstants for chaining.
+   *
+   * @param uniqueModuleConstants The unique module constants
+   * @return This SwerveModuleConstants object
+   */
+  public SwerveModuleConstants withUniqueModuleConstants(
+      UniqueModuleConstants uniqueModuleConstants) {
+    UniqueModuleConstants = uniqueModuleConstants;
     return this;
   }
 
@@ -161,6 +174,15 @@ public class SwerveModuleConstants {
       }
 
       throw new IllegalArgumentException("Invalid corner index: " + index);
+    }
+  }
+
+  @Override
+  public SwerveModuleConstants clone() {
+    try {
+      return (SwerveModuleConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
     }
   }
 }

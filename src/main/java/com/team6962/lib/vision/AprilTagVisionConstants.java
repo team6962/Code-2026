@@ -10,7 +10,7 @@ import java.util.List;
 import org.photonvision.simulation.SimCameraProperties;
 
 /** Configuration constants for AprilTag vision processing. */
-public class AprilTagVisionConstants {
+public class AprilTagVisionConstants implements Cloneable {
   /**
    * Standard deviations for single-tag pose estimates, which are generally less reliable than
    * multi-tag estimates.
@@ -197,5 +197,14 @@ public class AprilTagVisionConstants {
   public AprilTagVisionConstants withMinTagsForHeadingUpdateWhileDisabled(int minTags) {
     this.MinTagsForHeadingUpdateWhileDisabled = minTags;
     return this;
+  }
+
+  @Override
+  public AprilTagVisionConstants clone() {
+    try {
+      return (AprilTagVisionConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }
