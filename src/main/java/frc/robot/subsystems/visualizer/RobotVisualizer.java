@@ -71,58 +71,63 @@ public class RobotVisualizer extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update intake simulation
-    if (robot.getIntakeExtension().isExtended()
-        && robot.getIntakeRollers().getAppliedVoltage().in(Volts) > 1.0) {
-      intakeSim.startIntake();
-    } else {
-      intakeSim.stopIntake();
-    }
-
-    // Visualize fuel in robot
-    int fuelCount = intakeSim.getGamePiecesAmount();
-
-    if (!robot.getIntakeExtension().isExtended()
-        && fuelCount > RobotVisualizationConstants.maxRetractedFuel) {
-      for (int i = 0; i < fuelCount - RobotVisualizationConstants.maxRetractedFuel; i++) {
-        Translation3d fuelTranslation = getFuelTranslation(i);
-
-        robot
-            .getSwerveDrive()
-            .getSimulation()
-            .getMapleSim()
-            .getArena()
-            .addGamePieceProjectile(
-                new RebuiltFuelOnFly(
-                    robot.getSwerveDrive().getPosition2d().getTranslation(),
-                    fuelTranslation
-                        .toTranslation2d()
-                        .rotateBy(robot.getSwerveDrive().getPosition2d().getRotation()),
-                    robot.getSwerveDrive().getVelocity(),
-                    Rotation2d.fromRotations(Math.random()),
-                    Meters.of(fuelTranslation.getZ()),
-                    MetersPerSecond.of(Math.random() * 2.0 + 2.5),
-                    Degrees.of(65.0 + Math.random() * 20.0)));
+    try {
+      robot.getSwerveDrive().getSimulation().getArenaLock().lock();
+      // Update intake simulation
+      if (robot.getIntakeExtension().isExtended()
+          && robot.getIntakeRollers().getAppliedVoltage().in(Volts) > 1.0) {
+        intakeSim.startIntake();
+      } else {
+        intakeSim.stopIntake();
       }
 
-      intakeSim.setGamePiecesCount(RobotVisualizationConstants.maxRetractedFuel);
-      fuelCount = RobotVisualizationConstants.maxRetractedFuel;
+      // Visualize fuel in robot
+      int fuelCount = intakeSim.getGamePiecesAmount();
+
+      if (!robot.getIntakeExtension().isExtended()
+          && fuelCount > RobotVisualizationConstants.maxRetractedFuel) {
+        for (int i = 0; i < fuelCount - RobotVisualizationConstants.maxRetractedFuel; i++) {
+          Translation3d fuelTranslation = getFuelTranslation(i);
+
+          robot
+              .getSwerveDrive()
+              .getSimulation()
+              .getMapleSim()
+              .getArena()
+              .addGamePieceProjectile(
+                  new RebuiltFuelOnFly(
+                      robot.getSwerveDrive().getPosition2d().getTranslation(),
+                      fuelTranslation
+                          .toTranslation2d()
+                          .rotateBy(robot.getSwerveDrive().getPosition2d().getRotation()),
+                      robot.getSwerveDrive().getVelocity(),
+                      Rotation2d.fromRotations(Math.random()),
+                      Meters.of(fuelTranslation.getZ()),
+                      MetersPerSecond.of(Math.random() * 2.0 + 2.5),
+                      Degrees.of(65.0 + Math.random() * 20.0)));
+        }
+
+        intakeSim.setGamePiecesCount(RobotVisualizationConstants.maxRetractedFuel);
+        fuelCount = RobotVisualizationConstants.maxRetractedFuel;
+      }
+
+      List<Pose3d> additionalFuelPoses = new ArrayList<>();
+
+      for (int i = 0; i < fuelCount; i++) {
+        Translation3d fuelTranslation = getFuelTranslation(i);
+        additionalFuelPoses.add(new Pose3d(fuelTranslation, new Rotation3d()));
+      }
+
+      robot
+          .getSwerveDrive()
+          .getSimulation()
+          .getMapleSim()
+          .setHeldFuelPoses(additionalFuelPoses.toArray(Pose3d[]::new));
+
+      DogLog.log("RobotVisualizer/HeldFuelCount", fuelCount);
+    } finally {
+      robot.getSwerveDrive().getSimulation().getArenaLock().unlock();
     }
-
-    List<Pose3d> additionalFuelPoses = new ArrayList<>();
-
-    for (int i = 0; i < fuelCount; i++) {
-      Translation3d fuelTranslation = getFuelTranslation(i);
-      additionalFuelPoses.add(new Pose3d(fuelTranslation, new Rotation3d()));
-    }
-
-    robot
-        .getSwerveDrive()
-        .getSimulation()
-        .getMapleSim()
-        .setHeldFuelPoses(additionalFuelPoses.toArray(Pose3d[]::new));
-
-    DogLog.log("RobotVisualizer/HeldFuelCount", fuelCount);
 
     // Get robot state
     Angle turretAngle = robot.getTurret().getPosition();
