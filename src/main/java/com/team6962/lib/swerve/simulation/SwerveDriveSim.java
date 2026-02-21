@@ -74,6 +74,15 @@ public class SwerveDriveSim {
   }
 
   /**
+   * Gets the MapleSim instance for direct access to arena and physics simulation data.
+   *
+   * @return the {@link MapleSim} instance representing the arena and physics simulation
+   */
+  public MapleSim getMapleSim() {
+    return mapleSim;
+  }
+
+  /**
    * Updates all module and gyroscope simulations.
    *
    * @param deltaTimeSeconds time elapsed since the last update
