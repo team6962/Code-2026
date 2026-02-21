@@ -1,6 +1,5 @@
 package frc.robot.controls;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -8,8 +7,6 @@ import com.team6962.lib.swerve.commands.TeleopSwerveCommand;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -141,12 +138,11 @@ public class TeleopControls {
 
     // Force shooting
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
-                
+
     // Pass fuel to alliance zone
     driver.rightStick().whileTrue(robot.getAutoPassing().passRight());
 
     driver.leftStick().whileTrue(robot.getAutoPassing().passLeft()); // temporary
-
 
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back

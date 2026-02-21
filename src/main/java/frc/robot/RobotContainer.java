@@ -4,16 +4,12 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -71,14 +67,13 @@ public class RobotContainer {
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
 
     autoPassing = new AutoPassing(this);
-    
+
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-    
+
     configureAutonomousChooser();
-    
 
     visualizer = new RobotVisualizer(this);
   }

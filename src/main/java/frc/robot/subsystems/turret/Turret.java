@@ -427,7 +427,7 @@ public class Turret extends SubsystemBase {
     return startEnd(
             () -> {
               Angle optimizedTargetPosition =
-                    clampPositionToSafeRange(
+                  clampPositionToSafeRange(
                       optimizeTarget(
                           targetAngle,
                           getPosition(),
@@ -454,7 +454,7 @@ public class Turret extends SubsystemBase {
     return runEnd(
             () -> {
               Angle optimizedTargetPosition =
-                    clampPositionToSafeRange(
+                  clampPositionToSafeRange(
                       optimizeTarget(
                           targetAngleSupplier.get(),
                           getPosition(),
