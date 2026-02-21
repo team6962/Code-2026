@@ -16,20 +16,35 @@ import org.apache.commons.math3.analysis.interpolation.MicrosphereInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 
 public class ShooterFunctions {
-  /** Path to the CSV file containing 2D hood angle calibration data for hub shots. Formatted as Distance, Velocity, Angle */
-  private static final String anglePathHub = "hoodangledatahub.csv"; 
+  /**
+   * Path to the CSV file containing 2D hood angle calibration data for hub shots. Formatted as
+   * Distance, Velocity, Angle
+   */
+  private static final String anglePathHub = "hoodangledatahub.csv";
 
-  /** Path to the CSV file containing 2-column flywheel velocity calibration data for hub shots. Formatted as Distance, Velocity */
+  /**
+   * Path to the CSV file containing 2-column flywheel velocity calibration data for hub shots.
+   * Formatted as Distance, Velocity
+   */
   private static final String velocityPathHub = "flywheelvelocitydatahub.csv";
 
-  /** Path to the CSV file containing hood angle calibration data for passing. Formatted as Distance, Angle */
+  /**
+   * Path to the CSV file containing hood angle calibration data for passing. Formatted as Distance,
+   * Angle
+   */
   private static final String anglePathPass = "passinghoodangledata.csv";
 
-  /** Path to the CSV file containing flywheel velocity calibration data for passing. Formatted as Distance, Velocity */
+  /**
+   * Path to the CSV file containing flywheel velocity calibration data for passing. Formatted as
+   * Distance, Velocity
+   */
   private static final String velocityPathPass = "passingflywheelvelocitydata.csv";
 
-  /** Path to the CSV file containing minimum and maximum velocities to shoot at. Formatted as Distance, Velocity, Angle */
-  private static final String velocityRangeHub = "velocityrangehub.csv"; 
+  /**
+   * Path to the CSV file containing minimum and maximum velocities to shoot at. Formatted as
+   * Distance, Velocity, Angle
+   */
+  private static final String velocityRangeHub = "velocityrangehub.csv";
 
   /** Minimum valid distance to the target for hub shots, in inches. */
   private static final double minDistanceHub = 57.5; // Calibrated for our shooter A testing
@@ -111,7 +126,8 @@ public class ShooterFunctions {
   }
 
   /**
-   * Loads shooter calibration data for passing from a CSV file and returns an interpolating function.
+   * Loads shooter calibration data for passing from a CSV file and returns an interpolating
+   * function.
    *
    * @return a {@code UnivariateFunction} that interpolates the distance to a hood angle setpoint
    *     using the data loaded from the CSV file
@@ -130,14 +146,15 @@ public class ShooterFunctions {
     }
     return interpolator.interpolate(x, y);
   }
-  
+
   /**
-   * Loads flywheel velocity calibration data for passing from a CSV file and returns an interpolating
-   * function.
+   * Loads flywheel velocity calibration data for passing from a CSV file and returns an
+   * interpolating function.
    *
    * @return a {@code UnivariateFunction} that interpolates the distance to a flywheel velocity
    *     setpoint using the data loaded from the CSV file
-   * @throws IOException if an I/O error occurs while reading the CSV file at {@code velocityPathPass}
+   * @throws IOException if an I/O error occurs while reading the CSV file at {@code
+   *     velocityPathPass}
    */
   private UnivariateFunction loadFlywheelDataPass() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
@@ -152,14 +169,15 @@ public class ShooterFunctions {
     }
     return interpolator.interpolate(x, y);
   }
-  
+
   /**
-   * Loads minimum flywheel velocity data for hub shots from a CSV file and returns an
-   * interpolating function.
+   * Loads minimum flywheel velocity data for hub shots from a CSV file and returns an interpolating
+   * function.
    *
    * @return a {@code UnivariateFunction} that interpolates the distance to a velocity setpoint
    *     using the data loaded from the CSV file
-   * @throws IOException if an I/O error occurs while reading the CSV file at {@code velocityRangeHub}
+   * @throws IOException if an I/O error occurs while reading the CSV file at {@code
+   *     velocityRangeHub}
    */
   private UnivariateFunction loadMinVelocityHub() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
@@ -176,12 +194,13 @@ public class ShooterFunctions {
   }
 
   /**
-   * Loads maximum flywheel velocity data for hub shots from a CSV file and returns an
-   * interpolating function.
+   * Loads maximum flywheel velocity data for hub shots from a CSV file and returns an interpolating
+   * function.
    *
    * @return a {@code UnivariateFunction} that interpolates the distance to a velocity setpoint
    *     using the data loaded from the CSV file
-   * @throws IOException if an I/O error occurs while reading the CSV file at {@code velocityRangeHub}
+   * @throws IOException if an I/O error occurs while reading the CSV file at {@code
+   *     velocityRangeHub}
    */
   private UnivariateFunction loadMaxVelocityHub() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
@@ -252,7 +271,8 @@ public class ShooterFunctions {
    * @return an Angle representing the hood setpoint in degrees needed for the shot
    */
   public Angle getHoodAngleHub(Distance distance, AngularVelocity velocity) {
-    if (isDistanceWithinValidHubRange(distance) && isVelocityWithinValidHubRange(distance, velocity)) {
+    if (isDistanceWithinValidHubRange(distance)
+        && isVelocityWithinValidHubRange(distance, velocity)) {
       return Degrees.of(
           hoodAngleFunctionHub.value(
               new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
@@ -260,14 +280,19 @@ public class ShooterFunctions {
       return Degrees.of(
           hoodAngleFunctionHub.value(
               new double[] {
-                MathUtil.clamp(distance.in(Inches), minDistanceHub, maxDistanceHub), velocity.in(RotationsPerSecond)}));
-    } else return Degrees.of(
-        hoodAngleFunctionHub.value(
-            new double[] {
-              MathUtil.clamp(distance.in(Inches), minDistanceHub, maxDistanceHub),
-              MathUtil.clamp(velocity.in(RotationsPerSecond), minVelocityHub.value(distance.in(Inches)), maxVelocityHub.value(distance.in(Inches)))
-            }));
-      
+                MathUtil.clamp(distance.in(Inches), minDistanceHub, maxDistanceHub),
+                velocity.in(RotationsPerSecond)
+              }));
+    } else
+      return Degrees.of(
+          hoodAngleFunctionHub.value(
+              new double[] {
+                MathUtil.clamp(distance.in(Inches), minDistanceHub, maxDistanceHub),
+                MathUtil.clamp(
+                    velocity.in(RotationsPerSecond),
+                    minVelocityHub.value(distance.in(Inches)),
+                    maxVelocityHub.value(distance.in(Inches)))
+              }));
   }
 
   /**
