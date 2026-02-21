@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.math.CSVLoader;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -18,6 +19,8 @@ public class ShooterFunctions {
 
   private static final String anglePath = "hoodangledata.csv";
   private static final String velocityPath = "flywheelvelocitydata.csv";
+  private static final double minDistance = 57.5;
+  private static final double maxDistance = 263.0;
 
   private MultivariateFunction hoodAngleFunction;
   private UnivariateFunction flywheelVelocityFunction;
@@ -26,6 +29,8 @@ public class ShooterFunctions {
     try {
       this.hoodAngleFunction = loadShooterData();
       this.flywheelVelocityFunction = loadFlywheelData();
+      loadShooterData();
+      loadFlywheelData();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -44,10 +49,10 @@ public class ShooterFunctions {
   private MultivariateFunction loadShooterData() throws IOException {
     MicrosphereInterpolator interpolator = new MicrosphereInterpolator();
     double[][] data = CSVLoader.loadCSV(anglePath);
-    double[][] x = new double[2][data.length];
+    double[][] x = new double[data.length][2];
     for (int i = 0; i < data.length; i++) {
-      x[0][i] = data[i][0];
-      x[1][i] = data[i][1];
+      x[i][0] = data[i][0];
+      x[i][1] = data[i][1];
     }
     double[] y = new double[data.length];
     for (int i = 0; i < data.length; i++) {
@@ -90,7 +95,8 @@ public class ShooterFunctions {
 
   /**
    * Calculates the hood angle required to score given the current distance to the target and the
-   * shooter wheel angular velocity.
+   * shooter wheel angular velocity. Clamps the output to the maximum and minimum hood angles if the
+   * input distance is outside the valid range.
    *
    * @param distance the distance to the target (will be converted to inches for the internal
    *     calculation)
@@ -98,21 +104,49 @@ public class ShooterFunctions {
    *     for the internal calculation)
    * @return an Angle representing the hood setpoint in degrees needed for the shot
    */
-  public Angle getHoodAngle(Distance distance, AngularVelocity velocity) {
-    return Degrees.of(
-        hoodAngleFunction.value(
-            new double[] {distance.in(Inches), velocity.in(RotationsPerSecond)}));
+  public Angle getHoodAngle(Distance distance) {
+    if (isWithinValidRange(distance)) {
+      return Degrees.of(
+          hoodAngleFunction.value(
+              new double[] {
+                distance.in(Inches), getFlywheelVelocity(distance).in(RotationsPerSecond)
+              }));
+    } else
+      return Degrees.of(
+          hoodAngleFunction.value(
+              new double[] {
+                MathUtil.clamp(distance.in(Inches), minDistance, maxDistance),
+                getFlywheelVelocity(distance).in(RotationsPerSecond)
+              }));
   }
 
   /**
    * Calculates the required flywheel angular velocity to reach a target at the specified distance
-   * and shooter angle.
+   * and shooter angle. Clamps the output to the maximum and minimum flywheel velocities if the
+   * input distance is outside the valid range.
    *
    * @param distance the distance to the target; will be converted to inches before evaluation
    * @param angle the shooter/target angle (currently unused by this method)
    * @return the required flywheel angular velocity as an AngularVelocity (rotations per second)
    */
-  public AngularVelocity getFlywheelVelocity(Distance distance, Angle angle) {
-    return RotationsPerSecond.of(flywheelVelocityFunction.value(distance.in(Inches)));
+  public AngularVelocity getFlywheelVelocity(Distance distance) {
+    if (isWithinValidRange(distance)) {
+      return RotationsPerSecond.of(flywheelVelocityFunction.value(distance.in(Inches)));
+    } else
+      return RotationsPerSecond.of(
+          flywheelVelocityFunction.value(
+              MathUtil.clamp(distance.in(Inches), minDistance, maxDistance)));
+  }
+
+  /**
+   * Determines whether the given distance falls within the configured valid range.
+   *
+   * @param distance the Distance to check; will be converted to inches for comparison
+   * @return true if the distance (in inches) is greater than or equal to minDistance and less than
+   *     or equal to maxDistance
+   */
+  public boolean isWithinValidRange(Distance distance) {
+    double distanceInInches = distance.in(Inches);
+    return distanceInInches >= minDistance && distanceInInches <= maxDistance;
   }
 }
