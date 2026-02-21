@@ -125,29 +125,29 @@ public class LEDs extends SubsystemBase {
 
   /* Sets the gradient green and pink for Auton state.*/
   public Command autonColors() {
-        return Commands.either(
-          runEnd(() -> {
-            Color yellow = new Color(204,255,0);
-            Color blue = new Color(0,255,255);
-            LEDPattern pattern = createContinuousGradient(blue, yellow, Hertz.of(1)); // T.B.D
-            pattern.applyTo(colorBuffer);
-            addressableLeds.setData(colorBuffer);
-          },       () -> {
-        clearLeds();
-      }),
-          runEnd(() -> {
-            Color yellow = new Color(204,255,0);
-            Color red = new Color(255,0,0);
-            LEDPattern pattern = createContinuousGradient(red, yellow, Hertz.of(1)); // T.B.D
-            pattern.applyTo(colorBuffer);
-            addressableLeds.setData(colorBuffer);
-          },       () -> {
-        clearLeds();
-      }),
-          () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)
-        ); 
-      }
-
-    
+    return Commands.either(
+        runEnd(
+            () -> {
+              Color yellow = new Color(204, 255, 0);
+              Color blue = new Color(0, 255, 255);
+              LEDPattern pattern = createContinuousGradient(blue, yellow, Hertz.of(1)); // T.B.D
+              pattern.applyTo(colorBuffer);
+              addressableLeds.setData(colorBuffer);
+            },
+            () -> {
+              clearLeds();
+            }),
+        runEnd(
+            () -> {
+              Color yellow = new Color(204, 255, 0);
+              Color red = new Color(255, 0, 0);
+              LEDPattern pattern = createContinuousGradient(red, yellow, Hertz.of(1)); // T.B.D
+              pattern.applyTo(colorBuffer);
+              addressableLeds.setData(colorBuffer);
+            },
+            () -> {
+              clearLeds();
+            }),
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red));
   }
-
+}
