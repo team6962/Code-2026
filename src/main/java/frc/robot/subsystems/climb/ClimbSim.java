@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.team6962.lib.simulation.LinearMechanismSim;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 
 /** climb sim runs a physics sim for the climb mechanism */
@@ -19,7 +18,7 @@ public class ClimbSim {
     climbMotor = motor.getSimState();
     physicsSim =
         new LinearMechanismSim(
-            DCMotor.getKrakenX60Foc(1),
+            ClimbConstants.SIMULATED_MOTOR,
             ClimbConstants.GEAR_RATIO,
             ClimbConstants.MASS,
             ClimbConstants.DRUM_RADIUS,
@@ -33,15 +32,20 @@ public class ClimbSim {
     climbMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(climbMotor.getMotorVoltage());
     physicsSim.update(0.02);
+
     climbMotor.setRawRotorPosition(
         Rotations.of(
             physicsSim.getPositionMeters()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
+                / 2
+                / Math.PI
                 * ClimbConstants.GEAR_RATIO));
     climbMotor.setRotorVelocity(
         RotationsPerSecond.of(
             physicsSim.getVelocityMetersPerSecond()
                 / ClimbConstants.DRUM_RADIUS.in(Meters)
+                / 2
+                / Math.PI
                 * ClimbConstants.GEAR_RATIO));
   }
 }
