@@ -44,6 +44,12 @@ public class MapleSim {
   /** The swerve drive simulation instance that handles drivetrain physics. */
   private SwerveDriveSimulation swerveSim;
 
+  /** Cached poses of fuel game pieces in the arena for logging and visualization purposes. */
+  private Pose3d[] fuelPoses = new Pose3d[0];
+
+  /** Additional robot-relative fuel poses for fuel inside the robot. */
+  private Pose3d[] heldFuelPoses = new Pose3d[0];
+
   /**
    * Creates and initializes the MapleSim physics simulation.
    *
@@ -170,7 +176,17 @@ public class MapleSim {
    *     pieces currently in the arena simulation
    */
   public Pose3d[] getFuelPositions() {
-    return arena.getGamePiecesArrayByType("Fuel");
+    return fuelPoses;
+  }
+
+  /**
+   * Sets additional fuel poses for fuel inside the robot.
+   *
+   * @param heldFuelPoses an array of {@link Pose3d} representing the positions and orientations of
+   *     additional fuel inside the robot
+   */
+  public void setHeldFuelPoses(Pose3d[] heldFuelPoses) {
+    this.heldFuelPoses = heldFuelPoses;
   }
 
   /**
@@ -191,6 +207,24 @@ public class MapleSim {
 
     // Query the positions of all fuel game pieces in the arena
     Pose3d[] fuelPoses = arena.getGamePiecesArrayByType("Fuel");
+
+    if (heldFuelPoses.length > 0) {
+      // If there are additional fuel poses (e.g., for fuel inside the robot), combine them with the
+      // arena fuel poses for logging and visualization
+      Pose3d[] combinedPoses = new Pose3d[fuelPoses.length + heldFuelPoses.length];
+      System.arraycopy(fuelPoses, 0, combinedPoses, 0, fuelPoses.length);
+
+      for (int i = 0; i < heldFuelPoses.length; i++) {
+        // Transform the held fuel poses from robot-relative to field-relative coordinates
+        Pose3d fuelTransform =
+            new Pose3d(getRobotPose()).plus(heldFuelPoses[i].minus(new Pose3d()));
+        combinedPoses[fuelPoses.length + i] = fuelTransform;
+      }
+
+      fuelPoses = combinedPoses;
+    }
+
+    this.fuelPoses = fuelPoses;
 
     // Log fuel positions for visualization in AdvantageScope or other logging tools
     DogLog.log("Drivetrain/Simulation/FuelPositions", fuelPoses);
