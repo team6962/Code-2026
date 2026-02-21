@@ -1,5 +1,6 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -7,6 +8,8 @@ import com.team6962.lib.swerve.commands.TeleopSwerveCommand;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -109,7 +112,7 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    driver.rightStick().whileTrue(driveToClump.driveToClump());
+    // driver.rightStick().whileTrue(driveToClump.driveToClump()); uncomment before pushing
 
     // Intake without driving
     driver
@@ -138,8 +141,32 @@ public class TeleopControls {
 
     // Force shooting
     operator.rightTrigger().whileTrue(Commands.print("Force Shoot"));
-
+                
     // Pass fuel to alliance zone
+    driver.rightStick().whileTrue(Commands.sequence( // temporary
+        robot.getTurret().moveTo(
+          () -> {
+            Angle turretTarget = new Translation2d( // Get translation from robot to the left side of the field
+              1.525 - robot.getSwerveDrive().getPosition2d().getX(),
+              7.022 - robot.getSwerveDrive().getPosition2d().getY()
+            ).getAngle().getMeasure() // Convert the Translation2d into an angle
+            .minus( // Subtract the robot's current heading to get the angle that the turret should rotate to
+              robot.getSwerveDrive().getHeading()
+            );
+
+            System.out.println("Turret Target Angle: " + turretTarget.in(Degrees));
+
+            return turretTarget;
+          }
+        )
+        // should point to the left side of the field from the drive station's perspective
+        // getShooterHood().moveTo(ShooterHoodConstants.MAX_ANGLE),
+        // getShooterRollers().shoot(RotationsPerSecond.of(1)) // arbitrary shooting speed for now
+    ));
+
+    driver.rightStick().whileTrue(Commands.print("Pass Left")); // temporary
+
+
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
 

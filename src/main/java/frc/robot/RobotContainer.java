@@ -4,12 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -119,7 +123,30 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    // return autoChooser.getSelected();
+
+    // (1.525, 7.022)
+
+
+    return Commands.sequence(
+        getTurret().moveTo(
+          () -> {
+            // Get translation to the left side of the field
+            return new Translation2d(
+              1.525 - getSwerveDrive().getPosition2d().getX(),
+              7.022 - getSwerveDrive().getPosition2d().getY()
+            ).getAngle().getMeasure() // Convert the Translation2d into an angle
+            .minus( // Subtract the robot's current heading to get the angle that the turret should rotate to
+              getSwerveDrive().getHeading()
+            );
+          }
+        )
+        // should point to the left side of the field from the drive station's perspective
+        // getShooterHood().moveTo(ShooterHoodConstants.MAX_ANGLE),
+        // getShooterRollers().shoot(RotationsPerSecond.of(1)) // arbitrary shooting speed for now
+        );
+
+    // return getTurret().moveTo(Radians.of(Math.PI / 2));
   }
 
   public void latePeriodic() {

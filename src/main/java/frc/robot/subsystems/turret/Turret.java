@@ -215,6 +215,7 @@ public class Turret extends SubsystemBase {
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
+    DogLog.log("Turret/PositionDegs", getPosition().in(Degrees));
     DogLog.log("Turret/Velocity", getVelocity());
     DogLog.log("Turret/Acceleration", getAcceleration());
     DogLog.log("Turret/AppliedVoltage", getAppliedVoltage());
