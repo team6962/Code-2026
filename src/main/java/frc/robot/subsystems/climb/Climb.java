@@ -53,9 +53,7 @@ public class Climb extends SubsystemBase {
               * ClimbConstants.DRUM_RADIUS.in(Meters)
               * ClimbConstants.MASS.in(Kilograms)
               / ClimbConstants.GEAR_RATIO
-              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp
-              * 2.0
-              * Math.PI;
+              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp;
 
       ClimbConstants.MOTOR_CONFIGURATION.Slot0.kS = 0; // No friction in simulation, so kS = 0
 
@@ -69,9 +67,7 @@ public class Climb extends SubsystemBase {
               * ClimbConstants.MASS.in(Kilograms)
               * ClimbConstants.DRUM_RADIUS.in(Meters)
               / ClimbConstants.GEAR_RATIO
-              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp
-              * 2.0
-              * Math.PI;
+              / ClimbConstants.SIMULATED_MOTOR.KtNMPerAmp;
     }
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
