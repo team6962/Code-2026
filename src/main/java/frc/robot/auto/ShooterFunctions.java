@@ -185,12 +185,12 @@ public class ShooterFunctions {
    *     for the internal calculation)
    * @return an Angle representing the hood setpoint in degrees needed for the shot
    */
-  public Angle getHoodAngleHub(Distance distance) {
-    if (isWithinValidHubRange(distance)) {
+  public Angle getHoodAngleHub(Distance distance, AngularVelocity velocity) {
+    if (isDistanceWithinValidHubRange(distance)) {
       return Degrees.of(
           hoodAngleFunctionHub.value(
               new double[] {
-                distance.in(Inches), getFlywheelVelocityHub(distance).in(RotationsPerSecond)
+                distance.in(Inches), velocity.in(RotationsPerSecond)
               }));
     } else
       return Degrees.of(
@@ -211,7 +211,7 @@ public class ShooterFunctions {
    * @return the required flywheel angular velocity as an AngularVelocity (rotations per second)
    */
   public AngularVelocity getFlywheelVelocityHub(Distance distance) {
-    if (isWithinValidHubRange(distance)) {
+    if (isDistanceWithinValidHubRange(distance)) {
       return RotationsPerSecond.of(flywheelVelocityFunctionHub.value(distance.in(Inches)));
     } else
       return RotationsPerSecond.of(
@@ -229,7 +229,7 @@ public class ShooterFunctions {
    * @return an Angle representing the hood setpoint in degrees needed for passing
    */
   public Angle getHoodAnglePass(Distance distance) {
-    if (isWithinValidPassRange(distance)) {
+    if (isDistanceWithinValidPassRange(distance)) {
       return Degrees.of(hoodAngleFunctionPass.value(distance.in(Inches)));
     } else
       return Degrees.of(
@@ -247,7 +247,7 @@ public class ShooterFunctions {
    *     second)
    */
   public AngularVelocity getFlywheelVelocityPass(Distance distance) {
-    if (isWithinValidPassRange(distance)) {
+    if (isDistanceWithinValidPassRange(distance)) {
       return RotationsPerSecond.of(flywheelVelocityFunctionPass.value(distance.in(Inches)));
     } else
       return RotationsPerSecond.of(
@@ -262,7 +262,7 @@ public class ShooterFunctions {
    * @return true if the distance (in inches) is greater than or equal to minDistance and less than
    *     or equal to maxDistance
    */
-  public boolean isWithinValidHubRange(Distance distance) {
+  public boolean isDistanceWithinValidHubRange(Distance distance) {
     double distanceInInches = distance.in(Inches);
     return distanceInInches >= minDistanceHub && distanceInInches <= maxDistanceHub;
   }
@@ -274,7 +274,7 @@ public class ShooterFunctions {
    * @return true if the distance (in inches) is greater than or equal to minDistancePass and less
    *     than or equal to maxDistancePass
    */
-  public boolean isWithinValidPassRange(Distance distance) {
+  public boolean isDistanceWithinValidPassRange(Distance distance) {
     double distanceInInches = distance.in(Inches);
     return distanceInInches >= minDistancePass && distanceInInches <= maxDistancePass;
   }
