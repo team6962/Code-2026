@@ -123,7 +123,7 @@ public class LEDs extends SubsystemBase {
         });
   }
 
-  /* Sets the gradient to alliance color + yellow while autonomous.*/
+  /* Sets the gradient to alliance color + yellow while autonomous. */
   public Command autonColors() {
     return Commands.either(
         runEnd(
