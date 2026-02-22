@@ -25,7 +25,7 @@ public class Autonomous {
     this.autoClimb = new AutoClimb(robot);
   }
 
-  public Command rightPreloadClimbAutoWithVision() {
+  public Command rightPreloadNeutralZoneClimbAuto() {
     return Commands.sequence(
         this.robot
             .getSwerveDrive()
@@ -53,5 +53,6 @@ public class Autonomous {
                                 / 2))), // rough position estimate based on simulation, not exact
                 new ChassisSpeeds(0, 0.5, 0)), // not exact chassis speeds
         this.autoClimb.climb());
+        //currently doesn't shoot at all
   }
 }
