@@ -29,16 +29,10 @@ public class ShooterFunctions {
   private static final String velocityPathHub = "flywheelvelocitydatahub.csv";
 
   /**
-   * Path to the CSV file containing hood angle calibration data for passing. Formatted as Distance,
+   * Path to the CSV file containing hood angle and flywheel velocity calibration data for passing. Formatted as Distance,
    * Angle
    */
-  private static final String anglePathPass = "passinghoodangledata.csv";
-
-  /**
-   * Path to the CSV file containing flywheel velocity calibration data for passing. Formatted as
-   * Distance, Velocity
-   */
-  private static final String velocityPathPass = "passingflywheelvelocitydata.csv";
+  private static final String passingPath = "passingdata.csv";
 
   /**
    * Path to the CSV file containing minimum and maximum velocities to shoot at. Formatted as
@@ -135,7 +129,7 @@ public class ShooterFunctions {
    */
   private UnivariateFunction loadHoodAngleDataPass() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
-    double[][] data = CSVLoader.loadCSV(anglePathPass);
+    double[][] data = CSVLoader.loadCSV(passingPath);
     double[] x = new double[data.length];
     for (int i = 0; i < data.length; i++) {
       x[i] = data[i][0];
@@ -158,7 +152,7 @@ public class ShooterFunctions {
    */
   private UnivariateFunction loadFlywheelDataPass() throws IOException {
     SplineInterpolator interpolator = new SplineInterpolator();
-    double[][] data = CSVLoader.loadCSV(velocityPathPass);
+    double[][] data = CSVLoader.loadCSV(passingPath);
     double[] x = new double[data.length];
     for (int i = 0; i < data.length; i++) {
       x[i] = data[i][0];
