@@ -29,14 +29,21 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * extends and retracts the thing that intakes the fuel
+ */
 public class IntakeExtension extends SubsystemBase {
+  /**
+   * checks wether the hall sensor has been triggered before, and lets us know if the machine knows the intake extension's postiion.
+   */
+  private boolean isZeroed = true;
 
+  private CANdi candi;
   private TalonFX motor;
-  private CANdi candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
 
-  private StatusSignal<Angle> angleSignal;
-  private StatusSignal<AngularVelocity> angularVelocitySignal;
-  private StatusSignal<AngularAcceleration> angularAccelerationSignal;
+  private StatusSignal<Angle> distanceSignal;
+  private StatusSignal<AngularVelocity> linearVelocitySignal;
+  private StatusSignal<AngularAcceleration> linearAccelerationSignal;
 
   private StatusSignal<Voltage> voltageSignal;
 
@@ -50,17 +57,18 @@ public class IntakeExtension extends SubsystemBase {
   private IntakeExtensionSim simulation;
 
   public IntakeExtension() {
+    candi = new CANdi(IntakeExtensionConstants.CANDI_DEVICE_ID, "subsystems");
     motor = new TalonFX(IntakeExtensionConstants.MOTOR_CAN_ID, new CANBus("subsystems"));
     motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(IntakeExtensionConstants.CANDI_CONFIGURATION);
 
-    angleSignal = motor.getPosition();
-    angularVelocitySignal = motor.getVelocity();
-    angularAccelerationSignal = motor.getAcceleration();
+    distanceSignal = motor.getPosition();
+    linearVelocitySignal = motor.getVelocity();
+    linearAccelerationSignal = motor.getAcceleration();
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    candiTriggeredSignal = candi.getS1Closed(); // we dont know which candi sensor it is
+    candiTriggeredSignal = candi.getS1Closed();
     closedLoopReferenceSignal = motor.getClosedLoopReference();
 
     if (RobotBase.isSimulation()) {
@@ -70,11 +78,10 @@ public class IntakeExtension extends SubsystemBase {
 
   /**
    * Makes sure the extension doesn't go over or under the maximum and minimum
-   *
    * @param input
    * @return Maximum, minimum, or the input
    */
-  public Distance clampPositionToSafeRange(Distance input) {
+  private Distance clampPositionToSafeRange(Distance input) {
     if (input.gt(IntakeExtensionConstants.MAX_POSITION)) {
       return IntakeExtensionConstants.MAX_POSITION;
     } else if (input.lt(IntakeExtensionConstants.MIN_POSITION)) {
@@ -84,14 +91,19 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   public Command extend() {
-    return startEnd(
+    if (isZeroed) {
+      return startEnd(
         () -> {
           motor.setControl(
-              new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+            new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
         },
         () -> {
           motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
         });
+      }
+      else {
+        return null;
+      }
   }
 
   public Command retract() {
@@ -114,7 +126,7 @@ public class IntakeExtension extends SubsystemBase {
   public LinearVelocity getVelocity() {
     return MetersPerSecond.of(
         BaseStatusSignal.getLatencyCompensatedValue(
-                angularVelocitySignal, angularAccelerationSignal)
+                linearVelocitySignal, linearAccelerationSignal)
             .in(RotationsPerSecond));
   }
 
@@ -125,7 +137,7 @@ public class IntakeExtension extends SubsystemBase {
    */
   public Distance getPosition() {
     return Meters.of(
-        BaseStatusSignal.getLatencyCompensatedValue(angleSignal, angularVelocitySignal)
+        BaseStatusSignal.getLatencyCompensatedValue(distanceSignal, linearVelocitySignal)
             .in(Rotations));
   }
 
@@ -135,7 +147,7 @@ public class IntakeExtension extends SubsystemBase {
    * @return The linear acceleration as a LinearAcceleration object.
    */
   public LinearAcceleration getAcceleration() {
-    return MetersPerSecondPerSecond.of(angularAccelerationSignal.getValueAsDouble());
+    return MetersPerSecondPerSecond.of(linearAccelerationSignal.getValueAsDouble());
   }
 
   /**
@@ -168,13 +180,13 @@ public class IntakeExtension extends SubsystemBase {
   /**
    * This finds out whether the CANdi was triggered
    *
-   * @return true or false
+   * @return true if hall sensor is triggered, false otherwise
    */
-  public Boolean getCANdiTriggered() {
+  private boolean getCANdiTriggered() {
     return candiTriggeredSignal.getValue();
   }
 
-  public Double getClosedLoopReference() {
+  private double getClosedLoopReference() {
     return closedLoopReferenceSignal.getValue();
   }
 
@@ -183,27 +195,35 @@ public class IntakeExtension extends SubsystemBase {
     if (simulation != null) {
       simulation.update();
     }
-    if (getCANdiTriggered()) {
+    else if (simulation == null) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+    }
+    if (getCANdiTriggered() && (getPosition().in(Meters) < IntakeExtensionConstants.MIN_POSITION.in(Meters))) {
+      motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+    }
+     {
+    if (getCANdiTriggered() != true) {
+      isZeroed = false;
     }
 
     BaseStatusSignal.refreshAll(
-        angularVelocitySignal,
+        linearVelocitySignal,
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        angleSignal,
-        angularAccelerationSignal,
+        distanceSignal,
+        linearAccelerationSignal,
         candiTriggeredSignal,
         closedLoopReferenceSignal);
 
-    DogLog.log("intake/position", getPosition());
-    DogLog.log("intake/velocity", getVelocity());
-    DogLog.log("intake/acceleration", getAcceleration());
-    DogLog.log("intake/voltage", getVoltage());
-    DogLog.log("intake/statorCurrent", getStatorCurrent());
-    DogLog.log("intake/supplyCurrent", getSupplyCurrent());
-    DogLog.log("intake/candiTriggered", getCANdiTriggered());
-    DogLog.log("intake/closedLoopReference", getClosedLoopReference());
+    DogLog.log("Intake/Position", getPosition());
+    DogLog.log("Intake/Velocity", getVelocity());
+    DogLog.log("Intake/Acceleration", getAcceleration());
+    DogLog.log("Intake/Voltage", getVoltage());
+    DogLog.log("Intake/StatorCurrent", getStatorCurrent());
+    DogLog.log("Intake/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Intake/CandiTriggered", getCANdiTriggered());
+    DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
+  }
   }
 }

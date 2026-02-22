@@ -55,6 +55,10 @@ public class RobotContainer {
     return aprilTagVision;
   }
 
+  public IntakeExtension getIntakeExtension() {
+    return intake;
+  }
+
   public Command getAutonomousCommand() {
     return driveStraightAuto.getCommand();
   }

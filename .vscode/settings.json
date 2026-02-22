@@ -59,11 +59,5 @@
   ],
   "java.dependency.enableDependencyCheckup": false,
   "java.jdt.ls.vmargs": "-Xmx4G",
-  "java.compile.nullAnalysis.mode": "disabled",
-
-"[java]": {
-"editor.defaultFormatter": "RudraPatel.prettier-plugin-java-vscode",
-},
-"editor.defaultFormatter": "RudraPatel.prettier-plugin-java-vscode",
-"editor.formatOnSave": true
+  "java.compile.nullAnalysis.mode": "disabled"
 }
