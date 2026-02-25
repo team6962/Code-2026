@@ -12,10 +12,9 @@ import frc.robot.RobotContainer;
 
 public class DriveFixedShooter {
   private RobotContainer robot;
-  private final Translation2d LEFT_HUB_POSITION =
+  private final Translation2d HUB_POSITION =
       new Translation2d(Inches.of(182.11).in(Meters), Inches.of(158.84).in(Meters));
-  private final Translation2d RIGHT_HUB_POSITION =
-      new Translation2d(Inches.of(469.11).in(Meters), Inches.of(158.84).in(Meters));
+  public static final double HUB_RADIUS = Inches.of(40).in(Meters); // just a guess
 
   public DriveFixedShooter(RobotContainer robot) {
     this.robot = robot;
@@ -23,8 +22,7 @@ public class DriveFixedShooter {
 
   public Command driveToLeftPosition(double radius) {
     Translation2d shotPosition =
-        LEFT_HUB_POSITION.plus(
-            new Translation2d(-radius / Math.sqrt(2.00), radius / Math.sqrt(2.00)));
+        HUB_POSITION.plus(new Translation2d(-radius / Math.sqrt(2.00), radius / Math.sqrt(2.00)));
     return robot
         .getSwerveDrive()
         .driveTo(new Pose2d(shotPosition, new Rotation2d(Degrees.of(-45.0))));
@@ -32,12 +30,21 @@ public class DriveFixedShooter {
 
   public Command driveToRightPosition(double radius) {
     Translation2d shotPosition =
-        LEFT_HUB_POSITION.plus(
-            new Translation2d(-radius / Math.sqrt(2.00), -radius / Math.sqrt(2.00)));
+        HUB_POSITION.plus(new Translation2d(-radius / Math.sqrt(2.00), -radius / Math.sqrt(2.00)));
     return robot
         .getSwerveDrive()
         .driveTo(new Pose2d(shotPosition, new Rotation2d(Degrees.of(45.0))));
   }
+
+  public Command driveToClosestShotPosition(double radius) {
+    Translation2d hubToRobotVector =
+        robot.getSwerveDrive().getPosition2d().getTranslation().minus(HUB_POSITION);
+    Translation2d shotPosition =
+        HUB_POSITION.plus(hubToRobotVector.div(hubToRobotVector.getNorm()).times(radius));
+    return robot
+        .getSwerveDrive()
+        .driveTo(
+            new Pose2d(
+                shotPosition, hubToRobotVector.getAngle().plus(new Rotation2d(Degrees.of(180.0)))));
+  }
 }
-// hub cord inches (left) (182.11,158.84)
-// hub cord inches (right) (469.11,158.84)

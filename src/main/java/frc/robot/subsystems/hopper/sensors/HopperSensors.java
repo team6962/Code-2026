@@ -127,10 +127,10 @@ public class HopperSensors extends SubsystemBase {
    */
   @Override
   public void periodic() {
-     if (!isHopperEmpty()) {
+    if (!isHopperEmpty()) {
       hopper.load();
     }
-    
+
     StatusUtil.check(
         BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
 

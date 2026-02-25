@@ -10,11 +10,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
+import frc.robot.auto.DriveFixedShooter;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
+  private DriveFixedShooter driveFixedShooter;
   //   private AutoClimb autoClimb;
   //   private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
@@ -24,6 +26,7 @@ public class TeleopControls {
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
+    this.driveFixedShooter = new DriveFixedShooter(robot);
     // this.autoClimb = new AutoClimb(robot);
     // this.driveToClump = new DriveToClump(robot);
   }
@@ -47,7 +50,9 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
+    driver
+        .a()
+        .whileTrue(driveFixedShooter.driveToClosestShotPosition(DriveFixedShooter.HUB_RADIUS));
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)

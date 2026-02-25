@@ -168,4 +168,8 @@ public class RobotContainer {
   public RobotVisualizer getVisualizer() {
     return visualizer;
   }
+
+  public DriveFixedShooter getDriveFixedShooter() {
+    return driveFixedShooter;
+  }
 }

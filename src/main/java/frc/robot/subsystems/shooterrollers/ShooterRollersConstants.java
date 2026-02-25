@@ -23,7 +23,8 @@ public final class ShooterRollersConstants {
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(2);
   public static final String CANBUS_NAME = "subsystems";
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.003072714);
-  public static final AngularVelocity FIXED_FLYWHEEL_VELOCITY = RotationsPerSecond.of(20); // Placeholder value
+  public static final AngularVelocity FIXED_FLYWHEEL_VELOCITY =
+      RotationsPerSecond.of(20); // Placeholder value
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs())
