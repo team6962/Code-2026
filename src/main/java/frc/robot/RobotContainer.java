@@ -62,7 +62,7 @@ public class RobotContainer {
     shooterRollers = new ShooterRollers();
     // turret = new Turret();
     intakeExtension = new IntakeExtension();
-    hopper = new Hopper();
+    hopper = new Hopper(shooterRollers);
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     // fuelClumpLocalization =
