@@ -1,12 +1,8 @@
 package frc.robot.controls;
 
-// import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-// import com.team6962.lib.swerve.commands.TeleopSwerveCommand;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-// import edu.wpi.first.math.geometry.Pose2d;
-// import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -16,17 +12,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
-// import frc.robot.auto.AutoClimb;
-// import frc.robot.auto.DriveToClump;
-// import frc.robot.subsystems.climb.ClimbConstants;
-// import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
-// import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
-//   private AutoClimb autoClimb;
-//   private DriveToClump driveToClump;
+  //   private AutoClimb autoClimb;
+  //   private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
 
@@ -79,7 +70,8 @@ public class TeleopControls {
     //                         5.947,
     //                         new Rotation2d(
     //                             Radians.of(
-    //                                 Math.PI)))), // rough position estimate based on simulation, not
+    //                                 Math.PI)))), // rough position estimate based on simulation,
+    // not
     //             // exact
     //             this.robot.getIntakeExtension().extend(),
     //             Commands.parallel(
@@ -99,7 +91,8 @@ public class TeleopControls {
     //             .getSwerveDrive()
     //             .driveTo(
     //                 new Pose2d(
-    //                     0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough estimate
+    //                     0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough
+    // estimate
 
     // Dump fuel
     driver
@@ -137,7 +130,9 @@ public class TeleopControls {
                 }));
 
     // Shoot
-    operator.rightTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(1))); //Incorrect number
+    operator
+        .rightTrigger()
+        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(1))); // Incorrect number
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
@@ -148,7 +143,8 @@ public class TeleopControls {
     //     .povUp()
     //     .and(() -> fineControl)
     //     .whileTrue(
-    //         this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE));
+    //
+    // this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE));
 
     // operator
     //     .povDown()
@@ -196,7 +192,8 @@ public class TeleopControls {
     //     .axisLessThan(Axis.kRightY.value, -0.5)
     //     .and(() -> fineControl)
     //     .whileTrue(
-    //         this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+    //
+    // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // // Intake extension and retraction
     Trigger intakeRetract = operator.rightStick().or(driver.back());
