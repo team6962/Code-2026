@@ -8,6 +8,7 @@ import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperConstants;
 
 /**
@@ -15,6 +16,8 @@ import frc.robot.subsystems.hopper.HopperConstants;
  * the robot and where the fuel is.
  */
 public class HopperSensors extends SubsystemBase {
+  private Hopper hopper;
+
   private CANrange kickerSensor;
   private CANrange upperHopperSensor;
   private CANrange lowerHopperSensor;
@@ -28,7 +31,8 @@ public class HopperSensors extends SubsystemBase {
    * Hopper, and Lower Hopper using constants defined in HopperConstants. Applies configuration
    * settings and initializes the StatusSignal objects for distance readings.
    */
-  public HopperSensors() {
+  public HopperSensors(Hopper hopper) {
+    this.hopper = hopper;
     kickerSensor =
         new CANrange(HopperConstants.KICKER_SENSOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     kickerSensor.getConfigurator().apply(HopperConstants.KICKER_SENSOR_CONFIGURATION);
@@ -123,6 +127,10 @@ public class HopperSensors extends SubsystemBase {
    */
   @Override
   public void periodic() {
+     if (!isHopperEmpty()) {
+      hopper.load();
+    }
+    
     StatusUtil.check(
         BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
 

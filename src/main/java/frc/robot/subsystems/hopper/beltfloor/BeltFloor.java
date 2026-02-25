@@ -110,7 +110,6 @@ public class BeltFloor extends SubsystemBase {
     if (simulation != null) {
       simulation.update();
     }
-
     /**
      * this will log Voltage, AngularVelocity, BeltVelocity, StatorCurrent, AngularAcceleration, and
      * SupplyCurrent.
