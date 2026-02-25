@@ -1,26 +1,17 @@
 package com.team6962.lib.swerve.simulation;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.localization.Gyroscope;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 /**
- * Simulates a Pigeon2 gyroscope by computing heading changes from swerve module motion.
- *
- * <p>Rather than simulating actual IMU physics, this class uses swerve kinematics to calculate the
- * robot's rotation from module position deltas. This approach accurately reflects what the robot
- * would experience during normal driving, though it cannot simulate external forces like being
- * pushed. The accelerometer is not simulated and the gyroscope mounting is assumed to be flat (no
- * pitch or roll).
- *
- * <p>The {@link #update(double)} method calculates the twist (change in pose) from module positions
- * and applies the rotational component to the gyroscope simulation. The yaw setter accounts for the
- * gyroscope's configured mount pose offset.
+ * Simulates a Pigeon2 gyroscope by computing robot yaw from MapleSim's physics simulation of the
+ * robot's motion.
  *
  * <p>Additional setter methods allow manual override of pitch, roll, and angular velocities for
  * testing scenarios that require specific gyroscope readings.
@@ -32,8 +23,8 @@ public class GyroscopeSim {
   /** Simulation state of the Pigeon2 gyroscope. */
   private Pigeon2SimState gyroSim;
 
-  /** Odometry simulation used to derive heading changes. */
-  private OdometrySim odometrySim;
+  /** MapleSim instance to get robot yaw and angular velocity for simulating gyro readings. */
+  private GyroSimulation gyroSimulation;
 
   /**
    * Creates a new gyroscope simulation.
@@ -41,27 +32,28 @@ public class GyroscopeSim {
    * @param constants drivetrain configuration
    * @param gyro the gyroscope to simulate
    * @param modulesSims module simulations to derive heading from
+   * @param mapleSim the MapleSim instance to get robot yaw and angular velocity for simulating gyro
+   *     readings
    */
-  public GyroscopeSim(DrivetrainConstants constants, Gyroscope gyro, OdometrySim odometrySim) {
+  public GyroscopeSim(DrivetrainConstants constants, Gyroscope gyro, MapleSim mapleSim) {
     this.constants = constants;
     this.gyroSim = gyro.getPigeon().getSimState();
-    this.odometrySim = odometrySim;
+    this.gyroSimulation = mapleSim.getSwerveSim().getGyroSimulation();
   }
 
   /**
-   * Updates the gyroscope simulation by calculating rotation from module motion.
+   * Updates the gyroscope simulation from the MapleSim physics simulation. This should be called
+   * periodically (typically every simulation tick) after updating the MapleSim arena.
    *
    * @param deltaTimeSeconds time elapsed since the last update
    */
   public void update(double deltaTimeSeconds) {
     gyroSim.setRawYaw(
-        odometrySim
-            .getPosition()
-            .getRotation()
+        gyroSimulation
+            .getGyroReading()
             .getMeasure()
             .plus(Degrees.of(constants.Gyroscope.DeviceConfiguration.MountPose.MountPoseYaw)));
-    gyroSim.setAngularVelocityZ(
-        RadiansPerSecond.of(odometrySim.getVelocity().omegaRadiansPerSecond));
+    gyroSim.setAngularVelocityZ(gyroSimulation.getMeasuredAngularVelocity());
   }
 
   /**

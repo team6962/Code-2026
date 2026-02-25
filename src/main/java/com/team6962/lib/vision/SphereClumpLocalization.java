@@ -51,7 +51,7 @@ public class SphereClumpLocalization extends SubsystemBase {
   public SphereClumpLocalization(
       MotionSwerveDrive swerveDrive, SphereCameraConstants cameraConstants) {
     this.swerveDrive = swerveDrive;
-    this.camera = new PhotonCamera(cameraConstants.Name);
+    this.camera = !cameraConstants.Name.equals("") ? new PhotonCamera(cameraConstants.Name) : null;
     this.cameraConstants = cameraConstants;
   }
 
@@ -61,6 +61,8 @@ public class SphereClumpLocalization extends SubsystemBase {
    */
   @Override
   public void periodic() {
+    if (camera == null) return;
+
     cachedClumpPosition = computeClumpPosition();
 
     if (cachedClumpPosition != null) {

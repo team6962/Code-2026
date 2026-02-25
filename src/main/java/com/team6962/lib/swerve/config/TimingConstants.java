@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.Frequency;
  * The constants that define various update frequencies and whether to use timesync for control
  * requests.
  */
-public class TimingConstants {
+public class TimingConstants implements Cloneable {
   /** The frequency at which devices should send status signal updates to the robot controller. */
   public Frequency SignalUpdateRate = Hertz.of(100);
 
@@ -81,5 +81,14 @@ public class TimingConstants {
   public TimingConstants withTimesyncControlRequests(boolean timesyncControlRequests) {
     TimesyncControlRequests = timesyncControlRequests;
     return this;
+  }
+
+  @Override
+  public TimingConstants clone() {
+    try {
+      return (TimingConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

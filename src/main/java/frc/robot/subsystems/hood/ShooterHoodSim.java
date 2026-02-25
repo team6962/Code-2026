@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -36,7 +37,11 @@ public class ShooterHoodSim {
 
   public void update() {
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-    double motorVoltage = invert(motorSim.getMotorVoltage(), true);
+    double motorVoltage =
+        invert(
+            motorSim.getMotorVoltage(),
+            ShooterHoodConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive);
 
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
@@ -46,15 +51,24 @@ public class ShooterHoodSim {
     AngularAcceleration acceleration = velocity.minus(lastVelocity).div(Seconds.of(0.02));
 
     motorSim.setRawRotorPosition(
-        invert(position, true)
+        invert(
+                position,
+                ShooterHoodConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                    == InvertedValue.Clockwise_Positive)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     motorSim.setRotorVelocity(
-        invert(velocity, true)
+        invert(
+                velocity,
+                ShooterHoodConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                    == InvertedValue.Clockwise_Positive)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     motorSim.setRotorAcceleration(
-        invert(acceleration, true)
+        invert(
+                acceleration,
+                ShooterHoodConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                    == InvertedValue.Clockwise_Positive)
             .times(ShooterHoodConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));
 
     lastVelocity = velocity;

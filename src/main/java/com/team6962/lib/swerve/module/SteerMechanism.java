@@ -12,6 +12,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -64,6 +65,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
   private StatusSignal<Voltage> appliedVoltageSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
+  private StatusSignal<Double> profilePositionSignal;
 
   // Cached values for the current state of the mechanism
   private Angle position = Radians.of(0);
@@ -72,6 +74,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
   private Voltage appliedVoltage = Volts.of(0);
   private Current statorCurrent = Amps.of(0);
   private Current supplyCurrent = Amps.of(0);
+  private Angle profilePosition = Radians.of(0);
 
   /** The last control request sent to the motor for telemetry logging. */
   private ControlRequest lastControlRequest;
@@ -94,12 +97,12 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     motor = new TalonFX(constants.getSwerveModule(corner).SteerMotorCANId, bus);
     encoder = new CANcoder(constants.getSwerveModule(corner).SteerEncoderCANId, bus);
 
-    constants.SteerMotor.DeviceConfiguration.Feedback.RotorToSensorRatio =
-        constants.SteerMotor.GearReduction;
-    constants.SteerMotor.DeviceConfiguration.Feedback.SensorToMechanismRatio = 1.0;
-    constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackSensorSource =
+    TalonFXConfiguration motorConfig = constants.getSteerMotorConfig(corner).clone();
+
+    motorConfig.Feedback.RotorToSensorRatio = constants.getSteerGearReduction(corner);
+    motorConfig.Feedback.FeedbackSensorSource =
         constants.SteerEncoder.DataFusion.feedbackSensorSource;
-    constants.SteerMotor.DeviceConfiguration.Feedback.FeedbackRemoteSensorID =
+    motorConfig.Feedback.FeedbackRemoteSensorID =
         constants.getSwerveModule(corner).SteerEncoderCANId;
 
     CANcoderConfiguration encoderConfig = constants.SteerEncoder.DeviceConfiguration.clone();
@@ -113,7 +116,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
             .minus(corner.getRotation())
             .in(Rotations);
 
-    StatusUtil.check(motor.getConfigurator().apply(constants.SteerMotor.DeviceConfiguration));
+    StatusUtil.check(motor.getConfigurator().apply(motorConfig));
     StatusUtil.check(encoder.getConfigurator().apply(encoderConfig));
 
     positionSignal = motor.getPosition(false);
@@ -122,6 +125,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     appliedVoltageSignal = motor.getMotorVoltage(false);
     statorCurrentSignal = motor.getStatorCurrent(false);
     supplyCurrentSignal = motor.getSupplyCurrent(false);
+    profilePositionSignal = motor.getClosedLoopReference(false);
   }
 
   /**
@@ -139,6 +143,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
       appliedVoltageSignal,
       statorCurrentSignal,
       supplyCurrentSignal,
+      profilePositionSignal,
       // required for encoder data fusion to work
       encoder.getPosition(),
       encoder.getVelocity()
@@ -172,6 +177,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
     DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
     DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
+    DogLog.log(basePath + "ProfilePosition", profilePosition.in(Radians));
     DogLog.log(
         basePath + "DataTimestamp",
         StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
@@ -231,6 +237,8 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     appliedVoltage = appliedVoltageSignal.getValue();
     statorCurrent = statorCurrentSignal.getValue();
     supplyCurrent = supplyCurrentSignal.getValue();
+
+    profilePosition = Rotations.of(profilePositionSignal.getValue());
   }
 
   /**

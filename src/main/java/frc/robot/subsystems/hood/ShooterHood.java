@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 public class ShooterHood extends SubsystemBase {
   private final TalonFX hoodMotor;
@@ -195,6 +196,7 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/AppliedVoltage", getAppliedVoltage());
     DogLog.log("Hood/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
+    DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log(
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
@@ -308,6 +310,24 @@ public class ShooterHood extends SubsystemBase {
 
     return startEnd(
         () -> {
+          setPositionControl(clampedAngle);
+        },
+        () -> {
+          setPositionControl(getPosition());
+        });
+  }
+
+  /**
+   * Returns a command that moves the hood to the given an inputted targetAngleSupplier.
+   *
+   * @param targetAngleSupplier the supplied target angle to move towards
+   * @return the command that moves to the supplied target angle
+   */
+  public Command moveTo(Supplier<Angle> targetAngleSupplier) {
+    return runEnd(
+        () -> {
+          Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get());
+          DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
           setPositionControl(clampedAngle);
         },
         () -> {

@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
  * The constants that define the behavior of the gyroscope used for determining the heading of the
  * robot.
  */
-public class GyroscopeConstants {
+public class GyroscopeConstants implements Cloneable {
   /** The CAN ID of the Pigeon 2 gyroscope. */
   public int CANId = -1;
 
@@ -84,5 +84,14 @@ public class GyroscopeConstants {
   public GyroscopeConstants withEnabled(boolean enabled) {
     Enabled = enabled;
     return this;
+  }
+
+  @Override
+  public GyroscopeConstants clone() {
+    try {
+      return (GyroscopeConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

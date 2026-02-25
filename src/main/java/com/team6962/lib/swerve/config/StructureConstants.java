@@ -11,7 +11,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /** The constants that define the physical structure of the drivetrain. */
-public class StructureConstants {
+public class StructureConstants implements Cloneable {
   /** The wheelbase of the robot, which is the distance between the front and back wheels. */
   public Distance WheelBase = Inches.of(22.75);
 
@@ -23,6 +23,14 @@ public class StructureConstants {
    * in their {@link SwerveModuleConstants}.
    */
   public Distance WheelRadius = Inches.of(1.95);
+
+  /**
+   * The coefficient of friction between the wheels and the ground. This is used for simulation and
+   * can be tuned to match the actual performance of the robot on the field. A typical value for
+   * rubber wheels on carpet is around 1.0 to 1.5, but this can vary based on the specific wheel
+   * material and field surface.
+   */
+  public double WheelCOF = 1.426;
 
   /** The outer length of the robot from bumper to bumper, in the X direction (front to back). */
   public Distance OuterLength = Inches.of(35);
@@ -72,6 +80,19 @@ public class StructureConstants {
    */
   public StructureConstants withWheelRadius(Distance wheelRadius) {
     WheelRadius = wheelRadius;
+    return this;
+  }
+
+  /**
+   * Sets the coefficient of friction between the wheels and the ground, and returns this
+   * StructureConstants object for chaining. This is used for simulation and can be tuned to match
+   * the actual performance of the robot on the field.
+   *
+   * @param wheelCOF The coefficient of friction for the wheels
+   * @return This StructureConstants object
+   */
+  public StructureConstants withWheelCOF(double wheelCOF) {
+    WheelCOF = wheelCOF;
     return this;
   }
 
@@ -147,5 +168,14 @@ public class StructureConstants {
         new Translation2d(WheelBase.div(2), TrackWidth.div(-2)),
         new Translation2d(WheelBase.div(-2), TrackWidth.div(2)),
         new Translation2d(WheelBase.div(-2), TrackWidth.div(-2)));
+  }
+
+  @Override
+  public StructureConstants clone() {
+    try {
+      return (StructureConstants) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError("Clone should be supported", e);
+    }
   }
 }

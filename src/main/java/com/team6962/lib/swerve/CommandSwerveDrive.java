@@ -1,15 +1,23 @@
 package com.team6962.lib.swerve;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.motion.SwerveMotion;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -126,6 +134,17 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
   }
 
   /**
+   * Creates a command that drives the robot at the specified velocity. The command requires both
+   * translation and rotation subsystems.
+   *
+   * @param velocity The desired chassis speeds
+   * @return A command that applies the velocity motion
+   */
+  public Command drive(ChassisSpeeds velocity) {
+    return runMotion(() -> applyVelocityMotion(velocity));
+  }
+
+  /**
    * Creates a command that drives the robot's translation at the velocity provided by the supplier.
    * The command only requires the translation subsystem, allowing rotation to be controlled
    * independently.
@@ -138,6 +157,17 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
   }
 
   /**
+   * Creates a command that drives the robot's translation at the specified velocity. The command
+   * only requires the translation subsystem, allowing rotation to be controlled independently.
+   *
+   * @param velocity The desired translational velocity
+   * @return A command that applies the translational velocity motion
+   */
+  public Command drive(TranslationalVelocity velocity) {
+    return runTranslation(() -> applyVelocityMotion(velocity));
+  }
+
+  /**
    * Creates a command that drives the robot's rotation at the angular velocity provided by the
    * supplier. The command only requires the rotation subsystem, allowing translation to be
    * controlled independently.
@@ -147,6 +177,18 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
    */
   public Command driveRotation(Supplier<AngularVelocity> angularVelocity) {
     return runRotation(() -> applyVelocityMotion(angularVelocity.get()));
+  }
+
+  /**
+   * Creates a command that drives the robot's rotation at the specified angular velocity. The
+   * command only requires the rotation subsystem, allowing translation to be controlled
+   * independently.
+   *
+   * @param angularVelocity The desired angular velocity
+   * @return A command that applies the rotational velocity motion
+   */
+  public Command drive(AngularVelocity angularVelocity) {
+    return runRotation(() -> applyVelocityMotion(angularVelocity));
   }
 
   /**
@@ -285,6 +327,56 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
    */
   public DriveToStateCommand driveTo(Angle angle) {
     return driveTo(new DriveToStateCommand.State(angle));
+  }
+
+  /**
+   * Creates a command that calibrates the wheel size by rotating the robot in place. Note that this
+   * command does not support different wheel sizes on different modules. Make sure to configure the
+   * global wheel size to a reasonable value before using this command.
+   *
+   * @return A command that rotates the robot and measures the wheel size based on the change in
+   *     gyroscope heading and odometry readings
+   */
+  public Command calibrateWheelSize() {
+    return drive(RotationsPerSecond.of(1.0 / 3.0))
+        .withDeadline(
+            Commands.sequence(
+                Commands.waitSeconds(3),
+                new Command() {
+                  private Angle initialAngle;
+                  private SwerveModulePosition[] initialPositions;
+
+                  @Override
+                  public void initialize() {
+                    initialAngle = getGyroscope().getYaw();
+                    initialPositions = getOdometry().getPositions();
+                  }
+
+                  @Override
+                  public void execute() {
+                    Angle finalAngle = getGyroscope().getYaw();
+                    Angle gyroAngleChange = finalAngle.minus(initialAngle);
+
+                    SwerveModulePosition[] finalPositions = getOdometry().getPositions();
+
+                    Twist2d odometryTwist =
+                        getConstants()
+                            .Structure
+                            .getKinematics()
+                            .toTwist2d(initialPositions, finalPositions);
+
+                    Angle odometryAngleChange = Radians.of(odometryTwist.dtheta);
+
+                    double scalar = gyroAngleChange.in(Radians) / odometryAngleChange.in(Radians);
+
+                    Distance wheelRadius = getConstants().Structure.WheelRadius.times(scalar);
+
+                    DogLog.log(
+                        "Drivetrain/WheelSizeCalibration/WheelRadius",
+                        wheelRadius.in(Inches),
+                        Inches);
+                  }
+                }));
   }
 
   /**
