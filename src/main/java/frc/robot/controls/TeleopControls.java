@@ -3,7 +3,7 @@ package frc.robot.controls;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import com.team6962.lib.swerve.commands.TeleopSwerveCommand;
+import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -210,7 +210,7 @@ public class TeleopControls {
     // Climb retraction
     Command autodescend = robot.getClimb().descend();
     Trigger climbRetract =
-        new Trigger(() -> TeleopSwerveCommand.isClearToOverride(robot.getClimb(), autodescend))
+        new Trigger(() -> CommandUtil.isClearToOverride(robot.getClimb(), autodescend))
             .and(RobotState::isTeleop)
             .and(RobotState::isEnabled);
 
