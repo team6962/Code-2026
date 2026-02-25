@@ -43,9 +43,7 @@ public class SphereCameraConstants implements Cloneable {
    */
   public Distance MaxDetectionRange = Meters.of(18.37);
 
-  /**
-   * Maximum range at which sphere pieces can be detected in simulation.
-   */
+  /** Maximum range at which sphere pieces can be detected in simulation. */
   public Distance MaxSimulatedDetectionRange = Meters.of(8);
 
   /**

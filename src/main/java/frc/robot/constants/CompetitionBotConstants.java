@@ -31,7 +31,6 @@ import com.team6962.lib.swerve.config.UniqueModuleConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -253,10 +252,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
         .withRobotToCameraTransform(
             new Transform3d(
-                new Translation3d(
-                    Inches.of(16.25).in(Meters),
-                    0,
-                    Inches.of(20.0).in(Meters)),
+                new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
                 new Rotation3d(0, Math.PI / 6, 0)));
   }
 
