@@ -18,9 +18,10 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.abstraction.IHood;
-import frc.robot.subsystems.abstraction.IShooterRollers;
-import frc.robot.subsystems.abstraction.ITurret;
+import frc.robot.auto.ShooterFunctions;
+import frc.robot.subsystems.hood.ShooterHood;
+import frc.robot.subsystems.shooterrollers.ShooterRollers;
+import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
 import org.apache.commons.math3.util.Pair;
 
@@ -30,13 +31,13 @@ public class AutoShoot extends Command {
   private CommandSwerveDrive swerveDrive;
 
   /** The turret that controls the azimuth angle of the shooter. */
-  private ITurret turret;
+  private Turret turret;
 
   /** The hood that controls the elevation angle of the shooter. */
-  private IHood hood;
+  private ShooterHood hood;
 
   /** The rollers that propel fuel out of the shooter. */
-  private IShooterRollers rollers;
+  private ShooterRollers rollers;
 
   /** A supplier that provides the target position in 3D space. */
   private Supplier<Translation3d> targetSupplier;
@@ -65,9 +66,10 @@ public class AutoShoot extends Command {
    */
   public AutoShoot(
       CommandSwerveDrive swerveDrive,
-      ITurret turret,
-      IHood hood,
-      IShooterRollers rollers,
+      Turret turret,
+      ShooterHood hood,
+      ShooterRollers rollers,
+      ShooterFunctions shooterFunctions,
       Supplier<Translation3d> targetSupplier) {
     this.swerveDrive = swerveDrive;
     this.turret = turret;
@@ -81,7 +83,7 @@ public class AutoShoot extends Command {
 
     Command turretCommand = turret.moveTo(() -> turretAngleTarget).repeatedly();
     Command hoodCommand = hood.moveTo(() -> hoodAngleTarget).repeatedly();
-    Command rollersCommand = rollers.spin(() -> rollerSpeedTarget).repeatedly();
+    Command rollersCommand = rollers.shoot(() -> rollerSpeedTarget).repeatedly();
 
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(turret, turretCommand))
@@ -230,7 +232,7 @@ public class AutoShoot extends Command {
 
     // Calculate the ideal shooting angles and roller speed to hit the target
     Pair<Angle, Angle> idealAngles =
-        getMovingShootingAngles(shooterPose, shooterVelocity, rollers.getVelocity(), target);
+        getMovingShootingAngles(shooterPose, shooterVelocity, rollers.getAngularVelocity(), target);
 
     // Set the target angles and roller speed
     turretAngleTarget = idealAngles.getFirst().minus(shooterPose.getRotation().getMeasure());
@@ -247,7 +249,7 @@ public class AutoShoot extends Command {
             shooterVelocity,
             turret.getPosition().plus(shooterPose.getRotation().getMeasure()),
             hood.getPosition(),
-            rollers.getVelocity(),
+            rollers.getAngularVelocity(),
             Meters.of(target.getZ()));
 
     // Calculate the predicted error if the projectile were to be fired now
