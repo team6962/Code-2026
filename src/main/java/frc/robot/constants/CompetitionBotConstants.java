@@ -91,7 +91,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             .withKP(10) // Not tuned
             .withKI(0.01) // Not tuned
             .withKD(0.25) // Not tuned
-            .withKS(0.25) // Not tuned
+            .withKS(0.231) // Somewhat tuned by increasing voltage and stopping when the wheel starts to move
             .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
             .withKA(
                 0.03 * 12.0 / 12.8 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
@@ -111,13 +111,11 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
     mk4nASteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(10) // Not tuned
-            .withKI(0.01) // Not tuned
-            .withKD(0.25) // Not tuned
-            .withKS(0.25) // Not tuned
+            .withKP(25) // Tuned
+            .withKD(1.25) // Tuned
+            .withKS(0.24) // Tuned
             .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
-            .withKA(
-                0.03 * 12.0 / 18.75 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKA(0.08); // KA = MOI * peak voltage / gear ratio / stall torque
 
     UniqueModuleConstants mk4nAConstants =
         new UniqueModuleConstants()
@@ -130,7 +128,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     mk4nBDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     TalonFXConfiguration mk4nBSteerMotorConfig = mk4nASteerMotorConfig.clone();
-    mk4nBSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4nBSteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     UniqueModuleConstants mk4nBConstants =
         new UniqueModuleConstants()
@@ -157,25 +155,25 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                   .withDriveMotorCANId(10)
                   .withSteerMotorCANId(11)
                   .withSteerEncoderCANId(10)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(-1.9325))
                   .withUniqueModuleConstants(mk4nBConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(12)
                   .withSteerMotorCANId(13)
                   .withSteerEncoderCANId(11)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(1.9017))
                   .withUniqueModuleConstants(mk4nAConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(14)
                   .withSteerMotorCANId(15)
                   .withSteerEncoderCANId(12)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(-2.7078))
                   .withUniqueModuleConstants(mk4cConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(16)
                   .withSteerMotorCANId(17)
                   .withSteerEncoderCANId(13)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(0.2274))
                   .withUniqueModuleConstants(mk4cConstants)
             })
         .withTiming(
