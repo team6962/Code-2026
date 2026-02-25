@@ -29,8 +29,8 @@ public class ShooterFunctions {
   private static final String velocityPathHub = "flywheelvelocitydatahub.csv";
 
   /**
-   * Path to the CSV file containing hood angle and flywheel velocity calibration data for passing. Formatted as Distance,
-   * Angle
+   * Path to the CSV file containing hood angle and flywheel velocity calibration data for passing.
+   * Formatted as Distance, Angle
    */
   private static final String passingPath = "passingdata.csv";
 
