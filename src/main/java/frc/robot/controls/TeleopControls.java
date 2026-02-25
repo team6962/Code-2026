@@ -1,7 +1,5 @@
 package frc.robot.controls;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -13,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
+import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
@@ -132,7 +131,8 @@ public class TeleopControls {
     // Shoot
     operator
         .rightTrigger()
-        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(1))); // Incorrect number
+        .whileTrue(
+            robot.getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY));
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start

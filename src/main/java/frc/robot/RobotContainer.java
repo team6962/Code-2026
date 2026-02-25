@@ -65,8 +65,8 @@ public class RobotContainer {
     hopper = new Hopper();
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
-    //fuelClumpLocalization =
-        //new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
+    // fuelClumpLocalization =
+    // new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
     driveFixedShooter = new DriveFixedShooter(this);
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
