@@ -111,6 +111,13 @@ public class RobotVisualizer extends SubsystemBase {
         fuelCount = RobotVisualizationConstants.maxRetractedFuel;
       }
 
+      List<Translation3d> fuelPositions = robot.getSwerveDrive().getSimulation().getMapleSim().getArena().getGamePiecesByType("Fuel")
+          .stream()
+          .map(gamePiece -> gamePiece.getPose3d().getTranslation())
+          .toList();
+
+      robot.getFuelLocalization().setSimulatedSpherePositions(fuelPositions);
+
       List<Pose3d> additionalFuelPoses = new ArrayList<>();
 
       for (int i = 0; i < fuelCount; i++) {

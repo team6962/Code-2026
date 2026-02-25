@@ -1,10 +1,16 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+
+import java.util.Set;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
-import java.util.Set;
 
 public class DriveToClump {
   private RobotContainer robot;
@@ -51,10 +57,24 @@ public class DriveToClump {
                 return Commands.none();
               }
 
+              Translation2d error = fuelPosition.minus(robot.getSwerveDrive().getPosition2d().getTranslation());
+
+              double maxVelocity = robot.getConstants().getDrivetrainConstants().Driving.MaxLinearVelocity.in(MetersPerSecond);
+              double maxAcceleration = robot.getConstants().getDrivetrainConstants().Driving.MaxLinearAcceleration.in(MetersPerSecondPerSecond);
+
+              double distance = error.getNorm();
+              double finalSpeed = Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration * distance));
+
+              ChassisSpeeds finalVelocity = new ChassisSpeeds(
+                  error.getX() / distance * finalSpeed,
+                  error.getY() / distance * finalSpeed,
+                  0);
+
               return Commands.either(
-                  Commands.parallel(
-                      robot.getIntakeRollers().run(robot.getIntakeRollers()::intake),
-                      robot.getSwerveDrive().driveTo(fuelPosition)),
+                  Commands.deadline(
+                    robot.getSwerveDrive().driveTo(new Pose2d(fuelPosition, error.getAngle()), finalVelocity),
+                    robot.getIntakeRollers().intake()
+                  ),
                   Commands.none(),
                   robot.getIntakeExtension()::isExtended);
             },
