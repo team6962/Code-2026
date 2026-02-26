@@ -46,12 +46,6 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     .withMotionMagicAcceleration(21.2))
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(0.017)
-                    .withKI(0.0017)
-                    .withKD(0.0017)
-                    .withKV(0.7324)
-                    .withKA(0.00067)
-                    .withKS(0.0288)
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -78,19 +72,20 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4cDriveMotorConfig = baseDriveMotorConfig.clone();
     mk4cDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4cDriveMotorConfig.Slot0.kP = 2.0;
+    mk4cDriveMotorConfig.Slot0.kV = 0.71;
+    mk4cDriveMotorConfig.Slot0.kS = 0.144;
 
     TalonFXConfiguration mk4cSteerMotorConfig = baseSteerMotorConfig.clone();
     mk4cSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     mk4cSteerMotorConfig.Feedback.RotorToSensorRatio = 12.8;
     mk4cSteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(10) // Not tuned
-            .withKI(0.01) // Not tuned
-            .withKD(0.25) // Not tuned
-            .withKS(0.231) // Somewhat tuned by increasing voltage and stopping when the wheel starts to move
+            .withKP(15)
+            .withKD(0.5)
+            .withKS(0.325)
             .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
-            .withKA(
-                0.03 * 12.0 / 12.8 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKA(0.034); // KA = MOI * peak voltage / gear ratio / stall torque
 
     UniqueModuleConstants mk4cConstants =
         new UniqueModuleConstants()
@@ -101,15 +96,18 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4nADriveMotorConfig = baseDriveMotorConfig.clone();
     mk4nADriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4nADriveMotorConfig.Slot0.kP = 2.0;
+    mk4nADriveMotorConfig.Slot0.kV = 0.71;
+    mk4nADriveMotorConfig.Slot0.kS = 0.144;
 
     TalonFXConfiguration mk4nASteerMotorConfig = baseSteerMotorConfig.clone();
     mk4nASteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
     mk4nASteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(25) // Tuned
-            .withKD(1.25) // Tuned
-            .withKS(0.24) // Tuned
+            .withKP(25)
+            .withKD(1.25)
+            .withKS(0.24)
             .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
             .withKA(0.08); // KA = MOI * peak voltage / gear ratio / stall torque
 
