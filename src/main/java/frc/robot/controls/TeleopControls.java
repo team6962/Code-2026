@@ -31,7 +31,8 @@ public class TeleopControls {
     // this.autoClimb = new AutoClimb(robot);
     // this.driveToClump = new DriveToClump(robot);
 
-    DogLog.log("TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
+    DogLog.log(
+        "TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
   }
 
   public void configureBindings() {
@@ -53,9 +54,7 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    driver
-        .a()
-        .whileTrue(driveFixedShooter.driveToClosestShotPosition(DriveFixedShooter.HUB_RADIUS));
+    driver.a().whileTrue(driveFixedShooter.driveToClosestShotPosition().repeatedly());
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
