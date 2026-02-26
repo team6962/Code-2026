@@ -16,7 +16,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -52,15 +51,14 @@ public final class IntakeExtensionConstants {
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                .withKA(0.00)
-                .withKD(0.0)
-                .withKP(20.0)
-                .withKG(-0.075)
-                .withKV(5.5108)
-                .withKS(0.425)
-                .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
-            )
-            // Minimum and maximum output to move: -0.5, 0.35
+                  .withKA(0.00)
+                  .withKD(0.0)
+                  .withKP(20.0)
+                  .withKG(-0.075)
+                  .withKV(5.5108)
+                  .withKS(0.425)
+                  .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign))
+          // Minimum and maximum output to move: -0.5, 0.35
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120))
