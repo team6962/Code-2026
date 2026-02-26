@@ -1,6 +1,8 @@
 package frc.robot.controls;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -131,6 +133,7 @@ public class TeleopControls {
             Commands.runOnce(
                 () -> {
                   fineControl = !fineControl;
+                  DogLog.log("TeleopControls/IntakeFineControl", fineControl);
                 }));
 
     // Shoot
