@@ -92,9 +92,5 @@ public class Hopper extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    if (shooterRollers.isRunning()) {
-      load();
-    }
-  }
+  public void periodic() {}
 }
