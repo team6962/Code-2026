@@ -140,7 +140,11 @@ public class TeleopControls {
     operator
         .rightTrigger()
         .whileTrue(
-            robot.getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY));
+            Commands.parallel(
+                robot
+                    .getShooterRollers()
+                    .shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
+                robot.getHopper().load()));
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
