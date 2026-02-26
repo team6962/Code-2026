@@ -1,7 +1,6 @@
 package frc.robot.controls;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -100,7 +99,7 @@ public class TeleopControls {
     //                     0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough
     // estimate
 
-    // Dump fuel
+    // Dump fuel - WORKS
     driver
         .leftStick()
         .whileTrue(
@@ -110,7 +109,7 @@ public class TeleopControls {
     // Intake and drive to fuel clump
     // driver.rightStick().whileTrue(driveToClump.driveToClump());
 
-    // Intake without driving
+    // Intake without driving - WORKS
     driver
         .start()
         .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
@@ -120,13 +119,13 @@ public class TeleopControls {
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
-    // Unjam hopper
+    // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
     // Disable shooting
     // operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
-    // Toggle fine control mode
+    // Toggle fine control mode - WORKS
     operator
         .rightBumper()
         .onTrue(
@@ -136,7 +135,7 @@ public class TeleopControls {
                   DogLog.log("TeleopControls/IntakeFineControl", fineControl);
                 }));
 
-    // Shoot
+    // Shoot - WORKS
     operator
         .rightTrigger()
         .whileTrue(
@@ -175,7 +174,7 @@ public class TeleopControls {
     //             .getTurret()
     //             .moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
-    operator
+    operator // WORKS
         .axisGreaterThan(Axis.kLeftX.value, 0.5)
         .and(() -> fineControl)
         .whileTrue(
@@ -183,7 +182,7 @@ public class TeleopControls {
                 .getIntakeExtension()
                 .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE));
 
-    operator
+    operator // WORKS
         .axisLessThan(Axis.kLeftX.value, -0.5)
         .and(() -> fineControl)
         .whileTrue(
@@ -203,20 +202,23 @@ public class TeleopControls {
     //
     // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
-    // // Intake extension and retraction
+    // Intake extension and retraction - WORKS
     Trigger intakeRetract = operator.rightStick().or(driver.back());
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
     intakeRetract.whileTrue(robot.getIntakeExtension().retract());
-    intakeExtend.onTrue(
-        robot.getIntakeExtension().extend().alongWith(robot.getIntakeRollers().intake()));
+    intakeExtend.onTrue(robot.getIntakeExtension().extend());
 
+    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
+    // fully tested
     Trigger load =
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
             .and(() -> !fineControl)
             .and(driver.leftStick().negate())
-            .and(operator.leftBumper().negate());
+            .and(operator.leftBumper().negate())
+            .and(() -> !robot.getHopper().getSensors().isKickerFull())
+            .and(() -> !robot.getHopper().isEmpty());
 
     load.whileTrue(robot.getHopper().load());
 
