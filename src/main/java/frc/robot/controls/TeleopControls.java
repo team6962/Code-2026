@@ -209,6 +209,14 @@ public class TeleopControls {
     intakeExtend.onTrue(
         robot.getIntakeExtension().extend().alongWith(robot.getIntakeRollers().intake()));
 
+    Trigger load =
+        new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
+            .and(() -> !fineControl)
+            .and(driver.leftStick().negate())
+            .and(operator.leftBumper().negate());
+
+    load.whileTrue(robot.getHopper().load());
+
     // Climb retraction
     // Command autodescend = robot.getClimb().descend();
     // Trigger climbRetract =
