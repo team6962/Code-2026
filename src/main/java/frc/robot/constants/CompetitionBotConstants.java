@@ -30,7 +30,6 @@ import com.team6962.lib.swerve.config.UniqueModuleConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
@@ -242,7 +241,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     //     .withFocalLengthY(907.64)
     //     .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
     //     .withSphereDiameter(Inches.of(5.91))
-    //     .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
+    //     .withMaxTargets(50) // Temporary value until we tune object detection on the practice
+    // field
     //     .withRobotToCameraTransform(
     //         new Transform3d(
     //             new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),

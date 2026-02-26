@@ -1,9 +1,7 @@
 package frc.robot.subsystems.visualizer;
 
-// import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-// import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -11,23 +9,15 @@ import com.team6962.lib.swerve.simulation.MapleSim;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-// import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
-// import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
-
-// import frc.robot.subsystems.hood.ShooterHoodConstants;
-// import java.util.ArrayList;
-// import java.util.List;
 import org.ironmaple.simulation.IntakeSimulation;
-
-// import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 
 /** Displays the articulated components on the robot in AdvantageScope. */
 public class RobotVisualizer extends SubsystemBase {
