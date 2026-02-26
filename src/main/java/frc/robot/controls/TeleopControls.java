@@ -31,6 +31,8 @@ public class TeleopControls {
     this.driveFixedShooter = new DriveFixedShooter(robot);
     // this.autoClimb = new AutoClimb(robot);
     // this.driveToClump = new DriveToClump(robot);
+
+    DogLog.log("TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
   }
 
   public void configureBindings() {
