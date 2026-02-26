@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.beltfloor.BeltFloor;
 import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.hopper.sensors.HopperSensors;
-import frc.robot.subsystems.shooterrollers.ShooterRollers;
 
 /**
  * Subsystem for the hopper, which includes the belt floor, kicker, and Sensors, which grabs it from
@@ -16,14 +15,12 @@ public class Hopper extends SubsystemBase {
   private final BeltFloor beltFloor;
   private final Kicker kicker;
   private final HopperSensors sensors;
-  private final ShooterRollers shooterRollers;
 
   /** Constructor for the Hopper subsystem, which initializes the belt floor, kicker, and sensors */
-  public Hopper(ShooterRollers shooterRollers) {
+  public Hopper() {
     beltFloor = new BeltFloor();
     kicker = new Kicker();
     sensors = new HopperSensors(this);
-    this.shooterRollers = shooterRollers;
   }
 
   /** Command to dump the hopper, which runs the belt floor and kicker in reverse. */
