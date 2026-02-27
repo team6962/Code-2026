@@ -144,7 +144,7 @@ public class TeleopControls {
                 robot
                     .getShooterRollers()
                     .shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
-                robot.getHopper().load()));
+                robot.getHopper().feed()));
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
