@@ -382,5 +382,6 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
+    DogLog.log("Intake/IsZeroed", isZeroed);
   }
 }

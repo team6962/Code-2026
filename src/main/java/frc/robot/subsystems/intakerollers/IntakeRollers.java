@@ -28,7 +28,7 @@ public class IntakeRollers extends SubsystemBase {
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
     this.intakeMotor =
-        new TalonFX(IntakeRollersConstants.DEVICE_ID, new CANBus("subsystem")); // temporary
+        new TalonFX(IntakeRollersConstants.DEVICE_ID, new CANBus("subsystems")); // temporary
 
     intakeMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
     this.velocitySignal = intakeMotor.getVelocity();
@@ -57,7 +57,7 @@ public class IntakeRollers extends SubsystemBase {
    * @return Command
    */
   public Command intake() {
-    return move(Volts.of(12));
+    return move(Volts.of(8));
   }
 
   /**
@@ -66,7 +66,7 @@ public class IntakeRollers extends SubsystemBase {
    * @return
    */
   public Command outtake() {
-    return move(Volts.of(-12));
+    return move(Volts.of(-8));
   }
 
   /**

@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -29,7 +30,7 @@ public final class IntakeExtensionConstants {
   public static final Mass MOVING_MASS = Pounds.of(12);
   public static final Distance MAX_POSITION = Inches.of(9.75);
   public static final Distance MIN_POSITION = Inches.of(0);
-  public static final Distance RETRACT_POSITION = Inches.of(1);
+  public static final Distance RETRACT_POSITION = Inches.of(4.15);
   public static final Angle ANGLE = Degrees.of(-18);
   public static final Distance PINION_RADIUS = Inches.of(0.5);
   public static final int CANDI_DEVICE_ID = 20;
@@ -65,7 +66,10 @@ public final class IntakeExtensionConstants {
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true))
-          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+          .withMotorOutput(
+              new MotorOutputConfigs()
+                  .withInverted(InvertedValue.Clockwise_Positive)
+                  .withNeutralMode(NeutralModeValue.Coast));
 
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
 }

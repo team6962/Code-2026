@@ -26,9 +26,9 @@ public class Hopper extends SubsystemBase {
     sensors = new HopperSensors();
   }
 
-  /** Command to dump the hopper, which runs the belt floor and kicker in reverse. */
+  /** Command to dump the hopper, which runs the belt floor in reverse. */
   public Command dump() {
-    return Commands.parallel(beltFloor.dump(), kicker.reverse());
+    return beltFloor.dump();
   }
 
   /**
@@ -37,7 +37,7 @@ public class Hopper extends SubsystemBase {
    * @return
    */
   public Command load() {
-    return Commands.parallel(beltFloor.feed(), kicker.feed()).until(sensors::isKickerFull);
+    return beltFloor.feed().alongWith(kicker.slowFeed()).until(() -> !sensors.isKickerEmpty());
   }
 
   /**
@@ -93,7 +93,7 @@ public class Hopper extends SubsystemBase {
 
   /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */
   public Command unjam() {
-    return Commands.parallel(beltFloor.dump(), kicker.reverse());
+    return beltFloor.dump();
   }
 
   /**

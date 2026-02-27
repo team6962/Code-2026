@@ -1,7 +1,10 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -24,6 +27,7 @@ public class TeleopControls {
   private CommandXboxController operator = new CommandXboxController(1);
 
   private boolean fineControl = false;
+  private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
@@ -33,6 +37,13 @@ public class TeleopControls {
 
     DogLog.log(
         "TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
+
+    DogLog.tunable(
+        "FlywheelVelocity",
+        flywheelVelocity.in(RotationsPerSecond),
+        value -> {
+          flywheelVelocity = RotationsPerSecond.of(value);
+        });
   }
 
   public void configureBindings() {
@@ -54,7 +65,7 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    driver.a().whileTrue(driveFixedShooter.driveToClosestShotPosition().repeatedly());
+    // driver.a().whileTrue(driveFixedShooter.driveToClosestShotPosition().repeatedly());
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
@@ -108,11 +119,11 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    // driver.rightStick().whileTrue(driveToClump.driveToClump());
+    // driver.start().whileTrue(driveToClump.driveToClump());
 
     // Intake without driving - WORKS
     driver
-        .start()
+        .rightStick()
         .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
 
     // // Manual climb controls
@@ -141,10 +152,7 @@ public class TeleopControls {
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
-                robot
-                    .getShooterRollers()
-                    .shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
-                robot.getHopper().feed()));
+                robot.getShooterRollers().shoot(() -> flywheelVelocity), robot.getHopper().feed()));
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
@@ -222,6 +230,7 @@ public class TeleopControls {
             .and(() -> !fineControl)
             .and(driver.leftStick().negate())
             .and(operator.leftBumper().negate())
+            .and(operator.rightTrigger().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
