@@ -19,11 +19,9 @@ public class HopperSensors extends SubsystemBase {
   private Hopper hopper;
 
   private CANrange kickerSensor;
-  private CANrange upperHopperSensor;
   private CANrange lowerHopperSensor;
 
   private StatusSignal<Distance> kickerDistance;
-  private StatusSignal<Distance> upperHopperDistance;
   private StatusSignal<Distance> lowerHopperDistance;
 
   /**
@@ -37,16 +35,11 @@ public class HopperSensors extends SubsystemBase {
         new CANrange(HopperConstants.KICKER_SENSOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     kickerSensor.getConfigurator().apply(HopperConstants.KICKER_SENSOR_CONFIGURATION);
 
-    upperHopperSensor =
-        new CANrange(HopperConstants.UPPER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
-    upperHopperSensor.getConfigurator().apply(HopperConstants.UPPER_HOPPER_CONFIGURATION);
-
     lowerHopperSensor =
         new CANrange(HopperConstants.LOWER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     lowerHopperSensor.getConfigurator().apply(HopperConstants.LOWER_HOPPER_CONFIGURATION);
 
     this.kickerDistance = kickerSensor.getDistance();
-    this.upperHopperDistance = upperHopperSensor.getDistance();
     this.lowerHopperDistance = lowerHopperSensor.getDistance();
   }
 
@@ -60,32 +53,12 @@ public class HopperSensors extends SubsystemBase {
   }
 
   /**
-   * Gets the current distance measured by the Upper Hopper sensor.
-   *
-   * @return The distance to the detected object in the Upper Hopper.
-   */
-  private Distance getUpperHopperDistance() {
-    return upperHopperDistance.getValue();
-  }
-
-  /**
    * Gets the current distance measured by the Lower Hopper sensor.
    *
    * @return The distance to the detected object in the Lower Hopper.
    */
   private Distance getLowerHopperDistance() {
     return lowerHopperDistance.getValue();
-  }
-
-  /**
-   * Checks if the Hopper is considered full. Determined by the Upper Hopper sensor detecting an
-   * object within the defined threshold.
-   *
-   * @return {@code true} if the distance is less than UPPER_HOPPER_SENSOR_THRESHOLD indicating an
-   *     object is present.
-   */
-  public boolean isHopperFull() {
-    return upperHopperDistance.getValue().lt(HopperConstants.UPPER_HOPPER_SENSOR_FULL_THRESHOLD);
   }
 
   /**
@@ -131,13 +104,10 @@ public class HopperSensors extends SubsystemBase {
       hopper.load();
     }
 
-    StatusUtil.check(
-        BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
+    StatusUtil.check(BaseStatusSignal.refreshAll(kickerDistance, lowerHopperDistance));
 
     DogLog.log("Hopper/Sensors/KickerDistance", getKickerDistance());
-    DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());
     DogLog.log("Hopper/Sensors/LowerHopperDistance", getLowerHopperDistance());
-    DogLog.log("Hopper/Sensors/HopperFull", isHopperFull());
     DogLog.log("Hopper/Sensors/HopperEmpty", isHopperEmpty());
     DogLog.log("Hopper/Sensors/KickerFull", isKickerFull());
     DogLog.log("Hopper/Sensors/KickerEmpty", isKickerEmpty());

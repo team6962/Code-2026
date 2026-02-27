@@ -54,16 +54,6 @@ public class Hopper extends SubsystemBase {
   }
 
   /**
-   * Command to eject the hopper, which runs the belt floor and kicker in reverse for a short time
-   * or until the hopper is empty
-   *
-   * @return
-   */
-  public boolean isFull() {
-    return sensors.isHopperFull();
-  }
-
-  /**
    * Command to check if the hopper is empty, which checks the sensors for both the hopper and
    * kicker
    *
