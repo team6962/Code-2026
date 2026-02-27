@@ -1,5 +1,8 @@
 package frc.robot.subsystems.hopper;
 
+import static edu.wpi.first.units.Units.Seconds;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,7 +23,7 @@ public class Hopper extends SubsystemBase {
   public Hopper() {
     beltFloor = new BeltFloor();
     kicker = new Kicker();
-    sensors = new HopperSensors(this);
+    sensors = new HopperSensors();
   }
 
   /** Command to dump the hopper, which runs the belt floor and kicker in reverse. */
@@ -44,8 +47,48 @@ public class Hopper extends SubsystemBase {
    * @return
    */
   public Command feed() {
+    return feedSynchronized()
+        .withTimeout(Seconds.of(0.5))
+        .andThen(
+            Commands.either(
+                    feedSynchronized().withTimeout(Seconds.of(0.5)),
+                    feedPulsing(),
+                    () -> sensors.isFeedingSuccessfully() || sensors.isKickerEmpty())
+                .repeatedly());
+  }
+
+  /**
+   * Feeds fuel from the hopper into the shooter by running the kicker and belt floor at the same
+   * time. This version of feeding is faster, but is more likely to get jammed, so it should be used
+   * with a backup.
+   *
+   * @return A command that feeds fuel from the hopper to the shooter by running the kicker an belt
+   *     floor at the same time
+   */
+  public Command feedSynchronized() {
+    return Commands.parallel(beltFloor.feed(), kicker.feed())
+        .deadlineFor(
+            Commands.startEnd(
+                () -> DogLog.log("Hopper/FeedMode", "Sync"),
+                () -> DogLog.log("Hopper/FeedMode", "Off")));
+  }
+
+  /**
+   * Feeds fuel from the hopper into the shooter by pulsing the kicker and belt floor, running only
+   * one at once. This version of feeding is much less likely to get jammed, so it is nice as a
+   * backup option.
+   *
+   * @return A command that feeds fuel from the hopper to the shooter by pulsing the kicker and belt
+   *     floor out of sync
+   */
+  public Command feedPulsing() {
     return Commands.sequence(
-        load(), Commands.parallel(beltFloor.feed(), kicker.feed()).until(this::isEmpty));
+            beltFloor.reverse().withTimeout(0.25),
+            kicker.feed().until(sensors::isKickerEmpty).withTimeout(1))
+        .deadlineFor(
+            Commands.startEnd(
+                () -> DogLog.log("Hopper/FeedMode", "Pulse"),
+                () -> DogLog.log("Hopper/FeedMode", "Off")));
   }
 
   /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */

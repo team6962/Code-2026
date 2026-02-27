@@ -93,7 +93,16 @@ public class BeltFloor extends SubsystemBase {
    * @return A command that runs the belt floor motor to feed fuel.
    */
   public Command feed() {
-    return feedDump(Volts.of(12.0));
+    return feedDump(Volts.of(8.0));
+  }
+
+  /**
+   * Moves the belts in reverse.
+   *
+   * @return A command that runs the belt floor motor to move fuel away from the queue.
+   */
+  public Command reverse() {
+    return feedDump(Volts.of(-6.0));
   }
 
   /**
@@ -102,7 +111,7 @@ public class BeltFloor extends SubsystemBase {
    * @return A command that runs the belt floor motor to dump fuel.
    */
   public Command dump() {
-    return feedDump(Volts.of(-12.0));
+    return feedDump(Volts.of(-8.0));
   }
 
   @Override
