@@ -12,8 +12,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
-import org.photonvision.simulation.SimCameraProperties;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -34,13 +32,13 @@ import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
   @Override
@@ -243,21 +241,20 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(12.866392).in(Meters),
                         Inches.of(-12.866926).in(Meters),
                         Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))        
+                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
         .withCameraSimProperties(
             new SimCameraProperties()
-                .setCalibration(640, 480, Rotation2d.fromDegrees(60)) //needs to be checked
+                .setCalibration(640, 480, Rotation2d.fromDegrees(60)) // needs to be checked
                 .setCalibError(0.29, 0.08) // needs to be checked
-                .setFPS(30) //needs to be checked
-                .setAvgLatencyMs(10) //needs to be checked
+                .setFPS(30) // needs to be checked
+                .setAvgLatencyMs(10) // needs to be checked
                 .setLatencyStdDevMs(5)) // needs to be checked
         .withDrawWireframes(true)
         .withMinTagsForHeadingUpdateWhileEnabled(2)
         .withMinTagsForHeadingUpdateWhileDisabled(1);
-        
   }
 
   @Override
