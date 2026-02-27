@@ -247,10 +247,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
         .withCameraSimProperties(
             new SimCameraProperties()
-                .setCalibration(640, 480, Rotation2d.fromDegrees(60)) // needs to be checked
-                .setCalibError(0.29, 0.08) // needs to be checked
-                .setFPS(30) // needs to be checked
-                .setAvgLatencyMs(10) // needs to be checked
+                .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
+                .setCalibError(0.23, 0.0442) // needs to be checked
+                .setFPS(50) // needs to be checked
+                .setAvgLatencyMs(20) // needs to be checked
                 .setLatencyStdDevMs(5)) // needs to be checked
         .withDrawWireframes(true)
         .withMinTagsForHeadingUpdateWhileEnabled(2)
