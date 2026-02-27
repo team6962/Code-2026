@@ -46,14 +46,14 @@ public final class IntakeExtensionConstants {
           .withMotionMagic(
               new MotionMagicConfigs()
                   // Not tuned
-                  .withMotionMagicCruiseVelocity(0.1)
-                  .withMotionMagicAcceleration(0.1)
+                  .withMotionMagicCruiseVelocity(0.8)
+                  .withMotionMagicAcceleration(0.8)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                  .withKA(0.00)
+                  .withKA(1.0)
                   .withKD(0.0)
-                  .withKP(20.0)
+                  .withKP(120.0)
                   .withKG(-0.075)
                   .withKV(5.5108)
                   .withKS(0.425)
