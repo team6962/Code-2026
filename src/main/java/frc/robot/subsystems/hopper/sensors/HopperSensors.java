@@ -34,6 +34,9 @@ public class HopperSensors extends SubsystemBase {
   private double lastKickerNotFullTimestamp;
   private double lastKickerFullTimetstamp;
 
+  private double jamTimeWhenFull = 0.25;
+  private double jamTimeWhenEmpty = 0.25;
+
   /**
    * Constructs a new HopperSensors instance. Initializes the CANrange sensors for the Kicker, Upper
    * Hopper, and Lower Hopper using constants defined in HopperConstants. Applies configuration
@@ -78,6 +81,16 @@ public class HopperSensors extends SubsystemBase {
         newValue -> {
           kickerSensorEmptyThreshold = Inches.of(newValue);
         });
+    
+    DogLog.tunable(
+      "HopperSensors/Jam Time When Full (s)", jamTimeWhenFull, value -> {
+        jamTimeWhenFull = value;
+      });
+    
+    DogLog.tunable(
+      "HopperSensors/Jam Time When Empty (s)", jamTimeWhenEmpty, value -> {
+        jamTimeWhenEmpty = value;
+      });
   }
 
   /**
@@ -133,8 +146,8 @@ public class HopperSensors extends SubsystemBase {
 
   public boolean isFeedingSuccessfully() {
     return isKickerFull()
-        ? Timer.getFPGATimestamp() < lastKickerNotFullTimestamp + 0.25
-        : Timer.getFPGATimestamp() < lastKickerFullTimetstamp + 0.5;
+        ? Timer.getFPGATimestamp() < lastKickerNotFullTimestamp + jamTimeWhenFull
+        : Timer.getFPGATimestamp() < lastKickerFullTimetstamp + jamTimeWhenEmpty;
   }
 
   /**

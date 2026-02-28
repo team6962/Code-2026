@@ -245,14 +245,13 @@ public class IntakeExtension extends SubsystemBase {
   public Command moveAtVoltage(Voltage voltage) {
     return startEnd(
             () -> {
-              if (isZeroed) {
-                motor.setControl(
-                    new VoltageOut(
-                        voltage.plus(
-                            Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
-              } else {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              }
+              motor.setControl(
+                  new VoltageOut(
+                      voltage
+                          .plus(
+                              Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kS)
+                                  .times(Math.signum(voltage.in(Volts))))
+                          .plus(Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
             },
             () -> {
               motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
@@ -361,6 +360,9 @@ public class IntakeExtension extends SubsystemBase {
 
     if (isHallSensorTriggered() && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+    }
+
+    if (isHallSensorTriggered()) {
       isZeroed = true;
     }
 

@@ -3,9 +3,11 @@ package frc.robot.controls;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -145,14 +147,19 @@ public class TeleopControls {
                 () -> {
                   fineControl = !fineControl;
                   DogLog.log("TeleopControls/IntakeFineControl", fineControl);
-                }));
+                })
+            .andThen(Commands.either(
+                fineControlEnableRumble(),
+                fineControlDisableRumble(),
+                () -> fineControl
+            )).ignoringDisable(true));
 
     // Shoot - WORKS
     operator
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
-                robot.getShooterRollers().shoot(() -> flywheelVelocity), robot.getHopper().feed()));
+                robot.getShooterRollers().shoot(() -> flywheelVelocity), robot.getHopper().feedPulsing()));
 
     // // Pass fuel to alliance zone
     // operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
@@ -191,17 +198,21 @@ public class TeleopControls {
         .axisGreaterThan(Axis.kLeftX.value, 0.5)
         .and(() -> fineControl)
         .whileTrue(
-            this.robot
-                .getIntakeExtension()
-                .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE));
+            DogLog.time(
+                "fineControlOut",
+                this.robot
+                    .getIntakeExtension()
+                    .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE)));
 
     operator // WORKS
         .axisLessThan(Axis.kLeftX.value, -0.5)
         .and(() -> fineControl)
         .whileTrue(
-            this.robot
-                .getIntakeExtension()
-                .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+            DogLog.time(
+                "fineControlIn",
+                this.robot
+                    .getIntakeExtension()
+                    .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
     // operator
     //     .axisGreaterThan(Axis.kRightY.value, 0.5)
@@ -220,8 +231,8 @@ public class TeleopControls {
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
-    intakeRetract.whileTrue(robot.getIntakeExtension().retract());
-    intakeExtend.onTrue(robot.getIntakeExtension().extend());
+    intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
+    intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
 
     // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
     // fully tested
@@ -244,5 +255,26 @@ public class TeleopControls {
     //         .and(RobotState::isEnabled);
 
     // climbRetract.onTrue(robot.getClimb().descend());
+  }
+
+  private Command rumble(CommandXboxController controller, RumbleType rumbleType, double intensity) {
+    return Commands.startEnd(
+        () -> controller.setRumble(rumbleType, intensity),
+        () -> controller.setRumble(rumbleType, 0.0)
+    );
+  }
+
+  private Command fineControlEnableRumble() {
+    return Commands.sequence(
+        rumble(operator, RumbleType.kLeftRumble, 1).withTimeout(1.0 / 3.0),
+        Commands.waitSeconds(1.0 / 3.0),
+        rumble(operator, RumbleType.kRightRumble, 1).withTimeout(1.0 / 3.0)
+    );
+  }
+
+  private Command fineControlDisableRumble() {
+    return Commands.sequence(
+        rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0)
+    );
   }
 }

@@ -35,7 +35,7 @@ public final class IntakeExtensionConstants {
   public static final Distance PINION_RADIUS = Inches.of(0.5);
   public static final int CANDI_DEVICE_ID = 20;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
-  public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
+  public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(1.0);
   public static final double GEAR_RATIO = 4.5;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =

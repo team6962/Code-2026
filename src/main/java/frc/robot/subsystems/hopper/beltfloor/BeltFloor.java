@@ -105,6 +105,10 @@ public class BeltFloor extends SubsystemBase {
     return feedDump(Volts.of(-6.0));
   }
 
+  public Command slowReverse() {
+    return feedDump(Volts.of(-1.0));
+  }
+
   /**
    * Moves the belts in reverse to dump fuel out of the hopper.
    *

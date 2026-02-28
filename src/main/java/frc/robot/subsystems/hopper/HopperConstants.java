@@ -57,14 +57,14 @@ public class HopperConstants {
   public static final Distance KICKER_SENSOR_FULL_THRESHOLD = Inches.of(5.0);
 
   // Threshold distances for determining if the Kicker is empty
-  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(16.0);
+  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(20.0);
 
   // Threshold distances for determining if the Hopper is full
   public static final Distance UPPER_HOPPER_SENSOR_FULL_THRESHOLD =
       Inches.of(15.0); // This isn't the correct distance
 
   // Threshold distances for determining if the Hopper is empty
-  public static final Distance LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD = Inches.of(23.0);
+  public static final Distance LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD = Inches.of(16.0);
 
   public static final CANrangeConfiguration KICKER_SENSOR_CONFIGURATION =
       new CANrangeConfiguration()
