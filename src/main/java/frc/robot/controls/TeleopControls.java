@@ -37,7 +37,7 @@ public class TeleopControls {
     // this.autoClimb = new AutoClimb(robot);
     // this.driveToClump = new DriveToClump(robot);
 
-    DogLog.log(
+    DogLog.forceNt.log(
         "TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
 
     DogLog.tunable(
@@ -146,7 +146,7 @@ public class TeleopControls {
             Commands.runOnce(
                 () -> {
                   fineControl = !fineControl;
-                  DogLog.log("TeleopControls/IntakeFineControl", fineControl);
+                  DogLog.forceNt.log("TeleopControls/IntakeFineControl", fineControl);
                 })
             .andThen(Commands.either(
                 fineControlEnableRumble(),

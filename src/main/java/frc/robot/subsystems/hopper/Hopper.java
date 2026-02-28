@@ -21,7 +21,7 @@ public class Hopper extends SubsystemBase {
   private final HopperSensors sensors;
 
   private double kickerClearTime = 0.5;
-  private double beltFloorPulseTime = 0.125;
+  private double beltFloorPulseTime = 0.25;
 
   /** Constructor for the Hopper subsystem, which initializes the belt floor, kicker, and sensors */
   public Hopper() {

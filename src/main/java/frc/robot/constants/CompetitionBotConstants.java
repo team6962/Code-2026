@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
@@ -29,16 +28,10 @@ import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.UniqueModuleConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
-import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+
 import edu.wpi.first.math.system.plant.DCMotor;
-import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
   @Override
@@ -149,7 +142,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.95265))) // Measured with used wheels
+                .withWheelRadius(Inches.of(1.9314))) // Measured with used wheels
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -232,29 +225,29 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public AprilTagVisionConstants getAprilTagVisionConstants() {
-    return super.getAprilTagVisionConstants()
-        .withCameras(
-            new AprilTagCameraConstants(
-                "Monochrome-7",
-                new Transform3d(
-                    new Translation3d(
-                        Inches.of(12.866392).in(Meters),
-                        Inches.of(-12.866926).in(Meters),
-                        Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))
-        // Note that standard deviations are not fully tuned
-        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
-        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
-        .withCameraSimProperties(
-            new SimCameraProperties()
-                .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
-                .setCalibError(0.23, 0.0442) // needs to be checked
-                .setFPS(50) // needs to be checked
-                .setAvgLatencyMs(20) // needs to be checked
-                .setLatencyStdDevMs(5)) // needs to be checked
-        .withDrawWireframes(true)
-        .withMinTagsForHeadingUpdateWhileEnabled(2)
-        .withMinTagsForHeadingUpdateWhileDisabled(1);
+    return super.getAprilTagVisionConstants();
+        // .withCameras(
+        //     new AprilTagCameraConstants(
+        //         "Monochrome-7",
+        //         new Transform3d(
+        //             new Translation3d(
+        //                 Inches.of(12.866392).in(Meters),
+        //                 Inches.of(-12.866926).in(Meters),
+        //                 Inches.of(7.688516).in(Meters)),
+        //             new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))
+        // // Note that standard deviations are not fully tuned
+        // .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        // .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        // .withCameraSimProperties(
+        //     new SimCameraProperties()
+        //         .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
+        //         .setCalibError(0.23, 0.0442) // needs to be checked
+        //         .setFPS(50) // needs to be checked
+        //         .setAvgLatencyMs(20) // needs to be checked
+        //         .setLatencyStdDevMs(5)) // needs to be checked
+        // .withDrawWireframes(true)
+        // .withMinTagsForHeadingUpdateWhileEnabled(2)
+        // .withMinTagsForHeadingUpdateWhileDisabled(1);
   }
 
   @Override
