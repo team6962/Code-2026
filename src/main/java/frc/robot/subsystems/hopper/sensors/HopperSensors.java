@@ -148,6 +148,13 @@ public class HopperSensors extends SubsystemBase {
     return kickerDistance.getValue().gt(kickerSensorEmptyThreshold);
   }
 
+  /**
+   * Determines if the hopper is currently feeding fuel successfully by checking if the kicker
+   * sensor is seeing fuel pass by.
+   *
+   * @return {@code true} if the hopper is likely feeding fuel successfully, based on recent sensor
+   *     readings and the defined jam times.
+   */
   public boolean isFeedingSuccessfully() {
     return isKickerFull()
         ? Timer.getFPGATimestamp() < lastKickerNotFullTimestamp + jamTimeWhenFull
