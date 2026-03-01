@@ -105,6 +105,12 @@ public class BeltFloor extends SubsystemBase {
     return feedDump(Volts.of(-6.0));
   }
 
+  /**
+   * Slowly runs the belts in reverse.
+   *
+   * @return A command that runs the belt floor motor at a low voltage to move fuel away from the
+   *     queue.
+   */
   public Command slowReverse() {
     return feedDump(Volts.of(-1.0));
   }
