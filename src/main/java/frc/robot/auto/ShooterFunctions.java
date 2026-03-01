@@ -82,6 +82,7 @@ public class ShooterFunctions {
    *     output using the data loaded from the CSV file
    * @throws IOException if an I/O error occurs while reading the CSV file at {@code path}
    */
+  @SuppressWarnings("deprecation")
   private MultivariateFunction loadHoodAngleDataHub() throws IOException {
     MicrosphereInterpolator interpolator = new MicrosphereInterpolator();
     double[][] data = CSVLoader.loadCSV(anglePathHub);

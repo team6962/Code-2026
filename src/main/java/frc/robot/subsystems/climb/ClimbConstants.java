@@ -27,7 +27,7 @@ public class ClimbConstants {
   public static final Distance DRUM_RADIUS = Inches.of(0.375);
   public static final int CANDI_CAN_ID = 40;
   public static final int MOTOR_ID = 50;
-  public static final String CANBUS_NAME = "subsystems";
+  public static final String CANBUS_NAME = "drivetrain";
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
 
   public static final Distance MIN_HEIGHT = Inches.of(0);

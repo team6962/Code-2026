@@ -12,10 +12,13 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -96,6 +99,86 @@ public class IntakeExtension extends SubsystemBase {
     hallSensorTriggeredSignal = candi.getS1Closed();
     closedLoopReferenceSignal = motor.getClosedLoopReference();
 
+    DogLog.tunable(
+        "IntakeExtension/kP",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kP,
+        newKP -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kP = newKP;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/kD",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kD,
+        newKD -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kD = newKD;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/kV",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kV,
+        newKV -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kV = newKV;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/kA",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kA,
+        newKA -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kA = newKA;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/kG",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG,
+        newKG -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kG = newKG;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/kS",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kS,
+        newKS -> {
+          Slot0Configs config = new Slot0Configs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.kS = newKS;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/Velocity",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity,
+        newVelocity -> {
+          MotionMagicConfigs config = new MotionMagicConfigs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.MotionMagicCruiseVelocity = newVelocity;
+          motor.getConfigurator().apply(config);
+        });
+
+    DogLog.tunable(
+        "IntakeExtension/Acceleration",
+        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration,
+        newAcceleration -> {
+          MotionMagicConfigs config = new MotionMagicConfigs();
+          StatusUtil.check(motor.getConfigurator().refresh(config));
+          config.MotionMagicAcceleration = newAcceleration;
+          motor.getConfigurator().apply(config);
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
       isZeroed = true;
@@ -137,7 +220,7 @@ public class IntakeExtension extends SubsystemBase {
     return startEnd(
             () -> {
               motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.MIN_POSITION.in(Meters)));
+                  new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
             },
             () -> {
               motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
@@ -146,7 +229,7 @@ public class IntakeExtension extends SubsystemBase {
             () ->
                 getPosition()
                     .isNear(
-                        IntakeExtensionConstants.MIN_POSITION,
+                        IntakeExtensionConstants.RETRACT_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE));
   }
 
@@ -162,14 +245,13 @@ public class IntakeExtension extends SubsystemBase {
   public Command moveAtVoltage(Voltage voltage) {
     return startEnd(
             () -> {
-              if (isZeroed) {
-                motor.setControl(
-                    new VoltageOut(
-                        voltage.plus(
-                            Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
-              } else {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              }
+              motor.setControl(
+                  new VoltageOut(
+                      voltage
+                          .plus(
+                              Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kS)
+                                  .times(Math.signum(voltage.in(Volts))))
+                          .plus(Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
             },
             () -> {
               motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
@@ -278,6 +360,9 @@ public class IntakeExtension extends SubsystemBase {
 
     if (isHallSensorTriggered() && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+    }
+
+    if (isHallSensorTriggered()) {
       isZeroed = true;
     }
 
@@ -299,5 +384,6 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
+    DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
   }
 }

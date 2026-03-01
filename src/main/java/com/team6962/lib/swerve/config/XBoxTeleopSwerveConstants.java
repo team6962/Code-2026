@@ -62,7 +62,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double DefaultAngularSpeed = 0.3;
+  public double DefaultAngularSpeed = 0.5;
 
   /**
    * The translational speed used during teleop when boosting and not using the D-pad for fine
