@@ -29,13 +29,16 @@ import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.UniqueModuleConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
+import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
   @Override
@@ -50,12 +53,6 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     .withMotionMagicAcceleration(21.2))
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(0.017)
-                    .withKI(0.0017)
-                    .withKD(0.0017)
-                    .withKV(0.7324)
-                    .withKA(0.00067)
-                    .withKS(0.0288)
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -82,19 +79,20 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4cDriveMotorConfig = baseDriveMotorConfig.clone();
     mk4cDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4cDriveMotorConfig.Slot0.kP = 2.0;
+    mk4cDriveMotorConfig.Slot0.kV = 0.71;
+    mk4cDriveMotorConfig.Slot0.kS = 0.144;
 
     TalonFXConfiguration mk4cSteerMotorConfig = baseSteerMotorConfig.clone();
     mk4cSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     mk4cSteerMotorConfig.Feedback.RotorToSensorRatio = 12.8;
     mk4cSteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(10) // Not tuned
-            .withKI(0.01) // Not tuned
-            .withKD(0.25) // Not tuned
-            .withKS(0.25) // Not tuned
+            .withKP(15)
+            .withKD(0.5)
+            .withKS(0.325)
             .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
-            .withKA(
-                0.03 * 12.0 / 12.8 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKA(0.034); // KA = MOI * peak voltage / gear ratio / stall torque
 
     UniqueModuleConstants mk4cConstants =
         new UniqueModuleConstants()
@@ -105,19 +103,20 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4nADriveMotorConfig = baseDriveMotorConfig.clone();
     mk4nADriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4nADriveMotorConfig.Slot0.kP = 2.0;
+    mk4nADriveMotorConfig.Slot0.kV = 0.71;
+    mk4nADriveMotorConfig.Slot0.kS = 0.144;
 
     TalonFXConfiguration mk4nASteerMotorConfig = baseSteerMotorConfig.clone();
     mk4nASteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
     mk4nASteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(10) // Not tuned
-            .withKI(0.01) // Not tuned
-            .withKD(0.25) // Not tuned
-            .withKS(0.25) // Not tuned
+            .withKP(25)
+            .withKD(1.25)
+            .withKS(0.24)
             .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
-            .withKA(
-                0.03 * 12.0 / 18.75 / 9.37); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKA(0.08); // KA = MOI * peak voltage / gear ratio / stall torque
 
     UniqueModuleConstants mk4nAConstants =
         new UniqueModuleConstants()
@@ -130,7 +129,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     mk4nBDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     TalonFXConfiguration mk4nBSteerMotorConfig = mk4nASteerMotorConfig.clone();
-    mk4nBSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    mk4nBSteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     UniqueModuleConstants mk4nBConstants =
         new UniqueModuleConstants()
@@ -150,32 +149,32 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.95265))) // Measured with used wheels
+                .withWheelRadius(Inches.of(1.9314))) // Measured with used wheels
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
                   .withDriveMotorCANId(10)
                   .withSteerMotorCANId(11)
                   .withSteerEncoderCANId(10)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(-1.9325))
                   .withUniqueModuleConstants(mk4nBConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(12)
                   .withSteerMotorCANId(13)
                   .withSteerEncoderCANId(11)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(1.9017))
                   .withUniqueModuleConstants(mk4nAConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(14)
                   .withSteerMotorCANId(15)
                   .withSteerEncoderCANId(12)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(-2.7078))
                   .withUniqueModuleConstants(mk4cConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(16)
                   .withSteerMotorCANId(17)
                   .withSteerEncoderCANId(13)
-                  .withSteerEncoderOffset(Radians.of(0)) // Not tuned
+                  .withSteerEncoderOffset(Radians.of(0.2274))
                   .withUniqueModuleConstants(mk4cConstants)
             })
         .withTiming(
@@ -233,7 +232,29 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public AprilTagVisionConstants getAprilTagVisionConstants() {
-    return super.getAprilTagVisionConstants();
+    return super.getAprilTagVisionConstants()
+        .withCameras(
+            new AprilTagCameraConstants(
+                "Monochrome-7",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(12.866392).in(Meters),
+                        Inches.of(-12.866926).in(Meters),
+                        Inches.of(7.688516).in(Meters)),
+                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))
+        // Note that standard deviations are not fully tuned
+        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        .withCameraSimProperties(
+            new SimCameraProperties()
+                .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
+                .setCalibError(0.23, 0.0442) // needs to be checked
+                .setFPS(50) // needs to be checked
+                .setAvgLatencyMs(20) // needs to be checked
+                .setLatencyStdDevMs(5)) // needs to be checked
+        .withDrawWireframes(true)
+        .withMinTagsForHeadingUpdateWhileEnabled(2)
+        .withMinTagsForHeadingUpdateWhileDisabled(1);
   }
 
   @Override

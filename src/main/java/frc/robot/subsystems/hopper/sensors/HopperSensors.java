@@ -1,5 +1,7 @@
 package frc.robot.subsystems.hopper.sensors;
 
+import static edu.wpi.first.units.Units.Inches;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -7,6 +9,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
@@ -22,6 +25,19 @@ public class HopperSensors extends SubsystemBase {
   private StatusSignal<Distance> kickerDistance;
   private StatusSignal<Distance> upperHopperDistance;
   private StatusSignal<Distance> lowerHopperDistance;
+
+  private Distance upperHopperSensorFullThreshold =
+      HopperConstants.UPPER_HOPPER_SENSOR_FULL_THRESHOLD;
+  private Distance lowerHopperSensorEmptyThreshold =
+      HopperConstants.LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD;
+  private Distance kickerSensorFullThreshold = HopperConstants.KICKER_SENSOR_FULL_THRESHOLD;
+  private Distance kickerSensorEmptyThreshold = HopperConstants.KICKER_SENSOR_EMPTY_THRESHOLD;
+
+  private double lastKickerNotFullTimestamp;
+  private double lastKickerFullTimetstamp;
+
+  private double jamTimeWhenFull = 0.25;
+  private double jamTimeWhenEmpty = 0.25;
 
   /**
    * Constructs a new HopperSensors instance. Initializes the CANrange sensors for the Kicker, Upper
@@ -44,6 +60,48 @@ public class HopperSensors extends SubsystemBase {
     this.kickerDistance = kickerSensor.getDistance();
     this.upperHopperDistance = upperHopperSensor.getDistance();
     this.lowerHopperDistance = lowerHopperSensor.getDistance();
+
+    DogLog.tunable(
+        "HopperSensors/Hopper Full Threshold (in)",
+        upperHopperSensorFullThreshold.in(Inches),
+        newValue -> {
+          upperHopperSensorFullThreshold = Inches.of(newValue);
+        });
+
+    DogLog.tunable(
+        "HopperSensors/Hopper Empty Threshold (in)",
+        lowerHopperSensorEmptyThreshold.in(Inches),
+        newValue -> {
+          lowerHopperSensorEmptyThreshold = Inches.of(newValue);
+        });
+
+    DogLog.tunable(
+        "HopperSensors/Kicker Full Threshold (in)",
+        kickerSensorFullThreshold.in(Inches),
+        newValue -> {
+          kickerSensorFullThreshold = Inches.of(newValue);
+        });
+
+    DogLog.tunable(
+        "HopperSensors/Kicker Empty Threshold (in)",
+        kickerSensorEmptyThreshold.in(Inches),
+        newValue -> {
+          kickerSensorEmptyThreshold = Inches.of(newValue);
+        });
+
+    DogLog.tunable(
+        "HopperSensors/Jam Time When Full (s)",
+        jamTimeWhenFull,
+        value -> {
+          jamTimeWhenFull = value;
+        });
+
+    DogLog.tunable(
+        "HopperSensors/Jam Time When Empty (s)",
+        jamTimeWhenEmpty,
+        value -> {
+          jamTimeWhenEmpty = value;
+        });
   }
 
   /**
@@ -81,7 +139,7 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isHopperFull() {
-    return upperHopperDistance.getValue().lt(HopperConstants.UPPER_HOPPER_SENSOR_FULL_THRESHOLD);
+    return upperHopperDistance.getValue().lt(upperHopperSensorFullThreshold);
   }
 
   /**
@@ -92,7 +150,7 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isHopperEmpty() {
-    return lowerHopperDistance.getValue().gt(HopperConstants.LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD);
+    return lowerHopperDistance.getValue().gt(lowerHopperSensorEmptyThreshold);
   }
 
   /**
@@ -103,7 +161,7 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isKickerFull() {
-    return kickerDistance.getValue().lt(HopperConstants.KICKER_SENSOR_FULL_THRESHOLD);
+    return kickerDistance.getValue().lt(kickerSensorFullThreshold);
   }
 
   /**
@@ -114,7 +172,20 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isKickerEmpty() {
-    return kickerDistance.getValue().gt(HopperConstants.KICKER_SENSOR_EMPTY_THRESHOLD);
+    return kickerDistance.getValue().gt(kickerSensorEmptyThreshold);
+  }
+
+  /**
+   * Determines if the hopper is currently feeding fuel successfully by checking if the kicker
+   * sensor is seeing fuel pass by.
+   *
+   * @return {@code true} if the hopper is likely feeding fuel successfully, based on recent sensor
+   *     readings and the defined jam times.
+   */
+  public boolean isFeedingSuccessfully() {
+    return isKickerFull()
+        ? Timer.getFPGATimestamp() < lastKickerNotFullTimestamp + jamTimeWhenFull
+        : Timer.getFPGATimestamp() < lastKickerFullTimetstamp + jamTimeWhenEmpty;
   }
 
   /**
@@ -123,8 +194,18 @@ public class HopperSensors extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    StatusUtil.check(
-        BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
+    StatusUtil.check(BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
+
+    if (isKickerFull()) {
+      lastKickerFullTimetstamp = Timer.getFPGATimestamp();
+    } else {
+      lastKickerNotFullTimestamp = Timer.getFPGATimestamp();
+    }
+
+    if (isKickerEmpty()) {
+      lastKickerFullTimetstamp = Timer.getFPGATimestamp();
+      lastKickerNotFullTimestamp = Timer.getFPGATimestamp();
+    }
 
     DogLog.log("Hopper/Sensors/KickerDistance", getKickerDistance());
     DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());
@@ -133,5 +214,6 @@ public class HopperSensors extends SubsystemBase {
     DogLog.log("Hopper/Sensors/HopperEmpty", isHopperEmpty());
     DogLog.log("Hopper/Sensors/KickerFull", isKickerFull());
     DogLog.log("Hopper/Sensors/KickerEmpty", isKickerEmpty());
+    DogLog.log("Hopper/Sensors/FeedingSuccessfully", isFeedingSuccessfully());
   }
 }
