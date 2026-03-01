@@ -194,7 +194,8 @@ public class HopperSensors extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    StatusUtil.check(BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
+    StatusUtil.check(
+        BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
 
     if (isKickerFull()) {
       lastKickerFullTimetstamp = Timer.getFPGATimestamp();
