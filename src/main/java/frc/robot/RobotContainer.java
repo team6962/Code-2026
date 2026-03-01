@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.DriveStraightAuto;
-import frc.robot.auto.ShooterFunctions;
+import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
 import frc.robot.subsystems.climb.Climb;
@@ -68,17 +68,11 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
+    shooterFunctions = new ShooterFunctions("shooter_hub_data.csv");
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
-
-    try {
-      shooterFunctions = new ShooterFunctions();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw e;
-    }
 
     configureAutonomousChooser();
 

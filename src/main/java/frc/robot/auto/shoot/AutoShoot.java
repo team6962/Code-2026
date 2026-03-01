@@ -1,46 +1,58 @@
 package frc.robot.auto.shoot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.function.Supplier;
+
+import org.apache.commons.math3.util.Pair;
 
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.auto.ShooterFunctions;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
-import java.util.function.Supplier;
-import org.apache.commons.math3.util.Pair;
 
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
-  /** The swerve drive, which is used to find the position and velocity of the robot. */
+  /**
+   * The swerve drive subsystem, used to get the shooter's pose and velocity for calculating
+   * shooting parameters.
+   */
   private CommandSwerveDrive swerveDrive;
 
-  /** The turret that controls the azimuth angle of the shooter. */
+  /**
+   * The turret subsystem, used to aim the shooter in azimuth.
+   */
   private Turret turret;
 
-  /** The hood that controls the elevation angle of the shooter. */
+  /**
+   * The hood subsystem, used to aim the shooter in elevation.
+   */
   private ShooterHood hood;
 
-  /** The rollers that propel fuel out of the shooter. */
+  /**
+   * The shooter rollers subsystem, used to spin up the shooter wheels to the target speed.
+   */
   private ShooterRollers rollers;
 
-  /** A supplier that provides the target position in 3D space. */
-  private Supplier<Translation3d> targetSupplier;
+  /** The shooter functions, which provide access to shooter calibration data. */
+  private ShooterFunctions shooterFunctions;
+
+  /** A supplier that provides the target position. */
+  private Supplier<Translation2d> targetSupplier;
 
   /** The target azimuth angle for the turret. */
   private Angle turretAngleTarget;
@@ -53,6 +65,9 @@ public class AutoShoot extends Command {
 
   /** Whether the system is ready to shoot. */
   private boolean readyToShoot;
+
+  /** Whether this command is currently running. */
+  private boolean thisCommandRunning = false;
 
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
@@ -70,16 +85,17 @@ public class AutoShoot extends Command {
       ShooterHood hood,
       ShooterRollers rollers,
       ShooterFunctions shooterFunctions,
-      Supplier<Translation3d> targetSupplier) {
+      Supplier<Translation2d> targetSupplier) {
     this.swerveDrive = swerveDrive;
     this.turret = turret;
     this.hood = hood;
     this.rollers = rollers;
     this.targetSupplier = targetSupplier;
+    this.shooterFunctions = shooterFunctions;
 
     // Create triggers and bind commands to them in order to continuously update
-    // subsystem setpoints while this command is scheduled.
-    Trigger runningTrigger = new Trigger(() -> isScheduled());
+    // subsystem setpoints while this command is running.
+    Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
 
     Command turretCommand = turret.moveTo(() -> turretAngleTarget).repeatedly();
     Command hoodCommand = hood.moveTo(() -> hoodAngleTarget).repeatedly();
@@ -96,6 +112,18 @@ public class AutoShoot extends Command {
         .whileTrue(rollersCommand);
   }
 
+  @Override
+  public void initialize() {
+    thisCommandRunning = true;
+    readyToShoot = false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    thisCommandRunning = false;
+    readyToShoot = false;
+  }
+
   /**
    * Returns a trigger that is active when the shooter is ready to shoot.
    *
@@ -107,73 +135,56 @@ public class AutoShoot extends Command {
 
   /**
    * Predicts the destination of a projectile fired from the shooter given the shooter's pose,
-   * velocity, azimuth angle, hood angle, roller speed, and target height.
+   * velocity, azimuth angle, and hood angle.
    *
+   * @param distance the distance to the target if the shooter is stationary
    * @param shooterPose the pose of the shooter
    * @param shooterVelocity the velocity of the shooter
    * @param azimuthAngle the azimuth angle of the shooter
    * @param hoodAngle the hood angle of the shooter
-   * @param rollerSpeed the roller speed of the shooter
-   * @param targetHeight the height of the target
    * @return the predicted destination of the projectile
    */
-  private Translation3d predictDestination(
+  private Translation2d predictDestination(
+      Distance distance,
       Pose2d shooterPose,
       TranslationalVelocity shooterVelocity,
       Angle azimuthAngle,
-      Angle hoodAngle,
-      AngularVelocity rollerSpeed,
-      Distance targetHeight) {
-    // Calculate parameters for the shooting model functions
-    double[] parameters =
-        new double[] {
-          hoodAngle.in(Radians), rollerSpeed.in(RadiansPerSecond), targetHeight.in(Meters)
-        };
+      Angle hoodAngle) {
 
     // Calculate the displacement of the projectile during flight
-    double distance = AutoShootConstants.distanceFunction.value(parameters);
-    Translation2d displacement = new Translation2d(distance, new Rotation2d(azimuthAngle));
+    Translation2d displacement = new Translation2d(distance.in(Meters), new Rotation2d(azimuthAngle));
 
     // Account for the shooter's initial velocity during flight
-    Time flightTime = Seconds.of(AutoShootConstants.flightTimeFunction.value(parameters));
+    Time flightTime = shooterFunctions.getFlightTime(distance);
     displacement =
         displacement.plus(
             shooterVelocity
                 .times(flightTime)
-                .times(
-                    AutoShootConstants.initialVelocityDisplacementScalarFunction.value(
-                        parameters)));
+                .times(AutoShootConstants.initialVelocityDisplacementScalarFunction.value(new double[] {
+                    distance.in(Inches), hoodAngle.in(Degrees)})));
 
     // Calculate the final destination of the projectile
-    Translation2d destination = shooterPose.getTranslation().plus(displacement);
-
-    return new Translation3d(destination.getX(), destination.getY(), targetHeight.in(Meters));
+    return shooterPose.getTranslation().plus(displacement);
   }
 
   /**
    * Calculates the static shooting angles (azimuth and hood) required to hit the target from the
-   * shooter's pose and velocity.
+   * shooter's pose.
    *
    * @param shooterPose the pose of the shooter
-   * @param shooterVelocity the velocity of the shooter
    * @param target the target position
    * @return a pair containing the azimuth and hood angles
    */
   private Pair<Angle, Angle> getStaticShootingAngles(
-      Pose2d shooterPose, AngularVelocity shooterVelocity, Translation3d target) {
+      Pose2d shooterPose, Translation2d target) {
     // Calculate the azimuth angle to the target
     Angle azimuthAngle =
-        shooterPose.getTranslation().minus(target.toTranslation2d()).getAngle().getMeasure();
+        shooterPose.getTranslation().minus(target).getAngle().getMeasure();
 
     // Calculate the hood angle using the hood angle function
-    double horizontalDistance = shooterPose.getTranslation().getDistance(target.toTranslation2d());
+    Distance horizontalDistance = Meters.of(shooterPose.getTranslation().getDistance(target));
 
-    Angle hoodAngle =
-        Radians.of(
-            AutoShootConstants.hoodAngleFunction.value(
-                new double[] {
-                  horizontalDistance, shooterVelocity.in(RadiansPerSecond), target.getZ()
-                }));
+    Angle hoodAngle = shooterFunctions.getHoodAngle(horizontalDistance);
 
     return new Pair<Angle, Angle>(azimuthAngle, hoodAngle);
   }
@@ -191,34 +202,33 @@ public class AutoShoot extends Command {
   private Pair<Angle, Angle> getMovingShootingAngles(
       Pose2d shooterPose,
       TranslationalVelocity shooterVelocity,
-      AngularVelocity rollersAngularVelocity,
-      Translation3d target) {
-    Pair<Angle, Angle> angles;
-    Translation3d predictedDestination;
-    Translation3d error;
-    Translation3d adjustedTarget = target;
+      Translation2d target) {
+    Pair<Angle, Angle> angles = getStaticShootingAngles(shooterPose, target);
+    Translation2d adjustedTarget = target;
 
     // Iteratively refine the shooting angles until the predicted destination is
     // within the optimization tolerance of the target.
-    do {
-      // Calculate the static shooting angles to hit the adjusted target
-      angles = getStaticShootingAngles(shooterPose, rollersAngularVelocity, adjustedTarget);
+    for (int i = 0; i < AutoShootConstants.optimizationIterations; i++) {
+      // Predict the destination for if the projectile were to be fired with the
+      // calculated angles
+      Distance distance = Meters.of(shooterPose.getTranslation().getDistance(adjustedTarget));
 
-      // Predict the destination using the calculated angles
-      predictedDestination =
+      Translation2d predictedDestination =
           predictDestination(
+              distance,
               shooterPose,
               shooterVelocity,
               angles.getFirst(),
-              angles.getSecond(),
-              rollersAngularVelocity,
-              Meters.of(target.getZ()));
+              angles.getSecond());
 
       // Adjust the target based on the error between the predicted destination and the
       // actual target
-      error = predictedDestination.minus(target);
+      Translation2d error = predictedDestination.minus(target);
       adjustedTarget = target.minus(error);
-    } while (error.getNorm() > AutoShootConstants.optimizationTolerance.in(Meters));
+
+      // Calculate the static shooting angles to hit the adjusted target
+      angles = getStaticShootingAngles(shooterPose, adjustedTarget);
+    }
 
     return angles;
   }
@@ -226,37 +236,35 @@ public class AutoShoot extends Command {
   @Override
   public void execute() {
     // Get the target position and initial shooter state
-    Translation3d target = targetSupplier.get();
+    Translation2d target = targetSupplier.get();
     Pose2d shooterPose = swerveDrive.getPosition2d().plus(AutoShootConstants.shooterTransform);
     TranslationalVelocity shooterVelocity = swerveDrive.getTranslationalVelocity();
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    Pair<Angle, Angle> idealAngles =
-        getMovingShootingAngles(shooterPose, shooterVelocity, rollers.getAngularVelocity(), target);
+    Pair<Angle, Angle> idealAngles = getMovingShootingAngles(shooterPose, shooterVelocity, target);
 
     // Set the target angles and roller speed
     turretAngleTarget = idealAngles.getFirst().minus(shooterPose.getRotation().getMeasure());
     hoodAngleTarget = idealAngles.getSecond();
-    rollerSpeedTarget =
-        RadiansPerSecond.of(
-            AutoShootConstants.rollerSpeedFunction.value(
-                target.toTranslation2d().getDistance(shooterPose.getTranslation())));
+    rollerSpeedTarget = shooterFunctions.getFlywheelVelocity(Meters.of(target.getDistance(shooterPose.getTranslation())));
 
-    // Predict the destination for if the projectile were to be fired now
-    Translation3d predictedDestination =
-        predictDestination(
-            shooterPose,
-            shooterVelocity,
-            turret.getPosition().plus(shooterPose.getRotation().getMeasure()),
-            hood.getPosition(),
-            rollers.getAngularVelocity(),
-            Meters.of(target.getZ()));
+    // Determine if the system is ready to shoot based on whether the shooter is at the target angles
+    // and roller speed
+    if (!rollers.getAngularVelocity().isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance)) {
+      readyToShoot = false;
+      return;
+    }
 
-    // Calculate the predicted error if the projectile were to be fired now
-    double error = predictedDestination.getDistance(target);
+    if (!hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance)) {
+      readyToShoot = false;
+      return;
+    }
 
-    // Determine if the system is ready to shoot based on the error between the
-    // predicted destination and the target
-    readyToShoot = error <= AutoShootConstants.shootingTolerance.in(Meters);
+    if (!turret.getPosition().isNear(turretAngleTarget, AutoShootConstants.turretAngleTolerance)) {
+      readyToShoot = false;
+      return;
+    }
+
+    readyToShoot = true;
   }
 }

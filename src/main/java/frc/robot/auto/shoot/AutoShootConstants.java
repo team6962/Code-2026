@@ -1,61 +1,44 @@
 package frc.robot.auto.shoot;
 
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import org.apache.commons.math3.analysis.MultivariateFunction;
 
 import com.team6962.lib.math.ConstantFunction;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.units.measure.Distance;
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+
+/**
+ * Constants for the AutoShoot command. These constants include functions that take in various
+ * parameters and return the corresponding shooting parameters (hood angle, roller speed, etc).
+ * These functions are used to calculate the optimal shooting parameters based on the current state
+ * of the robot and the target.
+ */
 public class AutoShootConstants {
   /**
-   * Function that takes in (distance to target, roller speed, target height) and returns hood
-   * angle. Uses SI units. This function must be carefully tuned to match the fuel's actual
-   * behavior.
-   */
-  public static final MultivariateFunction hoodAngleFunction = new ConstantFunction(0.125);
-
-  /**
-   * Function that takes in (hood angle, roller speed, target height) and returns flight time. Uses
-   * SI units. This function must be carefully tuned to match the fuel's actual behavior.
-   */
-  public static final MultivariateFunction flightTimeFunction = new ConstantFunction(0.5);
-
-  /**
-   * Function that takes in (hood angle, roller speed, target height) and returns distance to
-   * target. Uses SI units. This function must be carefully tuned to match the fuel's actual
-   * behavior.
-   */
-  public static final MultivariateFunction distanceFunction = new ConstantFunction(4);
-
-  /**
-   * Function that takes in (hood angle, roller speed, target height) and returns initial velocity
+   * Function that takes in (target distance, hood angle) and returns initial velocity
    * displacement scalar. This function is used to account for drag and the Magnus effect when
-   * shooting on the move. Uses SI units. This function must be carefully tuned to match the fuel's
-   * actual behavior.
+   * shooting on the move. Uses inches and degrees as inputs.
    */
-  public static final MultivariateFunction initialVelocityDisplacementScalarFunction =
-      new ConstantFunction(0.9);
+  public static final MultivariateFunction initialVelocityDisplacementScalarFunction = new ConstantFunction(0.9);
 
   /**
-   * Function that takes in (distance to target) and returns roller speed. Uses SI units. This
-   * function does not need to be tuned carefully, as long as it returns a speed that is high enough
-   * to reach the target.
+   * The number of iterations to run the optimization for when calculating the optimal shooting
+   * parameters.
    */
-  public static final UnivariateFunction rollerSpeedFunction = new ConstantFunction(500);
+  public static final int optimizationIterations = 20;
 
-  /**
-   * Maximum allowable error of the ideal shooting solution found by optimization. Lowering this
-   * value increases accuracy but also very slightly increases computation time.
-   */
-  public static final Distance optimizationTolerance = Inches.of(0.1);
+  /** Maximum allowable flywheel velocity error to shoot. */
+  public static final AngularVelocity flywheelVelocityTolerance = RotationsPerSecond.of(0.25);
 
-  /**
-   * Maximum allowable error to shoot. Lowering this value will make the robot shoot less often when
-   * it is not well aligned.
-   */
-  public static final Distance shootingTolerance = Inches.of(6);
+  /** Maximum allowable hood angle error to shoot. */
+  public static final Angle hoodAngleTolerance = Degrees.of(1);
+
+  /** Maximum allowable turret angle error to shoot. */
+  public static final Angle turretAngleTolerance = Degrees.of(1);
 
   /** Transform representing the shooter's position and orientation relative to the robot. */
   public static final Transform2d shooterTransform = new Transform2d();
