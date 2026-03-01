@@ -1,23 +1,31 @@
 package frc.robot.subsystems.visualizer;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.team6962.lib.swerve.simulation.MapleSim;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import org.ironmaple.simulation.IntakeSimulation;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 
 /** Displays the articulated components on the robot in AdvantageScope. */
 public class RobotVisualizer extends SubsystemBase {
@@ -33,113 +41,117 @@ public class RobotVisualizer extends SubsystemBase {
   public RobotVisualizer(RobotContainer robot) {
     this.robot = robot;
 
-    // Set up intake simulation
-    MapleSim mapleSim = robot.getSwerveDrive().getSimulation().getMapleSim();
-    intakeSim =
-        IntakeSimulation.OverTheBumperIntake(
-            "Fuel",
-            mapleSim.getSwerveSim(),
-            Inches.of(27),
-            Inches.of(12),
-            IntakeSimulation.IntakeSide.FRONT,
-            48);
+    if (RobotBase.isSimulation()) {
+      // Set up intake simulation
+      MapleSim mapleSim = robot.getSwerveDrive().getSimulation().getMapleSim();
+      intakeSim =
+          IntakeSimulation.OverTheBumperIntake(
+              "Fuel",
+              mapleSim.getSwerveSim(),
+              Inches.of(27),
+              Inches.of(12),
+              IntakeSimulation.IntakeSide.FRONT,
+              48);
+    }
   }
 
-  // private Translation3d getFuelTranslation(int index) {
-  //   double spacing = RobotVisualizationConstants.fuelSpacing.in(Meters);
-  //   Translation3d basePose = new Translation3d(0, -spacing * 1.5, 0.1);
+  private Translation3d getFuelTranslation(int index) {
+    double spacing = RobotVisualizationConstants.fuelSpacing.in(Meters);
+    Translation3d basePose = new Translation3d(0, -spacing * 1.5, 0.1);
 
-  //   int length =
-  //       robot.getIntakeExtension().isExtended()
-  //           ? RobotVisualizationConstants.hopperExtendedLength
-  //           : RobotVisualizationConstants.hopperRetractedLength;
-  //   int width = RobotVisualizationConstants.hopperWidth;
+    int length =
+        robot.getIntakeExtension().isExtended()
+            ? RobotVisualizationConstants.hopperExtendedLength
+            : RobotVisualizationConstants.hopperRetractedLength;
+    int width = RobotVisualizationConstants.hopperWidth;
 
-  //   int layer = index / length / width;
-  //   int indexInLayer = index % (length * width);
-  //   int row = indexInLayer / length;
-  //   int column = indexInLayer % length;
+    int layer = index / length / width;
+    int indexInLayer = index % (length * width);
+    int row = indexInLayer / length;
+    int column = indexInLayer % length;
 
-  //   return basePose.plus(new Translation3d(column * spacing, row * spacing, layer * spacing));
-  // }
+    return basePose.plus(new Translation3d(column * spacing, row * spacing, layer * spacing));
+  }
 
   @Override
-  public void periodic() {
-    try {
-      robot.getSwerveDrive().getSimulation().getArenaLock().lock();
-      // Update intake simulation
-      if (robot.getIntakeExtension().isExtended()
-          && robot.getIntakeRollers().getAppliedVoltage().in(Volts) > 1.0) {
-        intakeSim.startIntake();
-      } else {
-        intakeSim.stopIntake();
+  public void simulationPeriodic() {
+    if (RobotBase.isSimulation()) {
+      try {
+        robot.getSwerveDrive().getSimulation().getArenaLock().lock();
+        // Update intake simulation
+        if (robot.getIntakeExtension().isExtended()
+            && robot.getIntakeRollers().getAppliedVoltage().in(Volts) > 1.0) {
+          intakeSim.startIntake();
+        } else {
+          intakeSim.stopIntake();
+        }
+
+        // Visualize fuel in robot
+        int fuelCount = intakeSim.getGamePiecesAmount();
+
+        if (!robot.getIntakeExtension().isExtended()
+            && fuelCount > RobotVisualizationConstants.maxRetractedFuel) {
+          for (int i = 0; i < fuelCount - RobotVisualizationConstants.maxRetractedFuel; i++) {
+            Translation3d fuelTranslation = getFuelTranslation(i);
+
+            robot
+                .getSwerveDrive()
+                .getSimulation()
+                .getMapleSim()
+                .getArena()
+                .addGamePieceProjectile(
+                    new RebuiltFuelOnFly(
+                        robot.getSwerveDrive().getPosition2d().getTranslation(),
+                        fuelTranslation
+                            .toTranslation2d()
+                            .rotateBy(robot.getSwerveDrive().getPosition2d().getRotation()),
+                        robot.getSwerveDrive().getVelocity(),
+                        Rotation2d.fromRotations(Math.random()),
+                        Meters.of(fuelTranslation.getZ()),
+                        MetersPerSecond.of(Math.random() * 2.0 + 2.5),
+                        Degrees.of(65.0 + Math.random() * 20.0)));
+          }
+
+          intakeSim.setGamePiecesCount(RobotVisualizationConstants.maxRetractedFuel);
+          fuelCount = RobotVisualizationConstants.maxRetractedFuel;
+        }
+
+        List<Translation3d> fuelPositions =
+            robot
+                .getSwerveDrive()
+                .getSimulation()
+                .getMapleSim()
+                .getArena()
+                .getGamePiecesByType("Fuel")
+                .stream()
+                .map(gamePiece -> gamePiece.getPose3d().getTranslation())
+                .toList();
+
+        robot.getFuelLocalization().setSimulatedSpherePositions(fuelPositions);
+
+        List<Pose3d> additionalFuelPoses = new ArrayList<>();
+
+        for (int i = 0; i < fuelCount; i++) {
+          Translation3d fuelTranslation = getFuelTranslation(i);
+          additionalFuelPoses.add(new Pose3d(fuelTranslation, new Rotation3d()));
+        }
+
+        robot
+            .getSwerveDrive()
+            .getSimulation()
+            .getMapleSim()
+            .setHeldFuelPoses(additionalFuelPoses.toArray(Pose3d[]::new));
+
+        DogLog.log("RobotVisualizer/HeldFuelCount", fuelCount);
+      } finally {
+        robot.getSwerveDrive().getSimulation().getArenaLock().unlock();
       }
-
-      // Visualize fuel in robot
-      // int fuelCount = intakeSim.getGamePiecesAmount();
-
-      // if (!robot.getIntakeExtension().isExtended()
-      //     && fuelCount > RobotVisualizationConstants.maxRetractedFuel) {
-      //   for (int i = 0; i < fuelCount - RobotVisualizationConstants.maxRetractedFuel; i++) {
-      //     Translation3d fuelTranslation = getFuelTranslation(i);
-
-      //     robot
-      //         .getSwerveDrive()
-      //         .getSimulation()
-      //         .getMapleSim()
-      //         .getArena()
-      //         .addGamePieceProjectile(
-      //             new RebuiltFuelOnFly(
-      //                 robot.getSwerveDrive().getPosition2d().getTranslation(),
-      //                 fuelTranslation
-      //                     .toTranslation2d()
-      //                     .rotateBy(robot.getSwerveDrive().getPosition2d().getRotation()),
-      //                 robot.getSwerveDrive().getVelocity(),
-      //                 Rotation2d.fromRotations(Math.random()),
-      //                 Meters.of(fuelTranslation.getZ()),
-      //                 MetersPerSecond.of(Math.random() * 2.0 + 2.5),
-      //                 Degrees.of(65.0 + Math.random() * 20.0)));
-      //   }
-
-      //   intakeSim.setGamePiecesCount(RobotVisualizationConstants.maxRetractedFuel);
-      //   fuelCount = RobotVisualizationConstants.maxRetractedFuel;
-      // }
-
-      // List<Translation3d> fuelPositions =
-      //     robot
-      //         .getSwerveDrive()
-      //         .getSimulation()
-      //         .getMapleSim()
-      //         .getArena()
-      //         .getGamePiecesByType("Fuel")
-      //         .stream()
-      //         .map(gamePiece -> gamePiece.getPose3d().getTranslation())
-      //         .toList();
-
-      // robot.getFuelLocalization().setSimulatedSpherePositions(fuelPositions);
-
-      // List<Pose3d> additionalFuelPoses = new ArrayList<>();
-
-      // for (int i = 0; i < fuelCount; i++) {
-      //   Translation3d fuelTranslation = getFuelTranslation(i);
-      //   additionalFuelPoses.add(new Pose3d(fuelTranslation, new Rotation3d()));
-      // }
-
-      // robot
-      //     .getSwerveDrive()
-      //     .getSimulation()
-      //     .getMapleSim()
-      //     .setHeldFuelPoses(additionalFuelPoses.toArray(Pose3d[]::new));
-
-      // DogLog.log("RobotVisualizer/HeldFuelCount", fuelCount);
-    } finally {
-      robot.getSwerveDrive().getSimulation().getArenaLock().unlock();
     }
 
     // Get robot state
-    Angle turretAngle = Radians.of(0); // robot.getTurret().getPosition();
-    Angle hoodAngle = Radians.of(0); // robot.getShooterHood().getPosition();
-    Distance climbPosition = Meters.of(0); // robot.getClimb().getPosition();
+    Angle turretAngle = robot.getTurret().getPosition();
+    Angle hoodAngle = robot.getShooterHood().getPosition();
+    Distance climbPosition = robot.getClimb().getPosition();
     Distance intakePosition = robot.getIntakeExtension().getPosition();
     SwerveModulePosition[] modulePositions = robot.getSwerveDrive().getModulePositions();
 
