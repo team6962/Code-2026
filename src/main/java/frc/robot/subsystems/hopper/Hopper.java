@@ -122,7 +122,11 @@ public class Hopper extends SubsystemBase {
                     () -> DogLog.log("Hopper/FeedState", "Off"))));
   }
 
-  /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */
+  /**
+   * Attempts to unjam the indexer by running the belt floor in reverse.
+   *
+   * @return A command that runs the belt floor in reverse to attempt to unjam the indexer.
+   */
   public Command unjam() {
     return beltFloor.dump();
   }
