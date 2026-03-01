@@ -155,7 +155,4 @@ public class Hopper extends SubsystemBase {
   public HopperSensors getSensors() {
     return sensors;
   }
-
-  @Override
-  public void periodic() {}
 }
