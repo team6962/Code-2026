@@ -162,8 +162,4 @@ public class ShooterRollers extends SubsystemBase {
   public Voltage getMotorVoltage() {
     return voltageSignal.getValue();
   }
-
-  public boolean isRunning() {
-    return shooterRollerMotor1.getAppliedControl() != null;
-  }
 }
