@@ -64,42 +64,26 @@ public class Hopper extends SubsystemBase {
    *
    * @return
    */
-  public Command feed() {
-    return feedSynchronized()
+  public Command feedSynchronized() {
+    return feedSynchronizedWithoutUnjam()
         .withTimeout(Seconds.of(0.5))
         .andThen(
             Commands.either(
-                    feedSynchronized().withTimeout(Seconds.of(0.5)),
-                    feedUnjam(),
+                    feedSynchronizedWithoutUnjam().withTimeout(Seconds.of(0.5)),
+                    unjamDuringSynchronizedFeed(),
                     () -> sensors.isFeedingSuccessfully() || sensors.isKickerEmpty())
                 .repeatedly());
   }
 
-  /**
-   * Feeds fuel from the hopper into the shooter by running the kicker and belt floor at the same
-   * time. This version of feeding is faster, but is more likely to get jammed, so it should be used
-   * with a backup.
-   *
-   * @return A command that feeds fuel from the hopper to the shooter by running the kicker an belt
-   *     floor at the same time
-   */
-  public Command feedSynchronized() {
+  private Command feedSynchronizedWithoutUnjam() {
     return Commands.parallel(beltFloor.feed(), kicker.feed())
         .deadlineFor(
             Commands.startEnd(
-                () -> DogLog.log("Hopper/FeedMode", "Sync"),
-                () -> DogLog.log("Hopper/FeedMode", "Off")));
+                () -> DogLog.log("Hopper/FeedState", "Sync"),
+                () -> DogLog.log("Hopper/FeedState", "Off")));
   }
 
-  /**
-   * Feeds fuel from the hopper into the shooter by pulsing the kicker and belt floor, running only
-   * one at once. This version of feeding is much less likely to get jammed, so it is nice as a
-   * backup option.
-   *
-   * @return A command that feeds fuel from the hopper to the shooter by pulsing the kicker and belt
-   *     floor out of sync
-   */
-  public Command feedUnjam() {
+  private Command unjamDuringSynchronizedFeed() {
     return Commands.defer(
         () ->
             Commands.sequence(
@@ -110,11 +94,19 @@ public class Hopper extends SubsystemBase {
                         .withTimeout(kickerClearTime))
                 .deadlineFor(
                     Commands.startEnd(
-                        () -> DogLog.log("Hopper/FeedMode", "Unjam"),
-                        () -> DogLog.log("Hopper/FeedMode", "Off"))),
+                        () -> DogLog.log("Hopper/FeedState", "Unjam"),
+                        () -> DogLog.log("Hopper/FeedState", "Off"))),
         Set.of(beltFloor, kicker));
   }
 
+  /**
+   * Command to feed the hopper, which runs the belt floor and kicker in a pulsing pattern, feeding
+   * a new row of fuel into the queuer, then emptying the kicker/queuer before feeding in the next
+   * row.
+   *
+   * @return A command that feeds fuel from the hopper to the shooter by pulsing the kicker and belt
+   *     floor out of sync, which is less likely to get jammed than feedSynchronized.
+   */
   public Command feedPulsing() {
     return Commands.repeatingSequence(
         kicker.feed().alongWith(beltFloor.slowReverse()).until(sensors::isKickerEmpty),
@@ -123,7 +115,11 @@ public class Hopper extends SubsystemBase {
             .withDeadline(
                 Commands.parallel(
                     Commands.defer(() -> Commands.waitSeconds(beltFloorPulseTime), Set.of()),
-                    Commands.waitUntil(() -> !sensors.isKickerEmpty()))));
+                    Commands.waitUntil(() -> !sensors.isKickerEmpty())))
+            .deadlineFor(
+                Commands.startEnd(
+                    () -> DogLog.log("Hopper/FeedState", "Pulsing"),
+                    () -> DogLog.log("Hopper/FeedState", "Off"))));
   }
 
   /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */
