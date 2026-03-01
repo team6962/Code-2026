@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,12 @@ public class SphereClumpLocalization extends SubsystemBase {
   private Translation2d cachedClumpPosition;
 
   /**
+   * The list of simulated sphere positions for testing purposes. This allows us to bypass the
+   * camera processing and directly set the detected sphere positions in simulation.
+   */
+  private List<Translation3d> simulatedSpherePositions = new ArrayList<>();
+
+  /**
    * Construct the sphere clump localization subsystem.
    *
    * @param swerveDrive drive subsystem used for robot pose & field visualization
@@ -51,7 +58,10 @@ public class SphereClumpLocalization extends SubsystemBase {
   public SphereClumpLocalization(
       MotionSwerveDrive swerveDrive, SphereCameraConstants cameraConstants) {
     this.swerveDrive = swerveDrive;
-    this.camera = !cameraConstants.Name.equals("") ? new PhotonCamera(cameraConstants.Name) : null;
+    this.camera =
+        !cameraConstants.Name.equals("") && RobotBase.isReal()
+            ? new PhotonCamera(cameraConstants.Name)
+            : null;
     this.cameraConstants = cameraConstants;
   }
 
@@ -61,7 +71,7 @@ public class SphereClumpLocalization extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    if (camera == null) return;
+    if (cameraConstants.Name.equals("")) return;
 
     cachedClumpPosition = computeClumpPosition();
 
@@ -85,6 +95,12 @@ public class SphereClumpLocalization extends SubsystemBase {
     return cachedClumpPosition;
   }
 
+  public void setSimulatedSpherePositions(List<Translation3d> spherePositions) {
+    if (RobotBase.isSimulation()) {
+      simulatedSpherePositions = spherePositions;
+    }
+  }
+
   /**
    * Query the camera for targets and compute a best-guess clump position.
    *
@@ -102,65 +118,154 @@ public class SphereClumpLocalization extends SubsystemBase {
    * @return best estimated clump position as a Translation2d, or null if none found/valid
    */
   private Translation2d computeClumpPosition() {
-    // TODO: Switch to getAllUnreadResults()
-    PhotonPipelineResult result = camera.getLatestResult();
-    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/HasTargets", result.hasTargets());
+    PhotonPipelineResult result = null;
+    String cameraName = cameraConstants.Name;
 
-    if (!result.hasTargets()) {
-      DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/Count", 0);
+    if (RobotBase.isReal()) {
+      // TODO: Switch to getAllUnreadResults()
+      result = camera.getLatestResult();
+      DogLog.log("Vision/Cameras/" + cameraName + "/Spheres/HasTargets", result.hasTargets());
+    }
+
+    DogLog.log(
+        "Vision/Cameras/" + cameraName + "/Pose",
+        swerveDrive.getPosition3d().plus(cameraConstants.RobotToCameraTransform));
+
+    if (RobotBase.isReal() && !result.hasTargets()) {
+      DogLog.log("Vision/Cameras/" + cameraName + "/Spheres/Count", 0);
       return null;
     }
 
     // Get all sphere locations from tracked targets
+    List<Translation3d> sphereLocations3d;
+
+    if (RobotBase.isReal()) {
+      sphereLocations3d = computeRealSpherePositions(result);
+    } else {
+      sphereLocations3d = computeSimulatedSpherePositions();
+    }
+
+    List<Translation2d> sphereLocations2d =
+        sphereLocations3d.stream().map(t -> t.toTranslation2d()).toList();
+
+    // Publish all detected spheres for visualization (Pose2d list)
+    logSpheres(sphereLocations2d);
+
+    // Select the detection with the smallest summed planar distance to other detections.
+    // This heuristically picks a detection near the clump center.
+    return findClump(sphereLocations2d);
+  }
+
+  private List<Translation3d> computeRealSpherePositions(PhotonPipelineResult result) {
+    List<Translation3d> spherePositions = new ArrayList<>();
+
     List<PhotonTrackedTarget> targets = result.getTargets();
 
-    List<Translation2d> sphereLocations2d = new ArrayList<>();
-    List<Translation3d> sphereLocations3d = new ArrayList<>();
-
-    int sphereIndex = 0;
-    int validSphereCount = 0;
+    int index = 0;
 
     for (PhotonTrackedTarget target : targets) {
       if (target == null) continue;
 
-      // Increment sphere index but capture its initial value for logging
-      int thisSphereIndex = sphereIndex;
-      sphereIndex++;
-
-      // Convert tracked target into a 3D field-relative position
-      Translation3d sphereLocation3d = getSpherePosition(target, thisSphereIndex);
+      Translation3d position = getSpherePosition(target, index);
 
       DogLog.log(
-          "Vision/Cameras/" + camera.getName() + "/Spheres/" + thisSphereIndex + "/IsValid",
-          sphereLocation3d != null);
+          "Vision/Cameras/" + cameraConstants.Name + "/Spheres/" + index + "/IsValid",
+          position != null);
 
-      if (sphereLocation3d == null) continue;
+      if (position != null) {
+        spherePositions.add(position);
 
-      validSphereCount++;
+        DogLog.log(
+            "Vision/Cameras/"
+                + cameraConstants.Name
+                + "/Spheres/"
+                + index
+                + "/FieldRelativePosition",
+            new Pose3d(position, new Rotation3d()));
+      }
 
-      sphereLocations3d.add(sphereLocation3d);
-      sphereLocations2d.add(sphereLocation3d.toTranslation2d());
-
-      DogLog.log(
-          "Vision/Cameras/"
-              + camera.getName()
-              + "/Spheres/"
-              + thisSphereIndex
-              + "/FieldRelativePosition",
-          new Pose3d(sphereLocation3d, new Rotation3d()));
+      index++;
     }
 
-    // Publish all detected spheres for visualization (Pose2d list)
+    return spherePositions;
+  }
+
+  /**
+   * Computes simulated sphere positions, filtering out any that are outside the camera's maximum
+   * simulated detection range or outside the camera's field of view based on the robot's current
+   * position and orientation. This allows us to test the clump localization logic in simulation by
+   * directly setting sphere positions and having the subsystem process them as if they were
+   * detected by the camera.
+   *
+   * @return a list of valid simulated sphere positions
+   */
+  private List<Translation3d> computeSimulatedSpherePositions() {
+    List<Translation3d> spherePositions = new ArrayList<>();
+
+    int index = 0;
+
+    for (Translation3d position : simulatedSpherePositions) {
+      if (swerveDrive.getPosition2d().getTranslation().getDistance(position.toTranslation2d())
+          > Math.min(
+              cameraConstants.MaxSimulatedDetectionRange.in(Meters),
+              cameraConstants.MaxDetectionRange.in(Meters))) {
+        continue; // Skip simulated spheres that are out of range
+      }
+
+      Pose3d robotPose = swerveDrive.getPosition3d();
+      Pose3d cameraPose = robotPose.plus(cameraConstants.RobotToCameraTransform);
+      Pose3d sphereRelativeToCamera = new Pose3d(position, new Rotation3d()).relativeTo(cameraPose);
+
+      Angle yaw =
+          Radians.of(Math.atan2(sphereRelativeToCamera.getY(), sphereRelativeToCamera.getX()));
+      Angle pitch =
+          Radians.of(Math.atan2(sphereRelativeToCamera.getZ(), sphereRelativeToCamera.getX()));
+
+      if (Math.abs(yaw.in(Degrees)) > cameraConstants.FOVWidth.getDegrees() / 2
+          || Math.abs(pitch.in(Degrees)) > cameraConstants.FOVHeight.getDegrees() / 2) {
+        continue; // Skip simulated spheres that are outside the camera's FOV
+      }
+
+      spherePositions.add(position);
+
+      DogLog.log(
+          "Vision/Cameras/" + cameraConstants.Name + "/Spheres/" + index + "/FieldRelativePosition",
+          new Pose3d(position, new Rotation3d()));
+
+      index++;
+    }
+
+    return spherePositions;
+  }
+
+  /**
+   * Helper method to publish detected sphere positions to the field logger for visualization.
+   * Converts a list of Translation2d positions into Pose2d with zero rotation and updates a field
+   * object named "Sphere". Also logs the count of detected spheres.
+   *
+   * @param spheres a list of 2D positions of detected spheres
+   */
+  private void logSpheres(List<Translation2d> spheres) {
     swerveDrive
         .getFieldLogger()
         .getField()
         .getObject("Sphere")
-        .setPoses(sphereLocations2d.stream().map(t -> new Pose2d(t, new Rotation2d())).toList());
+        .setPoses(spheres.stream().map(t -> new Pose2d(t, new Rotation2d())).toList());
 
-    DogLog.log("Vision/Cameras/" + camera.getName() + "/Spheres/Count", validSphereCount);
+    DogLog.log("Vision/Cameras/" + cameraConstants.Name + "/Spheres/Count", spheres.size());
+  }
 
-    // Select the detection with the smallest summed planar distance to other detections.
-    // This heuristically picks a detection near the clump center.
+  /**
+   * Given a list of detected sphere positions, find the one that is most likely to be at the center
+   * of a clump by selecting the position with the lowest total distance to the other positions.
+   * This is a heuristic that assumes the clump center will be the detection closest to the other
+   * detections.
+   *
+   * @param sphereLocations2d a list of 2D positions of detected spheres
+   * @return the 2D position of the sphere most likely at the center of the clump, or null if
+   *     spherePositions was empty
+   */
+  private Translation2d findClump(List<Translation2d> sphereLocations2d) {
     Translation2d bestPosition = null;
     double lowestTotalDistance = Double.MAX_VALUE;
 
@@ -238,7 +343,7 @@ public class SphereClumpLocalization extends SubsystemBase {
     if (loggingIndex != -1) {
       DogLog.log(
           "Vision/Cameras/"
-              + camera.getName()
+              + cameraConstants.Name
               + "/Spheres/"
               + loggingIndex
               + "/CameraToTargetDistance",
@@ -261,7 +366,7 @@ public class SphereClumpLocalization extends SubsystemBase {
     if (loggingIndex != -1) {
       DogLog.log(
           "Vision/Cameras/"
-              + camera.getName()
+              + cameraConstants.Name
               + "/Spheres/"
               + loggingIndex
               + "/CameraRelativePosition",
@@ -277,7 +382,7 @@ public class SphereClumpLocalization extends SubsystemBase {
     if (loggingIndex != -1) {
       DogLog.log(
           "Vision/Cameras/"
-              + camera.getName()
+              + cameraConstants.Name
               + "/Spheres/"
               + loggingIndex
               + "/RobotRelativePosition",
