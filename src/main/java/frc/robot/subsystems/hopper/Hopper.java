@@ -37,11 +37,11 @@ public class Hopper extends SubsystemBase {
         });
 
     DogLog.tunable(
-      "Hopper/Belt Floor Pulse Time (s)",
-      beltFloorPulseTime,
-      value -> {
-        beltFloorPulseTime = value;
-      });
+        "Hopper/Belt Floor Pulse Time (s)",
+        beltFloorPulseTime,
+        value -> {
+          beltFloorPulseTime = value;
+        });
   }
 
   /** Command to dump the hopper, which runs the belt floor in reverse. */
@@ -103,7 +103,11 @@ public class Hopper extends SubsystemBase {
     return Commands.defer(
         () ->
             Commands.sequence(
-                    beltFloor.reverse().alongWith(kicker.feed()).until(sensors::isKickerEmpty).withTimeout(kickerClearTime))
+                    beltFloor
+                        .reverse()
+                        .alongWith(kicker.feed())
+                        .until(sensors::isKickerEmpty)
+                        .withTimeout(kickerClearTime))
                 .deadlineFor(
                     Commands.startEnd(
                         () -> DogLog.log("Hopper/FeedMode", "Unjam"),
@@ -113,12 +117,13 @@ public class Hopper extends SubsystemBase {
 
   public Command feedPulsing() {
     return Commands.repeatingSequence(
-      kicker.feed().alongWith(beltFloor.slowReverse()).until(sensors::isKickerEmpty),
-      beltFloor.feed().withDeadline(Commands.parallel(
-        Commands.defer(() -> Commands.waitSeconds(beltFloorPulseTime), Set.of()),
-        Commands.waitUntil(() -> !sensors.isKickerEmpty())
-      ))
-    );
+        kicker.feed().alongWith(beltFloor.slowReverse()).until(sensors::isKickerEmpty),
+        beltFloor
+            .feed()
+            .withDeadline(
+                Commands.parallel(
+                    Commands.defer(() -> Commands.waitSeconds(beltFloorPulseTime), Set.of()),
+                    Commands.waitUntil(() -> !sensors.isKickerEmpty()))));
   }
 
   /** Command to unjam the hopper, which runs the belt floor and kicker in reverse. */

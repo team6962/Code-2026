@@ -19,22 +19,19 @@ public class DriveToClump {
   }
 
   /**
-   * Creates a command that repeatedly attempts to drive the robot to a detected clump of fuel
-while
+   * Creates a command that repeatedly attempts to drive the robot to a detected clump of fuel while
    * running the intake rollers when the intake is extended.
    *
    * <p>Behavior:
    *
    * <ul>
-   *   <li>On each execution, the command queries the provided {@code fuelClumpLocalization} for
-the
+   *   <li>On each execution, the command queries the provided {@code fuelClumpLocalization} for the
    *       current clump position.
    *   <li>If no clump position is available (null), the command does nothing for that iteration.
    *   <li>If a clump position is available and the intake extension reports it is extended, the
    *       command runs the intake rollers and commands the swerve drive to drive to the clump
    *       position in parallel.
-   *   <li>If a clump position is available but the intake is not extended, the command does
-nothing
+   *   <li>If a clump position is available but the intake is not extended, the command does nothing
    *       for that iteration.
    *   <li>The composed command is created with {@code Commands.defer(...).repeatedly()}, so the
    *       check-and-act behavior repeats until the returned command is cancelled or interrupted.
@@ -43,8 +40,7 @@ nothing
    * @param intakeExtension subsystem that reports whether the intake is extended; used as the
    *     condition to decide whether to intake and drive
    * @param intakeRollers subsystem used to run the intake rollers when approaching a clump
-   * @param fuelClumpLocalization provider used to obtain the current Translation2d position of
-the
+   * @param fuelClumpLocalization provider used to obtain the current Translation2d position of the
    *     detected fuel clump (may return {@code null} if no fuel is visible)
    * @param swerveDrive swerve-drive command provider used to drive to the detected fuel clump
    *     position
@@ -79,8 +75,7 @@ the
                       .in(MetersPerSecondPerSecond);
 
               double distance = error.getNorm();
-              double finalSpeed = Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration *
-distance));
+              double finalSpeed = Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration * distance));
 
               ChassisSpeeds finalVelocity =
                   new ChassisSpeeds(

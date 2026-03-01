@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
-import frc.robot.auto.DriveFixedShooter;
 import frc.robot.auto.DriveToClump;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
@@ -94,7 +92,8 @@ public class TeleopControls {
                             5.947,
                             new Rotation2d(
                                 Radians.of(
-                                    Math.PI)))), // rough position estimate based on simulation, not exact
+                                    Math.PI)))), // rough position estimate based on simulation, not
+                // exact
                 this.robot.getIntakeExtension().extend(),
                 Commands.parallel(
                     this.robot
@@ -146,22 +145,22 @@ public class TeleopControls {
         .rightBumper()
         .onTrue(
             Commands.runOnce(
-                () -> {
-                  fineControl = !fineControl;
-                  DogLog.forceNt.log("TeleopControls/IntakeFineControl", fineControl);
-                })
-            .andThen(Commands.either(
-                fineControlEnableRumble(),
-                fineControlDisableRumble(),
-                () -> fineControl
-            )).ignoringDisable(true));
+                    () -> {
+                      fineControl = !fineControl;
+                      DogLog.forceNt.log("TeleopControls/IntakeFineControl", fineControl);
+                    })
+                .andThen(
+                    Commands.either(
+                        fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
+                .ignoringDisable(true));
 
     // Shoot - WORKS
     operator
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
-                robot.getShooterRollers().shoot(() -> flywheelVelocity), robot.getHopper().feedPulsing()));
+                robot.getShooterRollers().shoot(() -> flywheelVelocity),
+                robot.getHopper().feedPulsing()));
 
     // // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
@@ -223,7 +222,8 @@ public class TeleopControls {
     operator
         .axisLessThan(Axis.kRightY.value, -0.5)
         .and(() -> fineControl)
-        .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+        .whileTrue(
+            this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Intake extension and retraction - WORKS
     Trigger intakeRetract = operator.rightStick().or(driver.back());
@@ -256,24 +256,21 @@ public class TeleopControls {
     // climbRetract.onTrue(robot.getClimb().descend());
   }
 
-  private Command rumble(CommandXboxController controller, RumbleType rumbleType, double intensity) {
+  private Command rumble(
+      CommandXboxController controller, RumbleType rumbleType, double intensity) {
     return Commands.startEnd(
         () -> controller.setRumble(rumbleType, intensity),
-        () -> controller.setRumble(rumbleType, 0.0)
-    );
+        () -> controller.setRumble(rumbleType, 0.0));
   }
 
   private Command fineControlEnableRumble() {
     return Commands.sequence(
         rumble(operator, RumbleType.kLeftRumble, 1).withTimeout(1.0 / 3.0),
         Commands.waitSeconds(1.0 / 3.0),
-        rumble(operator, RumbleType.kRightRumble, 1).withTimeout(1.0 / 3.0)
-    );
+        rumble(operator, RumbleType.kRightRumble, 1).withTimeout(1.0 / 3.0));
   }
 
   private Command fineControlDisableRumble() {
-    return Commands.sequence(
-        rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0)
-    );
+    return Commands.sequence(rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0));
   }
 }

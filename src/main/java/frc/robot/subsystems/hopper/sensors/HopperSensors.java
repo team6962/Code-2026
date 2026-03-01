@@ -81,16 +81,20 @@ public class HopperSensors extends SubsystemBase {
         newValue -> {
           kickerSensorEmptyThreshold = Inches.of(newValue);
         });
-    
+
     DogLog.tunable(
-      "HopperSensors/Jam Time When Full (s)", jamTimeWhenFull, value -> {
-        jamTimeWhenFull = value;
-      });
-    
+        "HopperSensors/Jam Time When Full (s)",
+        jamTimeWhenFull,
+        value -> {
+          jamTimeWhenFull = value;
+        });
+
     DogLog.tunable(
-      "HopperSensors/Jam Time When Empty (s)", jamTimeWhenEmpty, value -> {
-        jamTimeWhenEmpty = value;
-      });
+        "HopperSensors/Jam Time When Empty (s)",
+        jamTimeWhenEmpty,
+        value -> {
+          jamTimeWhenEmpty = value;
+        });
   }
 
   /**

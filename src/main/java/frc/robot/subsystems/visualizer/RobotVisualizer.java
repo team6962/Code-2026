@@ -7,9 +7,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.team6962.lib.swerve.simulation.MapleSim;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,6 +21,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
+import java.util.ArrayList;
+import java.util.List;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 

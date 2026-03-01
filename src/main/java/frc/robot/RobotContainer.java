@@ -7,9 +7,8 @@ package frc.robot;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
-
-import dev.doglog.DogLog;
 import com.team6962.lib.vision.SphereClumpLocalization;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -31,7 +30,6 @@ import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
-
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.visualizer.RobotVisualizer;
 
@@ -70,7 +68,8 @@ public class RobotContainer {
     hopper = new Hopper();
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
-    fuelClumpLocalization = new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
+    fuelClumpLocalization =
+        new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
     driveFixedShooter = new DriveFixedShooter(this);
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
@@ -110,11 +109,12 @@ public class RobotContainer {
 
     autoChooser.addOption("Calibrate Wheel Size", swerveDrive.calibrateWheelSize());
 
-    autoChooser.addOption("Shoot Preload", Commands.parallel(
-      getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
-      getHopper().feedPulsing(),
-      getIntakeExtension().extend().repeatedly()
-    ));
+    autoChooser.addOption(
+        "Shoot Preload",
+        Commands.parallel(
+            getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
+            getHopper().feedPulsing(),
+            getIntakeExtension().extend().repeatedly()));
 
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }

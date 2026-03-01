@@ -17,8 +17,7 @@ import java.util.Set;
 
 public class AutoClimb {
   /**
-   * The pose where the robot is at the end of the pole, but the climb mechanism is not quite
-over
+   * The pose where the robot is at the end of the pole, but the climb mechanism is not quite over
    * the end. This is the climb position that is closest to the blue outpost.
    */
   public static Pose2d END_OF_POLE_POSE =
@@ -27,8 +26,7 @@ over
   /** The center of the blue tower in the Y direction, in meters. */
   public static double CENTER_OF_TOWER = 3.745706;
 
-  /** The velocity at which the robot should be moving at when it reaches the prepare climb pose.
-*/
+  /** The velocity at which the robot should be moving at when it reaches the prepare climb pose. */
   public static LinearVelocity ENTER_VELOCITY = MetersPerSecond.of(1.0);
 
   /**
@@ -38,8 +36,7 @@ over
   public static Distance ENTER_DISTANCE = Meters.of(0.3);
 
   /**
-   * The distance away from the pole that the robot should be when it reaches the align climb
-pose.
+   * The distance away from the pole that the robot should be when it reaches the align climb pose.
    */
   public static Distance ALIGN_DISTANCE = Meters.of(0.1);
 
@@ -64,26 +61,22 @@ pose.
   }
 
   /**
-   * Gets the pose for climbing based on the side of the pole and the distance along the pole.
-The
+   * Gets the pose for climbing based on the side of the pole and the distance along the pole. The
    * distance along the pole is how far the robot has moved along the pole. A distance of 0 means
    * the robot is at the end of the pole, and a positive distance means the climb mechanism is
    * hooked onto the pole.
    *
-   * @param side the side of the pole the robot is climbing on. The right side is the side
-closest
+   * @param side the side of the pole the robot is climbing on. The right side is the side closest
    *     to the blue outpost, and the left side is the side closest to the blue depot.
    * @param distanceAlongPole the distance in meters along the pole that the robot has climbed. A
-   *     distance of 0 means the robot is at the end of the pole, and a positive distance means
-the
+   *     distance of 0 means the robot is at the end of the pole, and a positive distance means the
    *     climb mechanism is hooked onto the pole.
    * @return the climb pose on the given side of the field at the given distance along the pole.
    */
   public static Pose2d getClimbPose(ClimbSide side, Distance distanceAlongPole) {
     Pose2d pose = END_OF_POLE_POSE;
 
-    pose = new Pose2d(pose.getX(), pose.getY() + distanceAlongPole.in(Meters),
-pose.getRotation());
+    pose = new Pose2d(pose.getX(), pose.getY() + distanceAlongPole.in(Meters), pose.getRotation());
 
     if (side == ClimbSide.LEFT) {
       pose =
@@ -109,8 +102,7 @@ pose.getRotation());
         .driveTo(
             getClimbPose(side, distanceAlongPole),
             new ChassisSpeeds(
-                0, side == ClimbSide.LEFT ? -velocityMetersPerSecond : velocityMetersPerSecond,
-0));
+                0, side == ClimbSide.LEFT ? -velocityMetersPerSecond : velocityMetersPerSecond, 0));
   }
 
   public Command driveToPrepareClimb(ClimbSide side) {
