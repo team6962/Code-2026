@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.phoenix.StatusUtil;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -57,7 +58,7 @@ public class IntakeRollers extends SubsystemBase {
    * @return Command
    */
   public Command intake() {
-    return move(Volts.of(8));
+    return move(Volts.of(5));
   }
 
   /**
@@ -66,7 +67,7 @@ public class IntakeRollers extends SubsystemBase {
    * @return
    */
   public Command outtake() {
-    return move(Volts.of(-8));
+    return move(Volts.of(-5));
   }
 
   /**
