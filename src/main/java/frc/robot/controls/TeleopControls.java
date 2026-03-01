@@ -42,7 +42,7 @@ public class TeleopControls {
     this.driveToClump = new DriveToClump(robot);
 
     DogLog.forceNt.log(
-        "TeleopControls/IntakeFineControl", fineControl); // Initial log so that the folder shows up
+        "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
 
     DogLog.tunable(
         "FlywheelVelocity",
@@ -147,7 +147,7 @@ public class TeleopControls {
             Commands.runOnce(
                     () -> {
                       fineControl = !fineControl;
-                      DogLog.forceNt.log("TeleopControls/IntakeFineControl", fineControl);
+                      DogLog.forceNt.log("TeleopControls/FineControl", fineControl);
                     })
                 .andThen(
                     Commands.either(
