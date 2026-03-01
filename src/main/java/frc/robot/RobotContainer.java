@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.auto.DriveFixedShooter;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
@@ -48,7 +47,6 @@ public class RobotContainer {
   private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
-  private final DriveFixedShooter driveFixedShooter;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
 
@@ -70,7 +68,6 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
-    driveFixedShooter = new DriveFixedShooter(this);
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -181,9 +178,5 @@ public class RobotContainer {
 
   public RobotVisualizer getVisualizer() {
     return visualizer;
-  }
-
-  public DriveFixedShooter getDriveFixedShooter() {
-    return driveFixedShooter;
   }
 }
