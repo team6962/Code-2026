@@ -12,8 +12,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
-import org.photonvision.simulation.SimCameraProperties;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -34,13 +32,13 @@ import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
   @Override
@@ -261,24 +259,22 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
-    return super.getSphereCameraConstants();
-    // return super.getSphereCameraConstants()
-    //     .withName("Color-2")
-    //     .withClassId(0)
-    //     .withFOVHeight(Rotation2d.fromDegrees(48.9))
-    //     .withFOVWidth(Rotation2d.fromDegrees(70))
-    //     .withCameraHeightPixels(800)
-    //     .withCameraWidthPixels(1280)
-    //     .withFocalLengthX(907.41)
-    //     .withFocalLengthY(907.64)
-    //     .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
-    //     .withSphereDiameter(Inches.of(5.91))
-    //     .withMaxTargets(50) // Temporary value until we tune object detection on the practice
-    // field
-    //     .withRobotToCameraTransform(
-    //         new Transform3d(
-    //             new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
-    //             new Rotation3d(0, Math.PI / 6, 0)));
+    return super.getSphereCameraConstants()
+        .withName("Color-2")
+        .withClassId(0)
+        .withFOVHeight(Rotation2d.fromDegrees(48.9))
+        .withFOVWidth(Rotation2d.fromDegrees(70))
+        .withCameraHeightPixels(800)
+        .withCameraWidthPixels(1280)
+        .withFocalLengthX(907.41)
+        .withFocalLengthY(907.64)
+        .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
+        .withSphereDiameter(Inches.of(5.91))
+        .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
+        .withRobotToCameraTransform(
+            new Transform3d(
+                new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
+                new Rotation3d(0, Math.PI / 6, 0)));
   }
 
   @Override
