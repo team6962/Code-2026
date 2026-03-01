@@ -3,6 +3,7 @@ package frc.robot.controls;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.team6962.lib.swerve.commands.TeleopSwerveCommand;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -71,15 +72,16 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
+    // Driver A is unused
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
-    // // Auto Climb and Unclimb
+    // Auto Climb and Unclimb
     driver.b().onTrue(autoClimb.climb());
     driver.x().onTrue(autoClimb.unclimb());
 
-    // // Auto Depot
+    // Auto Depot
     driver
         .leftBumper()
         .whileTrue(
@@ -129,7 +131,7 @@ public class TeleopControls {
         .rightStick()
         .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
 
-    // // Manual climb controls
+    // Manual climb controls
     operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
@@ -162,11 +164,11 @@ public class TeleopControls {
                 robot.getShooterRollers().shoot(() -> flywheelVelocity),
                 robot.getHopper().feedPulsing()));
 
-    // // Pass fuel to alliance zone
+    // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
     operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
 
-    // // Fine control
+    // Fine control
     operator
         .povUp()
         .and(() -> fineControl)
@@ -247,13 +249,13 @@ public class TeleopControls {
     load.whileTrue(robot.getHopper().load());
 
     // Climb retraction
-    // Command autodescend = robot.getClimb().descend();
-    // Trigger climbRetract =
-    //     new Trigger(() -> TeleopSwerveCommand.isClearToOverride(robot.getClimb(), autodescend))
-    //         .and(RobotState::isTeleop)
-    //         .and(RobotState::isEnabled);
+    Command autodescend = robot.getClimb().descend();
+    Trigger climbRetract =
+        new Trigger(() -> TeleopSwerveCommand.isClearToOverride(robot.getClimb(), autodescend))
+            .and(RobotState::isTeleop)
+            .and(RobotState::isEnabled);
 
-    // climbRetract.onTrue(robot.getClimb().descend());
+    climbRetract.onTrue(robot.getClimb().descend());
   }
 
   private Command rumble(
