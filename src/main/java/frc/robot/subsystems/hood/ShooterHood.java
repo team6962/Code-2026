@@ -348,7 +348,12 @@ public class ShooterHood extends SubsystemBase {
         () -> {
           if (isZeroed) {
             hoodMotor.setControl(
-                new VoltageOut(voltage.plus(Volts.of(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kS).times(Math.signum(voltage.in(Volts)))).plus(Volts.of(Math.cos(getPosition().in(Radians)) * kG))));
+                new VoltageOut(
+                    voltage
+                        .plus(
+                            Volts.of(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kS)
+                                .times(Math.signum(voltage.in(Volts))))
+                        .plus(Volts.of(Math.cos(getPosition().in(Radians)) * kG))));
           } else {
             hoodMotor.setControl(new NeutralOut());
           }
@@ -376,15 +381,16 @@ public class ShooterHood extends SubsystemBase {
   }
 
   /**
-   * Zeroes the hood without the hall effect sensor by assuming the hood is at the minimum
-   * angle.
-   * 
+   * Zeroes the hood without the hall effect sensor by assuming the hood is at the minimum angle.
+   *
    * @return A command that zeroes the hood
    */
   public Command zero() {
-    return Commands.runOnce(() -> {
-      hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
-      isZeroed = true;
-    }).ignoringDisable(true);
+    return Commands.runOnce(
+            () -> {
+              hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
+              isZeroed = true;
+            })
+        .ignoringDisable(true);
   }
 }
