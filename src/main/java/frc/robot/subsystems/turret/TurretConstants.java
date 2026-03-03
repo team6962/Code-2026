@@ -22,7 +22,7 @@ public class TurretConstants {
 
   // PID constants
   public static final double kP = 150.0;
-  public static final double kD = 3.0;
+  public static final double kD = 0.0;
   public static final double kS = 0.315;
   public static final double kV = 4.283;
   public static final double kA = 0.2;
@@ -66,13 +66,13 @@ public class TurretConstants {
    * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MIN_ANGLE = Degrees.of(-45);
+  public static final Angle MIN_ANGLE = Degrees.of(-200);
 
   /**
    * The maximum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MAX_ANGLE = Degrees.of(405);
+  public static final Angle MAX_ANGLE = Degrees.of(200);
 
   /**
    * The voltage to apply to the turret motor when the operator is manually controlling the turret
@@ -94,7 +94,5 @@ public class TurretConstants {
       MOMENT_OF_INERTIA
           * SIMULATED_MOTOR.nominalVoltageVolts
           / SIMULATED_MOTOR.stallTorqueNewtonMeters
-          / SENSOR_TO_MECHANISM_RATIO
-          * 2
-          * Math.PI;
+          / SENSOR_TO_MECHANISM_RATIO;
 }

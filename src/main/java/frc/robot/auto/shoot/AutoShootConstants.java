@@ -32,13 +32,13 @@ public class AutoShootConstants {
   public static final int optimizationIterations = 20;
 
   /** Maximum allowable flywheel velocity error to shoot. */
-  public static final AngularVelocity flywheelVelocityTolerance = RotationsPerSecond.of(0.25);
+  public static final AngularVelocity flywheelVelocityTolerance = RotationsPerSecond.of(0.5);
 
   /** Maximum allowable hood angle error to shoot. */
-  public static final Angle hoodAngleTolerance = Degrees.of(1);
+  public static final Angle hoodAngleTolerance = Degrees.of(2);
 
   /** Maximum allowable turret angle error to shoot. */
-  public static final Angle turretAngleTolerance = Degrees.of(1);
+  public static final Angle turretAngleTolerance = Degrees.of(2);
 
   /** Transform representing the shooter's position and orientation relative to the robot. */
   public static final Transform2d shooterTransform = new Transform2d();

@@ -5,10 +5,10 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -259,22 +259,22 @@ public class TeleopControls {
 
     climbRetract.onTrue(robot.getClimb().descend());
 
-    Command autoShoot = new AutoShoot(
+    AutoShoot autoShoot = new AutoShoot(
         robot.getSwerveDrive(),
         robot.getTurret(),
         robot.getShooterHood(),
         robot.getShooterRollers(),
         robot.getShooterFunctions(),
-        () -> new Translation2d()
+        () -> AutoShoot.HUB_TRANSLATION
     );
 
-    Trigger autoshootTrigger = new Trigger(() -> CommandUtil.isClearToOverride(robot.getTurret(), autoShoot))
-        .and(() -> CommandUtil.isClearToOverride(robot.getShooterHood(), autoShoot))
-        .and(() -> CommandUtil.isClearToOverride(robot.getShooterRollers(), autoShoot))
-        .and(RobotState::isTeleop)
-        .and(RobotState::isEnabled);
+    Trigger autoshootTrigger = new Trigger(RobotState::isTeleop)
+        .and(RobotState::isEnabled)
+        .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
+
+    operator.leftStick().and(autoShoot.isReadyToShoot()).whileTrue(robot.getHopper().feedSynchronized());
   }
 
   private Command rumble(

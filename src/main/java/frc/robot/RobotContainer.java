@@ -68,7 +68,7 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
-    shooterFunctions = new ShooterFunctions("shooter_hub_data.csv");
+    shooterFunctions = new ShooterFunctions(RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv");
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 

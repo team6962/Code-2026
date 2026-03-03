@@ -2,12 +2,21 @@ package frc.robot.subsystems.visualizer;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ironmaple.simulation.IntakeSimulation;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
+
 import com.team6962.lib.swerve.simulation.MapleSim;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,15 +30,12 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
-import java.util.ArrayList;
-import java.util.List;
-import org.ironmaple.simulation.IntakeSimulation;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 
 /** Displays the articulated components on the robot in AdvantageScope. */
 public class RobotVisualizer extends SubsystemBase {
   private RobotContainer robot;
   private IntakeSimulation intakeSim;
+  private int tickIndex = 0;
 
   /**
    * Creates a new RobotVisualizer.
@@ -74,6 +80,8 @@ public class RobotVisualizer extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
+    tickIndex++;
+
     if (RobotBase.isSimulation()) {
       try {
         robot.getSwerveDrive().getSimulation().getArenaLock().lock();
@@ -113,6 +121,27 @@ public class RobotVisualizer extends SubsystemBase {
 
           intakeSim.setGamePiecesCount(RobotVisualizationConstants.maxRetractedFuel);
           fuelCount = RobotVisualizationConstants.maxRetractedFuel;
+        }
+
+        if (robot.getHopper().getKicker().getAppliedVoltage().in(Volts) > 1.0 && robot.getShooterRollers().getMotorVoltage().in(Volts) > 1.0 && fuelCount > 0 && tickIndex % 5 == 0) {
+          fuelCount = Math.max(0, fuelCount - 1);
+          intakeSim.setGamePiecesCount(fuelCount);
+
+          robot
+              .getSwerveDrive()
+              .getSimulation()
+              .getMapleSim()
+              .getArena()
+              .addGamePieceProjectile(
+                  new RebuiltFuelOnFly(
+                      robot.getSwerveDrive().getPosition2d().getTranslation(),
+                      RobotVisualizationConstants.shooterTranslation.toTranslation2d().rotateBy(new Rotation2d(robot.getTurret().getPosition().unaryMinus())),
+                      robot.getSwerveDrive().getVelocity(),
+                      new Rotation2d(robot.getTurret().getPosition().plus(robot.getSwerveDrive().getYaw())),
+                      Meters.of(RobotVisualizationConstants.shooterTranslation.getZ()).plus(Inches.of(6)),
+                      InchesPerSecond.of(2).times(robot.getShooterRollers().getAngularVelocity().in(RadiansPerSecond)),
+                      Degrees.of(90).minus(robot.getShooterHood().getPosition())
+                    ));
         }
 
         List<Translation3d> fuelPositions =
