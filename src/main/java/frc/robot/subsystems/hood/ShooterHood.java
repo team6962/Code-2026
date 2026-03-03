@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterHood extends SubsystemBase {
@@ -84,7 +85,7 @@ public class ShooterHood extends SubsystemBase {
     positionSignal = hoodMotor.getPosition();
     statorCurrentSignal = hoodMotor.getStatorCurrent();
     supplyCurrentSignal = hoodMotor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS1Closed();
+    hallSensorTriggeredSignal = candi.getS2Closed();
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
 
     DogLog.tunable(
@@ -214,6 +215,7 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
     DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
+    DogLog.log("Hood/IsZeroed", isZeroed);
     DogLog.log(
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
@@ -363,7 +365,12 @@ public class ShooterHood extends SubsystemBase {
         () -> {
           if (isZeroed) {
             hoodMotor.setControl(
-                new VoltageOut(voltage.plus(Volts.of(Math.cos(getPosition().in(Radians)) * kG))));
+                new VoltageOut(
+                    voltage
+                        .plus(
+                            Volts.of(ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kS)
+                                .times(Math.signum(voltage.in(Volts))))
+                        .plus(Volts.of(Math.cos(getPosition().in(Radians)) * kG))));
           } else {
             hoodMotor.setControl(new NeutralOut());
           }
@@ -458,5 +465,19 @@ public class ShooterHood extends SubsystemBase {
     command.addRequirements(this);
 
     return command;
+  }
+
+  /**
+   * Zeroes the hood without the hall effect sensor by assuming the hood is at the minimum angle.
+   *
+   * @return A command that zeroes the hood
+   */
+  public Command zero() {
+    return Commands.runOnce(
+            () -> {
+              hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
+              isZeroed = true;
+            })
+        .ignoringDisable(true);
   }
 }

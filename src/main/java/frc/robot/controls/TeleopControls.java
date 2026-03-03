@@ -185,6 +185,9 @@ public class TeleopControls {
                 .getShooterHood()
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
+    // Backup zero
+    operator.x().onTrue(this.robot.getShooterHood().zero());
+
     operator
         .povLeft()
         .and(() -> fineControl)
