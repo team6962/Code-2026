@@ -21,7 +21,8 @@ public class Hopper extends SubsystemBase {
   private final HopperSensors sensors;
 
   private double kickerClearTime = 0.5;
-  private double beltFloorPulseTime = 0.2;
+  private double beltFloorPulseTime = 0.25;
+  private double kickerPulseTime = 0.15;
 
   /** Constructor for the Hopper subsystem, which initializes the belt floor, kicker, and sensors */
   public Hopper() {
@@ -41,6 +42,13 @@ public class Hopper extends SubsystemBase {
         beltFloorPulseTime,
         value -> {
           beltFloorPulseTime = value;
+        });
+
+    DogLog.tunable(
+        "Hopper/Kicker Pulse Time (s)",
+        kickerPulseTime,
+        value -> {
+          kickerPulseTime = value;
         });
   }
 
@@ -109,7 +117,11 @@ public class Hopper extends SubsystemBase {
    */
   public Command feedPulsing() {
     return Commands.repeatingSequence(
-        kicker.feed().alongWith(beltFloor.slowReverse()).until(sensors::isKickerEmpty),
+        kicker
+            .feed()
+            .alongWith(beltFloor.slowReverse())
+            .until(sensors::isKickerEmpty)
+            .withTimeout(kickerPulseTime),
         beltFloor
             .feed()
             .withDeadline(

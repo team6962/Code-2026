@@ -35,6 +35,7 @@ public class BeltFloor extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
   private BeltFloorSim simulation;
+  private double feedVoltage = 8.0;
 
   /**
    * Initializes the motor controller, configures status signals for logging, and sets up DogLog
@@ -64,6 +65,9 @@ public class BeltFloor extends SubsystemBase {
           Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
           feedDump(target).schedule();
         });
+
+    DogLog.tunable("Hopper/BeltFloor/FeedVoltage", feedVoltage, value -> feedVoltage = value);
+
     if (RobotBase.isSimulation()) {
       simulation = new BeltFloorSim(beltFloorMotor);
     }
@@ -93,7 +97,7 @@ public class BeltFloor extends SubsystemBase {
    * @return A command that runs the belt floor motor to feed fuel.
    */
   public Command feed() {
-    return feedDump(Volts.of(8.0));
+    return defer(() -> feedDump(Volts.of(feedVoltage)));
   }
 
   /**

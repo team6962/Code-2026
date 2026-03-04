@@ -26,6 +26,7 @@ public class Kicker extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<AngularVelocity> motorVelocitySignal;
   private KickerSim simulation;
+  private double feedVoltage = 12;
 
   public Kicker() {
 
@@ -37,6 +38,8 @@ public class Kicker extends SubsystemBase {
     statorCurrentSignal = kickerMotor.getStatorCurrent();
     supplyCurrentSignal = kickerMotor.getSupplyCurrent();
     appliedVoltageSignal = kickerMotor.getMotorVoltage();
+
+    DogLog.tunable("Kicker/FeedVoltage", feedVoltage, value -> feedVoltage = value);
 
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
@@ -65,7 +68,7 @@ public class Kicker extends SubsystemBase {
    * @return command that feeds fuel
    */
   public Command feed() {
-    return move(Volts.of(12));
+    return defer(() -> move(Volts.of(feedVoltage)));
   }
 
   /**

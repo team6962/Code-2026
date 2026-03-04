@@ -136,6 +136,11 @@ public class TeleopControls {
     operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
+    // Manual hopper and shooter controls - FOR TESTING ONLY
+    // operator.a().whileTrue(robot.getHopper().getKicker().feed());
+    // operator.b().whileTrue(robot.getHopper().getBeltFloor().feed());
+    // operator.y().whileTrue(robot.getShooterRollers().shoot(() -> flywheelVelocity));
+
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
