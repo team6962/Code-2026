@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoSegments;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
@@ -47,6 +48,7 @@ public class RobotContainer {
   private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
+  private final AutoSegments autoSegments;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
 
@@ -68,9 +70,11 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
+    
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
+    autoSegments = new AutoSegments(this);
     driveStraightAuto = new DriveStraightAuto(this);
 
     try {
@@ -137,7 +141,12 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    // return autoChooser.getSelected();
+
+    // Use this to test autonomous segments for now
+    return Commands.sequence(
+      autoSegments.driveToStart()
+    );
   }
 
   public void periodic() {
