@@ -2,6 +2,8 @@ package com.team6962.lib.logging;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj2.command.Command;
+
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
@@ -89,5 +91,23 @@ public class LoggingUtil {
     } catch (Exception e) {
       System.err.println("Failed to load git properties: " + e.getMessage());
     }
+  }
+
+  /**
+   * Wraps the given command with logging that indicates when the command starts and ends. Logs are
+   * written under the path "Commands/{key}" with a boolean value indicating whether the command
+   * is currently running (true) or not (false).
+   * 
+   * @param key A unique key to identify the command in the logs. This should be a descriptive name for the
+   *   command being logged (e.g., "Shoot", "DriveToClump", etc.).
+   * @param command The Command to wrap with logging.
+   * @return A new Command that behaves the same as the input command but also logs its execution status
+   *   under "Commands/{key}".
+   */
+  public static Command logCommand(String key, Command command) {
+    DogLog.log("Commands/" + key, false);
+
+    return command.beforeStarting(() -> DogLog.log("Commands/" + key, true))
+      .finallyDo(() -> DogLog.log("Commands/" + key, false));
   }
 }

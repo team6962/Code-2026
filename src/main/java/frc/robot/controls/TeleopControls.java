@@ -1,15 +1,19 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.commands.CommandUtil;
+import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -23,6 +27,7 @@ import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
 import frc.robot.auto.DriveToClump;
 import frc.robot.auto.shoot.AutoShoot;
+import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
@@ -35,6 +40,7 @@ public class TeleopControls {
   private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
+  private Distance shootingTestDistance = Inches.of(206);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -52,6 +58,13 @@ public class TeleopControls {
         flywheelVelocity.in(RotationsPerSecond),
         value -> {
           flywheelVelocity = RotationsPerSecond.of(value);
+        });
+    
+    DogLog.tunable(
+        "Shooting Test Distance (in)",
+        shootingTestDistance.in(Inches),
+        value -> {
+          shootingTestDistance = Inches.of(value);
         });
   }
 
@@ -248,6 +261,7 @@ public class TeleopControls {
             .and(driver.leftStick().negate())
             .and(operator.leftBumper().negate())
             .and(operator.rightTrigger().negate())
+            .and(driver.a().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
@@ -278,6 +292,18 @@ public class TeleopControls {
     autoshootTrigger.whileTrue(autoShoot);
 
     operator.leftStick().and(autoShoot.isReadyToShoot()).whileTrue(robot.getHopper().feedSynchronized());
+
+    ShooterFunctions functions = robot.getShooterFunctions();
+
+    driver.a().whileTrue(LoggingUtil.logCommand("TestShoot/BaseCommand", Commands.parallel(
+        LoggingUtil.logCommand("TestShoot/MoveHood", robot.getShooterRollers().shoot(() -> functions.getFlywheelVelocity(shootingTestDistance))),
+        LoggingUtil.logCommand("TestShoot/SpinRollers", robot.getShooterHood().moveTo(() -> functions.getHoodAngle(shootingTestDistance))),
+        Commands.sequence(
+            LoggingUtil.logCommand("TestShoot/Wait", Commands.waitUntil(
+                () -> robot.getShooterRollers().getAngularVelocity().isNear(functions.getFlywheelVelocity(shootingTestDistance), RotationsPerSecond.of(1)) && robot.getShooterHood().getPosition().isNear(functions.getHoodAngle(shootingTestDistance), Degrees.of(1)))
+            ),
+            LoggingUtil.logCommand("TestShoot/Feed", robot.getHopper().feedPulsing())
+    ))));
   }
 
   private Command rumble(

@@ -8,7 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import java.io.IOException;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 
 import com.team6962.lib.math.CSVLoader;
 import com.team6962.lib.math.MeasureUtil;
@@ -51,7 +51,7 @@ public class ShooterFunctions {
 
   public ShooterFunctions(String filePath) {
     try {
-      SplineInterpolator interpolator = new SplineInterpolator();
+      LinearInterpolator interpolator = new LinearInterpolator();
       double[][] data = CSVLoader.loadCSV(filePath);
 
       double[] distances = new double[data.length];
