@@ -145,6 +145,7 @@ public class RobotContainer {
 
     // Use this to test autonomous segments for now
     return Commands.sequence(
+      autoSegments.driveToMiddleAlliance(),
       autoSegments.driveToStart()
     );
   }
