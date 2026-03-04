@@ -48,6 +48,12 @@ public class AngleMath {
     double nearbyMultipleOfTwoPi = Math.round(nearbyRadians / (2 * Math.PI)) * (2 * Math.PI);
     double continuousRadians = discreteRadians + nearbyMultipleOfTwoPi;
 
+    if (continuousRadians - nearbyRadians > Math.PI) {
+      continuousRadians -= 2 * Math.PI;
+    } else if (continuousRadians - nearbyRadians < -Math.PI) {
+      continuousRadians += 2 * Math.PI;
+    }
+
     return Radians.of(continuousRadians);
   }
 }

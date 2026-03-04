@@ -65,7 +65,16 @@ public class Kicker extends SubsystemBase {
    * @return command that feeds fuel
    */
   public Command feed() {
-    return move(Volts.of(12)); // negative or positive to be tuned
+    return move(Volts.of(12));
+  }
+
+  /**
+   * Slowly feeds fuel towards the shooter.
+   *
+   * @return A command that slowly feeds fuel towards the shooter
+   */
+  public Command slowFeed() {
+    return move(Volts.of(2));
   }
 
   /**
@@ -74,7 +83,7 @@ public class Kicker extends SubsystemBase {
    * @return command that passes fuel back
    */
   public Command reverse() {
-    return move(Volts.of(-12)); // negative or positive to be tuned
+    return move(Volts.of(-12));
   }
 
   /**
@@ -118,6 +127,7 @@ public class Kicker extends SubsystemBase {
     if (simulation != null) {
       simulation.update();
     }
+
     StatusUtil.check(
         BaseStatusSignal.refreshAll(
             motorVelocitySignal, statorCurrentSignal, supplyCurrentSignal, appliedVoltageSignal));

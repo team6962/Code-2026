@@ -43,6 +43,9 @@ public class SphereCameraConstants implements Cloneable {
    */
   public Distance MaxDetectionRange = Meters.of(18.37);
 
+  /** Maximum range at which sphere pieces can be detected in simulation. */
+  public Distance MaxSimulatedDetectionRange = Meters.of(8);
+
   /**
    * Tolerance for sphere detection algorithm. This affects how closely a detected object must match
    * a spherical shape to be considered a sphere piece.
@@ -167,6 +170,17 @@ public class SphereCameraConstants implements Cloneable {
    */
   public SphereCameraConstants withMaxDetectionRange(Distance maxRange) {
     this.MaxDetectionRange = maxRange;
+    return this;
+  }
+
+  /**
+   * Sets the maximum range at which sphere pieces can be detected in simulation.
+   *
+   * @param maxSimulatedRange The maximum simulated detection range.
+   * @return This SphereCameraConstants instance for method chaining.
+   */
+  public SphereCameraConstants withMaxSimulatedDetectionRange(Distance maxSimulatedRange) {
+    this.MaxSimulatedDetectionRange = maxSimulatedRange;
     return this;
   }
 

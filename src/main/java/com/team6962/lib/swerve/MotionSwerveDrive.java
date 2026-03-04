@@ -169,7 +169,7 @@ public class MotionSwerveDrive implements AutoCloseable {
       }
     }
 
-    DogLog.log("Drivetrain/SignalLatency", signalLatencySeconds);
+    DogLog.forceNt.log("Drivetrain/SignalLatency", signalLatencySeconds);
 
     for (SwerveModule module : modules) {
       module.update(deltaTimeSeconds);

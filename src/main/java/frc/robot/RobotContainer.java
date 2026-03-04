@@ -8,10 +8,12 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +28,7 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
+import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.visualizer.RobotVisualizer;
 
@@ -65,7 +68,6 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
-
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -104,6 +106,13 @@ public class RobotContainer {
 
     autoChooser.addOption("Calibrate Wheel Size", swerveDrive.calibrateWheelSize());
 
+    autoChooser.addOption(
+        "Shoot Preload",
+        Commands.parallel(
+            getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
+            getHopper().feedPulsing(),
+            getIntakeExtension().extend().repeatedly()));
+
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
@@ -129,6 +138,10 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public void periodic() {
+    DogLog.forceNt.log("BatteryVoltage", RobotController.getBatteryVoltage());
   }
 
   public void latePeriodic() {

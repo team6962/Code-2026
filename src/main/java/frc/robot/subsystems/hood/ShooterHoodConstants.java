@@ -25,20 +25,20 @@ import edu.wpi.first.units.measure.Voltage;
 
 public final class ShooterHoodConstants {
   public static final int MOTOR_CAN_ID = 20;
-  public static final int CANDI_CAN_ID = 20;
+  public static final int CANDI_CAN_ID = 40;
   public static final String CANBUS = "subsystems";
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
 
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.04942);
 
   public static final Angle MIN_ANGLE = Degrees.of(17.95);
-  public static final Angle MAX_ANGLE = Degrees.of(50);
+  public static final Angle MAX_ANGLE = Degrees.of(41);
 
   /** Distance between the pivot point and the center of mass of the hood. */
   public static final Distance ARM_LENGTH = Inches.of(6.85);
 
   /** Gravity compensation feedforward constant (volts). */
-  public static final double kG = 0.22;
+  public static final double kG = 0.29;
 
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
 
@@ -47,16 +47,16 @@ public final class ShooterHoodConstants {
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(176 / 3))
           .withMotionMagic(
               new MotionMagicConfigs()
-                  .withMotionMagicCruiseVelocity(30.0)
-                  .withMotionMagicAcceleration(30.0)
+                  .withMotionMagicCruiseVelocity(40.0)
+                  .withMotionMagicAcceleration(20.0)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                  .withKP(80.0)
-                  .withKD(1.0)
+                  .withKP(150.0)
+                  .withKD(3.0)
                   .withKV(12.0 / (7368.0 / 60.0) * 176.0 / 3.0)
-                  .withKS(0.0)
-                  .withKA(0.03)
+                  .withKS(0.11)
+                  .withKA(0.05)
                   .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
               // Don't add kG here, instead use ShooterHoodConstants.kG
               )
@@ -74,7 +74,7 @@ public final class ShooterHoodConstants {
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
               new MotorOutputConfigs()
-                  .withInverted(InvertedValue.CounterClockwise_Positive)
+                  .withInverted(InvertedValue.Clockwise_Positive)
                   .withNeutralMode(NeutralModeValue.Brake));
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
 }
