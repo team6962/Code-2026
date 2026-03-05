@@ -13,16 +13,16 @@ public class FieldPositions {
         Inches.of(90.78).in(Meters),
         Inches.of(158.32).in(Meters));
     public static final Translation2d RIGHT_TRENCH_FRONT = new Translation2d(
-        Inches.of(177.11).in(Meters),
+        Inches.of(165.61).in(Meters),
         Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_TRENCH_FRONT = new Translation2d(
-        Inches.of(177.11).in(Meters),
+        Inches.of(165.61).in(Meters),
         Inches.of(292.76).in(Meters));
     public static final Translation2d RIGHT_TRENCH_BACK = new Translation2d(
-        Inches.of(187.11).in(Meters),
+        Inches.of(198.61).in(Meters),
         Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_TRENCH_BACK = new Translation2d(
-        Inches.of(187.11).in(Meters),
+        Inches.of(198.61).in(Meters),
         Inches.of(292.76).in(Meters));
     public static final Translation2d NEUTRAL_ZONE_CENTER = new Translation2d(
         Inches.of(158.84).in(Meters),
