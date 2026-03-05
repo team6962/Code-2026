@@ -15,6 +15,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
@@ -93,6 +94,7 @@ public class Turret extends SubsystemBase {
         RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
     config.Slot0.kV = RobotBase.isReal() ? TurretConstants.kV : TurretConstants.simulationKV;
     config.Slot0.kA = RobotBase.isReal() ? TurretConstants.kA : TurretConstants.simulationKA;
+    config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
 
     config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
@@ -121,7 +123,7 @@ public class Turret extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS2Closed();
+    hallSensorTriggeredSignal = candi.getS1Closed();
     profilePositionSignal = motor.getClosedLoopReference();
 
     // Tunable angle input, PID values, Motion Magic constraints
@@ -174,6 +176,18 @@ public class Turret extends SubsystemBase {
             motor
                 .getConfigurator()
                 .apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
+
+    DogLog.tunable("Turret/Turret kW", TurretConstants.kW, newKW -> TurretConstants.kW = newKW);
+
+    DogLog.tunable(
+        "Turret/Turret Minimum kW Angle",
+        TurretConstants.MIN_KW_ANGLE.in(Degrees),
+        newMinAngle -> TurretConstants.MIN_KW_ANGLE = Degrees.of(newMinAngle));
+
+    DogLog.tunable(
+        "Turret/Turret Maximum kW Angle",
+        TurretConstants.MAX_KW_ANGLE.in(Degrees),
+        newMaxAngle -> TurretConstants.MAX_KW_ANGLE = Degrees.of(newMaxAngle));
 
     // Set motor to coast mode before it has been zeroed, to allow for easier manual zeroing
     motor.setControl(new CoastOut());
@@ -228,6 +242,10 @@ public class Turret extends SubsystemBase {
         Radians);
 
     LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
+
+    if (motor.getAppliedControl() instanceof MotionMagicVoltage control) {
+      setPositionControl(control.getPositionMeasure());
+    }
   }
 
   /**
@@ -290,6 +308,10 @@ public class Turret extends SubsystemBase {
       isZeroed = true;
     }
   }
+
+  // Forwards: -2.380738
+  // Max: 0.918854
+  // Min: 0.796136
 
   /**
    * Gets the current position of the turret. An angle of 0 represents the turret facing the intake
@@ -455,7 +477,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          clampPositionToSafeRange(targetAngleSupplier.get()),
+                          targetAngleSupplier.get(),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
@@ -475,7 +497,12 @@ public class Turret extends SubsystemBase {
    */
   private void setPositionControl(Angle targetAngle) {
     if (isZeroed()) {
-      motor.setControl(new MotionMagicVoltage(targetAngle));
+      motor.setControl(
+          new MotionMagicVoltage(targetAngle)
+              .withFeedForward(
+                  targetAngle.lt(TurretConstants.MIN_KW_ANGLE)
+                      ? -TurretConstants.kW
+                      : targetAngle.gt(TurretConstants.MAX_KW_ANGLE) ? TurretConstants.kW : 0));
     } else if (RobotState.isEnabled()) {
       motor.setControl(new NeutralOut());
     } else {

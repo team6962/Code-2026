@@ -1,6 +1,7 @@
 package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -238,10 +239,29 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 "Monochrome-7",
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(12.866392).in(Meters),
+                        Inches.of(-12.866392).in(Meters),
                         Inches.of(-12.866926).in(Meters),
                         Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))))
+                    new Rotation3d(0, -Math.PI / 6, -(3 * Math.PI) / 4))),
+            new AprilTagCameraConstants(
+                "Monochrome-9",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(-12.866392).in(Meters),
+                        Inches.of(12.866926).in(Meters),
+                        Inches.of(7.688516).in(Meters)),
+                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))),
+            new AprilTagCameraConstants(
+                "Monochrome-8",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(-10.293558).in(Meters),
+                        Inches.of(-7.882).in(Meters),
+                        Inches.of(20.601426).in(Meters)),
+                    new Rotation3d(
+                        Degrees.of(-18.224755).in(Radians),
+                        Degrees.of(-26.25).in(Radians),
+                        Math.PI / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
@@ -253,7 +273,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .setAvgLatencyMs(20) // needs to be checked
                 .setLatencyStdDevMs(5)) // needs to be checked
         .withDrawWireframes(true)
-        .withMinTagsForHeadingUpdateWhileEnabled(2)
+        .withMinTagsForHeadingUpdateWhileEnabled(
+            Integer.MAX_VALUE) // No heading updates from vision while enabled
         .withMinTagsForHeadingUpdateWhileDisabled(1);
   }
 
