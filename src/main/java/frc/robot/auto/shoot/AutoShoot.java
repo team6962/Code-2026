@@ -9,15 +9,10 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import java.util.function.Supplier;
-
-import org.apache.commons.math3.util.Pair;
-
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,10 +29,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
+import java.util.function.Supplier;
+import org.apache.commons.math3.util.Pair;
 
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
-  public static Translation2d HUB_TRANSLATION = new Translation2d(4.62562575, 4.03463125); // Measured with CAD
+  public static Translation2d HUB_TRANSLATION =
+      new Translation2d(4.62562575, 4.03463125); // Measured with CAD
 
   /**
    * The swerve drive subsystem, used to get the shooter's pose and velocity for calculating
@@ -45,25 +43,19 @@ public class AutoShoot extends Command {
    */
   private CommandSwerveDrive swerveDrive;
 
-  /**
-   * The turret subsystem, used to aim the shooter in azimuth.
-   */
+  /** The turret subsystem, used to aim the shooter in azimuth. */
   private Turret turret;
 
   /** A filter used to reduce noise in the turret's target velocity measurements. */
   private LinearFilter turretVelocityFilter = LinearFilter.movingAverage((int) (0.1 / 0.02));
 
-  /**
-   * The hood subsystem, used to aim the shooter in elevation.
-   */
+  /** The hood subsystem, used to aim the shooter in elevation. */
   private ShooterHood hood;
 
   /** A filter used to reduce noise in the hood's target velocity measurements. */
   private LinearFilter hoodVelocityFilter = LinearFilter.movingAverage((int) (0.1 / 0.02));
 
-  /**
-   * The shooter rollers subsystem, used to spin up the shooter wheels to the target speed.
-   */
+  /** The shooter rollers subsystem, used to spin up the shooter wheels to the target speed. */
   private ShooterRollers rollers;
 
   /** The shooter functions, which provide access to shooter calibration data. */
@@ -128,8 +120,7 @@ public class AutoShoot extends Command {
     Command hoodCommand = hood.track(() -> hoodAngleTarget, () -> hoodVelocityTarget).repeatedly();
     Command rollersCommand = rollers.shoot(() -> rollerSpeedTarget).repeatedly();
 
-    runningTrigger
-        .whileTrue(turretCommand);
+    runningTrigger.whileTrue(turretCommand);
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(hood, hoodCommand))
         .whileTrue(hoodCommand);
@@ -186,7 +177,8 @@ public class AutoShoot extends Command {
       Angle hoodAngle) {
 
     // Calculate the displacement of the projectile during flight
-    Translation2d displacement = new Translation2d(distance.in(Meters), new Rotation2d(azimuthAngle));
+    Translation2d displacement =
+        new Translation2d(distance.in(Meters), new Rotation2d(azimuthAngle));
 
     // Account for the shooter's initial velocity during flight
     Time flightTime = shooterFunctions.getFlightTime(distance);
@@ -194,8 +186,9 @@ public class AutoShoot extends Command {
         displacement.plus(
             shooterVelocity
                 .times(flightTime)
-                .times(AutoShootConstants.initialVelocityDisplacementScalarFunction.value(new double[] {
-                    distance.in(Inches), hoodAngle.in(Degrees)})));
+                .times(
+                    AutoShootConstants.initialVelocityDisplacementScalarFunction.value(
+                        new double[] {distance.in(Inches), hoodAngle.in(Degrees)})));
 
     // Calculate the final destination of the projectile
     return shooterPose.getTranslation().plus(displacement);
@@ -209,11 +202,9 @@ public class AutoShoot extends Command {
    * @param target the target position
    * @return a pair containing the azimuth and hood angles
    */
-  private Pair<Angle, Angle> getStaticShootingAngles(
-      Pose2d shooterPose, Translation2d target) {
+  private Pair<Angle, Angle> getStaticShootingAngles(Pose2d shooterPose, Translation2d target) {
     // Calculate the azimuth angle to the target
-    Angle azimuthAngle =
-        target.minus(shooterPose.getTranslation()).getAngle().getMeasure();
+    Angle azimuthAngle = target.minus(shooterPose.getTranslation()).getAngle().getMeasure();
 
     // Calculate the hood angle using the hood angle function
     Distance horizontalDistance = Meters.of(shooterPose.getTranslation().getDistance(target));
@@ -234,9 +225,7 @@ public class AutoShoot extends Command {
    * @return a pair containing the azimuth and hood angles
    */
   private Pair<Angle, Angle> getMovingShootingAngles(
-      Pose2d shooterPose,
-      TranslationalVelocity shooterVelocity,
-      Translation2d target) {
+      Pose2d shooterPose, TranslationalVelocity shooterVelocity, Translation2d target) {
     Pair<Angle, Angle> angles = getStaticShootingAngles(shooterPose, target);
     Translation2d adjustedTarget = target;
 
@@ -249,11 +238,7 @@ public class AutoShoot extends Command {
 
       Translation2d predictedDestination =
           predictDestination(
-              distance,
-              shooterPose,
-              shooterVelocity,
-              angles.getFirst(),
-              angles.getSecond());
+              distance, shooterPose, shooterVelocity, angles.getFirst(), angles.getSecond());
 
       // Adjust the target based on the error between the predicted destination and the
       // actual target
@@ -293,7 +278,8 @@ public class AutoShoot extends Command {
     twist.dx *= poseExtrapolationTime.in(Seconds);
     twist.dy *= poseExtrapolationTime.in(Seconds);
     twist.dtheta *= poseExtrapolationTime.in(Seconds);
-    Pose2d shooterPose = swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
+    Pose2d shooterPose =
+        swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
     TranslationalVelocity shooterVelocity = swerveDrive.getTranslationalVelocity();
 
     // Calculate the ideal shooting angles and roller speed to hit the target
@@ -301,7 +287,9 @@ public class AutoShoot extends Command {
 
     Angle turretAngleTarget = idealAngles.getFirst().minus(shooterPose.getRotation().getMeasure());
     Angle hoodAngleTarget = idealAngles.getSecond();
-    AngularVelocity rollerSpeedTarget = shooterFunctions.getFlywheelVelocity(Meters.of(target.getDistance(shooterPose.getTranslation())));
+    AngularVelocity rollerSpeedTarget =
+        shooterFunctions.getFlywheelVelocity(
+            Meters.of(target.getDistance(shooterPose.getTranslation())));
 
     return new ShootingParameters(turretAngleTarget, hoodAngleTarget, rollerSpeedTarget);
   }
@@ -332,25 +320,45 @@ public class AutoShoot extends Command {
     if (previousTurretAngleTarget != null && previousHoodAngleTarget != null) {
       double timeSinceLastPeriodic = Timer.getFPGATimestamp() - previousPeriodicTimestamp;
 
-      turretVelocityTarget = RotationsPerSecond.of(turretVelocityFilter.calculate(
-        AngleMath.toContinuous(AngleMath.toDiscrete(turretAngleTarget), previousTurretAngleTarget).minus(previousTurretAngleTarget)
-          .div(Seconds.of(timeSinceLastPeriodic)).in(RotationsPerSecond)));
+      turretVelocityTarget =
+          RotationsPerSecond.of(
+              turretVelocityFilter.calculate(
+                  AngleMath.toContinuous(
+                          AngleMath.toDiscrete(turretAngleTarget), previousTurretAngleTarget)
+                      .minus(previousTurretAngleTarget)
+                      .div(Seconds.of(timeSinceLastPeriodic))
+                      .in(RotationsPerSecond)));
 
-      hoodVelocityTarget = RotationsPerSecond.of(hoodVelocityFilter.calculate(
-        hoodAngleTarget.minus(previousHoodAngleTarget).div(Seconds.of(timeSinceLastPeriodic)).in(RotationsPerSecond)
-      ));
+      hoodVelocityTarget =
+          RotationsPerSecond.of(
+              hoodVelocityFilter.calculate(
+                  hoodAngleTarget
+                      .minus(previousHoodAngleTarget)
+                      .div(Seconds.of(timeSinceLastPeriodic))
+                      .in(RotationsPerSecond)));
 
-      DogLog.log("AutoShoot/AppliedShootingParameters/TurretVelocity", turretVelocityTarget.in(RadiansPerSecond), RadiansPerSecond);
-      DogLog.log("AutoShoot/AppliedShootingParameters/HoodVelocity", hoodVelocityTarget.in(DegreesPerSecond), DegreesPerSecond);
+      DogLog.log(
+          "AutoShoot/AppliedShootingParameters/TurretVelocity",
+          turretVelocityTarget.in(RadiansPerSecond),
+          RadiansPerSecond);
+      DogLog.log(
+          "AutoShoot/AppliedShootingParameters/HoodVelocity",
+          hoodVelocityTarget.in(DegreesPerSecond),
+          DegreesPerSecond);
     }
 
     previousPeriodicTimestamp = Timer.getFPGATimestamp();
 
-    // Determine if the system is ready to shoot based on whether the shooter is at the target angles
+    // Determine if the system is ready to shoot based on whether the shooter is at the target
+    // angles
     // and roller speed
-    readyToShoot = rollers.getAngularVelocity().isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance) &&
-      hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance) &&
-      AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget).isNear(turretAngleTarget, AutoShootConstants.turretAngleTolerance);
+    readyToShoot =
+        rollers
+                .getAngularVelocity()
+                .isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance)
+            && hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance)
+            && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
+                .isNear(turretAngleTarget, AutoShootConstants.turretAngleTolerance);
 
     thisCommandRunning = true;
 

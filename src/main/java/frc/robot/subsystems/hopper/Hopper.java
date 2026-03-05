@@ -72,7 +72,10 @@ public class Hopper extends SubsystemBase {
             Commands.either(
                     feedSynchronizedWithoutUnjam().withTimeout(Seconds.of(0.5)),
                     unjamDuringSynchronizedFeed(),
-                    () -> sensors.isFeedingSuccessfully() || sensors.isKickerEmpty() || RobotBase.isSimulation())
+                    () ->
+                        sensors.isFeedingSuccessfully()
+                            || sensors.isKickerEmpty()
+                            || RobotBase.isSimulation())
                 .repeatedly());
   }
 

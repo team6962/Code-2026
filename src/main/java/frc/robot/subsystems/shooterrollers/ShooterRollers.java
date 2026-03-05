@@ -98,7 +98,9 @@ public class ShooterRollers extends SubsystemBase {
   public Command shoot(Supplier<AngularVelocity> targetVelocity) {
     return runEnd(
         () -> {
-          if (getAngularVelocity().plus(ShooterRollersConstants.BANG_BANG_TOLERANCE).lt(targetVelocity.get())) {
+          if (getAngularVelocity()
+              .plus(ShooterRollersConstants.BANG_BANG_TOLERANCE)
+              .lt(targetVelocity.get())) {
             shooterRollerMotor1.setControl(new DutyCycleOut(1));
           } else {
             // defines a local function to set motor voltage to make it go

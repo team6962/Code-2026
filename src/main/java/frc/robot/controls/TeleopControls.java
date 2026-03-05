@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -59,7 +58,7 @@ public class TeleopControls {
         value -> {
           flywheelVelocity = RotationsPerSecond.of(value);
         });
-    
+
     DogLog.tunable(
         "Shooting Test Distance (in)",
         shootingTestDistance.in(Inches),
@@ -276,34 +275,62 @@ public class TeleopControls {
 
     climbRetract.onTrue(robot.getClimb().descend());
 
-    AutoShoot autoShoot = new AutoShoot(
-        robot.getSwerveDrive(),
-        robot.getTurret(),
-        robot.getShooterHood(),
-        robot.getShooterRollers(),
-        robot.getShooterFunctions(),
-        () -> AutoShoot.HUB_TRANSLATION
-    );
+    AutoShoot autoShoot =
+        new AutoShoot(
+            robot.getSwerveDrive(),
+            robot.getTurret(),
+            robot.getShooterHood(),
+            robot.getShooterRollers(),
+            robot.getShooterFunctions(),
+            () -> AutoShoot.HUB_TRANSLATION);
 
-    Trigger autoshootTrigger = new Trigger(RobotState::isTeleop)
-        .and(RobotState::isEnabled)
-        .and(() -> !fineControl);
+    Trigger autoshootTrigger =
+        new Trigger(RobotState::isTeleop).and(RobotState::isEnabled).and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
 
-    operator.leftStick().and(autoShoot.isReadyToShoot()).whileTrue(robot.getHopper().feedSynchronized());
+    operator
+        .leftStick()
+        .and(autoShoot.isReadyToShoot())
+        .whileTrue(robot.getHopper().feedSynchronized());
 
     ShooterFunctions functions = robot.getShooterFunctions();
 
-    driver.a().whileTrue(LoggingUtil.logCommand("TestShoot/BaseCommand", Commands.parallel(
-        LoggingUtil.logCommand("TestShoot/MoveHood", robot.getShooterRollers().shoot(() -> functions.getFlywheelVelocity(shootingTestDistance))),
-        LoggingUtil.logCommand("TestShoot/SpinRollers", robot.getShooterHood().moveTo(() -> functions.getHoodAngle(shootingTestDistance))),
-        Commands.sequence(
-            LoggingUtil.logCommand("TestShoot/Wait", Commands.waitUntil(
-                () -> robot.getShooterRollers().getAngularVelocity().isNear(functions.getFlywheelVelocity(shootingTestDistance), RotationsPerSecond.of(1)) && robot.getShooterHood().getPosition().isNear(functions.getHoodAngle(shootingTestDistance), Degrees.of(1)))
-            ),
-            LoggingUtil.logCommand("TestShoot/Feed", robot.getHopper().feedPulsing())
-    ))));
+    driver
+        .a()
+        .whileTrue(
+            LoggingUtil.logCommand(
+                "TestShoot/BaseCommand",
+                Commands.parallel(
+                    LoggingUtil.logCommand(
+                        "TestShoot/MoveHood",
+                        robot
+                            .getShooterRollers()
+                            .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance))),
+                    LoggingUtil.logCommand(
+                        "TestShoot/SpinRollers",
+                        robot
+                            .getShooterHood()
+                            .moveTo(() -> functions.getHoodAngle(shootingTestDistance))),
+                    Commands.sequence(
+                        LoggingUtil.logCommand(
+                            "TestShoot/Wait",
+                            Commands.waitUntil(
+                                () ->
+                                    robot
+                                            .getShooterRollers()
+                                            .getAngularVelocity()
+                                            .isNear(
+                                                functions.getFlywheelVelocity(shootingTestDistance),
+                                                RotationsPerSecond.of(1))
+                                        && robot
+                                            .getShooterHood()
+                                            .getPosition()
+                                            .isNear(
+                                                functions.getHoodAngle(shootingTestDistance),
+                                                Degrees.of(1)))),
+                        LoggingUtil.logCommand(
+                            "TestShoot/Feed", robot.getHopper().feedPulsing())))));
   }
 
   private Command rumble(

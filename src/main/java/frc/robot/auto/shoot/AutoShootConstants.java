@@ -3,13 +3,11 @@ package frc.robot.auto.shoot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import org.apache.commons.math3.analysis.MultivariateFunction;
-
 import com.team6962.lib.math.ConstantFunction;
-
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import org.apache.commons.math3.analysis.MultivariateFunction;
 
 /**
  * Constants for the AutoShoot command. These constants include functions that take in various
@@ -19,11 +17,12 @@ import edu.wpi.first.units.measure.AngularVelocity;
  */
 public class AutoShootConstants {
   /**
-   * Function that takes in (target distance, hood angle) and returns initial velocity
-   * displacement scalar. This function is used to account for drag and the Magnus effect when
-   * shooting on the move. Uses inches and degrees as inputs.
+   * Function that takes in (target distance, hood angle) and returns initial velocity displacement
+   * scalar. This function is used to account for drag and the Magnus effect when shooting on the
+   * move. Uses inches and degrees as inputs.
    */
-  public static final MultivariateFunction initialVelocityDisplacementScalarFunction = new ConstantFunction(0.9);
+  public static final MultivariateFunction initialVelocityDisplacementScalarFunction =
+      new ConstantFunction(0.9);
 
   /**
    * The number of iterations to run the optimization for when calculating the optimal shooting
