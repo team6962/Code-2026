@@ -23,4 +23,40 @@ public class AutoSegments {
     public Command driveToMiddleAlliance(){
         return robot.getSwerveDrive().driveTo(FieldPositions.ALLIANCE_ZONE_CENTER);
     }
+
+    public Command driveToMiddleNeutral(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.NEUTRAL_ZONE_CENTER);
+    }
+
+    /*
+     * drive to left trench from alliance zone
+     */
+    public Command driveToLeftTrenchAlliance(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.LEFT_TRENCH_FRONT);
+    }
+
+    /*
+     * drive to left trench from neutral zone
+     */
+    public Command driveToLeftTrenchNeutral(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.LEFT_TRENCH_BACK);
+    }
+
+    /*
+     * drive to right trench from alliance zone
+     */
+    public Command driveToRightTrenchAlliance(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.RIGHT_TRENCH_FRONT);
+    }
+
+    /*
+     * drive to right trench from neutral zone
+     */
+    public Command driveToRightTrenchNeutral(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.RIGHT_TRENCH_BACK);
+    }
+
+    public Command driveToHub(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.HUB_CENTER);
+    }
 }
