@@ -6,6 +6,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -82,17 +83,7 @@ public class ShooterRollers extends SubsystemBase {
    * the build team
    */
   public Command shoot(AngularVelocity targetVelocity) {
-
-    return startEnd(
-        () -> {
-          // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(
-              new VelocityVoltage(targetVelocity.in(RotationsPerSecond)));
-        },
-        () -> {
-          // defines a local function to stop motor
-          shooterRollerMotor1.setControl(new CoastOut());
-        });
+    return shoot(() -> targetVelocity);
   }
 
   /**
@@ -105,12 +96,15 @@ public class ShooterRollers extends SubsystemBase {
    *     coasts the motor on end
    */
   public Command shoot(Supplier<AngularVelocity> targetVelocity) {
-
     return runEnd(
         () -> {
-          // defines a local function to set motor voltage to make it go
-          shooterRollerMotor1.setControl(
-              new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
+          if (getAngularVelocity().plus(ShooterRollersConstants.BANG_BANG_TOLERANCE).lt(targetVelocity.get())) {
+            shooterRollerMotor1.setControl(new DutyCycleOut(1));
+          } else {
+            // defines a local function to set motor voltage to make it go
+            shooterRollerMotor1.setControl(
+                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
+          }
         },
         () -> {
           // defines a local function to stop motor
