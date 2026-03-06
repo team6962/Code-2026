@@ -14,17 +14,17 @@ public class FieldPositions {
         Inches.of(158.84).in(Meters));
 
     public static class Trench {
-        public static final Translation2d RIGHT_ALLIANCE = new Translation2d(
-            Inches.of(165.61).in(Meters),
+        public static final Translation2d RIGHT_ALLIANCE = new Translation2d( //tune all of these values while testing. I will probably add a rotation like kzero so everything is aligned
+            Inches.of(125.61).in(Meters), //original = 165.61
             Inches.of(24.92).in(Meters));
         public static final Translation2d LEFT_ALLIANCE = new Translation2d(
-            Inches.of(165.61).in(Meters),
+            Inches.of(125.61).in(Meters),
             Inches.of(292.76).in(Meters));
         public static final Translation2d RIGHT_NEUTRAL = new Translation2d(
-            Inches.of(198.61).in(Meters),
+            Inches.of(238.61).in(Meters),
             Inches.of(24.92).in(Meters));
         public static final Translation2d LEFT_NEUTRAL = new Translation2d(
-            Inches.of(198.61).in(Meters),
+            Inches.of(238.61).in(Meters), //original pos = 198.61
             Inches.of(292.76).in(Meters));
     }
     

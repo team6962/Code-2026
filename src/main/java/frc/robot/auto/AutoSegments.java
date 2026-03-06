@@ -32,7 +32,7 @@ public class AutoSegments {
      * drive to left trench from alliance zone
      */
     public Command driveToLeftTrenchAlliance(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_ALLIANCE);
     }
 
     /*
