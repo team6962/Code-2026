@@ -262,7 +262,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Degrees.of(-18.224755).in(Radians),
                         Degrees.of(-26.25).in(Radians),
                         Math.PI / 4))),
-             new AprilTagCameraConstants(
+            new AprilTagCameraConstants(
                 "Monochrome-4",
                 new Transform3d(
                     new Translation3d(
