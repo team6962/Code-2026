@@ -261,7 +261,18 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     new Rotation3d(
                         Degrees.of(-18.224755).in(Radians),
                         Degrees.of(-26.25).in(Radians),
-                        Math.PI / 4))))
+                        Math.PI / 4))),
+             new AprilTagCameraConstants(
+                "Monochrome-4",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(-10.293472).in(Meters),
+                        Inches.of(-12.117890).in(Meters),
+                        Inches.of(20.601468).in(Meters)),
+                    new Rotation3d(
+                        Degrees.of(18.224755).in(Radians),
+                        Degrees.of(-26.25).in(Radians),
+                        -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
