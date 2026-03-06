@@ -32,28 +32,28 @@ public class AutoSegments {
      * drive to left trench from alliance zone
      */
     public Command driveToLeftTrenchAlliance(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_FRONT);
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
     }
 
     /*
      * drive to left trench from neutral zone
      */
     public Command driveToLeftTrenchNeutral(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_BACK);
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
     }
 
     /*
      * drive to right trench from alliance zone
      */
     public Command driveToRightTrenchAlliance(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_FRONT);
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_ALLIANCE);
     }
 
     /*
      * drive to right trench from neutral zone
      */
     public Command driveToRightTrenchNeutral(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_BACK);
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL);
     }
 
     public Command driveToHub(){

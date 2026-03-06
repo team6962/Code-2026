@@ -14,16 +14,16 @@ public class FieldPositions {
         Inches.of(158.84).in(Meters));
 
     public static class Trench {
-        public static final Translation2d RIGHT_FRONT = new Translation2d(
+        public static final Translation2d RIGHT_ALLIANCE = new Translation2d(
             Inches.of(165.61).in(Meters),
             Inches.of(24.92).in(Meters));
-        public static final Translation2d LEFT_FRONT = new Translation2d(
+        public static final Translation2d LEFT_ALLIANCE = new Translation2d(
             Inches.of(165.61).in(Meters),
             Inches.of(292.76).in(Meters));
-        public static final Translation2d RIGHT_BACK = new Translation2d(
+        public static final Translation2d RIGHT_NEUTRAL = new Translation2d(
             Inches.of(198.61).in(Meters),
             Inches.of(24.92).in(Meters));
-        public static final Translation2d LEFT_BACK = new Translation2d(
+        public static final Translation2d LEFT_NEUTRAL = new Translation2d(
             Inches.of(198.61).in(Meters),
             Inches.of(292.76).in(Meters));
     }
