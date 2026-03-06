@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.math.ConstantFunction;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import org.apache.commons.math3.analysis.MultivariateFunction;
@@ -40,5 +42,6 @@ public class AutoShootConstants {
   public static final Angle turretAngleTolerance = Degrees.of(2);
 
   /** Transform representing the shooter's position and orientation relative to the robot. */
-  public static final Transform2d shooterTransform = new Transform2d();
+  public static final Transform2d shooterTransform =
+      new Transform2d(new Translation2d(-0.17145, 0.17145), new Rotation2d());
 }

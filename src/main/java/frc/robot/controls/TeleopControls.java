@@ -43,6 +43,8 @@ public class TeleopControls {
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
+  private double tunableHoodAngle = ShooterHoodConstants.MIN_ANGLE.in(Degrees);
+  private double tunableRollerVelocity = 0;
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
@@ -64,6 +66,20 @@ public class TeleopControls {
         shootingTestDistance.in(Inches),
         value -> {
           shootingTestDistance = Inches.of(value);
+        });
+
+    DogLog.tunable(
+        "Override Shooting/Hood Angle",
+        tunableHoodAngle,
+        value -> {
+          tunableHoodAngle = value;
+        });
+
+    DogLog.tunable(
+        "Override Shooting/Roller Velocity",
+        tunableRollerVelocity,
+        value -> {
+          tunableRollerVelocity = value;
         });
   }
 
@@ -282,7 +298,9 @@ public class TeleopControls {
             robot.getShooterHood(),
             robot.getShooterRollers(),
             robot.getShooterFunctions(),
-            () -> AutoShoot.HUB_TRANSLATION);
+            () -> AutoShoot.HUB_TRANSLATION,
+            () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
+            () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
 
     Trigger autoshootTrigger =
         new Trigger(RobotState::isTeleop).and(RobotState::isEnabled).and(() -> !fineControl);

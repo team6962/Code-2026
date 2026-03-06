@@ -101,11 +101,12 @@ public class ShooterRollers extends SubsystemBase {
           if (getAngularVelocity()
               .plus(ShooterRollersConstants.BANG_BANG_TOLERANCE)
               .lt(targetVelocity.get())) {
-            shooterRollerMotor1.setControl(new DutyCycleOut(1));
+            shooterRollerMotor1.setControl(new DutyCycleOut(1).withEnableFOC(false));
           } else {
             // defines a local function to set motor voltage to make it go
             shooterRollerMotor1.setControl(
-                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
+                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond))
+                    .withEnableFOC(false));
           }
         },
         () -> {

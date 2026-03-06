@@ -34,6 +34,9 @@ import edu.wpi.first.units.measure.Angle;
  * field.
  */
 public class Localization implements SwerveComponent {
+  /** Drivetrain constants containing configuration for the swerve drive. */
+  private DrivetrainConstants constants;
+
   /**
    * The pose estimator that fuses gyroscope, odometry, and vision data to estimate the robot's
    * position on the field.
@@ -72,6 +75,7 @@ public class Localization implements SwerveComponent {
 
   public Localization(
       DrivetrainConstants constants, Pose3d initialPose, Odometry odometry, Gyroscope gyroscope) {
+    this.constants = constants;
     this.gyroscope = gyroscope;
     this.odometry = odometry;
 
@@ -139,14 +143,6 @@ public class Localization implements SwerveComponent {
 
     DogLog.log(basePath + "Localization/Position", position);
 
-    DogLog.log(basePath + "Localization/PositionX", position.getX(), Meters);
-    DogLog.log(basePath + "Localization/PositionY", position.getY(), Meters);
-    DogLog.log(basePath + "Localization/PositionZ", position.getZ(), Meters);
-
-    DogLog.log(basePath + "Localization/RotationYaw", position.getRotation().getZ(), Radians);
-    DogLog.log(basePath + "Localization/RotationPitch", position.getRotation().getY(), Radians);
-    DogLog.log(basePath + "Localization/RotationRoll", position.getRotation().getX(), Radians);
-
     DogLog.log(basePath + "Localization/Heading", getHeading().in(Radians), Radians);
 
     DogLog.log(basePath + "Localization/VelocityX", velocity.vxMetersPerSecond, MetersPerSecond);
@@ -156,26 +152,36 @@ public class Localization implements SwerveComponent {
         velocity.omegaRadiansPerSecond,
         RadiansPerSecond);
 
-    DogLog.log(
-        basePath + "Localization/AngularVelocityYaw",
-        gyroscope.getYawVelocity().in(RadiansPerSecond),
-        RadiansPerSecond);
-    DogLog.log(
-        basePath + "Localization/AngularVelocityPitch",
-        gyroscope.getPitchVelocity().in(RadiansPerSecond),
-        RadiansPerSecond);
-    DogLog.log(
-        basePath + "Localization/AngularVelocityRoll",
-        gyroscope.getRollVelocity().in(RadiansPerSecond),
-        RadiansPerSecond);
+    if (!constants.Timing.MinimizeLogging) {
+      DogLog.log(basePath + "Localization/PositionX", position.getX(), Meters);
+      DogLog.log(basePath + "Localization/PositionY", position.getY(), Meters);
+      DogLog.log(basePath + "Localization/PositionZ", position.getZ(), Meters);
 
-    DogLog.log(basePath + "Localization/TwistDX", twist.dx, Meters);
-    DogLog.log(basePath + "Localization/TwistDY", twist.dy, Meters);
-    DogLog.log(basePath + "Localization/TwistDTheta", twist.dtheta, Radians);
+      DogLog.log(basePath + "Localization/RotationYaw", position.getRotation().getZ(), Radians);
+      DogLog.log(basePath + "Localization/RotationPitch", position.getRotation().getY(), Radians);
+      DogLog.log(basePath + "Localization/RotationRoll", position.getRotation().getX(), Radians);
 
-    DogLog.log(basePath + "Localization/ArcVelocityDX", arcVelocity.dx, MetersPerSecond);
-    DogLog.log(basePath + "Localization/ArcVelocityDY", arcVelocity.dy, MetersPerSecond);
-    DogLog.log(basePath + "Localization/ArcVelocityDTheta", arcVelocity.dtheta, RadiansPerSecond);
+      DogLog.log(
+          basePath + "Localization/AngularVelocityYaw",
+          gyroscope.getYawVelocity().in(RadiansPerSecond),
+          RadiansPerSecond);
+      DogLog.log(
+          basePath + "Localization/AngularVelocityPitch",
+          gyroscope.getPitchVelocity().in(RadiansPerSecond),
+          RadiansPerSecond);
+      DogLog.log(
+          basePath + "Localization/AngularVelocityRoll",
+          gyroscope.getRollVelocity().in(RadiansPerSecond),
+          RadiansPerSecond);
+
+      DogLog.log(basePath + "Localization/TwistDX", twist.dx, Meters);
+      DogLog.log(basePath + "Localization/TwistDY", twist.dy, Meters);
+      DogLog.log(basePath + "Localization/TwistDTheta", twist.dtheta, Radians);
+
+      DogLog.log(basePath + "Localization/ArcVelocityDX", arcVelocity.dx, MetersPerSecond);
+      DogLog.log(basePath + "Localization/ArcVelocityDY", arcVelocity.dy, MetersPerSecond);
+      DogLog.log(basePath + "Localization/ArcVelocityDTheta", arcVelocity.dtheta, RadiansPerSecond);
+    }
   }
 
   /**

@@ -104,7 +104,9 @@ public class AutoShoot extends Command {
       ShooterHood hood,
       ShooterRollers rollers,
       ShooterFunctions shooterFunctions,
-      Supplier<Translation2d> targetSupplier) {
+      Supplier<Translation2d> targetSupplier,
+      Supplier<Angle> hoodAngleOverride,
+      Supplier<AngularVelocity> rollerVelocityOverride) {
     this.swerveDrive = swerveDrive;
     this.turret = turret;
     this.hood = hood;
@@ -117,8 +119,20 @@ public class AutoShoot extends Command {
     Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
 
     Command turretCommand = turret.track(() -> turretAngleTarget, () -> turretVelocityTarget);
-    Command hoodCommand = hood.track(() -> hoodAngleTarget, () -> hoodVelocityTarget).repeatedly();
-    Command rollersCommand = rollers.shoot(() -> rollerSpeedTarget).repeatedly();
+    Command hoodCommand =
+        hood.track(
+                () -> hoodAngleOverride.get() != null ? hoodAngleOverride.get() : hoodAngleTarget,
+                () ->
+                    hoodAngleOverride.get() == null ? hoodVelocityTarget : RotationsPerSecond.of(0))
+            .repeatedly();
+    Command rollersCommand =
+        rollers
+            .shoot(
+                () ->
+                    rollerVelocityOverride.get() != null
+                        ? rollerVelocityOverride.get()
+                        : rollerSpeedTarget)
+            .repeatedly();
 
     runningTrigger.whileTrue(turretCommand);
     runningTrigger
@@ -281,6 +295,8 @@ public class AutoShoot extends Command {
     Pose2d shooterPose =
         swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
     TranslationalVelocity shooterVelocity = swerveDrive.getTranslationalVelocity();
+
+    DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
 
     // Calculate the ideal shooting angles and roller speed to hit the target
     Pair<Angle, Angle> idealAngles = getMovingShootingAngles(shooterPose, shooterVelocity, target);

@@ -79,7 +79,7 @@ public class Hopper extends SubsystemBase {
                 .repeatedly());
   }
 
-  private Command feedSynchronizedWithoutUnjam() {
+  public Command feedSynchronizedWithoutUnjam() {
     return Commands.parallel(beltFloor.feed(), kicker.feed())
         .deadlineFor(
             Commands.startEnd(
