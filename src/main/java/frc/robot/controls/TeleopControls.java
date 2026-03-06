@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -189,10 +190,7 @@ public class TeleopControls {
     // Shoot - WORKS
     operator
         .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                robot.getShooterRollers().shoot(() -> flywheelVelocity),
-                robot.getHopper().feedPulsing()));
+        .whileTrue(robot.getHopper().feedPulsing());
 
     // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
