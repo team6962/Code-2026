@@ -165,19 +165,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
       basePath += "/";
     }
 
-    DogLog.log(basePath + "Position", getPosition().in(Meters));
     DogLog.log(basePath + "Velocity", getVelocity().in(MetersPerSecond));
-    DogLog.log(basePath + "Acceleration", getAcceleration().in(MetersPerSecondPerSecond));
-    DogLog.log(basePath + "AngularPosition", getAngularPosition().in(Radians));
-    DogLog.log(basePath + "AngularVelocity", getAngularVelocity().in(RadiansPerSecond));
-    DogLog.log(
-        basePath + "AngularAcceleration", getAngularAcceleration().in(RadiansPerSecondPerSecond));
-    DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
-    DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
     DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
-    DogLog.log(
-        basePath + "DataTimestamp",
-        StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
 
     // If running a position or velocity request, log the target position or
     // velocity in radians. The target is logged as part of the control
@@ -207,7 +196,21 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
           RadiansPerSecond);
     }
 
-    LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
+    if (!constants.Timing.MinimizeLogging) {
+      DogLog.log(basePath + "Position", getPosition().in(Meters));
+      DogLog.log(basePath + "Acceleration", getAcceleration().in(MetersPerSecondPerSecond));
+      DogLog.log(basePath + "AngularPosition", getAngularPosition().in(Radians));
+      DogLog.log(basePath + "AngularVelocity", getAngularVelocity().in(RadiansPerSecond));
+      DogLog.log(
+          basePath + "AngularAcceleration", getAngularAcceleration().in(RadiansPerSecondPerSecond));
+      DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
+      DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
+      DogLog.log(
+          basePath + "DataTimestamp",
+          StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+
+      LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
+    }
   }
 
   /**

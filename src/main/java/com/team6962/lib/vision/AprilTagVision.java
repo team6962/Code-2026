@@ -9,11 +9,11 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.photonvision.simulation.VisionSystemSim;
 
@@ -23,6 +23,9 @@ import org.photonvision.simulation.VisionSystemSim;
  * drive's odometry.
  */
 public class AprilTagVision extends SubsystemBase {
+  /** Notifier for periodic vision updates. */
+  private final Notifier notifier = new Notifier(this::update);
+
   /** The swerve drive subsystem to provide vision measurements to. */
   private final CommandSwerveDrive swerveDrive;
 
@@ -63,6 +66,8 @@ public class AprilTagVision extends SubsystemBase {
     }
 
     DogLog.log("Vision/Cameras/Count", visionConstants.Cameras.size());
+
+    notifier.startPeriodic(0.02);
   }
 
   /**
@@ -70,31 +75,11 @@ public class AprilTagVision extends SubsystemBase {
    *
    * @param camera The AprilTagCamera to add to the system.
    */
-  public void addCamera(AprilTagCamera camera) {
+  private void addCamera(AprilTagCamera camera) {
     cameras.put(camera.getName(), camera);
   }
 
-  /**
-   * Gets an immutable list of all cameras in the vision system.
-   *
-   * @return A list containing all registered AprilTagCamera instances.
-   */
-  public List<AprilTagCamera> getCameras() {
-    return List.copyOf(cameras.values());
-  }
-
-  /**
-   * Retrieves a camera by name.
-   *
-   * @param name The name of the camera to retrieve.
-   * @return The AprilTagCamera with the given name, or null if not found.
-   */
-  public AprilTagCamera getCamera(String name) {
-    return cameras.get(name);
-  }
-
-  @Override
-  public void periodic() {
+  private void update() {
     // Update vision simulation with current robot pose
     if (visionSystemSim != null) {
       visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
@@ -126,8 +111,7 @@ public class AprilTagVision extends SubsystemBase {
                     : visionConstants.MinTagsForHeadingUpdateWhileDisabled);
 
         if (!canUpdateRotation) {
-          measurement =
-              measurement.withAdjustedRotation(swerveDrive.getLocalization().getRotation3d());
+          measurement = measurement.withIgnoredRotation();
         }
 
         // Add the measurement to the swerve drive's localization system

@@ -98,7 +98,5 @@ public class TurretConstants {
       MOMENT_OF_INERTIA
           * SIMULATED_MOTOR.nominalVoltageVolts
           / SIMULATED_MOTOR.stallTorqueNewtonMeters
-          / SENSOR_TO_MECHANISM_RATIO
-          * 2
-          * Math.PI;
+          / SENSOR_TO_MECHANISM_RATIO;
 }

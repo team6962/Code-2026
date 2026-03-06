@@ -1,6 +1,7 @@
 package com.team6962.lib.vision;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N1;
@@ -89,6 +90,23 @@ public class AprilTagVisionMeasurement {
             photonEstimate.strategy);
 
     return new AprilTagVisionMeasurement(adjustedEstimate, this.stdDevs);
+  }
+
+  /**
+   * Returns a copy of this vision measurement with the rotation component of the pose effectively
+   * ignored by setting its standard deviation to a very large value. This can be used to avoid
+   * setting the rotation of the robot when enabled.
+   *
+   * @return A new AprilTagVisionMeasurement with the rotation component ignored.
+   */
+  public AprilTagVisionMeasurement withIgnoredRotation() {
+    return new AprilTagVisionMeasurement(
+        this.photonEstimate,
+        VecBuilder.fill(
+            this.stdDevs.get(0, 0),
+            this.stdDevs.get(0, 1),
+            this.stdDevs.get(0, 2),
+            Double.MAX_VALUE));
   }
 
   /**

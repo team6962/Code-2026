@@ -3,6 +3,7 @@ package frc.robot.subsystems.hopper;
 import static edu.wpi.first.units.Units.Seconds;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -71,11 +72,14 @@ public class Hopper extends SubsystemBase {
             Commands.either(
                     feedSynchronizedWithoutUnjam().withTimeout(Seconds.of(0.5)),
                     unjamDuringSynchronizedFeed(),
-                    () -> sensors.isFeedingSuccessfully() || sensors.isKickerEmpty())
+                    () ->
+                        sensors.isFeedingSuccessfully()
+                            || sensors.isKickerEmpty()
+                            || RobotBase.isSimulation())
                 .repeatedly());
   }
 
-  private Command feedSynchronizedWithoutUnjam() {
+  public Command feedSynchronizedWithoutUnjam() {
     return Commands.parallel(beltFloor.feed(), kicker.feed())
         .deadlineFor(
             Commands.startEnd(

@@ -2,11 +2,11 @@ package com.team6962.lib.swerve.commands;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -43,12 +43,15 @@ public abstract class TeleopSwerveCommand extends Command {
 
     Trigger rotationTrigger =
         new Trigger(
-            () -> isScheduled() && isClearToOverride(swerveDrive.useRotation(), rotationCommand));
+            () ->
+                isScheduled()
+                    && CommandUtil.isClearToOverride(swerveDrive.useRotation(), rotationCommand));
     Trigger translationTrigger =
         new Trigger(
             () ->
                 isScheduled()
-                    && isClearToOverride(swerveDrive.useTranslation(), translationCommand));
+                    && CommandUtil.isClearToOverride(
+                        swerveDrive.useTranslation(), translationCommand));
 
     rotationTrigger.whileTrue(rotationCommand);
     translationTrigger.whileTrue(translationCommand);
@@ -70,19 +73,4 @@ public abstract class TeleopSwerveCommand extends Command {
    * @return The desired field-relative chassis speeds
    */
   protected abstract ChassisSpeeds getDrivenVelocity();
-
-  /**
-   * Checks if it is okay to replace the currently active command on a subsystem, and have the given
-   * command take control instead. A subsystem is clear to override if it has no current command,
-   * has only its default command running, or is already running the specified command.
-   *
-   * @param subsystem The subsystem to check
-   * @param command The command that wants to take control
-   * @return True if the subsystem's active command can be safely overridden
-   */
-  public static boolean isClearToOverride(Subsystem subsystem, Command command) {
-    return subsystem.getCurrentCommand() == null
-        || subsystem.getCurrentCommand() == subsystem.getDefaultCommand()
-        || subsystem.getCurrentCommand() == command;
-  }
 }

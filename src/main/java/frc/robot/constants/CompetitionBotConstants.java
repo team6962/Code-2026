@@ -185,7 +185,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withControlLoopFrequency(Hertz.of(100))
                 .withSignalUpdateRate(Hertz.of(100))
                 .withTimesyncControlRequests(false)
-                .withUseThreadedControlLoop(true))
+                .withUseThreadedControlLoop(true)
+                .withMinimizeLogging(true))
         .withDriving(
             baseConstants
                 .Driving
@@ -261,7 +262,18 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     new Rotation3d(
                         Degrees.of(-18.224755).in(Radians),
                         Degrees.of(-26.25).in(Radians),
-                        Math.PI / 4))))
+                        Math.PI / 4))),
+            new AprilTagCameraConstants(
+                "Monochrome-4",
+                new Transform3d(
+                    new Translation3d(
+                        Inches.of(-10.293558).in(Meters),
+                        Inches.of(-12.118).in(Meters),
+                        Inches.of(20.601426).in(Meters)),
+                    new Rotation3d(
+                        Degrees.of(18.224755).in(Radians),
+                        Degrees.of(-26.25).in(Radians),
+                        -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
@@ -280,22 +292,22 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
-    return super.getSphereCameraConstants()
-        .withName("Color-2")
-        .withClassId(0)
-        .withFOVHeight(Rotation2d.fromDegrees(48.9))
-        .withFOVWidth(Rotation2d.fromDegrees(70))
-        .withCameraHeightPixels(800)
-        .withCameraWidthPixels(1280)
-        .withFocalLengthX(907.41)
-        .withFocalLengthY(907.64)
-        .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
-        .withSphereDiameter(Inches.of(5.91))
-        .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
-        .withRobotToCameraTransform(
-            new Transform3d(
-                new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
-                new Rotation3d(0, Math.PI / 6, 0)));
+    return super.getSphereCameraConstants();
+    // .withName("Color-2")
+    // .withClassId(0)
+    // .withFOVHeight(Rotation2d.fromDegrees(48.9))
+    // .withFOVWidth(Rotation2d.fromDegrees(70))
+    // .withCameraHeightPixels(800)
+    // .withCameraWidthPixels(1280)
+    // .withFocalLengthX(907.41)
+    // .withFocalLengthY(907.64)
+    // .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
+    // .withSphereDiameter(Inches.of(5.91))
+    // .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
+    // .withRobotToCameraTransform(
+    //     new Transform3d(
+    //         new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
+    //         new Rotation3d(0, Math.PI / 6, 0)));
   }
 
   @Override

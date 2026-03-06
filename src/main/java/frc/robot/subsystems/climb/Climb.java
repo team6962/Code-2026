@@ -7,12 +7,12 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.team6962.lib.logging.LoggingUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -44,7 +44,7 @@ public class Climb extends SubsystemBase {
   private boolean isClimbed;
 
   public Climb() {
-    motor = new TalonFX(ClimbConstants.MOTOR_ID, ClimbConstants.CANBUS_NAME);
+    motor = new TalonFX(ClimbConstants.MOTOR_ID, new CANBus(ClimbConstants.MOTOR_CANBUS_NAME));
 
     if (RobotBase.isSimulation()) {
       ClimbConstants.MOTOR_CONFIGURATION.Slot0.kG =
@@ -72,7 +72,7 @@ public class Climb extends SubsystemBase {
 
     motor.getConfigurator().apply(ClimbConstants.MOTOR_CONFIGURATION);
 
-    candi = new CANdi(ClimbConstants.CANDI_CAN_ID, ClimbConstants.CANBUS_NAME);
+    candi = new CANdi(ClimbConstants.CANDI_CAN_ID, new CANBus(ClimbConstants.CANDI_CANBUS_NAME));
     candi.getConfigurator().apply(ClimbConstants.CANDI_CONFIGURATION);
 
     accelerationSignal = motor.getAcceleration();
@@ -203,8 +203,9 @@ public class Climb extends SubsystemBase {
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        hallEffectSensorSignal,
         profilePositionSignal);
+
+    hallEffectSensorSignal.refresh();
 
     DogLog.log("Climb/Acceleration", getAcceleration());
     DogLog.log("Climb/Velocity", getVelocity());
@@ -214,7 +215,6 @@ public class Climb extends SubsystemBase {
     DogLog.log("Climb/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Climb/HallSensorTriggered", isHallEffectSensorTriggered());
     DogLog.log("Climb/ProfilePosition", profilePositionSignal.getValue());
-    LoggingUtil.log("Climb/ControlRequest", motor.getAppliedControl());
 
     if (RobotState.isDisabled()) {
       motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
