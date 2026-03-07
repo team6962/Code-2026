@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
-import frc.robot.auto.DriveToClump;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.climb.ClimbConstants;
@@ -36,20 +35,18 @@ import frc.robot.subsystems.turret.TurretConstants;
 public class TeleopControls {
   private RobotContainer robot;
   private AutoClimb autoClimb;
-  private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
-  private double tunableHoodAngle = ShooterHoodConstants.MIN_ANGLE.in(Degrees);
+  private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     this.autoClimb = new AutoClimb(robot);
-    this.driveToClump = new DriveToClump(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -154,7 +151,7 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    driver.start().whileTrue(driveToClump.driveToClump());
+    // driver.start().whileTrue(driveToClump.driveToClump());
 
     // Intake without driving - WORKS
     driver
@@ -187,7 +184,7 @@ public class TeleopControls {
                 .ignoringDisable(true));
 
     // Shoot - WORKS
-    operator.rightTrigger().whileTrue(robot.getHopper().feedPulsing());
+    operator.rightTrigger().whileTrue(robot.getHopper().feedSynchronizedWithoutUnjam());
 
     // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start

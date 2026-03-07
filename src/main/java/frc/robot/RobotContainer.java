@@ -87,12 +87,14 @@ public class RobotContainer {
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
 
-    if (RobotBase.isSimulation()) {
-      autoChooser.addOption(
-          "Test Drive To Pose",
-          swerveDrive.driveTo(
-              new Pose2d(10, 5, Rotation2d.fromDegrees(0)), new ChassisSpeeds(-2, 2, 0)));
+    autoChooser.addOption(
+        "Test Drive To Pose",
+        swerveDrive
+            .driveTo(
+                new Pose2d(3, 4.03463125, Rotation2d.fromDegrees(0)), new ChassisSpeeds(0, 0, 0))
+            .repeatedly());
 
+    if (RobotBase.isSimulation()) {
       autoChooser.addOption(
           "Test Drive To Pose with Final Velocity",
           swerveDrive

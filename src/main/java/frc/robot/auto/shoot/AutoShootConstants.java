@@ -24,7 +24,7 @@ public class AutoShootConstants {
    * move. Uses inches and degrees as inputs.
    */
   public static final MultivariateFunction initialVelocityDisplacementScalarFunction =
-      new ConstantFunction(0.9);
+      new ConstantFunction(0.8);
 
   /**
    * The number of iterations to run the optimization for when calculating the optimal shooting

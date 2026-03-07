@@ -191,14 +191,15 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             baseConstants
                 .Driving
                 .clone()
-                .withMaxLinearVelocity(MetersPerSecond.of(4)) // Not tuned
-                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5)) // Not tuned
-                .withMaxAngularVelocity(RotationsPerSecond.of(1)) // Not tuned
-                .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1)) // Not tuned
-                .withTranslationFeedbackKP(0.5) // Not tuned
-                .withTranslationFeedbackKD(0.1) // Not tuned
-                .withAngleFeedbackKP(0.25) // Not tuned
-                .withAngleFeedbackKD(0.05)) // Not tuned
+                .withMaxLinearVelocity(MetersPerSecond.of(4)) // 3.5 works well in auto
+                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5)) //  3 works well in auto
+                .withMaxAngularVelocity(RotationsPerSecond.of(1))
+                .withMaxAngularAcceleration(
+                    RotationsPerSecondPerSecond.of(1)) // 0.5 works well in auto
+                .withTranslationFeedbackKP(0.25) // Not tuned
+                .withTranslationFeedbackKD(0.0) // Not tuned
+                .withAngleFeedbackKP(0.1) // Not tuned
+                .withAngleFeedbackKD(0.0)) // Not tuned
         .withDriveMotor(
             baseConstants
                 .DriveMotor
@@ -206,7 +207,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withDeviceConfiguration(baseDriveMotorConfig)
                 .withGearReduction(5.9)
                 .withOutputType(ControlOutputType.VoltageFOC)
-                .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
+                .withVelocityControlMotionProfile(VelocityMotionProfileType.None)
                 .withVelocitySlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))
@@ -275,7 +276,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Degrees.of(-26.25).in(Radians),
                         -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
-        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
         .withCameraSimProperties(
             new SimCameraProperties()
