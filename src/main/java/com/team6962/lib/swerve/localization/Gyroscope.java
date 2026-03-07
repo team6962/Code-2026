@@ -129,17 +129,20 @@ public class Gyroscope implements SwerveComponent, AutoCloseable {
   public void logTelemetry(String basePath) {
     basePath = LoggingUtil.ensureEndsWithSlash(basePath);
 
-    DogLog.log(basePath + "IsConnected", gyro.isConnected());
-    DogLog.log(basePath + "UsingGyroscope", shouldUseGyroscope());
+    if (!constants.Timing.MinimizeLogging) {
+      DogLog.log(basePath + "IsConnected", gyro.isConnected());
+      DogLog.log(basePath + "UsingGyroscope", shouldUseGyroscope());
 
-    DogLog.log(basePath + "Yaw", getYaw().in(Radians), Radians);
-    DogLog.log(basePath + "Pitch", getPitch().in(Radians), Radians);
-    DogLog.log(basePath + "Roll", getRoll().in(Radians), Radians);
+      DogLog.log(basePath + "Yaw", getYaw().in(Radians), Radians);
+      DogLog.log(basePath + "Pitch", getPitch().in(Radians), Radians);
+      DogLog.log(basePath + "Roll", getRoll().in(Radians), Radians);
 
-    DogLog.log(basePath + "YawVelocity", getYawVelocity().in(RadiansPerSecond), RadiansPerSecond);
-    DogLog.log(
-        basePath + "PitchVelocity", getPitchVelocity().in(RadiansPerSecond), RadiansPerSecond);
-    DogLog.log(basePath + "RollVelocity", getRollVelocity().in(RadiansPerSecond), RadiansPerSecond);
+      DogLog.log(basePath + "YawVelocity", getYawVelocity().in(RadiansPerSecond), RadiansPerSecond);
+      DogLog.log(
+          basePath + "PitchVelocity", getPitchVelocity().in(RadiansPerSecond), RadiansPerSecond);
+      DogLog.log(
+          basePath + "RollVelocity", getRollVelocity().in(RadiansPerSecond), RadiansPerSecond);
+    }
   }
 
   /**

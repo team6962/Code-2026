@@ -20,7 +20,7 @@ public class Preferences {
    * should usually be false when visualizing with AdvantageScope's 3D field from a driver's
    * perspective.
    */
-  public static final boolean reorientControlsInSimulation = true;
+  public static final boolean reorientControlsInSimulation = false;
 
   /**
    * The robot constants to use in simulation. This should be set to a constants class that

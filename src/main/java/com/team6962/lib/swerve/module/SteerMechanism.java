@@ -172,15 +172,19 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     }
 
     DogLog.log(basePath + "Position", getPosition().in(Radians));
-    DogLog.log(basePath + "Velocity", getVelocity().in(RadiansPerSecond));
-    DogLog.log(basePath + "Acceleration", getAcceleration().in(RadiansPerSecondPerSecond));
-    DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
-    DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
-    DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
-    DogLog.log(basePath + "ProfilePosition", profilePosition.in(Radians));
-    DogLog.log(
-        basePath + "DataTimestamp",
-        StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+    if (!constants.Timing.MinimizeLogging) {
+      DogLog.log(basePath + "Velocity", getVelocity().in(RadiansPerSecond));
+      DogLog.log(basePath + "Acceleration", getAcceleration().in(RadiansPerSecondPerSecond));
+      DogLog.log(basePath + "AppliedVoltage", getAppliedVoltage().in(Volts));
+      DogLog.log(basePath + "StatorCurrent", getStatorCurrent().in(Amps));
+      DogLog.log(basePath + "SupplyCurrent", getSupplyCurrent().in(Amps));
+      DogLog.log(basePath + "ProfilePosition", profilePosition.in(Radians));
+      DogLog.log(
+          basePath + "DataTimestamp",
+          StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+
+      LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
+    }
 
     // If running a position or velocity request, log the target position or
     // velocity in radians. The target is logged as part of the control
@@ -205,8 +209,6 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
           RotationsPerSecond.of(velocityControl.Velocity).in(RadiansPerSecond),
           RadiansPerSecond);
     }
-
-    LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
   }
 
   /**

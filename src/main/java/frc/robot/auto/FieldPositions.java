@@ -22,6 +22,7 @@ public class FieldPositions {
         public static final Translation2d LEFT_ALLIANCE = new Translation2d(
             Inches.of(115.61).in(Meters),
             Inches.of(292.76).in(Meters));
+        //drive to trench on neutral side
         public static final Translation2d RIGHT_NEUTRAL = new Translation2d(
             Inches.of(248.61).in(Meters),
             Inches.of(24.92).in(Meters));
@@ -33,7 +34,7 @@ public class FieldPositions {
     public static final Translation2d NEUTRAL_ZONE_CENTER = new Translation2d(
         Inches.of(325.61).in(Meters),
         Inches.of(158.84).in(Meters));
-    public static final Translation2d HUB_CENTER = new Translation2d(
+    public static final Translation2d HUB_FRONT = new Translation2d(
         Inches.of(158.84).in(Meters),
-        Inches.of(182.11).in(Meters));
+        Inches.of(123.61).in(Meters));
 }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.hood;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -11,12 +12,14 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -24,6 +27,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -58,6 +62,19 @@ public class ShooterHood extends SubsystemBase {
     hoodMotor =
         new TalonFX(ShooterHoodConstants.MOTOR_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
     candi = new CANdi(ShooterHoodConstants.CANDI_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
+
+    if (RobotBase.isSimulation()) {
+      ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kP = 80.0;
+      ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kD = 3.0;
+      ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kV = 0.0; // 4.3;
+      ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kA = 0.0;
+      ShooterHoodConstants.kG = 0.22;
+      kG = ShooterHoodConstants.kG;
+      ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity =
+          1000.0; // 30.0;
+      ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration =
+          1000.0; // 30.0;
+    }
 
     hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(ShooterHoodConstants.CANDI_CONFIGURATION);
@@ -378,6 +395,91 @@ public class ShooterHood extends SubsystemBase {
     } else {
       hoodMotor.setControl(new NeutralOut());
     }
+  }
+
+  private void setPositionVelocityControl(Angle position, AngularVelocity velocity) {
+    if (isZeroed) {
+      hoodMotor.setControl(
+          new PositionVoltage(position)
+              .withVelocity(velocity)
+              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
+    } else {
+      hoodMotor.setControl(new NeutralOut());
+    }
+  }
+
+  /**
+   * Creates a Command that moves the hood to a target angle provided by the given supplier, while
+   * attempting to maintain the target velocity, which should be the velocity of the target angle.
+   * This is a done using a combination of basic PID and feedforward, with motion profiling used
+   * when error becomes large, ensuring fast movement when the hood reaches its limits and needs to
+   * rotate 360 degrees to reach the target angle.
+   *
+   * @param targetAngleSupplier supplier that is sampled repeatedly to provide the desired target
+   *     angle
+   * @param targetVelocitySupplier supplier that is sampled repeatedly to provide the desired target
+   *     velocity, which should be the velocity of the target angle; used for feedforward and can
+   *     help improve tracking performance when the target angle is changing rapidly
+   * @return a Command that, while scheduled, continuously moves the hood toward the supplied target
+   *     angle while attempting to maintain the supplied target velocity
+   */
+  public Command track(
+      Supplier<Angle> targetAngleSupplier, Supplier<AngularVelocity> targetVelocitySupplier) {
+    Command command =
+        new Command() {
+          private TrapezoidProfile profile =
+              new TrapezoidProfile(
+                  new TrapezoidProfile.Constraints(
+                      ShooterHoodConstants.MOTOR_CONFIGURATION
+                          .MotionMagic
+                          .MotionMagicCruiseVelocity,
+                      ShooterHoodConstants.MOTOR_CONFIGURATION
+                          .MotionMagic
+                          .MotionMagicAcceleration));
+          private TrapezoidProfile.State previousProfileState;
+          private double previousUpdateTimestamp;
+
+          @Override
+          public void initialize() {
+            previousProfileState =
+                new TrapezoidProfile.State(
+                    getPosition().in(Rotations), getVelocity().in(RotationsPerSecond));
+            previousUpdateTimestamp = Timer.getFPGATimestamp();
+          }
+
+          @Override
+          public void execute() {
+            Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
+
+            AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+            TrapezoidProfile.State profileState =
+                profile.calculate(
+                    Timer.getFPGATimestamp() - previousUpdateTimestamp,
+                    previousProfileState,
+                    new TrapezoidProfile.State(
+                        targetPosition.in(Rotations),
+                        0 // This can also be set to targetVelocity.in(RotationsPerSecond)
+                        // if the profile should go to the target position and velocity. However, 0
+                        // seems to perform better in simulation
+                        ));
+
+            previousProfileState = profileState;
+            previousUpdateTimestamp = Timer.getFPGATimestamp();
+
+            if (targetPosition.isNear(getPosition(), Degrees.of(3))) {
+              setPositionVelocityControl(targetPosition, targetVelocity);
+            } else {
+              setPositionVelocityControl(
+                  Rotations.of(profileState.position),
+                  RotationsPerSecond.of(profileState.velocity));
+            }
+          }
+        };
+
+    command.addRequirements(this);
+
+    return command;
   }
 
   /**
