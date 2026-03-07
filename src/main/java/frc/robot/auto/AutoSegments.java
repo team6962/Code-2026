@@ -127,12 +127,28 @@ public class AutoSegments {
     return Commands.sequence(driveToRightTrenchAlliance(), driveToRightTrenchNeutral());
   }
 
-  public Command driveThroughLeftTrenchIntoNeutral() { // ??
+  public Command driveThroughLeftTrenchIntoNeutral() {
     return Commands.sequence(driveToLeftTrenchAlliance(), driveToLeftTrenchNeutral());
   }
 
-  public Command driveThroughLeftTrenchIntoAlliance() { // ??
+  public Command driveThroughLeftTrenchIntoAlliance() {
     return Commands.sequence(driveToLeftTrenchNeutral(), driveToLeftTrenchAlliance());
+  }
+
+  public Command driveThroughRightBumpIntoAlliance() {
+    return Commands.sequence(driveToRightBumpNeutral(), driveToRightBumpAlliance());
+  }
+
+  public Command driveThroughRightBumpIntoNeutral() {
+    return Commands.sequence(driveToRightBumpAlliance(), driveToRightBumpNeutral());
+  }
+
+  public Command driveThroughLeftBumpIntoNeutral() {
+    return Commands.sequence(driveToLeftBumpAlliance(), driveToLeftBumpNeutral());
+  }
+
+  public Command driveThroughLeftBumpIntoAlliance() {
+    return Commands.sequence(driveToLeftBumpNeutral(), driveToLeftBumpAlliance());
   }
 
   public Command driveToOutpost() {
