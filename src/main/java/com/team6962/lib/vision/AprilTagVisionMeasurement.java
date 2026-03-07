@@ -104,8 +104,8 @@ public class AprilTagVisionMeasurement {
         this.photonEstimate,
         VecBuilder.fill(
             this.stdDevs.get(0, 0),
-            this.stdDevs.get(0, 1),
-            this.stdDevs.get(0, 2),
+            this.stdDevs.get(1, 0),
+            this.stdDevs.get(2, 0),
             Double.MAX_VALUE));
   }
 

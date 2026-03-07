@@ -1,19 +1,39 @@
 package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.auto.shoot.AutoShoot;
 
 public class AutoSegments {
   private RobotContainer robot;
 
-  public AutoSegments(RobotContainer robot) {
-    this.robot = robot;
-  }
+    private AutoShoot autoShoot;
+
+    public AutoSegments(RobotContainer robot) {
+        this.robot = robot;
+        autoShoot = new AutoShoot(
+            robot.getSwerveDrive(), 
+            robot.getTurret(), 
+            robot.getShooterHood(), 
+            robot.getShooterRollers(), 
+            robot.getShooterFunctions(), 
+            () -> FieldPositions.HUB_CENTER, 
+            () -> Degrees.of(0), 
+            () -> DegreesPerSecond.of(0));
+
+    }
+    
+    public Command driveToStart() {
+        return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.START_POSITION, Rotation2d.kZero));
+    }
 
   public Rotation2d orient() {
     if (robot.getSwerveDrive().getHeading().gt(Degrees.of(90))
@@ -24,11 +44,6 @@ public class AutoSegments {
     }
   }
 
-  public Command driveToStart() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.START_POSITION, Rotation2d.kZero));
-  }
 
   public Command driveToMiddleAlliance() {
     return robot.getSwerveDrive().driveTo(FieldPositions.ALLIANCE_ZONE_CENTER);
@@ -69,6 +84,9 @@ public class AutoSegments {
         .getSwerveDrive()
         .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient()));
   }
+    public Command shootUntilEmpty(){
+        return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
+    }
 
   public Command driveToHub() {
     return robot.getSwerveDrive().driveTo(FieldPositions.HUB_FRONT);

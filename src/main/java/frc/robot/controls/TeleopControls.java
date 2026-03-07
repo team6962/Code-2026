@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.commands.CommandUtil;
-import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
-import frc.robot.auto.DriveToClump;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.climb.ClimbConstants;
@@ -36,20 +34,18 @@ import frc.robot.subsystems.turret.TurretConstants;
 public class TeleopControls {
   private RobotContainer robot;
   private AutoClimb autoClimb;
-  private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
-  private double tunableHoodAngle = ShooterHoodConstants.MIN_ANGLE.in(Degrees);
+  private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     this.autoClimb = new AutoClimb(robot);
-    this.driveToClump = new DriveToClump(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -154,7 +150,7 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    driver.start().whileTrue(driveToClump.driveToClump());
+    // driver.start().whileTrue(driveToClump.driveToClump());
 
     // Intake without driving - WORKS
     driver
@@ -187,7 +183,7 @@ public class TeleopControls {
                 .ignoringDisable(true));
 
     // Shoot - WORKS
-    operator.rightTrigger().whileTrue(robot.getHopper().feedPulsing());
+    operator.rightTrigger().whileTrue(robot.getHopper().feed());
 
     // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
@@ -302,48 +298,34 @@ public class TeleopControls {
 
     autoshootTrigger.whileTrue(autoShoot);
 
-    operator
-        .leftStick()
-        .and(autoShoot.isReadyToShoot())
-        .whileTrue(robot.getHopper().feedSynchronized());
+    operator.leftStick().and(autoShoot.isReadyToShoot()).whileTrue(robot.getHopper().feed());
 
     ShooterFunctions functions = robot.getShooterFunctions();
 
     driver
         .a()
         .whileTrue(
-            LoggingUtil.logCommand(
-                "TestShoot/BaseCommand",
-                Commands.parallel(
-                    LoggingUtil.logCommand(
-                        "TestShoot/MoveHood",
-                        robot
-                            .getShooterRollers()
-                            .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance))),
-                    LoggingUtil.logCommand(
-                        "TestShoot/SpinRollers",
-                        robot
-                            .getShooterHood()
-                            .moveTo(() -> functions.getHoodAngle(shootingTestDistance))),
-                    Commands.sequence(
-                        LoggingUtil.logCommand(
-                            "TestShoot/Wait",
-                            Commands.waitUntil(
-                                () ->
-                                    robot
-                                            .getShooterRollers()
-                                            .getAngularVelocity()
-                                            .isNear(
-                                                functions.getFlywheelVelocity(shootingTestDistance),
-                                                RotationsPerSecond.of(1))
-                                        && robot
-                                            .getShooterHood()
-                                            .getPosition()
-                                            .isNear(
-                                                functions.getHoodAngle(shootingTestDistance),
-                                                Degrees.of(1)))),
-                        LoggingUtil.logCommand(
-                            "TestShoot/Feed", robot.getHopper().feedPulsing())))));
+            Commands.parallel(
+                robot
+                    .getShooterRollers()
+                    .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance)),
+                robot.getShooterHood().moveTo(() -> functions.getHoodAngle(shootingTestDistance)),
+                Commands.sequence(
+                    Commands.waitUntil(
+                        () ->
+                            robot
+                                    .getShooterRollers()
+                                    .getAngularVelocity()
+                                    .isNear(
+                                        functions.getFlywheelVelocity(shootingTestDistance),
+                                        RotationsPerSecond.of(1))
+                                && robot
+                                    .getShooterHood()
+                                    .getPosition()
+                                    .isNear(
+                                        functions.getHoodAngle(shootingTestDistance),
+                                        Degrees.of(1))),
+                    robot.getHopper().feed())));
   }
 
   private Command rumble(

@@ -25,10 +25,16 @@ public class FieldPositions {
         new Translation2d(
             Inches.of(248.61).in(Meters), // original pos = 198.61
             Inches.of(292.76).in(Meters));
-  }
 
-  public static final Translation2d NEUTRAL_ZONE_CENTER =
-      new Translation2d(Inches.of(325.61).in(Meters), Inches.of(158.84).in(Meters));
-  public static final Translation2d HUB_FRONT =
-      new Translation2d(Inches.of(158.84).in(Meters), Inches.of(123.61).in(Meters));
+    }
+    
+    public static final Translation2d NEUTRAL_ZONE_CENTER = new Translation2d(
+        Inches.of(325.61).in(Meters),
+        Inches.of(158.84).in(Meters));
+    public static final Translation2d HUB_FRONT = new Translation2d( // These are suspicious, should be double checked
+        Inches.of(158.84).in(Meters),
+        Inches.of(123.61).in(Meters));
+    public static final Translation2d HUB_CENTER = new Translation2d( // These are suspicious, should be double checked
+        Inches.of(182.11).in(Meters),
+        Inches.of(158.84).in(Meters));
 }
