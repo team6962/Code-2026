@@ -2,41 +2,42 @@ package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class FieldPositions {
-    public static final Translation2d START_POSITION = new Translation2d(0, 0); // dummy start pose
-    public static final Translation2d ALLIANCE_ZONE_CENTER = new Translation2d(
-        Inches.of(91.055).in(Meters),
-        Inches.of(158.84).in(Meters));
+  public static final Translation2d START_POSITION = new Translation2d(0, 0); // dummy start pose
+  public static final Translation2d ALLIANCE_ZONE_CENTER =
+      new Translation2d(Inches.of(91.055).in(Meters), Inches.of(158.84).in(Meters));
 
-    public static class Trench {
-        //drive to trench on alliance side
-        public static final Translation2d RIGHT_ALLIANCE = new Translation2d( //tune all of these values while testing. I will probably add a rotation like kzero so everything is aligned
-            Inches.of(125.61).in(Meters), //original = 165.61
+  public static class Trench {
+    // drive to trench on alliance side
+    public static final Translation2d RIGHT_ALLIANCE =
+        new Translation2d( // tune all of these values while testing. I will probably add a rotation
+            // like kzero so everything is aligned
+            Inches.of(125.61).in(Meters), // original = 165.61
             Inches.of(24.92).in(Meters));
-        public static final Translation2d LEFT_ALLIANCE = new Translation2d(
-            Inches.of(125.61).in(Meters),
+    public static final Translation2d LEFT_ALLIANCE =
+        new Translation2d(Inches.of(125.61).in(Meters), Inches.of(292.76).in(Meters));
+    // drive to trench on neutral side
+    public static final Translation2d RIGHT_NEUTRAL =
+        new Translation2d(Inches.of(238.61).in(Meters), Inches.of(24.92).in(Meters));
+    public static final Translation2d LEFT_NEUTRAL =
+        new Translation2d(
+            Inches.of(238.61).in(Meters), // original pos = 198.61
             Inches.of(292.76).in(Meters));
-        //drive to trench on neutral side
-        public static final Translation2d RIGHT_NEUTRAL = new Translation2d(
-            Inches.of(238.61).in(Meters),
-            Inches.of(24.92).in(Meters));
-        public static final Translation2d LEFT_NEUTRAL = new Translation2d(
-            Inches.of(238.61).in(Meters), //original pos = 198.61
-            Inches.of(292.76).in(Meters));
-    }
-    
-    public static final Translation2d NEUTRAL_ZONE_CENTER = new Translation2d(
-        Inches.of(325.61).in(Meters),
-        Inches.of(158.84).in(Meters));
-    public static final Translation2d HUB_FRONT = new Translation2d( // These are suspicious, should be double checked
-        Inches.of(123.61).in(Meters),
-        Inches.of(158.84).in(Meters));
-    public static final Translation2d HUB_CENTER = new Translation2d( // These are suspicious, should be double checked
-        Inches.of(182.11).in(Meters),
-        Inches.of(158.84).in(Meters));
+  }
+
+  public static final Translation2d NEUTRAL_ZONE_CENTER =
+      new Translation2d(Inches.of(325.61).in(Meters), Inches.of(158.84).in(Meters));
+  public static final Translation2d HUB_FRONT =
+      new Translation2d( // These are suspicious, should be double checked
+          Inches.of(123.61).in(Meters), Inches.of(158.84).in(Meters));
+  public static final Translation2d HUB_CENTER =
+      new Translation2d( // These are suspicious, should be double checked
+          Inches.of(182.11).in(Meters), Inches.of(158.84).in(Meters));
+  public static final Pose2d Depot = new Pose2d(0.6, 0.65, new Rotation2d(Radians.of(0)));
 }
