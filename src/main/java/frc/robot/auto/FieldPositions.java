@@ -21,9 +21,23 @@ public class FieldPositions {
             Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_ALLIANCE =
         new Translation2d(Inches.of(115.61).in(Meters), Inches.of(292.76).in(Meters));
-    // drive to trench on neutral side
     public static final Translation2d RIGHT_NEUTRAL =
         new Translation2d(Inches.of(248.61).in(Meters), Inches.of(24.92).in(Meters));
+    public static final Translation2d LEFT_NEUTRAL =
+        new Translation2d(
+            Inches.of(248.61).in(Meters), // original pos = 198.61
+            Inches.of(292.76).in(Meters));
+  }
+  public static
+  class Bump {
+    public static final Translation2d RIGHT_ALLIANCE =
+        new Translation2d(
+            Inches.of(115.61).in(Meters), // original = 165.61
+            Inches.of(98.85).in(Meters));
+    public static final Translation2d LEFT_ALLIANCE =
+        new Translation2d(Inches.of(115.61).in(Meters), Inches.of(292.76).in(Meters));
+    public static final Translation2d RIGHT_NEUTRAL =
+        new Translation2d(Inches.of(248.61).in(Meters), Inches.of(98.85).in(Meters));
     public static final Translation2d LEFT_NEUTRAL =
         new Translation2d(
             Inches.of(248.61).in(Meters), // original pos = 198.61
