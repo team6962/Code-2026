@@ -26,6 +26,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
@@ -87,6 +88,84 @@ public class AutoShoot extends Command {
 
   /** The last time that periodic() was executed. */
   private double previousPeriodicTimestamp = -1.0;
+
+  /**
+   * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
+   * shoot at the hub.
+   *
+   * @param robot the RobotContainer
+   */
+  public AutoShoot(RobotContainer robot) {
+    this(
+        robot.getSwerveDrive(),
+        robot.getTurret(),
+        robot.getShooterHood(),
+        robot.getShooterRollers(),
+        robot.getShooterFunctions());
+  }
+
+  /**
+   * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
+   * shoot at the hub.
+   *
+   * @param swerveDrive the swerve drive
+   * @param turret the turret
+   * @param hood the hood
+   * @param rollers the shooter rollers
+   */
+  public AutoShoot(
+      CommandSwerveDrive swerveDrive,
+      Turret turret,
+      ShooterHood hood,
+      ShooterRollers rollers,
+      ShooterFunctions shooterFunctions) {
+    this(swerveDrive, turret, hood, rollers, shooterFunctions, () -> HUB_TRANSLATION);
+  }
+
+  /**
+   * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
+   * shoot at the hub.
+   *
+   * @param robot the RobotContainer
+   * @param targetSupplier a supplier that provides the target position in 3D space
+   */
+  public AutoShoot(RobotContainer robot, Supplier<Translation2d> targetSupplier) {
+    this(
+        robot.getSwerveDrive(),
+        robot.getTurret(),
+        robot.getShooterHood(),
+        robot.getShooterRollers(),
+        robot.getShooterFunctions(),
+        targetSupplier);
+  }
+
+  /**
+   * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
+   * shoot at a target.
+   *
+   * @param swerveDrive the swerve drive
+   * @param turret the turret
+   * @param hood the hood
+   * @param rollers the shooter rollers
+   * @param targetSupplier a supplier that provides the target position in 3D space
+   */
+  public AutoShoot(
+      CommandSwerveDrive swerveDrive,
+      Turret turret,
+      ShooterHood hood,
+      ShooterRollers rollers,
+      ShooterFunctions shooterFunctions,
+      Supplier<Translation2d> targetSupplier) {
+    this(
+        swerveDrive,
+        turret,
+        hood,
+        rollers,
+        shooterFunctions,
+        targetSupplier,
+        () -> null,
+        () -> null);
+  }
 
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
