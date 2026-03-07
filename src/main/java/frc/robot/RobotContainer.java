@@ -144,7 +144,7 @@ public class RobotContainer {
     // return autoChooser.getSelected();
 
     // Use this to test autonomous segments for now
-    return Commands.sequence(autoSegments.collectFuelViaLeftTrenchSequence());
+    return Commands.sequence(autoSegments.collectFuelCrossingViaRightTrench());
   }
 
   public void periodic() {
