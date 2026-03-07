@@ -216,10 +216,11 @@ public class TranslationController {
    *
    * @param currentPosition The current translation of the system
    * @param currentVelocity The current translational velocity of the system
+   * @param lookahead The lookahead time in seconds to use for calculating the target velocity.
    * @return The target translational velocity for the system
    */
   public TranslationalVelocity calculate(
-      Translation2d currentPosition, TranslationalVelocity currentVelocity) {
+      Translation2d currentPosition, TranslationalVelocity currentVelocity, double lookahead) {
     // Convert the current position to path-relative coordinates
     Matrix<N3, N3> fieldToPathPositionMatrix = getFieldToPathMatrix(initialPosition, goalPosition);
 
@@ -236,8 +237,8 @@ public class TranslationController {
 
     // Calculate the target velocity in path-relative coordinates
     Vector<N2> pathRelativeTargetVelocity =
-        calculatePathCoordinates(pathRelativeCurrentPosition, pathRelativeCurrentVelocity);
-
+        calculatePathCoordinates(
+            pathRelativeCurrentPosition, pathRelativeCurrentVelocity, lookahead);
     // Convert the target velocity back to field-relative coordinates
     Matrix<N2, N2> pathToFieldVelocityMatrix =
         MatrixUtil.toMatrix2x2(getPathToFieldMatrix(initialPosition, goalPosition));
@@ -254,22 +255,24 @@ public class TranslationController {
    *
    * @param currentPosition The current position in path-relative coordinates
    * @param currentVelocity The current velocity in path-relative coordinates
+   * @param lookahead The lookahead time in seconds to use for calculating the target velocity.
    * @return The target velocity in path-relative coordinates
    */
   private Vector<N2> calculatePathCoordinates(
-      Vector<?> currentPosition, Vector<?> currentVelocity) {
+      Vector<?> currentPosition, Vector<?> currentVelocity, double lookahead) {
     // Use the trapezoidal controllers to calculate target velocities
     // along each axis
     double directTargetVelocity =
         directController.calculate(
             new MotionProfile.State(
-                Meters.of(currentPosition.get(0)).in(Meters), currentVelocity.get(0)));
+                Meters.of(currentPosition.get(0)).in(Meters), currentVelocity.get(0)),
+            lookahead);
 
     double strafeTargetVelocity =
         strafeController.calculate(
             new MotionProfile.State(
-                Meters.of(currentPosition.get(1)).in(Meters), currentVelocity.get(1)));
-
+                Meters.of(currentPosition.get(1)).in(Meters), currentVelocity.get(1)),
+            lookahead);
     return new TranslationalVelocity(directTargetVelocity, strafeTargetVelocity).toVector();
   }
 

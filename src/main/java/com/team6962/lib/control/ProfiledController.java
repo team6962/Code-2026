@@ -158,7 +158,21 @@ public class ProfiledController {
    * @return The desired velocity that will cause the system to follow the motion profile
    */
   public double calculate(MotionProfile.State currentState) {
-    double realTime = Timer.getFPGATimestamp() - startTime;
+    return calculate(currentState, 0);
+  }
+
+  /**
+   * Calculates the desired velocity at the current time, given the current state of the system and
+   * a lookahead time.
+   *
+   * @param currentState The current state of the system
+   * @param lookahead The amount of time in seconds to look ahead when calculating the desired
+   *     velocity. This can be used to account for latency in the system or to create a more
+   *     aggressive control response.
+   * @return The desired velocity that will cause the system to follow the motion profile
+   */
+  public double calculate(MotionProfile.State currentState, double lookahead) {
+    double realTime = Timer.getFPGATimestamp() - startTime + lookahead;
 
     if (realTime > getDuration()) {
       if (goalState.velocity != 0) {

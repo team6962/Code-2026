@@ -191,11 +191,16 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             baseConstants
                 .Driving
                 .clone()
-                .withMaxLinearVelocity(MetersPerSecond.of(4)) // 3.5 works well in auto
-                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5)) //  3 works well in auto
+                .withMaxLinearVelocity(MetersPerSecond.of(4))
+                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
-                .withMaxAngularAcceleration(
-                    RotationsPerSecondPerSecond.of(1)) // 0.5 works well in auto
+                .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
+                .withAutoLinearVelocity(MetersPerSecond.of(3.5))
+                .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
+                .withAutoAngularVelocity(RotationsPerSecond.of(1))
+                .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
+                .withAutoLinearAccelerationScalar(0.03)
+                .withAutoAngularAccelerationScalar(0.03)
                 .withTranslationFeedbackKP(0.25) // Not tuned
                 .withTranslationFeedbackKD(0.0) // Not tuned
                 .withAngleFeedbackKP(0.1) // Not tuned
