@@ -31,8 +31,9 @@ public class AutoSegments {
   }
 
   public Rotation2d orient() {
-    if (robot.getSwerveDrive().getHeading().gt(Degrees.of(90))
-        && robot.getSwerveDrive().getHeading().lt(Degrees.of(270))) {
+    double headingDegrees = robot.getSwerveDrive().getHeading().in(Degrees) % 360.0;
+    if (headingDegrees < 0.0) headingDegrees += 360.0;
+    if (headingDegrees > 90.0 && headingDegrees < 270.0) {
       return Rotation2d.k180deg;
     } else {
       return Rotation2d.kZero;
@@ -107,35 +108,68 @@ public class AutoSegments {
   }
 
   public Command collectFuelFromMidline() {
-          return  Commands.parallel(
-                robot.getHopper().load(),
-                robot.getIntakeRollers().intake(),
-                robot.getIntakeExtension().extend())
-            .withDeadline(robot
-                    .getSwerveDrive()
-                    .driveTo(FieldPositions.NEUTRAL_ZONE_CENTER));
+    return Commands.parallel(
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend())
+        .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.NEUTRAL_ZONE_CENTER));
   }
 
   public Command collectFuelViaRightTrenchSequence() {
     return Commands.sequence(
-        driveThroughRightTrenchIntoNeutral(),
-        robot
-            .getSwerveDrive()
-            .driveTo(new Pose2d(Inches.of(313).in(Meters), Inches.of(60).in(Meters),  Rotation2d.fromDegrees(90))),
-        collectFuelFromMidline(),
+        Commands.deadline(
+            driveThroughRightTrenchIntoNeutral(),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(
+                        Inches.of(323).in(Meters), Inches.of(75).in(Meters), orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.parallel(
+                robot
+                    .getSwerveDrive()
+                    .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+                robot.getHopper().load(),
+                robot.getIntakeRollers().intake(),
+                robot.getIntakeExtension().extend())
+            .withTimeout(5) /* TODO: Test and adjust this! */,
+        robot.getIntakeExtension().retract(),
         driveThroughRightTrenchIntoAlliance());
   }
 
   public Command collectFuelViaLeftTrenchSequence() {
     return Commands.sequence(
-        driveThroughLeftTrenchIntoNeutral(),
-        robot
-            .getSwerveDrive()
-            .driveTo(new Pose2d(Inches.of(313).in(Meters), Inches.of(260).in(Meters), Rotation2d.fromDegrees(90))),
-        collectFuelFromMidline(),
-        driveThroughRightTrenchIntoAlliance());
+        Commands.deadline(
+            driveThroughLeftTrenchIntoNeutral(),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(
+                        Inches.of(323).in(Meters), Inches.of(250).in(Meters), orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.parallel(
+                robot
+                    .getSwerveDrive()
+                    .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+                robot.getHopper().load(),
+                robot.getIntakeRollers().intake(),
+                robot.getIntakeExtension().extend())
+            .withTimeout(5) /* TODO: Test and adjust this! */,
+        robot.getIntakeExtension().retract(),
+        driveThroughLeftTrenchIntoAlliance());
   }
- /*Probably not going to be used */
+
+  /*Probably not going to be used */
   // public Command collectFuelInLeftNeutral() {
   //   return  Commands.parallel(
   //               robot
@@ -158,8 +192,20 @@ public class AutoSegments {
   //           .withDeadline(robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())));
   // }
 
+  public Command collectFuelInNeutral() {
+    return Commands.parallel(
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend())
+        .withTimeout(5) /* TODO: Test and adjust this! */;
+  }
+
   public Command shootUntilEmpty() {
-    return Commands.parallel(autoShoot(), robot.getHopper().feed()).until(() -> robot.getHopper().getSensors().isHopperEmpty());
+    return Commands.parallel(autoShoot(), robot.getHopper().feed())
+        .until(() -> robot.getHopper().getSensors().isHopperEmpty());
   }
 
   public Command driveToHub() {
@@ -204,6 +250,70 @@ public class AutoSegments {
         Commands.parallel(
             robot.getHopper().feed(),
             Commands.sequence(autoShoot().withTimeout(2.0), shootUntilEmpty())));
+  }
+
+  public Command collectFuelCrossingViaRightTrench() {
+    return Commands.sequence(
+        Commands.deadline(
+            driveThroughRightTrenchIntoNeutral(),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(
+                        Inches.of(323).in(Meters), Inches.of(75).in(Meters), orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.parallel(
+                robot
+                    .getSwerveDrive()
+                    .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                robot.getHopper().load(),
+                robot.getIntakeRollers().intake(),
+                robot.getIntakeExtension().extend())
+            .withTimeout(6), /* TODO: Test and adjust this! */
+        robot.getIntakeExtension().retract());
+  }
+
+  public Command collectFuelCrossingViaLeftTrench() {
+    return Commands.sequence(
+        Commands.deadline(
+            driveThroughLeftTrenchIntoNeutral(),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().extend()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(
+                        Inches.of(323).in(Meters), Inches.of(250).in(Meters), orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.deadline(
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+            robot.getHopper().load(),
+            robot.getIntakeRollers().intake()),
+        Commands.parallel(
+                robot
+                    .getSwerveDrive()
+                    .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                robot.getHopper().load(),
+                robot.getIntakeRollers().intake(),
+                robot.getIntakeExtension().extend())
+            .withTimeout(6), /* TODO: Test and adjust this! */
+        robot.getIntakeExtension().retract());
   }
 
   public Command testAuto() {

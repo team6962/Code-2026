@@ -16,9 +16,8 @@ public class IntakeRollersConstants {
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
-          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
+          .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(GEAR_RATIO))
-          // fake numbers end here
           .withSlot0(new Slot0Configs().withKP(0.02)) // needs to be tuned
           .withCurrentLimits(
               new CurrentLimitsConfigs()
