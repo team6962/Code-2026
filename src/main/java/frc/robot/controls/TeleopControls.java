@@ -2,14 +2,11 @@ package frc.robot.controls;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -129,7 +126,7 @@ public class TeleopControls {
     driver // Auto Drive to Outpost
         .rightBumper()
         .whileTrue(
-            this.robot.getSwerveDrive().driveTo(FieldPositions.Depot)); // also a rough estimate
+            this.robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST)); // also a rough estimate
 
     // Dump fuel - WORKS
     driver
