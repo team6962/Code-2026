@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;

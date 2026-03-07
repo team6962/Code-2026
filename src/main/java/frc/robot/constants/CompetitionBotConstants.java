@@ -194,7 +194,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withMaxLinearVelocity(MetersPerSecond.of(4)) // 3.5 works well in auto
                 .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5)) //  3 works well in auto
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
-                .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1)) // 0.5 works well in auto
+                .withMaxAngularAcceleration(
+                    RotationsPerSecondPerSecond.of(1)) // 0.5 works well in auto
                 .withTranslationFeedbackKP(0.25) // Not tuned
                 .withTranslationFeedbackKD(0.0) // Not tuned
                 .withAngleFeedbackKP(0.1) // Not tuned
