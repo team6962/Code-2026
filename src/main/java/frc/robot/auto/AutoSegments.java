@@ -51,59 +51,87 @@ public class AutoSegments {
    * drive to left trench from Neutral zone
    */
   public Command driveToLeftTrenchNeutral() {
-    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, orient()));
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to left trench from alliance zone
    */
   public Command driveToLeftTrenchAlliance() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Trench.LEFT_ALLIANCE, orient()));
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.Trench.LEFT_ALLIANCE, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to right trench from Neutral zone
    */
   public Command driveToRightTrenchNeutral() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, orient()));
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to right trench from alliance zone
    */
   public Command driveToRightTrenchAlliance() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient()));
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   public Command driveToLeftBumpNeutral() {
-    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_NEUTRAL, orient()));
+    return Commands.defer(
+        () ->
+            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_NEUTRAL, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to left Bump from alliance zone
    */
   public Command driveToLeftBumpAlliance() {
-    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()));
+    return Commands.defer(
+        () ->
+            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to right Bump from Neutral zone
    */
   public Command driveToRightBumpNeutral() {
-    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()));
+    return Commands.defer(
+        () ->
+            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   /*
    * drive to right Bump from alliance zone
    */
   public Command driveToRightBumpAlliance() {
-    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()));
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient())),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   public Command collectFuelFromMidline() {
@@ -173,17 +201,6 @@ public class AutoSegments {
   // Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())));
   // }
 
-  public Command collectFuelInNeutral() {
-    return Commands.parallel(
-            robot
-                .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
-            robot.getHopper().load(),
-            robot.getIntakeRollers().intake(),
-            robot.getIntakeExtension().extend())
-        .withTimeout(5) /* TODO: Test and adjust this! */;
-  }
-
   public Command shootUntilEmpty() {
     return Commands.parallel(autoShoot(), robot.getHopper().feed())
         .until(() -> robot.getHopper().isEmpty());
@@ -240,23 +257,32 @@ public class AutoSegments {
             robot.getIntakeRollers().intake(),
             robot.getIntakeExtension().extend()),
         Commands.deadline(
-            robot
-                .getSwerveDrive()
-                .driveTo(
-                    new Pose2d(
-                        Inches.of(323).in(Meters), Inches.of(75).in(Meters), orient())),
+            Commands.defer(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(
+                            new Pose2d(
+                                Inches.of(323).in(Meters), Inches.of(75).in(Meters), orient())),
+                robot.getSwerveDrive().useMotionSet()),
             robot.getHopper().load(),
             robot.getIntakeRollers().intake()),
         Commands.deadline(
-            robot
-                .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+            Commands.defer(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+                robot.getSwerveDrive().useMotionSet()),
             robot.getHopper().load(),
             robot.getIntakeRollers().intake()),
         Commands.parallel(
-                robot
-                    .getSwerveDrive()
-                    .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                Commands.defer(
+                    () ->
+                        robot
+                            .getSwerveDrive()
+                            .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                    robot.getSwerveDrive().useMotionSet()),
                 robot.getHopper().load(),
                 robot.getIntakeRollers().intake(),
                 robot.getIntakeExtension().extend())
@@ -272,23 +298,32 @@ public class AutoSegments {
             robot.getIntakeRollers().intake(),
             robot.getIntakeExtension().extend()),
         Commands.deadline(
-            robot
-                .getSwerveDrive()
-                .driveTo(
-                    new Pose2d(
-                        Inches.of(323).in(Meters), Inches.of(250).in(Meters), orient())),
+            Commands.defer(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(
+                            new Pose2d(
+                                Inches.of(323).in(Meters), Inches.of(250).in(Meters), orient())),
+                robot.getSwerveDrive().useMotionSet()),
             robot.getHopper().load(),
             robot.getIntakeRollers().intake()),
         Commands.deadline(
-            robot
-                .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+            Commands.defer(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())),
+                robot.getSwerveDrive().useMotionSet()),
             robot.getHopper().load(),
             robot.getIntakeRollers().intake()),
         Commands.parallel(
-                robot
-                    .getSwerveDrive()
-                    .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                Commands.defer(
+                    () ->
+                        robot
+                            .getSwerveDrive()
+                            .driveTo(new Pose2d(FieldPositions.ALLIANCE_ZONE_CENTER, orient())),
+                    robot.getSwerveDrive().useMotionSet()),
                 robot.getHopper().load(),
                 robot.getIntakeRollers().intake(),
                 robot.getIntakeExtension().extend())
