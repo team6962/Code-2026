@@ -2,6 +2,8 @@ package frc.robot.subsystems.shooterrollers;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -12,6 +14,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -21,7 +24,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
@@ -101,12 +103,11 @@ public class ShooterRollers extends SubsystemBase {
           if (getAngularVelocity()
               .plus(ShooterRollersConstants.BANG_BANG_TOLERANCE)
               .lt(targetVelocity.get())) {
-            shooterRollerMotor1.setControl(new DutyCycleOut(1).withEnableFOC(false));
+            shooterRollerMotor1.setControl(new DutyCycleOut(1));
           } else {
             // defines a local function to set motor voltage to make it go
             shooterRollerMotor1.setControl(
-                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond))
-                    .withEnableFOC(false));
+                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond)));
           }
         },
         () -> {

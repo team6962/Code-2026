@@ -43,7 +43,7 @@ public class TeleopControls {
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
-  private double tunableHoodAngle = ShooterHoodConstants.MIN_ANGLE.in(Degrees);
+  private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
   public TeleopControls(RobotContainer robot) {
@@ -187,7 +187,7 @@ public class TeleopControls {
                 .ignoringDisable(true));
 
     // Shoot - WORKS
-    operator.rightTrigger().whileTrue(robot.getHopper().feedPulsing());
+    operator.rightTrigger().whileTrue(robot.getHopper().feedSynchronizedWithoutUnjam());
 
     // Pass fuel to alliance zone
     operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start

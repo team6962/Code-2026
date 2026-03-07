@@ -30,8 +30,8 @@ public final class ShooterRollersConstants {
           .withFeedback(new FeedbackConfigs())
           .withSlot0(
               new Slot0Configs()
-                  .withKV(0.12)
-                  .withKS(RobotBase.isSimulation() ? 0 : 0.423)
+                  .withKV(0.124137931)
+                  .withKS(RobotBase.isSimulation() ? 0 : 0.0)
                   .withKP(0.1)) // kS should not exist when in simulation
           .withCurrentLimits(
               new CurrentLimitsConfigs()

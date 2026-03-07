@@ -275,7 +275,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Degrees.of(-26.25).in(Radians),
                         -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
-        .withSingleTagStdDevs(VecBuilder.fill(0.3, 0.3, 0.3, 1.5))
+        .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
         .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
         .withCameraSimProperties(
             new SimCameraProperties()
