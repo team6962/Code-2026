@@ -56,7 +56,7 @@ public class AutoSegments {
    * drive to left trench from Neutral zone
    */
   public Command driveToLeftTrenchNeutral() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, orient()));
   }
 
   /*
@@ -72,7 +72,9 @@ public class AutoSegments {
    * drive to right trench from Neutral zone
    */
   public Command driveToRightTrenchNeutral() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL);
+    return robot
+        .getSwerveDrive()
+        .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, orient()));
   }
 
   /*
