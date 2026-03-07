@@ -32,8 +32,8 @@ public class FieldPositions {
         Inches.of(325.61).in(Meters),
         Inches.of(158.84).in(Meters));
     public static final Translation2d HUB_FRONT = new Translation2d( // These are suspicious, should be double checked
-        Inches.of(158.84).in(Meters),
-        Inches.of(123.61).in(Meters));
+        Inches.of(123.61).in(Meters),
+        Inches.of(158.84).in(Meters));
     public static final Translation2d HUB_CENTER = new Translation2d( // These are suspicious, should be double checked
         Inches.of(182.11).in(Meters),
         Inches.of(158.84).in(Meters));
