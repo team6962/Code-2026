@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 
 public class AutoSegments {
@@ -29,6 +30,13 @@ public class AutoSegments {
     }
 
     /*
+     * drive to left trench from Neutral zone
+     */
+    public Command driveToLeftTrenchNeutral(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
+    }
+
+    /*
      * drive to left trench from alliance zone
      */
     public Command driveToLeftTrenchAlliance(){
@@ -36,10 +44,10 @@ public class AutoSegments {
     }
 
     /*
-     * drive to left trench from neutral zone
+     * drive to right trench from Neutral zone
      */
-    public Command driveToLeftTrenchNeutral(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
+    public Command driveToRightTrenchNeutral(){
+        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL);
     }
 
     /*
@@ -49,14 +57,35 @@ public class AutoSegments {
         return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_ALLIANCE);
     }
 
-    /*
-     * drive to right trench from neutral zone
-     */
-    public Command driveToRightTrenchNeutral(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL);
-    }
-
     public Command driveToHub(){
         return robot.getSwerveDrive().driveTo(FieldPositions.HUB_CENTER);
     }
+
+    public Command driveThroughRightTrenchIntoAlliance() {
+        return Commands.sequence(
+            driveToRightTrenchNeutral(),
+            driveToRightTrenchAlliance()
+        );
+    }
+
+    public Command driveThroughRightTrenchIntoNeutral() {
+        return Commands.sequence(
+            driveToRightTrenchAlliance(),
+            driveToRightTrenchNeutral()
+        );
+    }
+
+    public Command driveThroughLeftTrenchIntoNeutral() { // ??
+        return Commands.sequence(
+            driveToLeftTrenchAlliance(),
+            driveToLeftTrenchNeutral()
+        );
+    }
+
+    public Command driveThroughLeftTrenchIntoAlliance() { //??
+        return Commands.sequence(
+            driveToLeftTrenchNeutral(),
+            driveToLeftTrenchAlliance()
+        );
+    }    
 }
