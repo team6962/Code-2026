@@ -148,9 +148,7 @@ public class RobotContainer {
         autoSegments.driveToLeftBumpAlliance(),
         autoSegments.driveToMiddleAlliance(),
         autoSegments.driveToRightBumpAlliance(),
-        autoSegments.driveToRightBumpNeutral()
-        
-    );
+        autoSegments.driveToRightBumpNeutral());
   }
 
   public void periodic() {

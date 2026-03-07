@@ -94,27 +94,21 @@ public class AutoSegments {
    * drive to left Bump from alliance zone
    */
   public Command driveToLeftBumpAlliance() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()));
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()));
   }
 
   /*
    * drive to right Bump from Neutral zone
    */
   public Command driveToRightBumpNeutral() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()));
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()));
   }
 
   /*
    * drive to right Bump from alliance zone
    */
   public Command driveToRightBumpAlliance() {
-    return robot
-        .getSwerveDrive()
-        .driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()));
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()));
   }
 
   public Command shootUntilEmpty() {
