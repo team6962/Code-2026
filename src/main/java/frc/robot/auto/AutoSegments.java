@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.auto.shoot.AutoShoot;
+import frc.robot.subsystems.hopper.kicker.Kicker;
 
 public class AutoSegments {
   private RobotContainer robot;
@@ -158,7 +159,7 @@ public class AutoSegments {
   // }
 
   public Command shootUntilEmpty() {
-    return autoShoot().until(() -> robot.getHopper().getSensors().isHopperEmpty());
+    return Commands.parallel(autoShoot(), robot.getHopper().feed()).until(() -> robot.getHopper().getSensors().isHopperEmpty());
   }
 
   public Command driveToHub() {
