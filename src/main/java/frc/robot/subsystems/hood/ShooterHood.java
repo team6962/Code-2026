@@ -57,11 +57,15 @@ public class ShooterHood extends SubsystemBase {
   private boolean isZeroed = false;
   private double kG = ShooterHoodConstants.kG;
 
+  private Supplier<Boolean> shouldLowerHoodSupplier;
+
   /** Initializes the motor and status signal */
-  public ShooterHood() {
+  public ShooterHood(Supplier<Boolean> shouldLowerHoodSupplier) {
     hoodMotor =
         new TalonFX(ShooterHoodConstants.MOTOR_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
     candi = new CANdi(ShooterHoodConstants.CANDI_CAN_ID, new CANBus(ShooterHoodConstants.CANBUS));
+
+    this.shouldLowerHoodSupplier = shouldLowerHoodSupplier;
 
     if (RobotBase.isSimulation()) {
       ShooterHoodConstants.MOTOR_CONFIGURATION.Slot0.kP = 80.0;
@@ -215,6 +219,7 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
     DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
+    DogLog.log("Hood/ShouldBeLowered", shouldLowerHoodSupplier.get());
     DogLog.log("Hood/IsZeroed", isZeroed);
     DogLog.log(
         "Hood/ProfileReferenceAngle",
@@ -232,6 +237,12 @@ public class ShooterHood extends SubsystemBase {
     if (isHallSensorTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
+    }
+
+    // Automatically lower the hood all the way when near a trench
+    if (shouldLowerHoodSupplier.get()) {
+      System.out.println("hi charlize it works but it deosnt so thats very sad");
+      moveTo(ShooterHoodConstants.MIN_ANGLE);
     }
   }
 
@@ -323,6 +334,7 @@ public class ShooterHood extends SubsystemBase {
    * @return the command that moves to the target angle
    */
   public Command moveTo(Angle targetAngle) {
+
     Angle clampedAngle = clampPositionToSafeRange(targetAngle);
 
     DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
