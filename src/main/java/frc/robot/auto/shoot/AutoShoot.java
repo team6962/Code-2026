@@ -35,7 +35,7 @@ import org.apache.commons.math3.util.Pair;
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
   public static Translation2d HUB_TRANSLATION =
-      new Translation2d(4.62562575, 4.03463125); // Measured with CAD
+      new Translation2d(4.62403825, 4.03463125); // Measured with CAD
 
   /**
    * The swerve drive subsystem, used to get the shooter's pose and velocity for calculating

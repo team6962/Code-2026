@@ -194,6 +194,12 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
           basePath + "TargetAngularVelocity",
           RotationsPerSecond.of(velocityControl.Velocity).in(RadiansPerSecond),
           RadiansPerSecond);
+      DogLog.log(
+          basePath + "TargetVelocity",
+          WheelMath.toLinear(
+                  RotationsPerSecond.of(velocityControl.Velocity), constants.getWheelRadius(corner))
+              .in(MetersPerSecond),
+          MetersPerSecond);
     }
 
     if (!constants.Timing.MinimizeLogging) {
