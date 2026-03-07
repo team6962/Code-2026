@@ -55,6 +55,18 @@ public class DrivingConstants implements Cloneable {
   /** The maximum angular acceleration the swerve drive can achieve. */
   public AngularAcceleration MaxAngularAcceleration;
 
+  /** The maximum linear velocity used for autonomous. */
+  public LinearVelocity AutoLinearVelocity;
+
+  /** The maximum linear acceleration used for autonomous. */
+  public LinearAcceleration AutoLinearAcceleration;
+
+  /** The maximum angular velocity used for autonomous. */
+  public AngularVelocity AutoAngularVelocity;
+
+  /** The maximum angular acceleration used for autonomous. */
+  public AngularAcceleration AutoAngularAcceleration;
+
   /**
    * Sets the precise drive velocity.
    *
@@ -188,26 +200,70 @@ public class DrivingConstants implements Cloneable {
   }
 
   /**
+   * Sets the maximum linear velocity for autonomous mode.
+   *
+   * @param velocity The maximum linear velocity for autonomous mode
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoLinearVelocity(LinearVelocity velocity) {
+    this.AutoLinearVelocity = velocity;
+    return this;
+  }
+
+  /**
+   * Sets the maximum linear acceleration for autonomous mode.
+   *
+   * @param acceleration The maximum linear acceleration for autonomous mode
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoLinearAcceleration(LinearAcceleration acceleration) {
+    this.AutoLinearAcceleration = acceleration;
+    return this;
+  }
+
+  /**
+   * Sets the maximum angular velocity for autonomous mode.
+   *
+   * @param velocity The maximum angular velocity for autonomous mode
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoAngularVelocity(AngularVelocity velocity) {
+    this.AutoAngularVelocity = velocity;
+    return this;
+  }
+
+  /**
+   * Sets the maximum angular acceleration for autonomous mode.
+   *
+   * @param acceleration The maximum angular acceleration for autonomous mode
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoAngularAcceleration(AngularAcceleration acceleration) {
+    this.AutoAngularAcceleration = acceleration;
+    return this;
+  }
+
+  /**
    * Creates a {@link TrapezoidProfile.Constraints} object for translational motion based on the
-   * configured maximum linear velocity and acceleration.
+   * configured maximum linear velocity and acceleration for autonomous mode.
    *
    * @return The translation constraints for trajectory generation
    */
   public TrapezoidProfile.Constraints getTranslationConstraints() {
     return new TrapezoidProfile.Constraints(
-        MaxLinearVelocity.in(MetersPerSecond), MaxLinearAcceleration.in(MetersPerSecondPerSecond));
+        AutoLinearVelocity.in(MetersPerSecond), AutoLinearAcceleration.in(MetersPerSecondPerSecond));
   }
 
   /**
    * Creates a {@link TrapezoidProfile.Constraints} object for rotational motion based on the
-   * configured maximum angular velocity and acceleration.
+   * configured maximum angular velocity and acceleration for autonomous mode.
    *
    * @return The rotation constraints for trajectory generation
    */
   public TrapezoidProfile.Constraints getRotationConstraints() {
     return new TrapezoidProfile.Constraints(
-        MaxAngularVelocity.in(RadiansPerSecond),
-        MaxAngularAcceleration.in(RadiansPerSecondPerSecond));
+        AutoAngularVelocity.in(RadiansPerSecond),
+        AutoAngularAcceleration.in(RadiansPerSecondPerSecond));
   }
 
   @Override
