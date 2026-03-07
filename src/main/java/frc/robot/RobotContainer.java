@@ -142,14 +142,13 @@ public class RobotContainer {
 
     // Use this to test autonomous segments for now
     return Commands.sequence(
-      autoSegments.driveToMiddleAlliance(),
-      autoSegments.driveToLeftTrenchAlliance(),
-      autoSegments.driveToLeftTrenchNeutral(),
-      autoSegments.driveToMiddleNeutral(),
-      autoSegments.driveToRightTrenchNeutral(),
-      autoSegments.driveToRightTrenchAlliance(),
-      autoSegments.driveToHub()
-    );
+        autoSegments.driveToMiddleAlliance(),
+        autoSegments.driveToLeftTrenchAlliance(),
+        autoSegments.driveToLeftTrenchNeutral(),
+        autoSegments.driveToMiddleNeutral(),
+        autoSegments.driveToRightTrenchNeutral(),
+        autoSegments.driveToRightTrenchAlliance(),
+        autoSegments.driveToHub());
   }
 
   public void periodic() {

@@ -35,6 +35,15 @@ public class AutoSegments {
         .driveTo(new Pose2d(FieldPositions.START_POSITION, Rotation2d.kZero));
   }
 
+  public Rotation2d orient() {
+    if (robot.getSwerveDrive().getHeading().gt(Degrees.of(90))
+        && robot.getSwerveDrive().getHeading().lt(Degrees.of(270))) {
+      return Rotation2d.k180deg;
+    } else {
+      return Rotation2d.kZero;
+    }
+  }
+
   public Command driveToMiddleAlliance() {
     return robot.getSwerveDrive().driveTo(FieldPositions.ALLIANCE_ZONE_CENTER);
   }
@@ -47,36 +56,42 @@ public class AutoSegments {
    * drive to left trench from Neutral zone
    */
   public Command driveToLeftTrenchNeutral() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL);
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, orient()));
   }
 
   /*
    * drive to left trench from alliance zone
    */
   public Command driveToLeftTrenchAlliance() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_ALLIANCE);
+    return robot
+        .getSwerveDrive()
+        .driveTo(new Pose2d(FieldPositions.Trench.LEFT_ALLIANCE, orient()));
   }
 
   /*
    * drive to right trench from Neutral zone
    */
   public Command driveToRightTrenchNeutral() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL);
+    return robot
+        .getSwerveDrive()
+        .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, orient()));
   }
 
   /*
    * drive to right trench from alliance zone
    */
   public Command driveToRightTrenchAlliance() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_ALLIANCE);
-  }
-
-  public Command driveToHub() {
-    return robot.getSwerveDrive().driveTo(FieldPositions.HUB_FRONT);
+    return robot
+        .getSwerveDrive()
+        .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient()));
   }
 
   public Command shootUntilEmpty() {
     return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
+  }
+
+  public Command driveToHub() {
+    return robot.getSwerveDrive().driveTo(FieldPositions.HUB_FRONT);
   }
 
   public Command driveThroughRightTrenchIntoAlliance() {
@@ -95,11 +110,16 @@ public class AutoSegments {
     return Commands.sequence(driveToLeftTrenchNeutral(), driveToLeftTrenchAlliance());
   }
 
-  public Command driveToOutpost() {
+  public Command autoDepot() {
     return Commands.sequence(
-        robot.getSwerveDrive().driveTo(FieldPositions.Depot),
+        this.robot
+            .getSwerveDrive()
+            .driveTo(
+                FieldPositions.DEPOT_OUTSIDE), // rough position estimate based on simulation, not
+        // exact
+        this.robot.getIntakeExtension().extend(),
         Commands.parallel(
-            robot.getHopper().feed(),
-            Commands.sequence(autoShoot.withTimeout(2.0), shootUntilEmpty())));
+            this.robot.getSwerveDrive().driveTo(FieldPositions.DEPOT_INSIDE), // also rough estimate
+            this.robot.getIntakeRollers().intake()));
   }
 }

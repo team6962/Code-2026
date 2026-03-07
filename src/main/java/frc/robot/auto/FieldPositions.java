@@ -13,21 +13,20 @@ public class FieldPositions {
   public static final Translation2d ALLIANCE_ZONE_CENTER =
       new Translation2d(Inches.of(91.055).in(Meters), Inches.of(158.84).in(Meters));
 
-  public static class Trench {
-    // drive to trench on alliance side
+  public static
+  class Trench { // values need to be tuned and need to check if in alliance or neutral zone
     public static final Translation2d RIGHT_ALLIANCE =
-        new Translation2d( // tune all of these values while testing. I will probably add a rotation
-            // like kzero so everything is aligned
-            Inches.of(125.61).in(Meters), // original = 165.61
+        new Translation2d(
+            Inches.of(115.61).in(Meters), // original = 165.61
             Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_ALLIANCE =
-        new Translation2d(Inches.of(125.61).in(Meters), Inches.of(292.76).in(Meters));
+        new Translation2d(Inches.of(115.61).in(Meters), Inches.of(292.76).in(Meters));
     // drive to trench on neutral side
     public static final Translation2d RIGHT_NEUTRAL =
-        new Translation2d(Inches.of(238.61).in(Meters), Inches.of(24.92).in(Meters));
+        new Translation2d(Inches.of(248.61).in(Meters), Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_NEUTRAL =
         new Translation2d(
-            Inches.of(238.61).in(Meters), // original pos = 198.61
+            Inches.of(248.61).in(Meters), // original pos = 198.61
             Inches.of(292.76).in(Meters));
   }
 
@@ -35,9 +34,11 @@ public class FieldPositions {
       new Translation2d(Inches.of(325.61).in(Meters), Inches.of(158.84).in(Meters));
   public static final Translation2d HUB_FRONT =
       new Translation2d( // These are suspicious, should be double checked
-          Inches.of(123.61).in(Meters), Inches.of(158.84).in(Meters));
+          Inches.of(158.84).in(Meters), Inches.of(123.61).in(Meters));
   public static final Translation2d HUB_CENTER =
       new Translation2d( // These are suspicious, should be double checked
           Inches.of(182.11).in(Meters), Inches.of(158.84).in(Meters));
-  public static final Pose2d Depot = new Pose2d(0.6, 0.65, new Rotation2d(Radians.of(0)));
+  public static final Translation2d TOWER = new Translation2d(Inches.of(147.47), Inches.of(41.56));
+  public static final Pose2d DEPOT_OUTSIDE = new Pose2d(1.518, 5.947, Rotation2d.kZero);
+  public static final Pose2d DEPOT_INSIDE = new Pose2d(0.546, 5.947, Rotation2d.kZero);
 }
