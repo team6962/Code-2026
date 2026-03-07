@@ -108,7 +108,7 @@ public class RobotContainer {
         "Shoot Preload",
         Commands.parallel(
             getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
-            getHopper().feedPulsing(),
+            getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
