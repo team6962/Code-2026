@@ -199,6 +199,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
                 .withAutoAngularVelocity(RotationsPerSecond.of(1))
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
+                .withAutoLinearAccelerationScalar(0.03)
+                .withAutoAngularAccelerationScalar(0.03)
                 .withTranslationFeedbackKP(0.25) // Not tuned
                 .withTranslationFeedbackKD(0.0) // Not tuned
                 .withAngleFeedbackKP(0.1) // Not tuned

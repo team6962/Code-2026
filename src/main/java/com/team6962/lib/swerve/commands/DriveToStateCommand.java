@@ -3,6 +3,7 @@ package com.team6962.lib.swerve.commands;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.team6962.lib.control.MotionProfile;
 import com.team6962.lib.control.ProfiledController;
@@ -11,11 +12,14 @@ import com.team6962.lib.control.TrapezoidalProfile;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -232,11 +236,30 @@ public class DriveToStateCommand extends Command {
 
     // Calculate and apply velocity commands for translation and rotation
     if (translationController != null) {
-      TranslationalVelocity outputTranslationalVelocity =
+      TranslationalVelocity currentTranslationalVelocity =
           translationController.calculate(
-              swerveDrive.getPosition2d().getTranslation(), swerveDrive.getTranslationalVelocity());
+              swerveDrive.getPosition2d().getTranslation(),
+              swerveDrive.getTranslationalVelocity(),
+              0);
 
-      swerveDrive.applyVelocityMotion(outputTranslationalVelocity);
+      TranslationalVelocity nextTranslationalVelocity =
+          translationController.calculate(
+              swerveDrive.getPosition2d().getTranslation(),
+              swerveDrive.getTranslationalVelocity(),
+              0.02);
+
+      Vector<N2> acceleration =
+          nextTranslationalVelocity
+              .toVector()
+              .minus(currentTranslationalVelocity.toVector())
+              .div(0.02);
+
+      currentTranslationalVelocity =
+          currentTranslationalVelocity.plus(
+              new TranslationalVelocity(acceleration)
+                  .times(swerveDrive.getConstants().Driving.AutoLinearAccelerationScalar));
+
+      swerveDrive.applyVelocityMotion(currentTranslationalVelocity);
 
       // Add translation to current target pose
       currentTarget =
@@ -245,14 +268,30 @@ public class DriveToStateCommand extends Command {
     }
 
     if (headingController != null) {
-      AngularVelocity outputAngularVelocity =
+      MotionProfile.State angularState =
+          new MotionProfile.State(
+              swerveDrive.getYaw().in(Radians), swerveDrive.getYawVelocity().in(RadiansPerSecond));
+
+      AngularVelocity currentAngularVelocity =
+          RadiansPerSecond.of(headingController.calculate(angularState));
+
+      AngularVelocity nextAngularVelocity =
           RadiansPerSecond.of(
               headingController.calculate(
                   new MotionProfile.State(
                       swerveDrive.getYaw().in(Radians),
-                      swerveDrive.getYawVelocity().in(RadiansPerSecond))));
+                      swerveDrive.getYawVelocity().in(RadiansPerSecond)),
+                  0.02));
 
-      swerveDrive.applyVelocityMotion(outputAngularVelocity);
+      AngularAcceleration angularAcceleration =
+          nextAngularVelocity.minus(currentAngularVelocity).div(Seconds.of(0.02));
+
+      currentAngularVelocity =
+          currentAngularVelocity.plus(
+              angularAcceleration.times(
+                  Seconds.of(swerveDrive.getConstants().Driving.AutoAngularAccelerationScalar)));
+
+      swerveDrive.applyVelocityMotion(currentAngularVelocity);
 
       // Add rotation to current target pose
       currentTarget =

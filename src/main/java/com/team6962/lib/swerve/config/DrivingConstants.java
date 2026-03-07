@@ -68,6 +68,20 @@ public class DrivingConstants implements Cloneable {
   public AngularAcceleration AutoAngularAcceleration;
 
   /**
+   * The autonomous driving attempts to maintain a translational velocity equal to the translation
+   * velocity in the motion profile plus the translational acceleration multiplied by this scalar.
+   * This helps the drivetrain stay on the motion profile when accelerating and decelerating.
+   */
+  public double AutoLinearAccelerationScalar;
+
+  /**
+   * The autonomous driving attempts to maintain an angular velocity equal to the angular velocity
+   * in the motion profile plus the angular acceleration multiplied by this scalar. This helps the
+   * drivetrain stay on the motion profile when accelerating and decelerating rotationally.
+   */
+  public double AutoAngularAccelerationScalar;
+
+  /**
    * Sets the precise drive velocity.
    *
    * @param velocity The maximum linear velocity in precise driving mode
@@ -240,6 +254,30 @@ public class DrivingConstants implements Cloneable {
    */
   public DrivingConstants withAutoAngularAcceleration(AngularAcceleration acceleration) {
     this.AutoAngularAcceleration = acceleration;
+    return this;
+  }
+
+  /**
+   * Sets the auto linear acceleration scalar.
+   *
+   * @param scalar The scalar to multiply the linear acceleration by when calculating target
+   *     velocity
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoLinearAccelerationScalar(double scalar) {
+    this.AutoLinearAccelerationScalar = scalar;
+    return this;
+  }
+
+  /**
+   * Sets the auto angular acceleration scalar.
+   *
+   * @param scalar The scalar to multiply the angular acceleration by when calculating target
+   *     velocity
+   * @return This instance for method chaining
+   */
+  public DrivingConstants withAutoAngularAccelerationScalar(double scalar) {
+    this.AutoAngularAccelerationScalar = scalar;
     return this;
   }
 
