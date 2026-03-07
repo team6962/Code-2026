@@ -86,6 +86,31 @@ public class AutoSegments {
         .driveTo(new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient()));
   }
 
+  public Command driveToLeftBumpNeutral() {
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_NEUTRAL, orient()));
+  }
+
+  /*
+   * drive to left Bump from alliance zone
+   */
+  public Command driveToLeftBumpAlliance() {
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()));
+  }
+
+  /*
+   * drive to right Bump from Neutral zone
+   */
+  public Command driveToRightBumpNeutral() {
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()));
+  }
+
+  /*
+   * drive to right Bump from alliance zone
+   */
+  public Command driveToRightBumpAlliance() {
+    return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()));
+  }
+
   public Command shootUntilEmpty() {
     return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
   }
