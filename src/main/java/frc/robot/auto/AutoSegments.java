@@ -57,6 +57,6 @@ public class AutoSegments {
     }
 
     public Command driveToHub(){
-        return robot.getSwerveDrive().driveTo(FieldPositions.HUB_CENTER);
+        return robot.getSwerveDrive().driveTo(FieldPositions.HUB_FRONT);
     }
 }
