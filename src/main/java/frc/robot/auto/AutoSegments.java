@@ -1,5 +1,7 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -8,12 +10,25 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
+import frc.robot.auto.shoot.AutoShoot;
 
 public class AutoSegments {
     private RobotContainer robot;
 
+    private AutoShoot autoShoot;
+
     public AutoSegments(RobotContainer robot) {
         this.robot = robot;
+        autoShoot = new AutoShoot(
+            robot.getSwerveDrive(), 
+            robot.getTurret(), 
+            robot.getShooterHood(), 
+            robot.getShooterRollers(), 
+            robot.getShooterFunctions(), 
+            () -> FieldPositions.HUB_CENTER, 
+            () -> Degrees.of(0), 
+            () -> DegreesPerSecond.of(0));
+
     }
     
     public Command driveToStart() {
@@ -58,5 +73,9 @@ public class AutoSegments {
 
     public Command driveToHub(){
         return robot.getSwerveDrive().driveTo(FieldPositions.HUB_CENTER);
+    }
+
+    public Command shootUntilEmpty(){
+        return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
     }
 }
