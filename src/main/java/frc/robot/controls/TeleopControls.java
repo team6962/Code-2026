@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
+import frc.robot.auto.FieldPositions;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.climb.ClimbConstants;
@@ -115,22 +116,14 @@ public class TeleopControls {
                 this.robot
                     .getSwerveDrive()
                     .driveTo(
-                        new Pose2d(
-                            1.518,
-                            5.947,
-                            new Rotation2d(
-                                Radians.of(
-                                    Math.PI)))), // rough position estimate based on simulation, not
+                        FieldPositions
+                            .DEPOT_OUTSIDE), // rough position estimate based on simulation, not
                 // exact
                 this.robot.getIntakeExtension().extend(),
                 Commands.parallel(
                     this.robot
                         .getSwerveDrive()
-                        .driveTo(
-                            new Pose2d(
-                                0.546,
-                                5.947,
-                                new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
+                        .driveTo(FieldPositions.DEPOT_INSIDE), // also rough estimate
                     this.robot.getIntakeRollers().intake())));
 
     driver // Auto Drive to Outpost

@@ -109,4 +109,17 @@ public class AutoSegments {
   public Command driveThroughLeftTrenchIntoAlliance() { // ??
     return Commands.sequence(driveToLeftTrenchNeutral(), driveToLeftTrenchAlliance());
   }
+
+  public Command autoDepot() {
+    return Commands.sequence(
+        this.robot
+            .getSwerveDrive()
+            .driveTo(
+                FieldPositions.DEPOT_OUTSIDE), // rough position estimate based on simulation, not
+        // exact
+        this.robot.getIntakeExtension().extend(),
+        Commands.parallel(
+            this.robot.getSwerveDrive().driveTo(FieldPositions.DEPOT_INSIDE), // also rough estimate
+            this.robot.getIntakeRollers().intake()));
+  }
 }

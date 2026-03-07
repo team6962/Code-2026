@@ -3,6 +3,8 @@ package frc.robot.auto;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class FieldPositions {
@@ -35,8 +37,7 @@ public class FieldPositions {
   public static final Translation2d HUB_CENTER =
       new Translation2d( // These are suspicious, should be double checked
           Inches.of(182.11).in(Meters), Inches.of(158.84).in(Meters));
-    public static final Translation2d TOWER = 
-    new Translation2d(
-        Inches.of(147.47),
-        Inches.of(41.56));
+  public static final Translation2d TOWER = new Translation2d(Inches.of(147.47), Inches.of(41.56));
+  public static final Pose2d DEPOT_OUTSIDE = new Pose2d(1.518, 5.947, Rotation2d.kZero);
+  public static final Pose2d DEPOT_INSIDE = new Pose2d(0.546, 5.947, Rotation2d.kZero);
 }
