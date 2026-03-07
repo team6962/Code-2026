@@ -121,7 +121,7 @@ public class AutoSegments {
         driveThroughRightTrenchIntoNeutral(),
         robot
             .getSwerveDrive()
-            .driveTo(new Pose2d(Inches.of(323).in(Meters), Inches.of(75).in(Meters),  Rotation2d.fromDegrees(90))),
+            .driveTo(new Pose2d(Inches.of(313).in(Meters), Inches.of(60).in(Meters),  Rotation2d.fromDegrees(90))),
         collectFuelFromMidline(),
         driveThroughRightTrenchIntoAlliance());
   }
@@ -131,7 +131,7 @@ public class AutoSegments {
         driveThroughLeftTrenchIntoNeutral(),
         robot
             .getSwerveDrive()
-            .driveTo(new Pose2d(Inches.of(323).in(Meters), Inches.of(250).in(Meters), Rotation2d.fromDegrees(90))),
+            .driveTo(new Pose2d(Inches.of(313).in(Meters), Inches.of(260).in(Meters), Rotation2d.fromDegrees(90))),
         collectFuelFromMidline(),
         driveThroughRightTrenchIntoAlliance());
   }

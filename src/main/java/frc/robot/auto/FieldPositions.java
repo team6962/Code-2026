@@ -47,7 +47,7 @@ public class FieldPositions {
   public static final Translation2d TOWER = new Translation2d(Inches.of(147.47), Inches.of(41.56));
   public static final Pose2d DEPOT_OUTSIDE = new Pose2d(1.518, 5.947, Rotation2d.kZero);
   public static final Pose2d DEPOT_INSIDE = new Pose2d(0.546, 5.947, Rotation2d.kZero);
-  public static final Pose2d OUTPOST = new Pose2d(0.6, 0.65, new Rotation2d(Radians.of(0)));
+  public static final Pose2d OUTPOST = new Pose2d(0.6, 0.65, Rotation2d.fromDegrees(180));
 
   public static final Translation2d NEUTRAL_ZONE_CENTER =
       new Translation2d(Inches.of(325.61).in(Meters), Inches.of(158.84).in(Meters));
