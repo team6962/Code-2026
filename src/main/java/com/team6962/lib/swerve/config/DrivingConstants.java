@@ -251,7 +251,8 @@ public class DrivingConstants implements Cloneable {
    */
   public TrapezoidProfile.Constraints getTranslationConstraints() {
     return new TrapezoidProfile.Constraints(
-        AutoLinearVelocity.in(MetersPerSecond), AutoLinearAcceleration.in(MetersPerSecondPerSecond));
+        AutoLinearVelocity.in(MetersPerSecond),
+        AutoLinearAcceleration.in(MetersPerSecondPerSecond));
   }
 
   /**
