@@ -241,8 +241,8 @@ public class ShooterHood extends SubsystemBase {
 
     // Automatically lower the hood all the way when near a trench
     if (shouldLowerHoodSupplier.get()) {
-      System.out.println("hi charlize it works but it deosnt so thats very sad");
-      moveTo(ShooterHoodConstants.MIN_ANGLE);
+
+      moveTo(ShooterHoodConstants.MIN_ANGLE).schedule();
     }
   }
 
