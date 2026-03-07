@@ -2,7 +2,9 @@ package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
+import java.util.Set;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -111,6 +113,20 @@ public class AutoSegments {
     return robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()));
   }
 
+  public Command driveToNeutralFromRightTrench() {
+    return Commands.parallel(
+        robot.getSwerveDrive().driveTo(new Pose2d(
+          FieldPositions.NEUTRAL_ZONE_CENTER, new Rotation2d(Radians.of(0)))),
+        robot.getHopper().load().withTimeout(5 /*TODO: Test and adjust this!*/));
+  }
+
+  public Command driveToNeutralFromLeftTrench() {
+    return Commands.parallel(
+        robot.getSwerveDrive().driveTo((new Pose2d(
+          FieldPositions.NEUTRAL_ZONE_CENTER, new Rotation2d(Radians.of(0))))),
+        robot.getHopper().load().withTimeout(5 /*TODO: Test and adjust this!*/));
+  }
+
   public Command shootUntilEmpty() {
     return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
   }
@@ -133,6 +149,10 @@ public class AutoSegments {
 
   public Command driveThroughLeftTrenchIntoAlliance() {
     return Commands.sequence(driveToLeftTrenchNeutral(), driveToLeftTrenchAlliance());
+  }
+
+  public Command collectFuelFromNeutral() {
+    return Commands.sequence(driveToNeutralFromLeftTrench());
   }
 
   public Command driveThroughRightBumpIntoAlliance() {
