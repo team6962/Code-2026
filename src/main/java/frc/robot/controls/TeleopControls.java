@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
-import frc.robot.auto.DriveToClump;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.climb.ClimbConstants;
@@ -36,7 +36,6 @@ import frc.robot.subsystems.turret.TurretConstants;
 public class TeleopControls {
   private RobotContainer robot;
   private AutoClimb autoClimb;
-  private DriveToClump driveToClump;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
@@ -49,7 +48,6 @@ public class TeleopControls {
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     this.autoClimb = new AutoClimb(robot);
-    this.driveToClump = new DriveToClump(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -154,7 +152,7 @@ public class TeleopControls {
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
     // Intake and drive to fuel clump
-    driver.start().whileTrue(driveToClump.driveToClump());
+    // driver.start().whileTrue(driveToClump.driveToClump());
 
     // Intake without driving - WORKS
     driver
