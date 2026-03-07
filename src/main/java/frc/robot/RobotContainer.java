@@ -115,6 +115,8 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
+    autoChooser.addOption("Test Auto", autoSegments.testAuto());
+
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
@@ -139,10 +141,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // return autoChooser.getSelected();
-
-    // Use this to test autonomous segments for now
-    return Commands.sequence(autoSegments.collectFuelViaLeftTrenchSequence());
+    return autoChooser.getSelected();
   }
 
   public void periodic() {
