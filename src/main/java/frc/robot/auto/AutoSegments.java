@@ -1,10 +1,10 @@
 package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import com.team6962.lib.logging.LoggingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,20 +15,12 @@ import frc.robot.auto.shoot.AutoShoot;
 public class AutoSegments {
   private RobotContainer robot;
 
-  private AutoShoot autoShoot;
-
   public AutoSegments(RobotContainer robot) {
     this.robot = robot;
-    autoShoot =
-        new AutoShoot(
-            robot.getSwerveDrive(),
-            robot.getTurret(),
-            robot.getShooterHood(),
-            robot.getShooterRollers(),
-            robot.getShooterFunctions(),
-            () -> FieldPositions.HUB_CENTER,
-            () -> Degrees.of(0),
-            () -> DegreesPerSecond.of(0));
+  }
+
+  public Command autoShoot() {
+    return new AutoShoot(robot);
   }
 
   public Command driveToStart() {
@@ -161,7 +153,7 @@ public class AutoSegments {
   }
 
   public Command shootUntilEmpty() {
-    return autoShoot.until(() -> robot.getHopper().getSensors().isHopperEmpty());
+    return autoShoot().until(() -> robot.getHopper().getSensors().isHopperEmpty());
   }
 
   public Command driveToHub() {
@@ -205,6 +197,17 @@ public class AutoSegments {
         robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST),
         Commands.parallel(
             robot.getHopper().feed(),
-            Commands.sequence(autoShoot.withTimeout(2.0), shootUntilEmpty())));
+            Commands.sequence(autoShoot().withTimeout(2.0), shootUntilEmpty())));
+  }
+
+  public Command testAuto() {
+    return Commands.sequence(
+        LoggingUtil.logCommand(
+            "collectFuelViaRightTrenchSequence", collectFuelViaRightTrenchSequence()),
+        LoggingUtil.logCommand("shootUntilEmpty", shootUntilEmpty()),
+        LoggingUtil.logCommand(
+            "collectFuelViaRightTrenchSequence2", collectFuelViaRightTrenchSequence()),
+        LoggingUtil.logCommand("shootUntilEmpty2", shootUntilEmpty()),
+        LoggingUtil.logCommand("driveToOutpost", driveToOutpost()));
   }
 }
