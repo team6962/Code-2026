@@ -33,6 +33,7 @@ public class RobotVisualizer extends SubsystemBase {
   private RobotContainer robot;
   private IntakeSimulation intakeSim;
   private int tickIndex = 0;
+  private boolean outpostDumped;
 
   /**
    * Creates a new RobotVisualizer.
@@ -80,6 +81,8 @@ public class RobotVisualizer extends SubsystemBase {
     tickIndex++;
 
     if (RobotBase.isSimulation()) {
+      int fuelCount = 0;
+
       try {
         robot.getSwerveDrive().getSimulation().getArenaLock().lock();
         // Update intake simulation
@@ -91,7 +94,19 @@ public class RobotVisualizer extends SubsystemBase {
         }
 
         // Visualize fuel in robot
-        int fuelCount = intakeSim.getGamePiecesAmount();
+        fuelCount = intakeSim.getGamePiecesAmount();
+
+        if (!outpostDumped
+            && robot
+                .getSwerveDrive()
+                .isNear(
+                    new Pose2d(0.447, 0.674, Rotation2d.fromDegrees(180)),
+                    Inches.of(6),
+                    Degrees.of(10))) {
+          outpostDumped = true;
+          fuelCount += 24;
+          intakeSim.setGamePiecesCount(fuelCount);
+        }
 
         if (!robot.getIntakeExtension().isExtended()
             && fuelCount > RobotVisualizationConstants.maxRetractedFuel) {
@@ -179,6 +194,8 @@ public class RobotVisualizer extends SubsystemBase {
       } finally {
         robot.getSwerveDrive().getSimulation().getArenaLock().unlock();
       }
+
+      robot.getHopper().getSensors().setSimulatedFuelCount(fuelCount);
     }
 
     // Get robot state
