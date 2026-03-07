@@ -31,6 +31,9 @@ public class TimingConstants implements Cloneable {
    */
   public boolean TimesyncControlRequests = false;
 
+  /** Whether to minimize logging to improve performance. */
+  public boolean MinimizeLogging = false;
+
   /** Constructs a TimingConstants object with default values. */
   public TimingConstants() {
     SignalUpdateRate = Hertz.of(100);
@@ -80,6 +83,17 @@ public class TimingConstants implements Cloneable {
    */
   public TimingConstants withTimesyncControlRequests(boolean timesyncControlRequests) {
     TimesyncControlRequests = timesyncControlRequests;
+    return this;
+  }
+
+  /**
+   * Sets whether to minimize logging, and returns this TimingConstants for chaining.
+   *
+   * @param minimizeLogging True if logging should be minimized
+   * @return This TimingConstants object
+   */
+  public TimingConstants withMinimizeLogging(boolean minimizeLogging) {
+    MinimizeLogging = minimizeLogging;
     return this;
   }
 

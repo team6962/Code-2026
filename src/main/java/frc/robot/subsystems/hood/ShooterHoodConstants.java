@@ -38,7 +38,7 @@ public final class ShooterHoodConstants {
   public static final Distance ARM_LENGTH = Inches.of(6.85);
 
   /** Gravity compensation feedforward constant (volts). */
-  public static final double kG = 0.29;
+  public static double kG = 0.29;
 
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(0.5);
 

@@ -74,20 +74,22 @@ public class FieldLogger implements SwerveComponent {
 
     field.setRobotPose(robotPose);
 
-    Pose2d[] modulePoses = new Pose2d[4];
-    SwerveModuleState[] moduleStates = odometry.getStates();
+    if (!constants.Timing.MinimizeLogging) {
+      Pose2d[] modulePoses = new Pose2d[4];
+      SwerveModuleState[] moduleStates = odometry.getStates();
 
-    for (int i = 0; i < 4; i++) {
-      Pose2d relativePose =
-          new Pose2d(
-              constants.Structure.WheelBase.div(2).in(Meters) * (i < 2 ? 1 : -1),
-              constants.Structure.TrackWidth.div(2).in(Meters) * (i % 2 == 0 ? 1 : -1),
-              moduleStates[i].angle);
+      for (int i = 0; i < 4; i++) {
+        Pose2d relativePose =
+            new Pose2d(
+                constants.Structure.WheelBase.div(2).in(Meters) * (i < 2 ? 1 : -1),
+                constants.Structure.TrackWidth.div(2).in(Meters) * (i % 2 == 0 ? 1 : -1),
+                moduleStates[i].angle);
 
-      modulePoses[i] = robotPose.plus(relativePose.minus(new Pose2d()));
+        modulePoses[i] = robotPose.plus(relativePose.minus(new Pose2d()));
+      }
+
+      field.getObject("Swerve Modules").setPoses(modulePoses);
     }
-
-    field.getObject("Swerve Modules").setPoses(modulePoses);
   }
 
   /**

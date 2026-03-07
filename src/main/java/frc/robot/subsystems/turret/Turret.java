@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -12,13 +13,16 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -26,6 +30,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -93,6 +98,7 @@ public class Turret extends SubsystemBase {
         RobotBase.isReal() ? TurretConstants.kS : 0; // No friction in simulation, so kS = 0
     config.Slot0.kV = RobotBase.isReal() ? TurretConstants.kV : TurretConstants.simulationKV;
     config.Slot0.kA = RobotBase.isReal() ? TurretConstants.kA : TurretConstants.simulationKA;
+    config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
 
     config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
@@ -121,7 +127,7 @@ public class Turret extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS2Closed();
+    hallSensorTriggeredSignal = candi.getS1Closed();
     profilePositionSignal = motor.getClosedLoopReference();
 
     // Tunable angle input, PID values, Motion Magic constraints
@@ -174,6 +180,18 @@ public class Turret extends SubsystemBase {
             motor
                 .getConfigurator()
                 .apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
+
+    DogLog.tunable("Turret/Turret kW", TurretConstants.kW, newKW -> TurretConstants.kW = newKW);
+
+    DogLog.tunable(
+        "Turret/Turret Minimum kW Angle",
+        TurretConstants.MIN_KW_ANGLE.in(Degrees),
+        newMinAngle -> TurretConstants.MIN_KW_ANGLE = Degrees.of(newMinAngle));
+
+    DogLog.tunable(
+        "Turret/Turret Maximum kW Angle",
+        TurretConstants.MAX_KW_ANGLE.in(Degrees),
+        newMaxAngle -> TurretConstants.MAX_KW_ANGLE = Degrees.of(newMaxAngle));
 
     // Set motor to coast mode before it has been zeroed, to allow for easier manual zeroing
     motor.setControl(new CoastOut());
@@ -228,6 +246,10 @@ public class Turret extends SubsystemBase {
         Radians);
 
     LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
+
+    if (motor.getAppliedControl() instanceof MotionMagicVoltage control) {
+      setPositionControl(control.getPositionMeasure());
+    }
   }
 
   /**
@@ -290,6 +312,10 @@ public class Turret extends SubsystemBase {
       isZeroed = true;
     }
   }
+
+  // Forwards: -2.380738
+  // Max: 0.918854
+  // Min: 0.796136
 
   /**
    * Gets the current position of the turret. An angle of 0 represents the turret facing the intake
@@ -441,6 +467,82 @@ public class Turret extends SubsystemBase {
   }
 
   /**
+   * Creates a Command that moves the turret to a target angle provided by the given supplier, while
+   * attempting to maintain the target velocity, which should be the velocity of the target angle.
+   * This is a done using a combination of basic PID and feedforward, with motion profiling used
+   * when error becomes large, ensuring fast movement when the turret reaches its limits and needs
+   * to rotate 360 degrees to reach the target angle.
+   *
+   * @param targetAngleSupplier supplier that is sampled repeatedly to provide the desired target
+   *     angle
+   * @param targetVelocitySupplier supplier that is sampled repeatedly to provide the desired target
+   *     velocity, which should be the velocity of the target angle; used for feedforward and can
+   *     help improve tracking performance when the target angle is changing rapidly
+   * @return a Command that, while scheduled, continuously moves the turret toward the supplied
+   *     target angle while attempting to maintain the supplied target velocity
+   */
+  public Command track(
+      Supplier<Angle> targetAngleSupplier, Supplier<AngularVelocity> targetVelocitySupplier) {
+    Command command =
+        new Command() {
+          private TrapezoidProfile profile =
+              new TrapezoidProfile(
+                  new TrapezoidProfile.Constraints(
+                      TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY,
+                      TurretConstants.MOTION_MAGIC_ACCELERATION));
+          private TrapezoidProfile.State previousProfileState;
+          private double previousUpdateTimestamp;
+
+          @Override
+          public void initialize() {
+            previousProfileState =
+                new TrapezoidProfile.State(
+                    getPosition().in(Rotations), getVelocity().in(RotationsPerSecond));
+            previousUpdateTimestamp = Timer.getFPGATimestamp();
+          }
+
+          @Override
+          public void execute() {
+            Angle targetPosition =
+                clampPositionToSafeRange(
+                    optimizeTarget(
+                        targetAngleSupplier.get(),
+                        getPosition(),
+                        TurretConstants.MIN_ANGLE,
+                        TurretConstants.MAX_ANGLE));
+
+            AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+            TrapezoidProfile.State profileState =
+                profile.calculate(
+                    Timer.getFPGATimestamp() - previousUpdateTimestamp,
+                    previousProfileState,
+                    new TrapezoidProfile.State(
+                        targetPosition.in(Rotations),
+                        0 // This can also be set to targetVelocity.in(RotationsPerSecond)
+                        // if the profile should go to the target position and velocity. However, 0
+                        // seems to perform better in simulation
+                        ));
+
+            previousProfileState = profileState;
+            previousUpdateTimestamp = Timer.getFPGATimestamp();
+
+            if (targetPosition.isNear(getPosition(), Degrees.of(5))) {
+              setPositionVelocityControl(targetPosition, targetVelocity);
+            } else {
+              setPositionVelocityControl(
+                  Rotations.of(profileState.position),
+                  RotationsPerSecond.of(profileState.velocity));
+            }
+          }
+        };
+
+    command.addRequirements(this);
+
+    return command;
+  }
+
+  /**
    * Creates a command that continuously drives the turret to a target angle provided by the given
    * supplier.
    *
@@ -455,7 +557,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          clampPositionToSafeRange(targetAngleSupplier.get()),
+                          targetAngleSupplier.get(),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
@@ -475,7 +577,22 @@ public class Turret extends SubsystemBase {
    */
   private void setPositionControl(Angle targetAngle) {
     if (isZeroed()) {
-      motor.setControl(new MotionMagicVoltage(targetAngle));
+      motor.setControl(
+          new MotionMagicVoltage(targetAngle)
+              .withFeedForward(
+                  targetAngle.lt(TurretConstants.MIN_KW_ANGLE)
+                      ? -TurretConstants.kW
+                      : targetAngle.gt(TurretConstants.MAX_KW_ANGLE) ? TurretConstants.kW : 0));
+    } else if (RobotState.isEnabled()) {
+      motor.setControl(new NeutralOut());
+    } else {
+      motor.setControl(new CoastOut());
+    }
+  }
+
+  private void setPositionVelocityControl(Angle targetAngle, AngularVelocity targetVelocity) {
+    if (isZeroed()) {
+      motor.setControl(new PositionVoltage(targetAngle).withVelocity(targetVelocity));
     } else if (RobotState.isEnabled()) {
       motor.setControl(new NeutralOut());
     } else {
