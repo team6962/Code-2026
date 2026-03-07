@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.wpilibj.RobotBase;
 
 /*
  * sets constants for the shooter roller
@@ -28,11 +27,7 @@ public final class ShooterRollersConstants {
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs())
-          .withSlot0(
-              new Slot0Configs()
-                  .withKV(0.124137931)
-                  .withKS(RobotBase.isSimulation() ? 0 : 0.0)
-                  .withKP(0.1)) // kS should not exist when in simulation
+          .withSlot0(new Slot0Configs().withKV(0.124137931).withKP(0.1))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)
