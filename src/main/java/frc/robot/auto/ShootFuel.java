@@ -7,18 +7,23 @@ import frc.robot.RobotContainer;
 import frc.robot.auto.shoot.AutoShoot;
 
 public class ShootFuel {
-    private RobotContainer robot;
+  private RobotContainer robot;
 
-    public ShootFuel(RobotContainer robot) {
-        this.robot = robot;
-    }
+  public ShootFuel(RobotContainer robot) {
+    this.robot = robot;
+  }
 
-    public Command shootAllFuel() {
-        AutoShoot autoShoot = new AutoShoot(robot);
+  public Command shootAllFuel() {
+    AutoShoot autoShoot = new AutoShoot(robot);
 
-        return Commands.parallel(
+    return Commands.parallel(
             autoShoot,
-            robot.getHopper().feed().onlyWhile(() -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation()).repeatedly()
-        ).until(() -> robot.getHopper().isEmpty());
-    }
+            robot
+                .getHopper()
+                .feed()
+                .onlyWhile(
+                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                .repeatedly())
+        .until(() -> robot.getHopper().isEmpty());
+  }
 }

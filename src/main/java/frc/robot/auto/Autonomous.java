@@ -29,7 +29,6 @@ public class Autonomous {
         trench.driveToNeutral(),
         neutralIntake.intake(Meters.of(1), Meters.of(2.5)),
         trench.driveToAlliance(),
-        shootFuel.shootAllFuel()
-    );
+        shootFuel.shootAllFuel());
   }
 }

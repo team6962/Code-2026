@@ -100,7 +100,8 @@ public class NeutralIntake {
     return intakeRight(Meters.of(0), distance, MetersPerSecond.of(1), MetersPerSecond.of(0));
   }
 
-  public Command intake(Distance initialDistance,
+  public Command intake(
+      Distance initialDistance,
       Distance finalDistance,
       LinearVelocity initialVelocity,
       LinearVelocity finalVelocity) {
@@ -117,7 +118,7 @@ public class NeutralIntake {
             robot.getSwerveDrive().useRotation(),
             robot.getIntakeExtension(),
             robot.getIntakeRollers()));
-    }
+  }
 
   public Command intake(Distance distance) {
     return intake(distance, distance, MetersPerSecond.of(1), MetersPerSecond.of(0));
