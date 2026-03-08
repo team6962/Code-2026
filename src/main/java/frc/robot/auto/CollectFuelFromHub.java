@@ -8,34 +8,26 @@ import frc.robot.RobotContainer;
 
 public class CollectFuelFromHub {
   private RobotContainer robot;
-  private TrenchDriving trenchDriving;
 
-  public CollectFuelFromHub(RobotContainer robot, TrenchDriving trenchDriving) {
+  public CollectFuelFromHub(RobotContainer robot) {
     this.robot = robot;
-    this.trenchDriving = trenchDriving;
   }
 
-  public Command scoopingUpFuelRight() {
+  public Command intakeBehindHubRight() {
     return Commands.sequence(
-        trenchDriving.driveToNeutral(),
-        Commands.sequence(
-            robot
-                .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-150))),
-            Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
-                .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL))),
-        trenchDriving.driveToAlliance());
+      robot
+          .getSwerveDrive()
+          .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-150))),
+      Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
+          .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL)));
   }
 
-  public Command scoopingUpFuelLeft() {
+  public Command intakeBehindHubLeft() {
     return Commands.sequence(
-        trenchDriving.driveToNeutral(),
-        Commands.sequence(
-            robot
-                .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(150))),
-            Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
-                .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL))),
-        trenchDriving.driveToAlliance());
+        robot
+            .getSwerveDrive()
+            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(150))),
+        Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
+            .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL)));
   }
 }

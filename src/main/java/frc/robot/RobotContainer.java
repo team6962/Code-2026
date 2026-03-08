@@ -119,7 +119,9 @@ public class RobotContainer {
     autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
     autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Collect Fuel Along Left Edge", autonomous.leftEdgeCleanup());
-    autoChooser.addOption("Collect Fuel Along Right Edge", autonomous.RightEdgeCleanup());
+    autoChooser.addOption("Collect Fuel Along Right Edge", autonomous.rightEdgeCleanup());
+    autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
+    autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
