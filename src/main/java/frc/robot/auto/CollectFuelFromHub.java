@@ -22,10 +22,9 @@ public class CollectFuelFromHub {
             robot
                 .getSwerveDrive()
                 .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-150))),
-            Commands.parallel(
-                robot.getIntakeRollers().intake(), robot.getHopper().load())
+            Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
                 .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL))),
-                trenchDriving.driveToAlliance());
+        trenchDriving.driveToAlliance());
   }
 
   public Command scoopingUpFuelLeft() {
@@ -35,10 +34,8 @@ public class CollectFuelFromHub {
             robot
                 .getSwerveDrive()
                 .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(150))),
-            Commands.parallel(
-                robot.getIntakeRollers().intake(), robot.getHopper().load())
-                .withDeadline(
-                    robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL))),
-                    trenchDriving.driveToAlliance());
+            Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
+                .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.LEFT_NEUTRAL))),
+        trenchDriving.driveToAlliance());
   }
 }
