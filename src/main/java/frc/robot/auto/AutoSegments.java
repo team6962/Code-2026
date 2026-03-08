@@ -14,13 +14,26 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.auto.shoot.AutoShoot;
+
 public class AutoSegments {
   private static final LinearVelocity TRENCH_VELOCITY = MetersPerSecond.of(1.5);
   private static final LinearVelocity BUMP_VELOCITY = MetersPerSecond.of(1.5);
-  private Pose2d rightTrenchAlliancePose() { return new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient()); }
-  private Pose2d rightTrenchNeutralPose()  { return new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL,  orient()); }
-  private Pose2d leftTrenchAlliancePose()  { return new Pose2d(FieldPositions.Trench.LEFT_ALLIANCE,  orient()); }
-  private Pose2d leftTrenchNeutralPose()   { return new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL,   orient()); }
+
+  private Pose2d rightTrenchAlliancePose() {
+    return new Pose2d(FieldPositions.Trench.RIGHT_ALLIANCE, orient());
+  }
+
+  private Pose2d rightTrenchNeutralPose() {
+    return new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, orient());
+  }
+
+  private Pose2d leftTrenchAlliancePose() {
+    return new Pose2d(FieldPositions.Trench.LEFT_ALLIANCE, orient());
+  }
+
+  private Pose2d leftTrenchNeutralPose() {
+    return new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, orient());
+  }
 
   private RobotContainer robot;
 
@@ -63,8 +76,9 @@ public class AutoSegments {
         () ->
             robot
                 .getSwerveDrive()
-                .driveTo(leftTrenchNeutralPose(),
-                new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
+                .driveTo(
+                    leftTrenchNeutralPose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -76,8 +90,9 @@ public class AutoSegments {
         () ->
             robot
                 .getSwerveDrive()
-                .driveTo(leftTrenchAlliancePose(),
-                new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
+                .driveTo(
+                    leftTrenchAlliancePose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -89,8 +104,9 @@ public class AutoSegments {
         () ->
             robot
                 .getSwerveDrive()
-                .driveTo(rightTrenchNeutralPose(),
-                new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
+                .driveTo(
+                    rightTrenchNeutralPose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -102,16 +118,20 @@ public class AutoSegments {
         () ->
             robot
                 .getSwerveDrive()
-                .driveTo(rightTrenchAlliancePose(),
-                new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
+                .driveTo(
+                    rightTrenchAlliancePose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
   public Command driveToLeftBumpNeutral() {
     return Commands.defer(
         () ->
-            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_NEUTRAL, orient()),
-            new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(FieldPositions.Bump.LEFT_NEUTRAL, orient()),
+                    new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -121,8 +141,11 @@ public class AutoSegments {
   public Command driveToLeftBumpAlliance() {
     return Commands.defer(
         () ->
-            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()),
-            new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(FieldPositions.Bump.LEFT_ALLIANCE, orient()),
+                    new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -132,8 +155,11 @@ public class AutoSegments {
   public Command driveToRightBumpNeutral() {
     return Commands.defer(
         () ->
-            robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()),
-            new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    new Pose2d(FieldPositions.Bump.RIGHT_NEUTRAL, orient()),
+                    new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -145,8 +171,9 @@ public class AutoSegments {
         () ->
             robot
                 .getSwerveDrive()
-                .driveTo(new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()),
-                new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
+                .driveTo(
+                    new Pose2d(FieldPositions.Bump.RIGHT_ALLIANCE, orient()),
+                    new ChassisSpeeds(BUMP_VELOCITY.in(MetersPerSecond), 0, 0)),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -202,21 +229,37 @@ public class AutoSegments {
   }
 
   public Command driveThroughRightTrenchIntoAlliance() {
-      return Commands.defer(
-          () -> robot.getSwerveDrive()
-              .driveTo(rightTrenchNeutralPose(), new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))
-              .andThen(robot.getSwerveDrive()
-                  .driveTo(rightTrenchAlliancePose(), new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))),
-          robot.getSwerveDrive().useMotionSet());
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    rightTrenchNeutralPose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))
+                .andThen(
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(
+                            rightTrenchAlliancePose(),
+                            new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   public Command driveThroughRightTrenchIntoNeutral() {
-      return Commands.defer(
-          () -> robot.getSwerveDrive()
-              .driveTo(rightTrenchAlliancePose(), new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))
-              .andThen(robot.getSwerveDrive()
-                  .driveTo(rightTrenchNeutralPose(), new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))),
-          robot.getSwerveDrive().useMotionSet());
+    return Commands.defer(
+        () ->
+            robot
+                .getSwerveDrive()
+                .driveTo(
+                    rightTrenchAlliancePose(),
+                    new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))
+                .andThen(
+                    robot
+                        .getSwerveDrive()
+                        .driveTo(
+                            rightTrenchNeutralPose(),
+                            new ChassisSpeeds(TRENCH_VELOCITY.in(MetersPerSecond), 0, 0))),
+        robot.getSwerveDrive().useMotionSet());
   }
 
   public Command driveThroughLeftTrenchIntoNeutral() {

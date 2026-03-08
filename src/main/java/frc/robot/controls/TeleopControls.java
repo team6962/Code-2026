@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
+import frc.robot.auto.AutoDepot;
 import frc.robot.auto.FieldPositions;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
@@ -35,6 +36,7 @@ public class TeleopControls {
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
+  private AutoDepot autoDepot;
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -106,22 +108,7 @@ public class TeleopControls {
     driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Depot
-    driver
-        .leftBumper()
-        .whileTrue(
-            Commands.sequence(
-                this.robot
-                    .getSwerveDrive()
-                    .driveTo(
-                        FieldPositions
-                            .DEPOT_OUTSIDE), // rough position estimate based on simulation, not
-                // exact
-                this.robot.getIntakeExtension().extend(),
-                Commands.parallel(
-                    this.robot
-                        .getSwerveDrive()
-                        .driveTo(FieldPositions.DEPOT_INSIDE), // also rough estimate
-                    this.robot.getIntakeRollers().intake())));
+    driver.leftBumper().whileTrue(autoDepot.autoDepot());
 
     driver // Auto Drive to Outpost
         .rightBumper()
