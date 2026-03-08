@@ -35,6 +35,8 @@ import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.visualizer.RobotVisualizer;
+import frc.robot.auto.AutoOutpost;
+import frc.robot.auto.ShootFuel;
 
 public class RobotContainer {
   private final RobotConstants constants;
@@ -56,7 +58,8 @@ public class RobotContainer {
   private final ShooterFunctions shooterFunctions;
   private final Autonomous autonomous;
   private final TrenchDriving trenchDriving;
-
+  private final AutoOutpost autoOutpost;
+  private final ShootFuel shootFuel;
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
@@ -85,7 +88,8 @@ public class RobotContainer {
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);
     trenchDriving = new TrenchDriving(this);
-
+    shootFuel = new ShootFuel(this);
+    autoOutpost = new AutoOutpost(this, shootFuel);
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
@@ -97,6 +101,7 @@ public class RobotContainer {
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
     autoChooser.addOption("driveToNeutral",trenchDriving.driveToNeutral());
+    autoChooser.addOption("autoOutpost", autoOutpost.autoOutpost());
     autoChooser.addOption(
         "Test Drive To Pose",
         swerveDrive

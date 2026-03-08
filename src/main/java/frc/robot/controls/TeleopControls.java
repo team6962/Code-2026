@@ -21,8 +21,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
 import frc.robot.auto.FieldPositions;
+import frc.robot.auto.ShootFuel;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
+import frc.robot.auto.AutoOutpost;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
@@ -32,6 +34,8 @@ import frc.robot.subsystems.turret.TurretConstants;
 public class TeleopControls {
   private RobotContainer robot;
   private AutoClimb autoClimb;
+  private ShootFuel shootFuel;
+  private AutoOutpost autoOutpost;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
@@ -44,6 +48,8 @@ public class TeleopControls {
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     this.autoClimb = new AutoClimb(robot);
+    this.shootFuel = new ShootFuel(robot);
+    this.autoOutpost = new AutoOutpost(robot, shootFuel);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -126,7 +132,7 @@ public class TeleopControls {
     driver // Auto Drive to Outpost
         .rightBumper()
         .whileTrue(
-            this.robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST)); // also a rough estimate
+            autoOutpost.autoOutpost()); 
 
     // Dump fuel - WORKS
     driver
