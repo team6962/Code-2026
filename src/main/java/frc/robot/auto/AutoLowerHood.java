@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.Distance;
 
 public class AutoLowerHood {
   private CommandSwerveDrive swerveDrive;
-  private Distance HOOD_LOWERING_THRESHOLD = Meters.of(0.0);
+  private Distance HOOD_LOWERING_THRESHOLD = Meters.of(0.25);
 
   public AutoLowerHood(CommandSwerveDrive swerveDrive) {
     this.swerveDrive = swerveDrive;
