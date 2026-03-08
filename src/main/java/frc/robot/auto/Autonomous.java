@@ -12,12 +12,16 @@ public class Autonomous {
   private TrenchDriving trench;
   private NeutralIntake neutralIntake;
   private ShootFuel shootFuel;
+  private AutoDepot autoDepot;
+  private AutoSegments autoSegments;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
     this.trench = new TrenchDriving(robot);
     this.neutralIntake = new NeutralIntake(robot);
     this.shootFuel = new ShootFuel(robot);
+    this.autoDepot = new AutoDepot(robot);
+    this.autoSegments = new AutoSegments(robot);
   }
 
   public Command neutralCycle() {
@@ -31,4 +35,15 @@ public class Autonomous {
         trench.driveToAlliance(),
         shootFuel.shootAllFuel());
   }
+  public Command depotThenNeutralCycle() {
+    return Commands.sequence(
+      autoDepot.autoDepot(),
+      autoSegments.shootUntilEmpty(),
+      autoSegments.collectFuelViaLeftTrenchSequence(),
+      autoSegments.shootUntilEmpty(),
+      autoSegments.collectFuelViaLeftTrenchSequence(),
+      autoSegments.shootUntilEmpty()
+    );
+  }
+
 }

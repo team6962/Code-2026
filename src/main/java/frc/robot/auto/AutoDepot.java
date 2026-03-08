@@ -22,6 +22,6 @@ public class AutoDepot {
         robot.getIntakeExtension().extend(),
         Commands.parallel(
             robot.getSwerveDrive().driveTo(FieldPositions.DEPOT_INSIDE),
-            robot.getIntakeRollers().intake()));
+            robot.getIntakeRollers().intake().withTimeout(2)));
   }
 }

@@ -135,6 +135,7 @@ public class RobotContainer {
 
     autoChooser.addOption("Test Auto", autoSegments.testAuto());
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
+    autoChooser.addOption("Depot sequence then neutral cycle", autonomous.depotThenNeutralCycle());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
