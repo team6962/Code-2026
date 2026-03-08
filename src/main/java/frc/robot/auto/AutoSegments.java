@@ -173,33 +173,6 @@ public class AutoSegments {
         driveThroughLeftTrenchIntoAlliance());
   }
 
-  /*Probably not going to be used */
-  // public Command collectFuelInLeftNeutral() {
-  //   return  Commands.parallel(
-  //               robot
-  //                   .getSwerveDrive()
-  //                   .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER,
-  // Rotation2d.fromDegrees(90))),
-  //               robot.getHopper().load(),
-  //               robot.getIntakeRollers().intake(),
-  //               robot.getIntakeExtension().extend())
-  //           .withDeadline(robot.getSwerveDrive().driveTo(new
-  // Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())));
-  // }
-
-  //   public Command collectFuelInRightNeutral() {
-  //   return  Commands.parallel(
-  //               robot
-  //                   .getSwerveDrive()
-  //                   .driveTo(new Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER,
-  // Rotation2d.fromDegrees(-90))),
-  //               robot.getHopper().load(),
-  //               robot.getIntakeRollers().intake(),
-  //               robot.getIntakeExtension().extend())
-  //           .withDeadline(robot.getSwerveDrive().driveTo(new
-  // Pose2d(FieldPositions.NEUTRAL_ZONE_CENTER, orient())));
-  // }
-
   public Command shootUntilEmpty() {
     return Commands.parallel(autoShoot(), robot.getHopper().feed())
         .until(() -> robot.getHopper().isEmpty());
@@ -241,7 +214,7 @@ public class AutoSegments {
     return Commands.sequence(driveToLeftBumpNeutral(), driveToLeftBumpAlliance());
   }
 
-  public Command driveToOutpost() {
+  public Command AutoOutpost() {
     return Commands.sequence(
         robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST),
         Commands.sequence(
@@ -256,6 +229,6 @@ public class AutoSegments {
         LoggingUtil.logCommand(
             "collectFuelViaRightTrenchSequence2", collectFuelViaRightTrenchSequence()),
         LoggingUtil.logCommand("shootUntilEmpty2", shootUntilEmpty()),
-        LoggingUtil.logCommand("driveToOutpost", driveToOutpost()));
+        LoggingUtil.logCommand("driveToOutpost", AutoOutpost()));
   }
 }

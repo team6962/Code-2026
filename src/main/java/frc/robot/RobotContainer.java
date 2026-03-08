@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.AutoSegments;
+import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
@@ -54,6 +55,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
   private final Autonomous autonomous;
+  private final TrenchDriving trenchDriving;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -82,6 +84,7 @@ public class RobotContainer {
     autoSegments = new AutoSegments(this);
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);
+    trenchDriving = new TrenchDriving(this);
 
     configureAutonomousChooser();
 
@@ -93,7 +96,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Do Nothing", Commands.none());
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
-
+    autoChooser.addOption("driveToNeutral",trenchDriving.driveToNeutral());
     autoChooser.addOption(
         "Test Drive To Pose",
         swerveDrive
@@ -120,7 +123,6 @@ public class RobotContainer {
 
     autoChooser.addOption("Test Auto", autoSegments.testAuto());
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
-
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
