@@ -44,7 +44,7 @@ public class TrenchDriving {
     if (robotY.lt(HUB_Y)) {
       return RIGHT_TRENCH_CENTER_Y;
     } else {
-      return HUB_Y.minus(RIGHT_TRENCH_CENTER_Y);
+      return HUB_Y.times(2).minus(RIGHT_TRENCH_CENTER_Y);
     }
   }
 
