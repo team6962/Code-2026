@@ -23,6 +23,7 @@ import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.AutoSegments;
 import frc.robot.auto.Autonomous;
+import frc.robot.auto.CollectFuelFromHub;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
@@ -62,6 +63,7 @@ public class RobotContainer {
   private final AutoOutpost autoOutpost;
   private final ShootFuel shootFuel;
   private final AutoDepot autoDepot;
+  private final CollectFuelFromHub collectFuelFromHub;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -94,7 +96,7 @@ public class RobotContainer {
     shootFuel = new ShootFuel(this);
     autoOutpost = new AutoOutpost(this, shootFuel);
     autoDepot = new AutoDepot(this);
-
+    collectFuelFromHub = new CollectFuelFromHub(this, trenchDriving);
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
@@ -135,6 +137,8 @@ public class RobotContainer {
 
     autoChooser.addOption("Test Auto", autoSegments.testAuto());
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
+    autoChooser.addOption("ScoopingUpFuelRight", collectFuelFromHub.scoopingUpFuelRight());
+    autoChooser.addOption("ScoopingUpFuelLeft", collectFuelFromHub.scoopingUpFuelLeft());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
