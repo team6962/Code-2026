@@ -9,11 +9,11 @@ import frc.robot.RobotContainer;
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
   private RobotContainer robot;
-  private TrenchDriving trench;
-  private NeutralIntake neutralIntake;
-  private ShootFuel shootFuel;
-  private AutoDepot autoDepot;
-  private AutoSegments autoSegments;
+  public final TrenchDriving trench;
+  public final NeutralIntake neutralIntake;
+  public final ShootFuel shootFuel;
+  public final AutoDepot autoDepot;
+  public final AutoOutpost autoOutpost;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -21,7 +21,7 @@ public class Autonomous {
     this.neutralIntake = new NeutralIntake(robot);
     this.shootFuel = new ShootFuel(robot);
     this.autoDepot = new AutoDepot(robot);
-    this.autoSegments = new AutoSegments(robot);
+    this.autoOutpost = new AutoOutpost(robot, shootFuel);
   }
 
   public Command neutralCycle() {
@@ -35,15 +35,22 @@ public class Autonomous {
         trench.driveToAlliance(),
         shootFuel.shootAllFuel());
   }
+
   public Command depotThenNeutralCycle() {
     return Commands.sequence(
-      autoDepot.autoDepot(),
-      autoSegments.shootUntilEmpty(),
-      autoSegments.collectFuelViaLeftTrenchSequence(),
-      autoSegments.shootUntilEmpty(),
-      autoSegments.collectFuelViaLeftTrenchSequence(),
-      autoSegments.shootUntilEmpty()
-    );
+        autoDepot.autoDepot(),
+        trench.driveToNeutral().deadlineFor(shootFuel.shootAllFuel()),
+        neutralIntake.intake(Meters.of(1)),
+        trench.driveToAlliance(),
+        shootFuel.shootAllFuel());
   }
 
+  public Command outpostThenNeutralCycle() {
+    return Commands.sequence(
+        trench.driveToNeutral(),
+        neutralIntake.intake(Meters.of(1)),
+        trench.driveToAlliance(),
+        shootFuel.shootAllFuel(),
+        autoOutpost.autoOutpost());
+  }
 }
