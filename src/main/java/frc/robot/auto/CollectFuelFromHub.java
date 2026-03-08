@@ -15,11 +15,11 @@ public class CollectFuelFromHub {
 
   public Command intakeBehindHubRight() {
     return Commands.sequence(
-      robot
-          .getSwerveDrive()
-          .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-150))),
-      Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
-          .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL)));
+        robot
+            .getSwerveDrive()
+            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-150))),
+        Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
+            .withDeadline(robot.getSwerveDrive().driveTo(FieldPositions.Trench.RIGHT_NEUTRAL)));
   }
 
   public Command intakeBehindHubLeft() {

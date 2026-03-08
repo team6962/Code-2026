@@ -90,19 +90,17 @@ public class Autonomous {
 
   public Command intakeBehindHubLeft() {
     return Commands.sequence(
-      trench.driveToNeutral(Trench.LEFT),
-      collectFuelFromHub.intakeBehindHubLeft(),
-      trench.driveToAlliance(Trench.LEFT),
-      shootFuel.shootAllFuel()
-    );
+        trench.driveToNeutral(Trench.LEFT),
+        collectFuelFromHub.intakeBehindHubLeft(),
+        trench.driveToAlliance(Trench.LEFT),
+        shootFuel.shootAllFuel());
   }
 
   public Command intakeBehindHubRight() {
     return Commands.sequence(
-      trench.driveToNeutral(Trench.RIGHT),
-      collectFuelFromHub.intakeBehindHubRight(),
-      trench.driveToAlliance(Trench.RIGHT),
-      shootFuel.shootAllFuel()
-    );
+        trench.driveToNeutral(Trench.RIGHT),
+        collectFuelFromHub.intakeBehindHubRight(),
+        trench.driveToAlliance(Trench.RIGHT),
+        shootFuel.shootAllFuel());
   }
 }
