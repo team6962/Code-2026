@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.AutoSegments;
+import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
@@ -52,6 +53,7 @@ public class RobotContainer {
   private final AutoSegments autoSegments;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
+  private final Autonomous autonomous;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -79,6 +81,7 @@ public class RobotContainer {
 
     autoSegments = new AutoSegments(this);
     driveStraightAuto = new DriveStraightAuto(this);
+    autonomous = new Autonomous(this);
 
     configureAutonomousChooser();
 
@@ -116,6 +119,7 @@ public class RobotContainer {
             getIntakeExtension().extend().repeatedly()));
 
     autoChooser.addOption("Test Auto", autoSegments.testAuto());
+    autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
 
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
