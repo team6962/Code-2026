@@ -8,6 +8,7 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.Autonomous;
-import frc.robot.auto.CollectFuelFromHub;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
@@ -53,11 +53,6 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
   private final Autonomous autonomous;
-  private final TrenchDriving trenchDriving;
-  private final AutoOutpost autoOutpost;
-  private final ShootFuel shootFuel;
-  private final AutoDepot autoDepot;
-  private final CollectFuelFromHub collectFuelFromHub;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -86,11 +81,6 @@ public class RobotContainer {
 
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);
-    trenchDriving = new TrenchDriving(this);
-    shootFuel = new ShootFuel(this);
-    autoOutpost = new AutoOutpost(this, shootFuel);
-    autoDepot = new AutoDepot(this);
-    collectFuelFromHub = new CollectFuelFromHub(this, trenchDriving);
 
     configureAutonomousChooser();
 
@@ -127,8 +117,6 @@ public class RobotContainer {
             getIntakeExtension().extend().repeatedly()));
 
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
-    autoChooser.addOption("ScoopingUpFuelRight", collectFuelFromHub.scoopingUpFuelRight());
-    autoChooser.addOption("ScoopingUpFuelLeft", collectFuelFromHub.scoopingUpFuelLeft());
     autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
     autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Collect Fuel Along Left Edge", autonomous.leftEdgeCleanup());
