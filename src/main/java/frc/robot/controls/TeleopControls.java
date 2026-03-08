@@ -99,7 +99,7 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unuse
+    // Driver A is unused
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
