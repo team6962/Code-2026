@@ -29,6 +29,11 @@ public class TrenchDriving {
 
   private RobotContainer robot;
 
+  public static enum Trench {
+    LEFT,
+    RIGHT
+  }
+
   /**
    * Creates a new AutoTrench command provider.
    *
@@ -38,17 +43,33 @@ public class TrenchDriving {
     this.robot = robot;
   }
 
-  private Distance getNearestTrenchCenterY() {
+  public Trench getNearestTrench() {
     Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
 
     if (robotY.lt(HUB_Y)) {
+      return Trench.RIGHT;
+    } else {
+      return Trench.LEFT;
+    }
+  }
+
+  private Distance getNearestTrenchCenterY(Trench trench) {
+    if (trench == null) {
+      trench = getNearestTrench();
+    }
+
+    if (trench == Trench.RIGHT) {
       return RIGHT_TRENCH_CENTER_Y;
     } else {
       return HUB_Y.times(2).minus(RIGHT_TRENCH_CENTER_Y);
     }
   }
 
-  private Rotation2d getTrenchRobotOrientation() {
+  private Rotation2d getTrenchRobotOrientation(Rotation2d overrideOrientation) {
+    if (overrideOrientation != null) {
+      return overrideOrientation;
+    }
+
     Angle robotHeading = AngleMath.toDiscrete(robot.getSwerveDrive().getHeading());
 
     if (robotHeading.abs(Degrees) < 90) {
@@ -58,32 +79,32 @@ public class TrenchDriving {
     }
   }
 
-  private Pose2d getInitialAlliancePose() {
+  private Pose2d getInitialAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
     return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_INITIAL_X),
-        getNearestTrenchCenterY(),
-        getTrenchRobotOrientation());
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
   }
 
-  private Pose2d getFinalAlliancePose() {
+  private Pose2d getFinalAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
     return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_FINAL_X),
-        getNearestTrenchCenterY(),
-        getTrenchRobotOrientation());
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
   }
 
-  private Pose2d getInitialNeutralPose() {
+  private Pose2d getInitialNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
     return new Pose2d(
         OBSTACLES_CENTER_X.plus(TRENCH_INITIAL_X),
-        getNearestTrenchCenterY(),
-        getTrenchRobotOrientation());
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
   }
 
-  private Pose2d getFinalNeutralPose() {
+  private Pose2d getFinalNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
     return new Pose2d(
         OBSTACLES_CENTER_X.plus(TRENCH_FINAL_X),
-        getNearestTrenchCenterY(),
-        getTrenchRobotOrientation());
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
   }
 
   /**
@@ -91,33 +112,99 @@ public class TrenchDriving {
    *
    * @param initialVelocity The initial velocity of the robot.
    * @param finalVelocity The final velocity of the robot.
+   * @param trench The trench to drive through, or {@code null} to automatically determine the
+   *     trench based on the robot's position.
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
    * @return A command that drives from the alliance zone to the neutral zone through the trench.
    */
-  public Command driveToNeutral(LinearVelocity initialVelocity, LinearVelocity finalVelocity) {
+  public Command driveToNeutral(
+      LinearVelocity initialVelocity,
+      LinearVelocity finalVelocity,
+      Trench trench,
+      Rotation2d orientation) {
     return Commands.defer(
         () ->
             Commands.sequence(
                 robot
                     .getSwerveDrive()
                     .driveTo(
-                        getInitialAlliancePose(),
+                        getInitialAlliancePose(trench, orientation),
                         new ChassisSpeeds(initialVelocity.in(MetersPerSecond), 0, 0)),
                 robot
                     .getSwerveDrive()
-                    .driveTo(getInitialAlliancePose())
+                    .driveTo(getInitialAlliancePose(trench, orientation))
+                    .repeatedly()
                     .onlyWhile(
                         () ->
                             !robot
                                 .getSwerveDrive()
                                 .isNear(
-                                    getInitialAlliancePose(),
+                                    getInitialAlliancePose(trench, orientation),
                                     TRENCH_LINEAR_TOLERANCE,
                                     TRENCH_ANGULAR_TOLERANCE)),
                 robot
                     .getSwerveDrive()
                     .driveTo(
-                        getFinalNeutralPose(),
+                        getFinalNeutralPose(trench, orientation),
                         new ChassisSpeeds(finalVelocity.in(MetersPerSecond), 0, 0))),
+        robot.getSwerveDrive().useMotionSet());
+  }
+
+  /**
+   * Creates a command that drives from the alliance zone to the neutral zone through the trench.
+   *
+   * @param initialVelocity The initial velocity of the robot.
+   * @param finalVelocity The final velocity of the robot.
+   * @return A command that drives from the alliance zone to the neutral zone through the trench at
+   *     the specified initial and final velocities, automatically determining the robot's
+   *     orientation based on its heading.
+   */
+  public Command driveToNeutral(LinearVelocity initialVelocity, LinearVelocity finalVelocity) {
+    return driveToNeutral(initialVelocity, finalVelocity, null, null);
+  }
+
+  /**
+   * Creates a command that drives from the neutral zone to the alliance zone through the trench.
+   *
+   * @param initialVelocity The initial velocity of the robot.
+   * @param finalVelocity The final velocity of the robot.
+   * @param trench The trench to drive through, or {@code null} to automatically determine the
+   *     trench based on the robot's position.
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
+   * @return A command that drives from the neutral zone to the alliance zone through the trench.
+   */
+  public Command driveToAlliance(
+      LinearVelocity initialVelocity,
+      LinearVelocity finalVelocity,
+      Trench trench,
+      Rotation2d orientation) {
+    return Commands.defer(
+        () ->
+            Commands.sequence(
+                robot
+                    .getSwerveDrive()
+                    .driveTo(
+                        getInitialNeutralPose(trench, orientation),
+                        new ChassisSpeeds(-initialVelocity.in(MetersPerSecond), 0, 0)),
+                robot
+                    .getSwerveDrive()
+                    .driveTo(getInitialNeutralPose(trench, orientation))
+                    .repeatedly()
+                    .onlyWhile(
+                        () ->
+                            !robot
+                                .getSwerveDrive()
+                                .isNear(
+                                    getInitialNeutralPose(trench, orientation),
+                                    TRENCH_LINEAR_TOLERANCE,
+                                    TRENCH_ANGULAR_TOLERANCE)),
+                robot
+                    .getSwerveDrive()
+                    .driveTo(
+                        getFinalAlliancePose(trench, orientation),
+                        new ChassisSpeeds(-finalVelocity.in(MetersPerSecond), 0, 0))),
         robot.getSwerveDrive().useMotionSet());
   }
 
@@ -126,34 +213,12 @@ public class TrenchDriving {
    *
    * @param initialVelocity The initial velocity of the robot.
    * @param finalVelocity The final velocity of the robot.
-   * @return A command that drives from the neutral zone to the alliance zone through the trench.
+   * @return A command that drives from the neutral zone to the alliance zone through the trench at
+   *     the specified initial and final velocities, automatically determining the robot's
+   *     orientation based on its heading.
    */
   public Command driveToAlliance(LinearVelocity initialVelocity, LinearVelocity finalVelocity) {
-    return Commands.defer(
-        () ->
-            Commands.sequence(
-                robot
-                    .getSwerveDrive()
-                    .driveTo(
-                        getInitialNeutralPose(),
-                        new ChassisSpeeds(-initialVelocity.in(MetersPerSecond), 0, 0)),
-                robot
-                    .getSwerveDrive()
-                    .driveTo(getInitialNeutralPose())
-                    .onlyWhile(
-                        () ->
-                            !robot
-                                .getSwerveDrive()
-                                .isNear(
-                                    getInitialNeutralPose(),
-                                    TRENCH_LINEAR_TOLERANCE,
-                                    TRENCH_ANGULAR_TOLERANCE)),
-                robot
-                    .getSwerveDrive()
-                    .driveTo(
-                        getFinalAlliancePose(),
-                        new ChassisSpeeds(-finalVelocity.in(MetersPerSecond), 0, 0))),
-        robot.getSwerveDrive().useMotionSet());
+    return driveToAlliance(initialVelocity, finalVelocity, null, null);
   }
 
   /**
@@ -176,5 +241,75 @@ public class TrenchDriving {
    */
   public Command driveToAlliance() {
     return driveToAlliance(TRENCH_VELOCITY, TRENCH_VELOCITY);
+  }
+
+  /**
+   * Creates a command that drives from the alliance zone to the neutral zone through the trench at
+   * a default velocity and given orientation.
+   *
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
+   * @return A command that drives from the alliance zone to the neutral zone through the trench at
+   *     a default velocity and given orientation.
+   */
+  public Command driveToNeutral(Rotation2d orientation) {
+    return driveToNeutral(TRENCH_VELOCITY, TRENCH_VELOCITY, null, orientation);
+  }
+
+  /**
+   * Creates a command that drives from the neutral zone to the alliance zone through the trench at
+   * a default velocity and given orientation.
+   *
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
+   * @return A command that drives from the neutral zone to the alliance zone through the trench at
+   *     a default velocity and given orientation.
+   */
+  public Command driveToAlliance(Rotation2d orientation) {
+    return driveToAlliance(TRENCH_VELOCITY, TRENCH_VELOCITY, null, orientation);
+  }
+
+  /**
+   * Creates a command that drives through the specified trench to the neutral zone, automatically
+   * determining the robot's orientation based on its heading.
+   */
+  public Command driveToNeutral(Trench trench) {
+    return driveToNeutral(TRENCH_VELOCITY, TRENCH_VELOCITY, trench, null);
+  }
+
+  /**
+   * Creates a command that drives through the specified trench to the alliance zone, automatically
+   * determining the robot's orientation based on its heading.
+   */
+  public Command driveToAlliance(Trench trench) {
+    return driveToAlliance(TRENCH_VELOCITY, TRENCH_VELOCITY, trench, null);
+  }
+
+  /**
+   * Creates a command that drives through the specified trench to the neutral zone at a default
+   * velocity and given orientation.
+   *
+   * @param trench The trench to drive through.
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
+   * @return A command that drives through the specified trench to the neutral zone at a default
+   *     velocity and given orientation.
+   */
+  public Command driveToNeutral(Trench trench, Rotation2d orientation) {
+    return driveToNeutral(TRENCH_VELOCITY, TRENCH_VELOCITY, trench, orientation);
+  }
+
+  /**
+   * Creates a command that drives through the specified trench to the alliance zone at a default
+   * velocity and given orientation.
+   *
+   * @param trench The trench to drive through.
+   * @param orientation The orientation of the robot while driving through the trench, or {@code
+   *     null} to automatically determine the orientation based on the robot's heading.
+   * @return A command that drives through the specified trench to the alliance zone at a default
+   *     velocity and given orientation.
+   */
+  public Command driveToAlliance(Trench trench, Rotation2d orientation) {
+    return driveToAlliance(TRENCH_VELOCITY, TRENCH_VELOCITY, trench, orientation);
   }
 }

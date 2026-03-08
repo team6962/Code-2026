@@ -2,9 +2,13 @@ package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import com.team6962.lib.logging.LoggingUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.auto.TrenchDriving.Trench;
+import java.util.Set;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -47,13 +51,29 @@ public class Autonomous {
         shootFuel.shootAllFuel());
   }
 
-  public Command outpostThenNeutralCycle() {
-    return Commands.sequence(
-        trench.driveToNeutral(),
-        neutralIntake.intake(Meters.of(1)),
-        trench.driveToAlliance(),
-        shootFuel.shootAllFuel(),
-        autoOutpost.autoOutpost());
+  public Command neutralCycleThenOutpost() {
+    return Commands.defer(
+        () -> {
+          Trench nearestTrench = trench.getNearestTrench();
+
+          return LoggingUtil.logCommand(
+              "neutralCycleThenOutpost",
+              Commands.sequence(
+                  LoggingUtil.logCommand("driveToNeutral", trench.driveToNeutral()),
+                  LoggingUtil.logCommand("neutralIntake", neutralIntake.intake(Meters.of(1))),
+                  LoggingUtil.logCommand(
+                      "driveToAlliance",
+                      trench.driveToAlliance(nearestTrench, Rotation2d.fromDegrees(180))),
+                  LoggingUtil.logCommand("shootFuel", shootFuel.shootAllFuel()),
+                  LoggingUtil.logCommand("autoOutpost", autoOutpost.autoOutpost())));
+        },
+        Set.of(
+            robot.getSwerveDrive().useRotation(),
+            robot.getSwerveDrive().useTranslation(),
+            robot.getIntakeRollers(),
+            robot.getIntakeExtension(),
+            robot.getHopper().getBeltFloor(),
+            robot.getHopper().getKicker()));
   }
 
   public Command leftEdgeCleanup() {

@@ -3,6 +3,7 @@ package frc.robot.auto;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.auto.shoot.AutoShoot;
 
 public class AutoOutpost {
   private final RobotContainer robot;
@@ -14,8 +15,10 @@ public class AutoOutpost {
   }
 
   public Command autoOutpost() {
-    return Commands.sequence(
-        robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST),
-        shootFuel.shootAllFuel().withTimeout(2.0));
+    return Commands.deadline(
+        new AutoShoot(robot)
+            .until(() -> !robot.getHopper().isEmpty())
+            .andThen(shootFuel.shootAllFuel()),
+        robot.getSwerveDrive().driveTo(FieldPositions.OUTPOST).repeatedly());
   }
 }
