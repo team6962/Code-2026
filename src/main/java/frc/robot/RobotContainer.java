@@ -18,15 +18,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoLowerHood;
-import frc.robot.auto.AutoOutpost;
-import frc.robot.auto.AutoSegments;
 import frc.robot.auto.Autonomous;
 import frc.robot.auto.CollectFuelFromHub;
 import frc.robot.auto.DriveStraightAuto;
-import frc.robot.auto.ShootFuel;
-import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
@@ -55,7 +50,6 @@ public class RobotContainer {
   private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
-  private final AutoSegments autoSegments;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
   private final Autonomous autonomous;
@@ -89,7 +83,6 @@ public class RobotContainer {
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
-    autoSegments = new AutoSegments(this);
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);
     trenchDriving = new TrenchDriving(this);
@@ -97,6 +90,7 @@ public class RobotContainer {
     autoOutpost = new AutoOutpost(this, shootFuel);
     autoDepot = new AutoDepot(this);
     collectFuelFromHub = new CollectFuelFromHub(this, trenchDriving);
+
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
@@ -107,10 +101,6 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Do Nothing", Commands.none());
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
-    autoChooser.addOption("driveToNeutral", trenchDriving.driveToNeutral());
-    autoChooser.addOption("autoOutpost", autoOutpost.autoOutpost());
-    autoChooser.addOption("driveToNeutral", trenchDriving.driveToNeutral());
-    autoChooser.addOption("Auto Depot", autoDepot.autoDepot());
     autoChooser.addOption(
         "Test Drive To Pose",
         swerveDrive
@@ -135,10 +125,13 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
-    autoChooser.addOption("Test Auto", autoSegments.testAuto());
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
     autoChooser.addOption("ScoopingUpFuelRight", collectFuelFromHub.scoopingUpFuelRight());
     autoChooser.addOption("ScoopingUpFuelLeft", collectFuelFromHub.scoopingUpFuelLeft());
+    autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
+    autoChooser.addOption("Outpost + Neutral", autonomous.outpostThenNeutralCycle());
+    autoChooser.addOption("Collect Fuel Along Left Edge", autonomous.leftEdgeCleanup());
+    autoChooser.addOption("Collect Fuel Along Right Edge", autonomous.RightEdgeCleanup());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
