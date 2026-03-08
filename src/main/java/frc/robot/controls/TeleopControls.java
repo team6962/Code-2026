@@ -21,10 +21,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
 import frc.robot.auto.AutoDepot;
+import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
-import frc.robot.auto.AutoOutpost;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
@@ -118,8 +118,7 @@ public class TeleopControls {
 
     driver // Auto Drive to Outpost
         .rightBumper()
-        .whileTrue(
-            autoOutpost.autoOutpost()); 
+        .whileTrue(autoOutpost.autoOutpost());
 
     // Dump fuel - WORKS
     driver
