@@ -56,4 +56,11 @@ public class FieldPositions {
   public static final Translation2d HUB_CENTER =
       new Translation2d( // These are suspicious, should be double checked
           Inches.of(182.11).in(Meters), Inches.of(158.84).in(Meters));
+
+  public static final Translation2d LEFT_END_OF_NEUTRAL_ZONE =
+      new Translation2d(
+          Inches.of(439.11).in(Meters), Inches.of(292.76).in(Meters)); // needs to be tuned
+  public static final Translation2d RIGHT_END_OF_NEUTRAL_ZONE =
+      new Translation2d(
+          Inches.of(439.11).in(Meters), Inches.of(24.92).in(Meters)); // needs to be tuned
 }

@@ -14,6 +14,7 @@ public class Autonomous {
   public final ShootFuel shootFuel;
   public final AutoDepot autoDepot;
   public final AutoOutpost autoOutpost;
+  public final AutoEdgeIntake autoEdgeIntake;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -22,6 +23,7 @@ public class Autonomous {
     this.shootFuel = new ShootFuel(robot);
     this.autoDepot = new AutoDepot(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
+    this.autoEdgeIntake = new AutoEdgeIntake(robot);
   }
 
   public Command neutralCycle() {
@@ -52,5 +54,15 @@ public class Autonomous {
         trench.driveToAlliance(),
         shootFuel.shootAllFuel(),
         autoOutpost.autoOutpost());
+  }
+
+  public Command leftEdgeCleanup() {
+    return Commands.sequence(
+        autoEdgeIntake.intakeToEdgeLeft(), trench.driveToAlliance(), shootFuel.shootAllFuel());
+  }
+
+  public Command RightEdgeCleanup() {
+    return Commands.sequence(
+        autoEdgeIntake.intakeToEdgeRight(), trench.driveToAlliance(), shootFuel.shootAllFuel());
   }
 }
