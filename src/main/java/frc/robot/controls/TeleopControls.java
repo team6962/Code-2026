@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.auto.AutoClimb;
-import frc.robot.auto.FieldPositions;
+import frc.robot.auto.AutoDepot;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
@@ -39,6 +39,7 @@ public class TeleopControls {
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
+  private AutoDepot autoDepot;
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -50,6 +51,7 @@ public class TeleopControls {
     this.autoClimb = new AutoClimb(robot);
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
+    this.autoDepot = new AutoDepot(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -102,32 +104,17 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
+    // Driver B is unused
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
-    driver.b().onTrue(autoClimb.climb());
+    driver.a().onTrue(autoClimb.climb());
     driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Depot
-    driver
-        .leftBumper()
-        .whileTrue(
-            Commands.sequence(
-                this.robot
-                    .getSwerveDrive()
-                    .driveTo(
-                        FieldPositions
-                            .DEPOT_OUTSIDE), // rough position estimate based on simulation, not
-                // exact
-                this.robot.getIntakeExtension().extend(),
-                Commands.parallel(
-                    this.robot
-                        .getSwerveDrive()
-                        .driveTo(FieldPositions.DEPOT_INSIDE), // also rough estimate
-                    this.robot.getIntakeRollers().intake())));
+    driver.leftBumper().whileTrue(autoDepot.autoDepot());
 
     driver // Auto Drive to Outpost
         .rightBumper()

@@ -18,11 +18,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.AutoSegments;
-import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
@@ -60,6 +61,8 @@ public class RobotContainer {
   private final TrenchDriving trenchDriving;
   private final AutoOutpost autoOutpost;
   private final ShootFuel shootFuel;
+  private final AutoDepot autoDepot;
+
   public RobotContainer() {
     LoggingUtil.logGitProperties();
 
@@ -90,6 +93,8 @@ public class RobotContainer {
     trenchDriving = new TrenchDriving(this);
     shootFuel = new ShootFuel(this);
     autoOutpost = new AutoOutpost(this, shootFuel);
+    autoDepot = new AutoDepot(this);
+
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
@@ -102,6 +107,8 @@ public class RobotContainer {
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
     autoChooser.addOption("driveToNeutral",trenchDriving.driveToNeutral());
     autoChooser.addOption("autoOutpost", autoOutpost.autoOutpost());
+    autoChooser.addOption("driveToNeutral", trenchDriving.driveToNeutral());
+    autoChooser.addOption("Auto Depot", autoDepot.autoDepot());
     autoChooser.addOption(
         "Test Drive To Pose",
         swerveDrive
