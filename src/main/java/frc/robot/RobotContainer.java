@@ -67,7 +67,8 @@ public class RobotContainer {
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
     climb = new Climb();
-    shooterHood = new ShooterHood(() -> new AutoLowerHood(swerveDrive).shouldLowerHood());
+    AutoLowerHood autoLowerHood = new AutoLowerHood(swerveDrive);
+    shooterHood = new ShooterHood(autoLowerHood::shouldLowerHood);
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
@@ -129,7 +130,7 @@ public class RobotContainer {
     autoChooser.addOption("ScoopingUpFuelRight", collectFuelFromHub.scoopingUpFuelRight());
     autoChooser.addOption("ScoopingUpFuelLeft", collectFuelFromHub.scoopingUpFuelLeft());
     autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
-    autoChooser.addOption("Outpost + Neutral", autonomous.outpostThenNeutralCycle());
+    autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Collect Fuel Along Left Edge", autonomous.leftEdgeCleanup());
     autoChooser.addOption("Collect Fuel Along Right Edge", autonomous.RightEdgeCleanup());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);

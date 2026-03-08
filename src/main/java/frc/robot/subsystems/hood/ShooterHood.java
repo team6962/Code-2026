@@ -238,12 +238,6 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
     }
-
-    // Automatically lower the hood all the way when near a trench
-    if (shouldLowerHoodSupplier.get()) {
-
-      moveTo(ShooterHoodConstants.MIN_ANGLE).schedule();
-    }
   }
 
   /**
@@ -400,23 +394,31 @@ public class ShooterHood extends SubsystemBase {
    * @param position The target position to move to.
    */
   private void setPositionControl(Angle position) {
-    if (isZeroed) {
+    if (!isZeroed) {
+      hoodMotor.setControl(new NeutralOut());
+    } else if (shouldLowerHoodSupplier.get()) {
+      hoodMotor.setControl(
+          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
+    } else {
       hoodMotor.setControl(
           new MotionMagicVoltage(position)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
-    } else {
-      hoodMotor.setControl(new NeutralOut());
     }
   }
 
   private void setPositionVelocityControl(Angle position, AngularVelocity velocity) {
-    if (isZeroed) {
+    if (!isZeroed) {
+      hoodMotor.setControl(new NeutralOut());
+    } else if (shouldLowerHoodSupplier.get()) {
+      hoodMotor.setControl(
+          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
+    } else {
       hoodMotor.setControl(
           new PositionVoltage(position)
               .withVelocity(velocity)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
-    } else {
-      hoodMotor.setControl(new NeutralOut());
     }
   }
 
