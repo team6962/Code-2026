@@ -104,13 +104,13 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver B is unused
+    // Driver A is unused
     // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
-    driver.a().onTrue(autoClimb.climb());
+    driver.b().onTrue(autoClimb.climb());
     driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Depot
