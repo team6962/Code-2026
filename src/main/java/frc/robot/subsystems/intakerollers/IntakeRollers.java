@@ -57,7 +57,7 @@ public class IntakeRollers extends SubsystemBase {
    * @return Command
    */
   public Command intake() {
-    return move(Volts.of(8));
+    return move(Volts.of(6));
   }
 
   /**
