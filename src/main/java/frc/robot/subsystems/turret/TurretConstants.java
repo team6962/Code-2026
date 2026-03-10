@@ -70,13 +70,13 @@ public class TurretConstants {
    * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MIN_ANGLE = Degrees.of(-100);
+  public static final Angle MIN_ANGLE = Degrees.of(-190);
 
   /**
    * The maximum angle that the turret can be at. This is used to prevent the turret from trying to
    * move beyond its physical limits.
    */
-  public static final Angle MAX_ANGLE = Degrees.of(300);
+  public static final Angle MAX_ANGLE = Degrees.of(370);
 
   /**
    * The voltage to apply to the turret motor when the operator is manually controlling the turret
