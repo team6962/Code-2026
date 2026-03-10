@@ -28,15 +28,15 @@ public final class IntakeExtensionConstants {
   public static final int MOTOR_CAN_ID = 40;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
   public static final Mass MOVING_MASS = Pounds.of(12);
-  public static final Distance MAX_POSITION = Inches.of(9.75);
+  public static final Distance MAX_POSITION = Inches.of(10.0);
   public static final Distance MIN_POSITION = Inches.of(0);
   public static final Distance RETRACT_POSITION = Inches.of(4.15);
-  public static final Angle ANGLE = Degrees.of(-18);
-  public static final Distance PINION_RADIUS = Inches.of(0.5);
+  public static final Angle ANGLE = Degrees.of(-18.5);
+  public static final Distance PINION_RADIUS = Inches.of(0.75);
   public static final int CANDI_DEVICE_ID = 20;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(1.0);
-  public static final double GEAR_RATIO = 4.5;
+  public static final double GEAR_RATIO = 7.2;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
@@ -47,19 +47,18 @@ public final class IntakeExtensionConstants {
           .withMotionMagic(
               new MotionMagicConfigs()
                   // Not tuned
-                  .withMotionMagicCruiseVelocity(0.8)
-                  .withMotionMagicAcceleration(0.8)
+                  .withMotionMagicCruiseVelocity(20.0)
+                  .withMotionMagicAcceleration(8.0)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                  .withKA(1.0)
+                  .withKA(0.035)
                   .withKD(0.0)
-                  .withKP(120.0)
-                  .withKG(-0.075)
-                  .withKV(5.5108)
-                  .withKS(0.425)
-                  .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign))
-          // Minimum and maximum output to move: -0.5, 0.35
+                  .withKP(100.0)
+                  .withKG(-0.045)
+                  .withKV(5.878)
+                  .withKS(0.315)
+                  .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120))
@@ -68,7 +67,7 @@ public final class IntakeExtensionConstants {
                   .withStatorCurrentLimitEnable(true))
           .withMotorOutput(
               new MotorOutputConfigs()
-                  .withInverted(InvertedValue.Clockwise_Positive)
+                  .withInverted(InvertedValue.CounterClockwise_Positive)
                   .withNeutralMode(NeutralModeValue.Coast));
 
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
