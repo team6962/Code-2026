@@ -200,7 +200,12 @@ public class IntakeExtension extends SubsystemBase {
                   new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              if (!getPosition()
+                  .isNear(
+                      IntakeExtensionConstants.MAX_POSITION,
+                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              }
             })
         .until(
             () ->
@@ -223,7 +228,12 @@ public class IntakeExtension extends SubsystemBase {
                   new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              if (!getPosition()
+                  .isNear(
+                      IntakeExtensionConstants.RETRACT_POSITION,
+                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              }
             })
         .until(
             () ->
