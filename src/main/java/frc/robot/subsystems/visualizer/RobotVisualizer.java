@@ -184,7 +184,7 @@ public class RobotVisualizer extends SubsystemBase {
     // Get robot state
     Angle turretAngle = robot.getTurret().getPosition();
     Angle hoodAngle = robot.getShooterHood().getPosition();
-    Distance climbPosition = robot.getClimb().getPosition();
+    Distance climbPosition = Inches.of(0);
     Distance intakePosition = robot.getIntakeExtension().getPosition();
     SwerveModulePosition[] modulePositions = robot.getSwerveDrive().getModulePositions();
 

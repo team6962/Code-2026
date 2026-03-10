@@ -22,7 +22,6 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
-import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
@@ -44,7 +43,7 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
-  private final Climb climb;
+  // private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -57,7 +56,7 @@ public class RobotContainer {
 
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
-    climb = new Climb();
+    // climb = new Climb();
     shooterHood = new ShooterHood();
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
@@ -162,9 +161,9 @@ public class RobotContainer {
     return shooterRollers;
   }
 
-  public Climb getClimb() {
-    return climb;
-  }
+  // public Climb getClimb() {
+  //   return climb;
+  // }
 
   public Hopper getHopper() {
     return hopper;

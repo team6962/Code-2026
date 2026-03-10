@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,10 +21,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
-import frc.robot.auto.AutoClimb;
+// import frc.robot.auto.AutoClimb;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
-import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
@@ -33,7 +31,7 @@ import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
-  private AutoClimb autoClimb;
+  //   private AutoClimb autoClimb;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
@@ -45,7 +43,7 @@ public class TeleopControls {
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
-    this.autoClimb = new AutoClimb(robot);
+    // this.autoClimb = new AutoClimb(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -104,8 +102,8 @@ public class TeleopControls {
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
-    driver.b().onTrue(autoClimb.climb());
-    driver.x().onTrue(autoClimb.unclimb());
+    // driver.b().onTrue(autoClimb.climb());
+    // driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Depot
     driver
@@ -158,9 +156,9 @@ public class TeleopControls {
         .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
 
     // Manual climb controls
-    operator.a().onTrue(robot.getClimb().descend()); // Lower climb
-    operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
-    operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
+    // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
+    // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
+    // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
@@ -240,16 +238,17 @@ public class TeleopControls {
                     .getIntakeExtension()
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
-    operator
-        .axisGreaterThan(Axis.kRightY.value, 0.5)
-        .and(() -> fineControl)
-        .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
+    // operator
+    //     .axisGreaterThan(Axis.kRightY.value, 0.5)
+    //     .and(() -> fineControl)
+    //     .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
 
-    operator
-        .axisLessThan(Axis.kRightY.value, -0.5)
-        .and(() -> fineControl)
-        .whileTrue(
-            this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
+    // operator
+    //     .axisLessThan(Axis.kRightY.value, -0.5)
+    //     .and(() -> fineControl)
+    //     .whileTrue(
+    //
+    // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Intake extension and retraction - WORKS
     Trigger intakeRetract = operator.rightStick().or(driver.back());
@@ -274,13 +273,13 @@ public class TeleopControls {
     load.whileTrue(robot.getHopper().load());
 
     // Climb retraction
-    Command autodescend = robot.getClimb().descend();
-    Trigger climbRetract =
-        new Trigger(() -> CommandUtil.isClearToOverride(robot.getClimb(), autodescend))
-            .and(RobotState::isTeleop)
-            .and(RobotState::isEnabled);
+    // Command autodescend = robot.getClimb().descend();
+    // Trigger climbRetract =
+    //     new Trigger(() -> CommandUtil.isClearToOverride(robot.getClimb(), autodescend))
+    //         .and(RobotState::isTeleop)
+    //         .and(RobotState::isEnabled);
 
-    climbRetract.onTrue(robot.getClimb().descend());
+    // climbRetract.onTrue(robot.getClimb().descend());
 
     AutoShoot autoShoot =
         new AutoShoot(
