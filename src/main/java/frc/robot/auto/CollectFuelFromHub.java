@@ -18,16 +18,16 @@ public class CollectFuelFromHub {
     return Commands.sequence(
         robot
             .getSwerveDrive()
-            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-60))),
+            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(-195))),
             Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
-            .withDeadline(robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, Rotation2d.fromDegrees(150)))));
+            .withDeadline(robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.RIGHT_NEUTRAL, Rotation2d.fromDegrees(-150)))));
   }
 
   public Command intakeBehindHubLeft() {
     return Commands.sequence(
         robot
             .getSwerveDrive()
-            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(60))),
+            .driveTo(new Pose2d(FieldPositions.HUB_BACK, Rotation2d.fromDegrees(195))),
             Commands.parallel(robot.getIntakeRollers().intake(), robot.getHopper().load())
             .withDeadline(robot.getSwerveDrive().driveTo(new Pose2d(FieldPositions.Trench.LEFT_NEUTRAL, Rotation2d.fromDegrees(150))))
         );
