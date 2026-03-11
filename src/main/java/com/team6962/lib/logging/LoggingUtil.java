@@ -3,6 +3,7 @@ package com.team6962.lib.logging;
 import com.ctre.phoenix6.controls.ControlRequest;
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
@@ -106,8 +107,30 @@ public class LoggingUtil {
   public static Command logCommand(String key, Command command) {
     DogLog.log("Commands/" + key, false);
 
-    return command
-        .beforeStarting(() -> DogLog.log("Commands/" + key, true))
-        .finallyDo(() -> DogLog.log("Commands/" + key, false));
+    CommandScheduler.getInstance().registerComposedCommands(command);
+
+    return new Command() {
+      @Override
+      public void initialize() {
+        DogLog.log("Commands/" + key, true);
+        command.initialize();
+      }
+
+      @Override
+      public void execute() {
+        command.execute();
+      }
+
+      @Override
+      public boolean isFinished() {
+        return command.isFinished();
+      }
+
+      @Override
+      public void end(boolean interrupted) {
+        command.end(interrupted);
+        DogLog.log("Commands/" + key, false);
+      }
+    };
   }
 }

@@ -2,13 +2,10 @@ package frc.robot.controls;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,6 +19,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 // import frc.robot.auto.AutoClimb;
+import frc.robot.auto.AutoDepot;
+import frc.robot.auto.AutoOutpost;
+import frc.robot.auto.ShootFuel;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
@@ -31,10 +31,13 @@ import frc.robot.subsystems.turret.TurretConstants;
 
 public class TeleopControls {
   private RobotContainer robot;
-  //   private AutoClimb autoClimb;
+  // private AutoClimb autoClimb;
+  private ShootFuel shootFuel;
+  private AutoOutpost autoOutpost;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
+  private AutoDepot autoDepot;
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -44,6 +47,9 @@ public class TeleopControls {
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
+    this.shootFuel = new ShootFuel(robot);
+    this.autoOutpost = new AutoOutpost(robot, shootFuel);
+    this.autoDepot = new AutoDepot(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -106,39 +112,11 @@ public class TeleopControls {
     // driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Depot
-    driver
-        .leftBumper()
-        .whileTrue(
-            Commands.sequence(
-                this.robot
-                    .getSwerveDrive()
-                    .driveTo(
-                        new Pose2d(
-                            1.518,
-                            5.947,
-                            new Rotation2d(
-                                Radians.of(
-                                    Math.PI)))), // rough position estimate based on simulation, not
-                // exact
-                this.robot.getIntakeExtension().extend(),
-                Commands.parallel(
-                    this.robot
-                        .getSwerveDrive()
-                        .driveTo(
-                            new Pose2d(
-                                0.546,
-                                5.947,
-                                new Rotation2d(Radians.of(Math.PI)))), // also rough estimate
-                    this.robot.getIntakeRollers().intake())));
+    driver.leftBumper().whileTrue(autoDepot.autoDepot());
 
     driver // Auto Drive to Outpost
         .rightBumper()
-        .whileTrue(
-            this.robot
-                .getSwerveDrive()
-                .driveTo(
-                    new Pose2d(
-                        0.6, 0.65, new Rotation2d(Radians.of(Math.PI))))); // also a rough estimate
+        .whileTrue(autoOutpost.autoOutpost());
 
     // Dump fuel - WORKS
     driver

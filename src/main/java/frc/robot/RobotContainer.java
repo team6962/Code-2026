@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoLowerHood;
+import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
@@ -49,6 +51,7 @@ public class RobotContainer {
   private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final ShooterFunctions shooterFunctions;
+  private final Autonomous autonomous;
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -60,7 +63,8 @@ public class RobotContainer {
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
     // climb = new Climb();
-    shooterHood = new ShooterHood();
+    AutoLowerHood autoLowerHood = new AutoLowerHood(swerveDrive);
+    shooterHood = new ShooterHood(autoLowerHood::shouldLowerHood);
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
@@ -77,6 +81,7 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     driveStraightAuto = new DriveStraightAuto(this);
+    autonomous = new Autonomous(this);
 
     configureAutonomousChooser();
 
@@ -88,7 +93,6 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Do Nothing", Commands.none());
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
-
     autoChooser.addOption(
         "Test Drive To Pose",
         swerveDrive
@@ -113,6 +117,11 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
+    autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
+    autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
+    autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
+    autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
+    autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 

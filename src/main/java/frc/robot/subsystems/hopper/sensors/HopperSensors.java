@@ -9,6 +9,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
@@ -38,6 +39,8 @@ public class HopperSensors extends SubsystemBase {
 
   private double jamTimeWhenFull = 0.25;
   private double jamTimeWhenEmpty = 0.25;
+
+  private int simulatedFuelCount = 0;
 
   /**
    * Constructs a new HopperSensors instance. Initializes the CANrange sensors for the Kicker, Upper
@@ -105,6 +108,10 @@ public class HopperSensors extends SubsystemBase {
         });
   }
 
+  public void setSimulatedFuelCount(int count) {
+    simulatedFuelCount = count;
+  }
+
   /**
    * Gets the current distance measured by the Kicker sensor.
    *
@@ -151,7 +158,9 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isHopperEmpty() {
-    return lowerHopperDistance.getValue().gt(lowerHopperSensorEmptyThreshold);
+    return RobotBase.isReal()
+        ? lowerHopperDistance.getValue().gt(lowerHopperSensorEmptyThreshold)
+        : simulatedFuelCount <= 3;
   }
 
   /**
@@ -162,7 +171,9 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isKickerFull() {
-    return kickerDistance.getValue().lt(kickerSensorFullThreshold);
+    return RobotBase.isReal()
+        ? kickerDistance.getValue().lt(kickerSensorFullThreshold)
+        : simulatedFuelCount >= 0;
   }
 
   /**
@@ -173,7 +184,9 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isKickerEmpty() {
-    return kickerDistance.getValue().gt(kickerSensorEmptyThreshold);
+    return RobotBase.isReal()
+        ? kickerDistance.getValue().gt(kickerSensorEmptyThreshold)
+        : simulatedFuelCount <= 0;
   }
 
   /**
