@@ -78,16 +78,6 @@ public class Autonomous {
             robot.getHopper().getKicker()));
   }
 
-  public Command leftEdgeCleanup() {
-    return Commands.sequence(
-        autoEdgeIntake.intakeToEdgeLeft(), trench.driveToAlliance(), shootFuel.shootAllFuel());
-  }
-
-  public Command rightEdgeCleanup() {
-    return Commands.sequence(
-        autoEdgeIntake.intakeToEdgeRight(), trench.driveToAlliance(), shootFuel.shootAllFuel());
-  }
-
   public Command intakeBehindHubLeft() {
     return Commands.sequence(
         trench.driveToNeutral(Trench.LEFT),
