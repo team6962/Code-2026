@@ -16,6 +16,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
@@ -182,6 +183,8 @@ public class ShooterHood extends SubsystemBase {
     } else {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
     }
+
+    CurrentDrawLogger.add("Shooter Hood", this::getSupplyCurrent);
   }
 
   @Override

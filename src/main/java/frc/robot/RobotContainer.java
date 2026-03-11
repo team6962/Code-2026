@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
@@ -51,6 +52,8 @@ public class RobotContainer {
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
+
+    CurrentDrawLogger.start();
 
     constants = RobotConstants.generate();
 

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -38,6 +39,8 @@ public class IntakeRollers extends SubsystemBase {
     if (RobotBase.isSimulation()) {
       simulation = new IntakeRollerSim(intakeMotor);
     }
+
+    CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
   }
 
   /** Returns command to make the motor move and stop */

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -41,6 +42,8 @@ public class Kicker extends SubsystemBase {
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
     }
+
+    CurrentDrawLogger.add("Kicker", this::getSupplyCurrent);
   }
 
   /**
@@ -131,9 +134,9 @@ public class Kicker extends SubsystemBase {
     StatusUtil.check(
         BaseStatusSignal.refreshAll(
             motorVelocitySignal, statorCurrentSignal, supplyCurrentSignal, appliedVoltageSignal));
-    DogLog.log("Kicker/AngularVelocity", getVelocity());
-    DogLog.log("Kicker/StatorCurrent", getStatorCurrent());
-    DogLog.log("Kicker/SupplyCurrent", getSupplyCurrent());
-    DogLog.log("Kicker/AppliedVoltage", getAppliedVoltage());
+    DogLog.log("Hopper/Kicker/AngularVelocity", getVelocity());
+    DogLog.log("Hopper/Kicker/StatorCurrent", getStatorCurrent());
+    DogLog.log("Hopper/Kicker/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Hopper/Kicker/AppliedVoltage", getAppliedVoltage());
   }
 }

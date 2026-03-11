@@ -18,6 +18,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
@@ -202,6 +203,8 @@ public class Turret extends SubsystemBase {
       // Assume the turret has been zeroed in simulation
       isZeroed = true;
     }
+
+    CurrentDrawLogger.add("Turret", this::getSupplyCurrent);
   }
 
   @Override

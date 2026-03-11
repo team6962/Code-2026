@@ -17,6 +17,7 @@ import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.phoenix.control.DynamicPositionControlRequest;
@@ -126,6 +127,8 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
     statorCurrentSignal = motor.getStatorCurrent(false);
     supplyCurrentSignal = motor.getSupplyCurrent(false);
     profilePositionSignal = motor.getClosedLoopReference(false);
+
+    CurrentDrawLogger.add(corner.getName() + " Steer Motor", this::getSupplyCurrent);
   }
 
   /**

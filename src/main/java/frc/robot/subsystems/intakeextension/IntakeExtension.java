@@ -18,6 +18,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -185,6 +186,8 @@ public class IntakeExtension extends SubsystemBase {
     } else {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
+
+    CurrentDrawLogger.add("Intake Extension", this::getSupplyCurrent);
   }
 
   /**

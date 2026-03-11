@@ -18,6 +18,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.StatusUtil;
@@ -113,6 +114,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     appliedVoltageSignal = motor.getMotorVoltage(false);
     statorCurrentSignal = motor.getStatorCurrent(false);
     supplyCurrentSignal = motor.getSupplyCurrent(false);
+
+    CurrentDrawLogger.add(corner.getName() + " Drive Motor", this::getSupplyCurrent);
   }
 
   /**
