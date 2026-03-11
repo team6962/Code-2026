@@ -117,6 +117,7 @@ public class RobotContainer {
 
     autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
     autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
+    autoChooser.addOption("EnemyDepot + Neutral", autonomous.enemyDepotThenNeutralCycle());
     autoChooser.addOption("Neutral + Outpost", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
     autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
