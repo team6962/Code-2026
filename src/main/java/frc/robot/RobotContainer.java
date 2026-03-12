@@ -111,6 +111,8 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
+    autoChooser.addOption("Follow Choreo Path", swerveDrive.followPath("example_path"));
+
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 

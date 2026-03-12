@@ -9,6 +9,8 @@ import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.motion.SwerveMotion;
+import com.team6962.lib.swerve.pathplanner.PathPlanner;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -40,6 +42,8 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
   /** Subsystem for controlling rotational motion. */
   private Subsystem rotation = new SubsystemBase() {};
 
+  private PathPlanner pathPlanner;
+
   /**
    * Creates a new CommandSwerveDrive with the given configuration constants.
    *
@@ -47,6 +51,8 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
    */
   public CommandSwerveDrive(DrivetrainConstants constants) {
     super(constants);
+
+    pathPlanner = new PathPlanner(this);
   }
 
   /**
@@ -377,6 +383,30 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
                         Inches);
                   }
                 }));
+  }
+
+  public PathPlanner getPathPlanner() {
+    return pathPlanner;
+  }
+
+  public Command followPath(String pathName) {
+    return pathPlanner.followPath(pathName);
+  }
+
+  public Command followPathRotation(String pathName) {
+    return pathPlanner.followPathRotation(pathName);
+  }
+
+  public Command followPathTranslation(String pathName) {
+    return pathPlanner.followPathTranslation(pathName);
+  }
+
+  public void loadChoreoPath(String pathName) {
+    pathPlanner.loadChoreoPath(pathName);
+  }
+
+  public void loadChoreoPath(String pathName, int splitIndex) {
+    pathPlanner.loadChoreoPath(pathName, splitIndex);
   }
 
   /**

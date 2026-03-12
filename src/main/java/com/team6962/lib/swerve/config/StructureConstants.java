@@ -170,6 +170,15 @@ public class StructureConstants implements Cloneable {
         new Translation2d(WheelBase.div(-2), TrackWidth.div(-2)));
   }
 
+  public Translation2d[] getModuleTranslations() {
+    return new Translation2d[] {
+        new Translation2d(WheelBase.div(2), TrackWidth.div(2)),
+        new Translation2d(WheelBase.div(2), TrackWidth.div(-2)),
+        new Translation2d(WheelBase.div(-2), TrackWidth.div(2)),
+        new Translation2d(WheelBase.div(-2), TrackWidth.div(-2))
+    };
+  }
+
   @Override
   public StructureConstants clone() {
     try {

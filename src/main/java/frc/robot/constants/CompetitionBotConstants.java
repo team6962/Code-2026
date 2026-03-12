@@ -26,6 +26,7 @@ import com.team6962.lib.phoenix.control.PositionMotionProfileType;
 import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.config.GyroscopeConstants;
+import com.team6962.lib.swerve.config.SimulationConstants;
 import com.team6962.lib.swerve.config.SteerEncoderConstants.DataFusionMethod;
 import com.team6962.lib.swerve.config.SwerveModuleConstants;
 import com.team6962.lib.swerve.config.UniqueModuleConstants;
@@ -34,6 +35,7 @@ import com.team6962.lib.vision.AprilTagCameraConstants;
 import com.team6962.lib.vision.AprilTagVisionConstants;
 import com.team6962.lib.vision.SphereCameraConstants;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -235,7 +237,11 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             super.getDrivetrainConstants()
                 .SteerEncoder
                 .clone()
-                .withDataFusion(DataFusionMethod.Remote));
+                .withDataFusion(DataFusionMethod.Remote))
+        .withSimulation(
+            new SimulationConstants()
+                .withInitialPose(new Pose2d(3.8, 0.662, new Rotation2d()))
+        );
   }
 
   @Override

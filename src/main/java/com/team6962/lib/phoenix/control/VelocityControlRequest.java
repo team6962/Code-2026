@@ -1,6 +1,7 @@
 package com.team6962.lib.phoenix.control;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
@@ -8,6 +9,7 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * Configuration for a control request that can be used to control the velocity of a motor. While
@@ -47,6 +49,12 @@ public class VelocityControlRequest {
   public ControlOutputType OutputType = ControlOutputType.VoltageFOC;
 
   /**
+   * Additional feedforward voltage to apply to the motor. Note that additional feedforward is
+   * only supported for voltage output types, and will be ignored for torque current control requests.
+   */
+  public Voltage AdditionalFeedforward = Volts.of(0);
+
+  /**
    * Constructs a control request with the given target velocity.
    *
    * @param Velocity The velocity to drive toward in rotations per second.
@@ -77,6 +85,7 @@ public class VelocityControlRequest {
       this.UseTimesync = vv.UseTimesync;
       this.MotionProfileType = VelocityMotionProfileType.None;
       this.OutputType = vv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+      this.AdditionalFeedforward = vv.getFeedForwardMeasure();
     } else if (controlRequest instanceof VelocityTorqueCurrentFOC vtc) {
       this.Velocity = vtc.Velocity;
       this.Slot = vtc.Slot;
@@ -91,6 +100,7 @@ public class VelocityControlRequest {
       this.UseTimesync = mmvv.UseTimesync;
       this.MotionProfileType = VelocityMotionProfileType.Trapezoidal;
       this.OutputType = mmvv.EnableFOC ? ControlOutputType.VoltageFOC : ControlOutputType.Voltage;
+      this.AdditionalFeedforward = mmvv.getFeedForwardMeasure();
     } else if (controlRequest instanceof MotionMagicVelocityTorqueCurrentFOC mmvtc) {
       this.Velocity = mmvtc.Velocity;
       this.Slot = mmvtc.Slot;
@@ -181,6 +191,17 @@ public class VelocityControlRequest {
     return this;
   }
 
+  /**
+   * Sets the additional feedforward voltage for this velocity control request.
+   *
+   * @param additionalFeedforward The additional feedforward voltage
+   * @return This control request object, for chaining.
+   */
+  public VelocityControlRequest withAdditionalFeedforward(Voltage additionalFeedforward) {
+    this.AdditionalFeedforward = additionalFeedforward;
+    return this;
+  }
+
   /** Converts this control request object to a {@link ControlRequest} object. */
   public ControlRequest toControlRequest() {
     if (MotionProfileType == null) {
@@ -199,12 +220,14 @@ public class VelocityControlRequest {
                 .withSlot(Slot)
                 .withUpdateFreqHz(UpdateFreqHz)
                 .withUseTimesync(UseTimesync)
+                .withFeedForward(AdditionalFeedforward)
                 .withEnableFOC(false);
           case VoltageFOC:
             return new VelocityVoltage(Velocity)
                 .withSlot(Slot)
                 .withUpdateFreqHz(UpdateFreqHz)
                 .withUseTimesync(UseTimesync)
+                .withFeedForward(AdditionalFeedforward)
                 .withEnableFOC(true);
           case TorqueCurrentFOC:
             return new VelocityTorqueCurrentFOC(Velocity)
@@ -219,12 +242,14 @@ public class VelocityControlRequest {
                 .withSlot(Slot)
                 .withUpdateFreqHz(UpdateFreqHz)
                 .withUseTimesync(UseTimesync)
+                .withFeedForward(AdditionalFeedforward)
                 .withEnableFOC(false);
           case VoltageFOC:
             return new MotionMagicVelocityVoltage(Velocity)
                 .withSlot(Slot)
                 .withUpdateFreqHz(UpdateFreqHz)
                 .withUseTimesync(UseTimesync)
+                .withFeedForward(AdditionalFeedforward)
                 .withEnableFOC(true);
           case TorqueCurrentFOC:
             return new MotionMagicVelocityTorqueCurrentFOC(Velocity)
