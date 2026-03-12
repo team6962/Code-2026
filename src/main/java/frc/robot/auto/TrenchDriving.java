@@ -18,7 +18,7 @@ import frc.robot.RobotContainer;
 
 /** Handles driving through the trenches autonomously. */
 public class TrenchDriving {
-  private static Distance OBSTACLES_CENTER_X = Meters.of(4.67);
+  public static Distance OBSTACLES_CENTER_X = Meters.of(4.67);
   private static Distance RIGHT_TRENCH_CENTER_Y = Inches.of(24.92);
   private static Distance HUB_Y = Meters.of(4.03463125);
   private static Distance TRENCH_INITIAL_X = Inches.of(48);
