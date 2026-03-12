@@ -1,7 +1,10 @@
 package frc.robot.controls;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
@@ -22,8 +25,8 @@ import frc.robot.RobotContainer;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.ShootFuel;
+import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
-import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
@@ -94,7 +97,7 @@ public class TeleopControls {
     Trigger teleopEnabledTrigger =
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled());
 
-    Command teleopSwerveCommand =
+    XBoxTeleopSwerveCommand teleopSwerveCommand =
         new XBoxTeleopSwerveCommand(
             robot.getSwerveDrive(), robot.getConstants().getTeleopSwerveConstants());
 
@@ -160,10 +163,6 @@ public class TeleopControls {
 
     // Shoot - WORKS
     operator.rightTrigger().whileTrue(robot.getHopper().feed());
-
-    // Pass fuel to alliance zone
-    operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
-    operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
 
     // Fine control
     operator
@@ -265,44 +264,84 @@ public class TeleopControls {
             robot.getTurret(),
             robot.getShooterHood(),
             robot.getShooterRollers(),
-            robot.getShooterFunctions(),
+            robot.getHubFunctions(),
             () -> AutoShoot.HUB_TRANSLATION,
             () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
             () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
 
+    Trigger inAllianceZone =
+        new Trigger(
+            () ->
+                robot.getSwerveDrive().getPosition2d().getX()
+                    < TrenchDriving.OBSTACLES_CENTER_X.in(Meters));
+
     Trigger autoshootTrigger =
-        new Trigger(RobotState::isTeleop).and(RobotState::isEnabled).and(() -> !fineControl);
+        new Trigger(RobotState::isTeleop)
+            .and(RobotState::isEnabled)
+            .and(inAllianceZone)
+            .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
 
-    operator.leftStick().and(autoShoot.isReadyToShoot()).whileTrue(robot.getHopper().feed());
+    AutoShoot autoPass =
+        new AutoShoot(
+            robot.getSwerveDrive(),
+            robot.getTurret(),
+            robot.getShooterHood(),
+            robot.getShooterRollers(),
+            robot.getPassFunctions(),
+            () ->
+                robot.getSwerveDrive().getPosition2d().getY() > AutoShoot.HUB_TRANSLATION.getY()
+                    ? AutoShoot.PASS_RIGHT_TRANSLATION
+                    : AutoShoot.PASS_LEFT_TRANSLATION,
+            () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
+            () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
 
-    ShooterFunctions functions = robot.getShooterFunctions();
+    Trigger autoPassTrigger =
+        new Trigger(RobotState::isTeleop)
+            .and(RobotState::isEnabled)
+            .and(inAllianceZone.negate())
+            .and(() -> !fineControl);
 
-    driver
-        .a()
+    autoPassTrigger.whileTrue(autoPass);
+
+    operator
+        .leftStick()
+        .or(driver.a())
+        .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(
             Commands.parallel(
-                robot
-                    .getShooterRollers()
-                    .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance)),
-                robot.getShooterHood().moveTo(() -> functions.getHoodAngle(shootingTestDistance)),
-                Commands.sequence(
-                    Commands.waitUntil(
-                        () ->
-                            robot
-                                    .getShooterRollers()
-                                    .getAngularVelocity()
-                                    .isNear(
-                                        functions.getFlywheelVelocity(shootingTestDistance),
-                                        RotationsPerSecond.of(1))
-                                && robot
-                                    .getShooterHood()
-                                    .getPosition()
-                                    .isNear(
-                                        functions.getHoodAngle(shootingTestDistance),
-                                        Degrees.of(1))),
-                    robot.getHopper().feed())));
+                robot.getHopper().feed(),
+                teleopSwerveCommand.limitVelocity(
+                    MetersPerSecond.of(0.25), DegreesPerSecond.of(30))));
+
+    // ShooterFunctions functions = robot.getHubFunctions();
+
+    // driver
+    //     .a()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             robot
+    //                 .getShooterRollers()
+    //                 .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance)),
+    //             robot.getShooterHood().moveTo(() ->
+    // functions.getHoodAngle(shootingTestDistance)),
+    //             Commands.sequence(
+    //                 Commands.waitUntil(
+    //                     () ->
+    //                         robot
+    //                                 .getShooterRollers()
+    //                                 .getAngularVelocity()
+    //                                 .isNear(
+    //                                     functions.getFlywheelVelocity(shootingTestDistance),
+    //                                     RotationsPerSecond.of(1))
+    //                             && robot
+    //                                 .getShooterHood()
+    //                                 .getPosition()
+    //                                 .isNear(
+    //                                     functions.getHoodAngle(shootingTestDistance),
+    //                                     Degrees.of(1))),
+    //                 robot.getHopper().feed())));
   }
 
   private Command rumble(
