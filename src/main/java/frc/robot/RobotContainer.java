@@ -50,7 +50,8 @@ public class RobotContainer {
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-  private final ShooterFunctions shooterFunctions;
+  private final ShooterFunctions hubFunctions;
+  private final ShooterFunctions passFunctions;
   private final Autonomous autonomous;
 
   public RobotContainer() {
@@ -74,9 +75,10 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
-    shooterFunctions =
+    hubFunctions =
         new ShooterFunctions(
             RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv");
+    passFunctions = new ShooterFunctions("shooter_pass_data.csv");
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -122,6 +124,18 @@ public class RobotContainer {
     autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
     autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
+    autoChooser.addOption(
+        "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Front Right Steer", swerveDrive.getModules()[1].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Back Left Steer", swerveDrive.getModules()[2].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Back Right Steer", swerveDrive.getModules()[3].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Front Drive", swerveDrive.driveSysId("Front Drive", true, true, false, false, 0));
+    autoChooser.addOption(
+        "SysId Back Drive", swerveDrive.driveSysId("Back Drive", false, false, true, true, 2));
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
@@ -181,8 +195,12 @@ public class RobotContainer {
     return hopper;
   }
 
-  public ShooterFunctions getShooterFunctions() {
-    return shooterFunctions;
+  public ShooterFunctions getHubFunctions() {
+    return hubFunctions;
+  }
+
+  public ShooterFunctions getPassFunctions() {
+    return passFunctions;
   }
 
   public RobotVisualizer getVisualizer() {

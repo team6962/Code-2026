@@ -6,6 +6,8 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -14,6 +16,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -32,6 +35,11 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 /**
  * Controls the steer motor of a swerve module, which rotates the wheel around its vertical axis.
@@ -52,6 +60,12 @@ import edu.wpi.first.units.measure.Voltage;
 public class SteerMechanism implements SwerveComponent, AutoCloseable {
   /** The drivetrain constants used to configure the mechanism. */
   private DrivetrainConstants constants;
+
+  /** The corner of the robot that this module is occupying. */
+  private Corner corner;
+
+  /** Indicates whether the mechanism is running system identification. */
+  private boolean sysIdRunning;
 
   /** The TalonFX motor controller for the steer motor. */
   private TalonFX motor;
@@ -91,6 +105,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
    * @param constants The drivetrain configuration constants
    */
   public SteerMechanism(Corner corner, DrivetrainConstants constants) {
+    this.corner = corner;
     this.constants = constants;
 
     CANBus bus = new CANBus(constants.CANBusName);
@@ -328,7 +343,10 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
    */
   public void setControl(ControlRequest controlRequest) {
     lastControlRequest = controlRequest;
-    motor.setControl(controlRequest);
+
+    if (!sysIdRunning) {
+      motor.setControl(controlRequest);
+    }
   }
 
   /** Closes the motor controller and encoder, releasing resources. */
@@ -336,5 +354,39 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
   public void close() {
     motor.close();
     encoder.close();
+  }
+
+  /**
+   * Returns a command that runs a system identification routine on the steer mechanism. This
+   * routine applies a series of quasistatic and dynamic voltage inputs to the motor while logging
+   * the relevant data for analysis.
+   *
+   * @return A command that performs the system identification routine
+   */
+  public Command sysId() {
+    SysIdRoutine routine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.per(Second).of(2), Volts.of(7), Seconds.of(5)),
+            new SysIdRoutine.Mechanism(
+                voltage -> motor.setControl(new VoltageOut(voltage).withEnableFOC(false)),
+                log ->
+                    log.motor(corner.getName() + " Steer Motor")
+                        .angularPosition(getPosition())
+                        .angularVelocity(getVelocity())
+                        .angularAcceleration(getAcceleration())
+                        .voltage(getAppliedVoltage()),
+                new Subsystem() {},
+                corner.getName() + " Steer Motor"));
+
+    return Commands.sequence(
+            Commands.runOnce(() -> sysIdRunning = true),
+            routine.quasistatic(Direction.kForward),
+            Commands.waitSeconds(1),
+            routine.quasistatic(Direction.kReverse),
+            Commands.waitSeconds(1),
+            routine.dynamic(Direction.kForward),
+            Commands.waitSeconds(1),
+            routine.dynamic(Direction.kReverse))
+        .finallyDo(() -> sysIdRunning = false);
   }
 }
