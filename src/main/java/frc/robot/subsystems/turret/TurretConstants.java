@@ -2,7 +2,6 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -57,14 +56,14 @@ public class TurretConstants {
    * turret passes through the sensor moving from higher to lower angles. Set to null to disable
    * zeroing when moving in this direction.
    */
-  public static final Angle MINIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(3.176874 * 34.5 / 27.0);
+  public static final Angle MINIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(233.11);
 
   /**
    * The maximum angle that the turret can be at to trigger the hall sensor. This is used when the
    * turret passes through the sensor moving from lower to higher angles. Set to null to disable
    * zeroing when moving in this direction.
    */
-  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Radians.of(3.299592 * 34.5 / 27.0);
+  public static final Angle MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE = Degrees.of(242.87);
 
   /**
    * The minimum angle that the turret can be at. This is used to prevent the turret from trying to
