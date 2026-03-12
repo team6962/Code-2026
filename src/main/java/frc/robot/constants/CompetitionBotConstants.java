@@ -50,15 +50,15 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         new TalonFXConfiguration()
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicCruiseVelocity(14.4)
-                    .withMotionMagicAcceleration(21.2))
+                    .withMotionMagicCruiseVelocity(13)
+                    .withMotionMagicAcceleration(20))
             .withSlot0(
                 new Slot0Configs()
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(120))
-                    .withSupplyCurrentLimit(Amps.of(80)))
+                    .withSupplyCurrentLimit(Amps.of(50)))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
     TalonFXConfiguration baseSteerMotorConfig =
@@ -80,9 +80,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4cDriveMotorConfig = baseDriveMotorConfig.clone();
     mk4cDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    mk4cDriveMotorConfig.Slot0.kP = 2.0;
-    mk4cDriveMotorConfig.Slot0.kV = 0.71;
-    mk4cDriveMotorConfig.Slot0.kS = 0.144;
+    mk4cDriveMotorConfig.Slot0.kP = 0.5;
+    mk4cDriveMotorConfig.Slot0.kV = 0.708;
+    mk4cDriveMotorConfig.Slot0.kS = 0.092619;
+    mk4cDriveMotorConfig.Slot0.kA = 0.1255 / 2.0;
 
     TalonFXConfiguration mk4cSteerMotorConfig = baseSteerMotorConfig.clone();
     mk4cSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -91,9 +92,9 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         new Slot0Configs()
             .withKP(15)
             .withKD(0.5)
-            .withKS(0.325)
-            .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
-            .withKA(0.034); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKS(0.19246)
+            .withKV(12.0 / (6000.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
+            .withKA(0.068177); // SysId
 
     UniqueModuleConstants mk4cConstants =
         new UniqueModuleConstants()
@@ -104,20 +105,21 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4nADriveMotorConfig = baseDriveMotorConfig.clone();
     mk4nADriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    mk4nADriveMotorConfig.Slot0.kP = 2.0;
-    mk4nADriveMotorConfig.Slot0.kV = 0.71;
-    mk4nADriveMotorConfig.Slot0.kS = 0.144;
+    mk4nADriveMotorConfig.Slot0.kP = 0.5;
+    mk4nADriveMotorConfig.Slot0.kV = 0.708;
+    mk4nADriveMotorConfig.Slot0.kS = 0.13811;
+    mk4nADriveMotorConfig.Slot0.kA = 0.18457 / 2.0;
 
     TalonFXConfiguration mk4nASteerMotorConfig = baseSteerMotorConfig.clone();
     mk4nASteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
     mk4nASteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(25)
-            .withKD(1.25)
-            .withKS(0.24)
-            .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
-            .withKA(0.08); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKP(12.916)
+            .withKD(0.40581)
+            .withKS(0.25503)
+            .withKV(12.0 / (6000.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
+            .withKA(0.085981); // SysId
 
     UniqueModuleConstants mk4nAConstants =
         new UniqueModuleConstants()
@@ -150,7 +152,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.9314))) // Measured with used wheels
+                .withWheelRadius(Inches.of(1.907879))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -184,7 +186,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withControlLoopFrequency(Hertz.of(100))
                 .withSignalUpdateRate(Hertz.of(100))
-                .withTimesyncControlRequests(false)
+                .withTimesyncControlRequests(true)
                 .withUseThreadedControlLoop(true)
                 .withMinimizeLogging(true))
         .withDriving(
@@ -211,8 +213,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withDeviceConfiguration(baseDriveMotorConfig)
                 .withGearReduction(5.9)
-                .withOutputType(ControlOutputType.VoltageFOC)
-                .withVelocityControlMotionProfile(VelocityMotionProfileType.None)
+                .withOutputType(ControlOutputType.Voltage)
+                .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
                 .withVelocitySlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))
@@ -224,7 +226,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withDeviceConfiguration(
                     baseSteerMotorConfig) // Unused because all modules are given unique constants
                 .withGearReduction(12.8) // Unused because all modules are given unique constants
-                .withOutputType(ControlOutputType.VoltageFOC)
+                .withOutputType(ControlOutputType.Voltage)
                 .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
                 .withPositionSlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
