@@ -51,7 +51,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(13)
-                    .withMotionMagicAcceleration(20))
+                    .withMotionMagicAcceleration(17))
             .withSlot0(
                 new Slot0Configs()
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
@@ -67,9 +67,9 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(120))
-                    .withSupplyCurrentLimit(Amps.of(60)))
+                    .withSupplyCurrentLimit(Amps.of(40)))
             .withMotionMagic(
-                new MotionMagicConfigs().withMotionMagicExpo_kV(2).withMotionMagicExpo_kA(0.25));
+                new MotionMagicConfigs().withMotionMagicExpo_kV(3).withMotionMagicExpo_kA(0.4));
 
     // MODULE PROPERTIES (TODO: Check in CAD)
     //                        MK4c MK4nA MK4nB
