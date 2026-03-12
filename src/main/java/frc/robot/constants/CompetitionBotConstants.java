@@ -201,8 +201,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
                 .withAutoAngularVelocity(RotationsPerSecond.of(1))
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
-                .withAutoLinearAccelerationScalar(0.03)
-                .withAutoAngularAccelerationScalar(0.03)
+                .withAutoLinearAccelerationScalar(0.06)
+                .withAutoAngularAccelerationScalar(0.06)
                 .withTranslationFeedbackKP(0.25) // Not tuned
                 .withTranslationFeedbackKD(0.0) // Not tuned
                 .withAngleFeedbackKP(0.5) // Not tuned
@@ -284,7 +284,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
-        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        .withMultiTagStdDevs(VecBuilder.fill(0.03, 0.03, 0.03, 0.15))
+        .withStdDevDistanceScalar(0.3)
         .withCameraSimProperties(
             new SimCameraProperties()
                 .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
