@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intakerollers;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -11,6 +13,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -25,6 +29,10 @@ public class IntakeRollers extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Voltage> appliedVoltageSignal;
   private IntakeRollerSim simulation;
+  private double intakeVoltage = 8.0;
+  private double intakeStallVoltage = 12.0;
+  private Debouncer stallDebouncer = new Debouncer(0.25, DebounceType.kRising);
+  private boolean stalling = false;
 
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
@@ -40,6 +48,20 @@ public class IntakeRollers extends SubsystemBase {
       simulation = new IntakeRollerSim(intakeMotor);
     }
 
+    DogLog.tunable(
+        "Intake Voltage",
+        intakeVoltage,
+        value -> {
+          intakeVoltage = value;
+        });
+
+    DogLog.tunable(
+        "Intake Stall Voltage",
+        intakeStallVoltage,
+        value -> {
+          intakeStallVoltage = value;
+        });
+
     CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
   }
 
@@ -47,7 +69,7 @@ public class IntakeRollers extends SubsystemBase {
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new VoltageOut(voltage));
+          intakeMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
         },
         () -> {
           intakeMotor.setControl(new CoastOut());
@@ -60,7 +82,14 @@ public class IntakeRollers extends SubsystemBase {
    * @return Command
    */
   public Command intake() {
-    return move(Volts.of(6));
+    return runEnd(
+        () -> {
+          intakeMotor.setControl(
+              new VoltageOut(stalling ? intakeStallVoltage : intakeVoltage).withEnableFOC(false));
+        },
+        () -> {
+          intakeMotor.setControl(new CoastOut());
+        });
   }
 
   /**
@@ -120,5 +149,10 @@ public class IntakeRollers extends SubsystemBase {
     DogLog.log("intakeRollers/statorCurrent", getStatorCurrent());
     DogLog.log("intakeRollers/supplyCurrent", getSupplyCurrent());
     DogLog.log("intakeRollers/appliedVoltage", getAppliedVoltage());
+    DogLog.log("intakeRollers/stalling", stalling);
+
+    stalling =
+        stallDebouncer.calculate(
+            getVelocity().abs(RotationsPerSecond) < 1.0 && getStatorCurrent().abs(Amps) > 100.0);
   }
 }
