@@ -23,9 +23,10 @@ public class TrenchDriving {
   private static Distance HUB_Y = Meters.of(4.03463125);
   private static Distance TRENCH_INITIAL_X = Inches.of(48);
   private static Distance TRENCH_FINAL_X = Inches.of(48);
+  private static Distance NEAR_TRENCH_ENTERANCE_DISTANCE = Inches.of(60);
   private static LinearVelocity TRENCH_VELOCITY = MetersPerSecond.of(1.5);
-  private static Distance TRENCH_LINEAR_TOLERANCE = Inches.of(6);
-  private static Angle TRENCH_ANGULAR_TOLERANCE = Degrees.of(10);
+  private static Distance TRENCH_LINEAR_TOLERANCE = Inches.of(10);
+  private static Angle TRENCH_ANGULAR_TOLERANCE = Degrees.of(20);
 
   private RobotContainer robot;
 
@@ -107,6 +108,11 @@ public class TrenchDriving {
         getTrenchRobotOrientation(overrideOrientation));
   }
 
+  private boolean isInTrench(double x) {
+    return x > OBSTACLES_CENTER_X.minus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters)
+        && x < OBSTACLES_CENTER_X.plus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters);
+  }
+
   /**
    * Creates a command that drives from the alliance zone to the neutral zone through the trench.
    *
@@ -130,7 +136,8 @@ public class TrenchDriving {
                     .getSwerveDrive()
                     .driveTo(
                         getInitialAlliancePose(trench, orientation),
-                        new ChassisSpeeds(initialVelocity.in(MetersPerSecond), 0, 0)),
+                        new ChassisSpeeds(initialVelocity.in(MetersPerSecond), 0, 0))
+                    .onlyIf(() -> !isInTrench(robot.getSwerveDrive().getPosition2d().getX())),
                 robot
                     .getSwerveDrive()
                     .driveTo(getInitialAlliancePose(trench, orientation))
@@ -142,7 +149,8 @@ public class TrenchDriving {
                                 .isNear(
                                     getInitialAlliancePose(trench, orientation),
                                     TRENCH_LINEAR_TOLERANCE,
-                                    TRENCH_ANGULAR_TOLERANCE)),
+                                    TRENCH_ANGULAR_TOLERANCE))
+                    .onlyIf(() -> !isInTrench(robot.getSwerveDrive().getPosition2d().getX())),
                 robot
                     .getSwerveDrive()
                     .driveTo(
