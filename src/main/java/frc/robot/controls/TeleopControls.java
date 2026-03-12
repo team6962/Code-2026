@@ -1,7 +1,6 @@
 package frc.robot.controls;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -308,12 +307,11 @@ public class TeleopControls {
     operator
         .leftStick()
         .or(driver.a())
-        .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(
-            Commands.parallel(
-                robot.getHopper().feed(),
-                teleopSwerveCommand.limitVelocity(
-                    MetersPerSecond.of(0.25), DegreesPerSecond.of(30))));
+            teleopSwerveCommand.limitVelocity(
+                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125)))
+        .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
+        .whileTrue(robot.getHopper().feed());
 
     // ShooterFunctions functions = robot.getHubFunctions();
 
