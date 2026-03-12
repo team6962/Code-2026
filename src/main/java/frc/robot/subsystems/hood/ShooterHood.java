@@ -401,7 +401,7 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setControl(new NeutralOut());
     } else if (shouldLowerHoodSupplier.get()) {
       hoodMotor.setControl(
-          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
       hoodMotor.setControl(
@@ -415,7 +415,7 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setControl(new NeutralOut());
     } else if (shouldLowerHoodSupplier.get()) {
       hoodMotor.setControl(
-          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
       hoodMotor.setControl(
