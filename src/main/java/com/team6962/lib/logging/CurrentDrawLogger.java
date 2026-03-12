@@ -3,15 +3,14 @@ package com.team6962.lib.logging;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class CurrentDrawLogger extends SubsystemBase {
   private static List<Device> devices = new ArrayList<>();
@@ -42,7 +41,7 @@ public class CurrentDrawLogger extends SubsystemBase {
   public void periodic() {
     Voltage batteryVoltage = Volts.of(RobotController.getBatteryVoltage());
     Current totalCurrent = getTotalCurrent();
-  
+
     DogLog.log("CurrentDraw/BatteryVoltage", batteryVoltage);
     DogLog.log("CurrentDraw/TotalCurrent", totalCurrent);
 

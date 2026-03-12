@@ -43,12 +43,14 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private XBoxTeleopSwerveConstants constants;
 
   /**
-   * Dynamic linear velocity limit that can be set at runtime to temporarily reduce the maximum speed of the robot.
+   * Dynamic linear velocity limit that can be set at runtime to temporarily reduce the maximum
+   * speed of the robot.
    */
   private LinearVelocity dynamicLinearVelocityLimit = null;
 
   /**
-   * Dynamic angular velocity limit that can be set at runtime to temporarily reduce the maximum rotation speed of the robot.
+   * Dynamic angular velocity limit that can be set at runtime to temporarily reduce the maximum
+   * rotation speed of the robot.
    */
   private AngularVelocity dynamicAngularVelocityLimit = null;
 
@@ -80,8 +82,12 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
-   * Adds dynamic velocity limits that will be applied on top of the configured maximum velocities. This can be used to temporarily reduce the robot's speed (e.g., when shooting) without changing the overall configuration. If either parameter is set to null, limits will be removed for the associated component. Because of this, {@link #removeDynamicVelocityLimits()} is equivalent to calling this method with null parameters.
-   * 
+   * Adds dynamic velocity limits that will be applied on top of the configured maximum velocities.
+   * This can be used to temporarily reduce the robot's speed (e.g., when shooting) without changing
+   * the overall configuration. If either parameter is set to null, limits will be removed for the
+   * associated component. Because of this, {@link #removeDynamicVelocityLimits()} is equivalent to
+   * calling this method with null parameters.
+   *
    * @param maxLinearVelocity The maximum linear velocity to apply
    * @param maxAngularVelocity The maximum angular velocity to apply
    */
@@ -92,7 +98,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
-   * Removes any dynamic velocity limits that were previously set, allowing the robot to return to its normal maximum speeds as defined in the configuration constants. This can be used to restore full speed after a temporary reduction (e.g., after shooting is complete).
+   * Removes any dynamic velocity limits that were previously set, allowing the robot to return to
+   * its normal maximum speeds as defined in the configuration constants. This can be used to
+   * restore full speed after a temporary reduction (e.g., after shooting is complete).
    */
   public void removeDynamicVelocityLimits() {
     this.dynamicLinearVelocityLimit = null;
@@ -100,8 +108,12 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
-   * Returns a command that applies temporary dynamic velocity limits while it is active. This can be used to create commands that temporarily reduce the robot's speed (e.g., when shooting) without changing the overall configuration constants. When this command ends, either naturally or through interruption, the velocity limits will be removed and the robot will return to its normal maximum speeds.
-   * 
+   * Returns a command that applies temporary dynamic velocity limits while it is active. This can
+   * be used to create commands that temporarily reduce the robot's speed (e.g., when shooting)
+   * without changing the overall configuration constants. When this command ends, either naturally
+   * or through interruption, the velocity limits will be removed and the robot will return to its
+   * normal maximum speeds.
+   *
    * @param maxLinearVelocity The maximum linear velocity to apply while the command is active
    * @param maxAngularVelocity The maximum angular velocity to apply while the command is active
    * @return A command that applies the specified velocity limits while it is active
@@ -109,7 +121,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   public Command limitVelocity(
       LinearVelocity maxLinearVelocity, AngularVelocity maxAngularVelocity) {
     return Commands.startEnd(
-        () -> addDynamicVelocityLimits(maxLinearVelocity, maxAngularVelocity), this::removeDynamicVelocityLimits);
+        () -> addDynamicVelocityLimits(maxLinearVelocity, maxAngularVelocity),
+        this::removeDynamicVelocityLimits);
   }
 
   /**
@@ -141,7 +154,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
         && Math.hypot(targetVelocity.vxMetersPerSecond, targetVelocity.vyMetersPerSecond)
             > dynamicLinearVelocityLimitMetersPerSecond) {
       double scale =
-          dynamicLinearVelocityLimitMetersPerSecond / Math.hypot(targetVelocity.vxMetersPerSecond, targetVelocity.vyMetersPerSecond);
+          dynamicLinearVelocityLimitMetersPerSecond
+              / Math.hypot(targetVelocity.vxMetersPerSecond, targetVelocity.vyMetersPerSecond);
       targetVelocity =
           new ChassisSpeeds(
               targetVelocity.vxMetersPerSecond * scale,
@@ -150,8 +164,11 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     }
 
     if (dynamicAngularVelocityLimitRadiansPerSecond != 0
-        && Math.abs(targetVelocity.omegaRadiansPerSecond) > dynamicAngularVelocityLimitRadiansPerSecond) {
-      double scale = dynamicAngularVelocityLimitRadiansPerSecond / Math.abs(targetVelocity.omegaRadiansPerSecond);
+        && Math.abs(targetVelocity.omegaRadiansPerSecond)
+            > dynamicAngularVelocityLimitRadiansPerSecond) {
+      double scale =
+          dynamicAngularVelocityLimitRadiansPerSecond
+              / Math.abs(targetVelocity.omegaRadiansPerSecond);
       targetVelocity =
           new ChassisSpeeds(
               targetVelocity.vxMetersPerSecond,
