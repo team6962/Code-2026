@@ -32,7 +32,7 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
-  public Command neutralCycle() {
+  public Command doubleNeutralCycle() {
     return Commands.sequence(
         trench.driveToNeutral(),
         neutralIntake.intake(Meters.of(1)),
@@ -40,6 +40,14 @@ public class Autonomous {
         shootFuel.shootAllFuel(),
         trench.driveToNeutral(),
         neutralIntake.intake(Meters.of(1), Meters.of(2.5)),
+        trench.driveToAlliance(),
+        shootFuel.shootAllFuel());
+  }
+
+  public Command singleNeutralCycle() {
+    return Commands.sequence(
+        trench.driveToNeutral(),
+        neutralIntake.intake(Meters.of(1)),
         trench.driveToAlliance(),
         shootFuel.shootAllFuel());
   }

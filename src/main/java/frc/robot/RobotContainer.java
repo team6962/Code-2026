@@ -119,7 +119,8 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
-    autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
+    autoChooser.addOption("Single Neutral Cycle", autonomous.singleNeutralCycle());
+    autoChooser.addOption("Double Neutral Cycle", autonomous.doubleNeutralCycle());
     autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
     autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
     autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
