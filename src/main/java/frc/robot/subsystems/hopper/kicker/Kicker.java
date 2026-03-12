@@ -55,7 +55,7 @@ public class Kicker extends SubsystemBase {
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
-          kickerMotor.setControl(new VoltageOut(voltage));
+          kickerMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
         },
         () -> {
           kickerMotor.setControl(new NeutralOut());
