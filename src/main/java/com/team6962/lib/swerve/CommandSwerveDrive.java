@@ -3,11 +3,15 @@ package com.team6962.lib.swerve;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.motion.DriveSysIdMotion;
 import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.pathplanner.PathPlanner;
 
@@ -20,10 +24,13 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -415,5 +422,65 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
    */
   public void latePeriodic() {
     updateMotion();
+  }
+
+  /**
+   * Creates a command that applies voltage to the drive motors for system identification. The
+   * command runs a series of quasistatic and dynamic tests in both forward and reverse directions,
+   * applying voltage to the specified modules and logging the velocity and voltage of the measured
+   * module for analysis.
+   *
+   * <p>Note that the measured motor must be oriented such that positive voltage causes forward
+   * motion.
+   *
+   * @param name The name to use for logging the measured data (e.g. "Drive Motors")
+   * @param fl Whether to apply voltage to the front-left module
+   * @param fr Whether to apply voltage to the front-right module
+   * @param bl Whether to apply voltage to the back-left module
+   * @param br Whether to apply voltage to the back-right module
+   * @param measuredModule The index of the module to measure for logging (0 = front-left, 1 =
+   *     front-right, 2 = back-left, 3 = back-right)
+   * @return A command that performs the system identification routine on the specified modules
+   */
+  public Command driveSysId(
+      String name, boolean fl, boolean fr, boolean bl, boolean br, int measuredModule) {
+    SysIdRoutine routine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.per(Second).of(2), Volts.of(7), Seconds.of(4)),
+            new SysIdRoutine.Mechanism(
+                voltage ->
+                    applyMotion(
+                        new DriveSysIdMotion(
+                            this,
+                            new Voltage[] {
+                              fl ? voltage : Volts.of(0),
+                              fr ? voltage : Volts.of(0),
+                              bl ? voltage : Volts.of(0),
+                              br ? voltage : Volts.of(0)
+                            })),
+                log ->
+                    log.motor(name)
+                        .angularPosition(
+                            getModules()[measuredModule].getDriveMechanism().getAngularPosition())
+                        .angularVelocity(
+                            getModules()[measuredModule].getDriveMechanism().getAngularVelocity())
+                        .voltage(
+                            getModules()[measuredModule].getDriveMechanism().getAppliedVoltage()),
+                new Subsystem() {},
+                name));
+
+    Command command =
+        Commands.sequence(
+            routine.quasistatic(Direction.kForward),
+            Commands.waitSeconds(1),
+            routine.quasistatic(Direction.kReverse),
+            Commands.waitSeconds(1),
+            routine.dynamic(Direction.kForward),
+            Commands.waitSeconds(1),
+            routine.dynamic(Direction.kReverse));
+
+    command.addRequirements(useMotion());
+
+    return command;
   }
 }

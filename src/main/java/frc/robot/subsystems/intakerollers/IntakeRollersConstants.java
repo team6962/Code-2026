@@ -23,7 +23,7 @@ public class IntakeRollersConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120))
-                  .withSupplyCurrentLimit(Amps.of(60))
+                  .withSupplyCurrentLimit(Amps.of(40))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true));
 }

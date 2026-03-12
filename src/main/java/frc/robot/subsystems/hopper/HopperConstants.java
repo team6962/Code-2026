@@ -27,7 +27,7 @@ public class HopperConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120)) // everything needs to be tuned
-                  .withSupplyCurrentLimit(Amps.of(60)) // current limits might not be neccesary
+                  .withSupplyCurrentLimit(Amps.of(40))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true));
 
@@ -46,7 +46,7 @@ public class HopperConstants {
                   .withStatorCurrentLimitEnable(true)
                   .withStatorCurrentLimit(80)
                   .withSupplyCurrentLimitEnable(true)
-                  .withSupplyCurrentLimit(40));
+                  .withSupplyCurrentLimit(30));
   // Sensors
   // The CAN IDs for the sensors: kicker, upper hopper, and lower hopper.
   public static final int KICKER_SENSOR_CAN_ID = 30;

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
@@ -202,6 +203,8 @@ public class Turret extends SubsystemBase {
       // Assume the turret has been zeroed in simulation
       isZeroed = true;
     }
+
+    CurrentDrawLogger.add("Turret", this::getSupplyCurrent);
   }
 
   @Override
@@ -294,7 +297,9 @@ public class Turret extends SubsystemBase {
     // motor position to the minimum angle that can trigger the hall sensor
     if (isHallSensorTriggered()
         && TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
-        && getPosition().lt(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE)) {
+        && getPosition().lt(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE)
+        && (getPosition().isNear(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
+            || !hasHallSensorBeenTriggered)) {
       motor.setPosition(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE);
     }
 
@@ -302,7 +307,9 @@ public class Turret extends SubsystemBase {
     // motor position to the maximum angle that can trigger the hall sensor
     if (isHallSensorTriggered()
         && TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
-        && getPosition().gt(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)) {
+        && getPosition().gt(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)
+        && (getPosition().isNear(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
+            || !hasHallSensorBeenTriggered)) {
       motor.setPosition(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE);
     }
 

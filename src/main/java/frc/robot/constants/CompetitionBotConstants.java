@@ -52,15 +52,15 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         new TalonFXConfiguration()
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicCruiseVelocity(14.4)
-                    .withMotionMagicAcceleration(21.2))
+                    .withMotionMagicCruiseVelocity(13)
+                    .withMotionMagicAcceleration(17))
             .withSlot0(
                 new Slot0Configs()
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(120))
-                    .withSupplyCurrentLimit(Amps.of(80)))
+                    .withSupplyCurrentLimit(Amps.of(50)))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
     TalonFXConfiguration baseSteerMotorConfig =
@@ -69,9 +69,9 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(120))
-                    .withSupplyCurrentLimit(Amps.of(60)))
+                    .withSupplyCurrentLimit(Amps.of(40)))
             .withMotionMagic(
-                new MotionMagicConfigs().withMotionMagicExpo_kV(2).withMotionMagicExpo_kA(0.25));
+                new MotionMagicConfigs().withMotionMagicExpo_kV(3).withMotionMagicExpo_kA(0.4));
 
     // MODULE PROPERTIES (TODO: Check in CAD)
     //                        MK4c MK4nA MK4nB
@@ -82,9 +82,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4cDriveMotorConfig = baseDriveMotorConfig.clone();
     mk4cDriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    mk4cDriveMotorConfig.Slot0.kP = 2.0;
-    mk4cDriveMotorConfig.Slot0.kV = 0.71;
-    mk4cDriveMotorConfig.Slot0.kS = 0.144;
+    mk4cDriveMotorConfig.Slot0.kP = 0.5;
+    mk4cDriveMotorConfig.Slot0.kV = 0.708;
+    mk4cDriveMotorConfig.Slot0.kS = 0.092619;
+    mk4cDriveMotorConfig.Slot0.kA = 0.1255 / 2.0;
 
     TalonFXConfiguration mk4cSteerMotorConfig = baseSteerMotorConfig.clone();
     mk4cSteerMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -93,9 +94,9 @@ public class CompetitionBotConstants extends BaseRobotConstants {
         new Slot0Configs()
             .withKP(15)
             .withKD(0.5)
-            .withKS(0.325)
-            .withKV(12.0 / (5800.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
-            .withKA(0.034); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKS(0.19246)
+            .withKV(12.0 / (6000.0 / 60.0) * 12.8) // KV = gear ratio * peak voltage / free speed
+            .withKA(0.068177); // SysId
 
     UniqueModuleConstants mk4cConstants =
         new UniqueModuleConstants()
@@ -106,20 +107,21 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     TalonFXConfiguration mk4nADriveMotorConfig = baseDriveMotorConfig.clone();
     mk4nADriveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    mk4nADriveMotorConfig.Slot0.kP = 2.0;
-    mk4nADriveMotorConfig.Slot0.kV = 0.71;
-    mk4nADriveMotorConfig.Slot0.kS = 0.144;
+    mk4nADriveMotorConfig.Slot0.kP = 0.5;
+    mk4nADriveMotorConfig.Slot0.kV = 0.708;
+    mk4nADriveMotorConfig.Slot0.kS = 0.13811;
+    mk4nADriveMotorConfig.Slot0.kA = 0.18457 / 2.0;
 
     TalonFXConfiguration mk4nASteerMotorConfig = baseSteerMotorConfig.clone();
     mk4nASteerMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     mk4nASteerMotorConfig.Feedback.RotorToSensorRatio = 18.75;
     mk4nASteerMotorConfig.Slot0 =
         new Slot0Configs()
-            .withKP(25)
-            .withKD(1.25)
-            .withKS(0.24)
-            .withKV(12.0 / (5800.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
-            .withKA(0.08); // KA = MOI * peak voltage / gear ratio / stall torque
+            .withKP(12.916)
+            .withKD(0.40581)
+            .withKS(0.25503)
+            .withKV(12.0 / (6000.0 / 60.0) * 18.75) // KV = gear ratio * peak voltage / free speed
+            .withKA(0.085981); // SysId
 
     UniqueModuleConstants mk4nAConstants =
         new UniqueModuleConstants()
@@ -152,7 +154,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.9314))) // Measured with used wheels
+                .withWheelRadius(Inches.of(1.907879))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -186,7 +188,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withControlLoopFrequency(Hertz.of(100))
                 .withSignalUpdateRate(Hertz.of(100))
-                .withTimesyncControlRequests(false)
+                .withTimesyncControlRequests(true)
                 .withUseThreadedControlLoop(true)
                 .withMinimizeLogging(true))
         .withDriving(
@@ -201,11 +203,11 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
                 .withAutoAngularVelocity(RotationsPerSecond.of(1))
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
-                .withAutoLinearAccelerationScalar(0.03)
-                .withAutoAngularAccelerationScalar(0.03)
+                .withAutoLinearAccelerationScalar(0.06)
+                .withAutoAngularAccelerationScalar(0.06)
                 .withTranslationFeedbackKP(0.25) // Not tuned
                 .withTranslationFeedbackKD(0.0) // Not tuned
-                .withAngleFeedbackKP(0.1) // Not tuned
+                .withAngleFeedbackKP(0.5) // Not tuned
                 .withAngleFeedbackKD(0.0)) // Not tuned
         .withDriveMotor(
             baseConstants
@@ -213,8 +215,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withDeviceConfiguration(baseDriveMotorConfig)
                 .withGearReduction(5.9)
-                .withOutputType(ControlOutputType.VoltageFOC)
-                .withVelocityControlMotionProfile(VelocityMotionProfileType.None)
+                .withOutputType(ControlOutputType.Voltage)
+                .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
                 .withVelocitySlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))
@@ -226,7 +228,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withDeviceConfiguration(
                     baseSteerMotorConfig) // Unused because all modules are given unique constants
                 .withGearReduction(12.8) // Unused because all modules are given unique constants
-                .withOutputType(ControlOutputType.VoltageFOC)
+                .withOutputType(ControlOutputType.Voltage)
                 .withPositionControlMotionProfile(PositionMotionProfileType.Exponential)
                 .withPositionSlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
@@ -288,7 +290,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         -Math.PI / 4))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
-        .withMultiTagStdDevs(VecBuilder.fill(0.1, 0.1, 0.1, 0.5))
+        .withMultiTagStdDevs(VecBuilder.fill(0.03, 0.03, 0.03, 0.15))
+        .withStdDevDistanceScalar(0.3)
         .withCameraSimProperties(
             new SimCameraProperties()
                 .setCalibration(640, 480, Rotation2d.fromDegrees(60.54)) // needs to be checked
@@ -304,22 +307,24 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
-    return super.getSphereCameraConstants();
-    // .withName("Color-2")
-    // .withClassId(0)
-    // .withFOVHeight(Rotation2d.fromDegrees(48.9))
-    // .withFOVWidth(Rotation2d.fromDegrees(70))
-    // .withCameraHeightPixels(800)
-    // .withCameraWidthPixels(1280)
-    // .withFocalLengthX(907.41)
-    // .withFocalLengthY(907.64)
-    // .withMaxDetectionRange(Meters.of(18.37)) // diagonal length of the field
-    // .withSphereDiameter(Inches.of(5.91))
-    // .withMaxTargets(50) // Temporary value until we tune object detection on the practice field
-    // .withRobotToCameraTransform(
-    //     new Transform3d(
-    //         new Translation3d(Inches.of(16.25).in(Meters), 0, Inches.of(20.0).in(Meters)),
-    //         new Rotation3d(0, Math.PI / 6, 0)));
+    return super.getSphereCameraConstants()
+        .withName("Color-3")
+        .withClassId(0)
+        .withFOVHeight(Rotation2d.fromDegrees(47.23))
+        .withFOVWidth(Rotation2d.fromDegrees(60.48))
+        .withCameraHeightPixels(600)
+        .withCameraWidthPixels(800)
+        .withFocalLengthX(686.17)
+        .withFocalLengthY(686.21)
+        .withMaxDetectionRange(
+            Inches.of(426.708074544)) // Farthest distance the camera can detect a target
+        .withSphereDiameter(Inches.of(5.91))
+        .withMaxTargets(50) // Temporary value until we tune object detection
+        .withRobotToCameraTransform(
+            new Transform3d(
+                new Translation3d(
+                    Inches.of(12.6644).in(Meters), 0, 0), // Placeholder for real camera transform
+                new Rotation3d(0, Degrees.of(25.2).in(Radians), 0)));
   }
 
   @Override

@@ -379,6 +379,21 @@ public class MotionSwerveDrive implements AutoCloseable {
   }
 
   /**
+   * Checks if the robot is within a translational tolerance of a target pose.
+   *
+   * @param target The target pose to check against
+   * @param translationTolerance Maximum allowed translation error from target position
+   * @return {@code true} if within the translational tolerance, {@code false} otherwise
+   */
+  public boolean isNear(Pose2d target, Distance translationTolerance) {
+    Pose2d current = getPosition2d();
+
+    double linearError = current.getTranslation().getDistance(target.getTranslation());
+
+    return linearError <= translationTolerance.in(Meters);
+  }
+
+  /**
    * Gets the current field-relative velocity of the robot as a {@link ChassisSpeeds} object.
    *
    * @return The {@link ChassisSpeeds} (vx, vy, omega)
