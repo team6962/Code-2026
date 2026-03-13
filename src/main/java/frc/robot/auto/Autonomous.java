@@ -44,7 +44,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
-        shootFuel.shootAllFuelStationary());
+        shootFuel.shoot());
   }
 
   private Command doubleNeutralCycle(boolean rightSide) {
@@ -67,7 +67,7 @@ public class Autonomous {
             .followPath("left_neutral.2", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        shootFuel.shootAllFuelStationary());
+        shootFuel.shoot());
   }
 
   public Command leftSingleNeutralCycle() {
