@@ -33,7 +33,7 @@ public class AutoShootConstants {
   public static final int optimizationIterations = 20;
 
   /** Maximum allowable flywheel velocity error to shoot. */
-  public static final AngularVelocity flywheelVelocityTolerance = RotationsPerSecond.of(0.5);
+  public static final AngularVelocity flywheelVelocityTolerance = RotationsPerSecond.of(0.75);
 
   /** Maximum allowable hood angle error to shoot. */
   public static final Angle hoodAngleTolerance = Degrees.of(2);
