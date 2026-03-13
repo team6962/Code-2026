@@ -44,12 +44,12 @@
    "val":0.04953
   },
   "vmax":{
-   "exp":"5000 RPM",
-   "val":523.5987755982989
+   "exp":"4000 RPM",
+   "val":418.87902047863906
   },
   "tmax":{
-   "exp":"1 N * m",
-   "val":1.0
+   "exp":"0.75 N * m",
+   "val":0.75
   },
   "cof":{
    "exp":"1",
@@ -57,16 +57,16 @@
   },
   "bumper":{
    "front":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"16.25 in",
+    "val":0.41275
    },
    "side":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"16.5 in",
+    "val":0.4191
    },
    "back":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"16.25 in",
+    "val":0.41275
    }
   },
   "differentialTrackWidth":{
