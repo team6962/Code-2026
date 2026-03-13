@@ -119,15 +119,12 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
-    autoChooser.addOption("Left Neutral Cycle", autonomous.leftNeutralCycle());
+    autoChooser.addOption("Left Single Neutral Cycle", autonomous.leftSingleNeutralCycle());
     autoChooser.addOption("Left Double Neutral Cycle", autonomous.leftDoubleNeutralCycle());
+    autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
+    autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
+    autoChooser.addOption("Preload", autonomous.preload());
 
-    autoChooser.addOption("Single Neutral Cycle", autonomous.singleNeutralCycle());
-    autoChooser.addOption("Double Neutral Cycle", autonomous.doubleNeutralCycle());
-    autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
-    autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
-    autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
-    autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
     autoChooser.addOption(
         "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
     autoChooser.addOption(

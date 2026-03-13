@@ -407,6 +407,18 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
     return pathPlanner.followPathTranslation(pathName);
   }
 
+  public Command followPath(String pathName, boolean mirrorPath) {
+    return pathPlanner.followPath(pathName, mirrorPath);
+  }
+
+  public Command followPathRotation(String pathName, boolean mirrorPath) {
+    return pathPlanner.followPathRotation(pathName, mirrorPath);
+  }
+
+  public Command followPathTranslation(String pathName, boolean mirrorPath) {
+    return pathPlanner.followPathTranslation(pathName, mirrorPath);
+  }
+
   public void loadChoreoPath(String pathName) {
     pathPlanner.loadChoreoPath(pathName);
   }

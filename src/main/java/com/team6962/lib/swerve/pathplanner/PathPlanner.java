@@ -3,6 +3,9 @@ package com.team6962.lib.swerve.pathplanner;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Newtons;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -28,6 +31,7 @@ public class PathPlanner {
   private ChassisSpeeds lastSpeeds;
   private boolean trackingTranslation = false;
   private boolean trackingRotation = false;
+  private Map<String, PathPlannerPath> mirroredPaths = new HashMap<>();
 
   public PathPlanner(CommandSwerveDrive drivetrain) {
     this.drivetrain = drivetrain;
@@ -182,9 +186,15 @@ public class PathPlanner {
     return wrapperCommand;
   }
 
-  public PathPlannerPath loadChoreoPath(String pathName) {
+  public PathPlannerPath loadChoreoPath(String pathName, boolean mirrorPath) {
     try {
-      return PathPlannerPath.fromChoreoTrajectory(pathName);
+      PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName);
+
+      if (mirrorPath) {
+        return mirroredPaths.computeIfAbsent(pathName, key -> unmirroredPath.mirrorPath());
+      } else {
+        return unmirroredPath;
+      }
     } catch (Exception e) {
       DriverStation.reportError("Failed to load path: " + pathName, true);
       e.printStackTrace();
@@ -192,9 +202,15 @@ public class PathPlanner {
     }
   }
 
-  public PathPlannerPath loadChoreoPath(String pathName, int splitIndex) {
+  public PathPlannerPath loadChoreoPath(String pathName, int splitIndex, boolean mirrorPath) {
     try {
-      return PathPlannerPath.fromChoreoTrajectory(pathName, splitIndex);
+      PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName, splitIndex);
+
+      if (mirrorPath) {
+        return mirroredPaths.computeIfAbsent(pathName + "." + splitIndex, key -> unmirroredPath.mirrorPath());
+      } else {
+        return unmirroredPath;
+      }
     } catch (Exception e) {
       DriverStation.reportError("Failed to load path: " + pathName + "." + splitIndex, true);
       e.printStackTrace();
@@ -202,7 +218,17 @@ public class PathPlanner {
     }
   }
 
-  private Command followPath(String pathName, boolean trackRotation, boolean trackTranslation) {
+  public PathPlannerPath loadChoreoPath(String pathName) {
+    loadChoreoPath(pathName, true);
+    return loadChoreoPath(pathName, false);
+  }
+
+  public PathPlannerPath loadChoreoPath(String pathName, int splitIndex) {
+    loadChoreoPath(pathName, splitIndex, true);
+    return loadChoreoPath(pathName, splitIndex, false);
+  }
+
+  private Command followPath(String pathName, boolean trackRotation, boolean trackTranslation, boolean mirrorPath) {
     if (pathName.contains(".")) {
       // Use the split index if it's included in the path name
       String[] parts = pathName.split("\\.");
@@ -210,46 +236,70 @@ public class PathPlanner {
       if (parts.length == 2) {
         try {
           int splitIndex = Integer.parseInt(parts[1]);
-          return followPath(parts[0], splitIndex, trackRotation, trackTranslation);
+          return followPath(parts[0], splitIndex, trackRotation, trackTranslation, mirrorPath);
         } catch (NumberFormatException e) {
           DriverStation.reportError("Invalid split index in path name: " + pathName, true);
         }
       }
     }
 
-    return followPath(pathName, loadChoreoPath(pathName), trackRotation, trackTranslation);
+    return followPath(pathName, loadChoreoPath(pathName, mirrorPath), trackRotation, trackTranslation);
   }
 
   private Command followPath(
-      String pathName, int splitIndex, boolean trackRotation, boolean trackTranslation) {
+      String pathName, int splitIndex, boolean trackRotation, boolean trackTranslation, boolean mirrorPath) {
     return followPath(
         pathName + "." + splitIndex,
-        loadChoreoPath(pathName, splitIndex),
+        loadChoreoPath(pathName, splitIndex, mirrorPath),
         trackRotation,
         trackTranslation);
   }
 
+  public Command followPath(String pathName, boolean mirrorPath) {
+    return followPath(pathName, true, true, mirrorPath);
+  }
+
+  public Command followPathRotation(String pathName, boolean mirrorPath) {
+    return followPath(pathName, true, false, mirrorPath);
+  }
+
+  public Command followPathTranslation(String pathName, boolean mirrorPath) {
+    return followPath(pathName, false, true, mirrorPath);
+  }
+
+  public Command followPath(String pathName, int splitIndex, boolean mirrorPath) {
+    return followPath(pathName, splitIndex, true, true, mirrorPath);
+  }
+
+  public Command followPathRotation(String pathName, int splitIndex, boolean mirrorPath) {
+    return followPath(pathName, splitIndex, true, false, mirrorPath);
+  }
+
+  public Command followPathTranslation(String pathName, int splitIndex, boolean mirrorPath) {
+    return followPath(pathName, splitIndex, false, true, mirrorPath);
+  }
+
   public Command followPath(String pathName) {
-    return followPath(pathName, true, true);
+    return followPath(pathName, false);
   }
 
   public Command followPathRotation(String pathName) {
-    return followPath(pathName, true, false);
+    return followPathRotation(pathName, false);
   }
 
   public Command followPathTranslation(String pathName) {
-    return followPath(pathName, false, true);
+    return followPathTranslation(pathName, false);
   }
 
   public Command followPath(String pathName, int splitIndex) {
-    return followPath(pathName, splitIndex, true, true);
+    return followPath(pathName, splitIndex, false);
   }
 
   public Command followPathRotation(String pathName, int splitIndex) {
-    return followPath(pathName, splitIndex, true, false);
+    return followPathRotation(pathName, splitIndex, false);
   }
 
   public Command followPathTranslation(String pathName, int splitIndex) {
-    return followPath(pathName, splitIndex, false, true);
+    return followPathTranslation(pathName, splitIndex, false);
   }
 }
