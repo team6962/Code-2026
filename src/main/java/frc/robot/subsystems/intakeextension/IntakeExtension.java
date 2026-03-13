@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -371,7 +372,9 @@ public class IntakeExtension extends SubsystemBase {
       simulation.update();
     }
 
-    if (isHallSensorTriggered() && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
+    if (RobotState.isDisabled()
+        && isHallSensorTriggered()
+        && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
 

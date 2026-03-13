@@ -21,7 +21,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
-import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.phoenix.StatusUtil;
 import com.team6962.lib.phoenix.control.DynamicPositionControlRequest;
 import com.team6962.lib.phoenix.control.PositionControlRequest;
@@ -201,7 +200,7 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
           basePath + "DataTimestamp",
           StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
 
-      LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
+      // LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
     }
 
     // If running a position or velocity request, log the target position or

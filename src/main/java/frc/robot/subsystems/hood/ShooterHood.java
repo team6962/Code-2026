@@ -17,7 +17,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
-import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -229,7 +228,7 @@ public class ShooterHood extends SubsystemBase {
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
         Degrees);
 
-    LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
+    // LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
 
     // Update the currently applied control request with a new gravity feedforward
     // voltage if the control request is a MotionMagicVoltage
@@ -237,7 +236,9 @@ public class ShooterHood extends SubsystemBase {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
-    if (isHallSensorTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
+    if (RobotState.isDisabled()
+        && isHallSensorTriggered()
+        && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
     }
