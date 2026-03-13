@@ -49,8 +49,8 @@ public class VelocityControlRequest {
   public ControlOutputType OutputType = ControlOutputType.VoltageFOC;
 
   /**
-   * Additional feedforward voltage to apply to the motor. Note that additional feedforward is
-   * only supported for voltage output types, and will be ignored for torque current control requests.
+   * Additional feedforward voltage to apply to the motor. Note that additional feedforward is only
+   * supported for voltage output types, and will be ignored for torque current control requests.
    */
   public Voltage AdditionalFeedforward = Volts.of(0);
 

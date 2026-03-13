@@ -19,7 +19,6 @@ import com.team6962.lib.swerve.MotionSwerveDrive;
 import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -72,10 +71,12 @@ public class VelocityMotion implements SwerveMotion {
    * Creates a new VelocityMotion with the specified field-relative velocity.
    *
    * @param velocity The target field-relative chassis speeds
-   * @param forceFeedforwards The feedforward forces for each swerve module, which can be null if not used
+   * @param forceFeedforwards The feedforward forces for each swerve module, which can be null if
+   *     not used
    * @param swerveDrive The swerve drive to control
    */
-  public VelocityMotion(ChassisSpeeds velocity, Force[] forceFeedforwards, MotionSwerveDrive swerveDrive) {
+  public VelocityMotion(
+      ChassisSpeeds velocity, Force[] forceFeedforwards, MotionSwerveDrive swerveDrive) {
     this.velocity = velocity;
     this.hasTranslation =
         Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01;
@@ -193,7 +194,8 @@ public class VelocityMotion implements SwerveMotion {
       double motorKT = swerveDrive.getConstants().DriveMotor.SimulatedMotor.KtNMPerAmp;
       double ffCurrentAmps = ffMotorTorqueNm / motorKT;
       Current ffCurrent = Amps.of(ffCurrentAmps);
-      Resistance windingResistance = Ohms.of(swerveDrive.getConstants().DriveMotor.SimulatedMotor.rOhms);
+      Resistance windingResistance =
+          Ohms.of(swerveDrive.getConstants().DriveMotor.SimulatedMotor.rOhms);
       Voltage ffVoltage = ffCurrent.times(windingResistance);
 
       module.setControl(

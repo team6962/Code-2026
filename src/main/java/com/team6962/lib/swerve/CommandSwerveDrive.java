@@ -14,7 +14,6 @@ import com.team6962.lib.swerve.config.DrivetrainConstants;
 import com.team6962.lib.swerve.motion.DriveSysIdMotion;
 import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.pathplanner.PathPlanner;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
