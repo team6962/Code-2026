@@ -119,7 +119,8 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
-    autoChooser.addOption("Follow Choreo Path", swerveDrive.followPath("example_path"));
+    autoChooser.addOption("Left Neutral Cycle", autonomous.leftNeutralCycle());
+    autoChooser.addOption("Left Double Neutral Cycle", autonomous.leftDoubleNeutralCycle());
 
     autoChooser.addOption("Single Neutral Cycle", autonomous.singleNeutralCycle());
     autoChooser.addOption("Double Neutral Cycle", autonomous.doubleNeutralCycle());
