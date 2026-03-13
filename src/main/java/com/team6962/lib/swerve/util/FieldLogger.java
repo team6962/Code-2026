@@ -48,11 +48,13 @@ public class FieldLogger implements SwerveComponent {
   private LogData logData;
 
   /**
-   * Data structure to hold the robot pose and module poses for logging. This is cloned before being accessed in the logging thread to avoid concurrency issues.
+   * Data structure to hold the robot pose and module poses for logging. This is cloned before being
+   * accessed in the logging thread to avoid concurrency issues.
    */
   private static class LogData implements Cloneable {
     /** The robot's current pose on the field. */
     public Pose2d robotPose;
+
     /** The poses of the swerve modules relative to the robot. */
     public Pose2d[] modulePoses;
 
@@ -93,7 +95,8 @@ public class FieldLogger implements SwerveComponent {
   }
 
   /**
-   * Logs the robot pose and module poses to the Field2d widget. This method is called periodically by the Notifier in a separate thread.
+   * Logs the robot pose and module poses to the Field2d widget. This method is called periodically
+   * by the Notifier in a separate thread.
    */
   private void threadedLog() {
     LogData dataCopy;
