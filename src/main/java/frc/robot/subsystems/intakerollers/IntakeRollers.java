@@ -94,8 +94,9 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
-   * Returns command where motor intakes fuel at full speed. This should only be used when shooting fuel out of the robot with the intake is not a concern.
-   * 
+   * Returns command where motor intakes fuel at full speed. This should only be used when shooting
+   * fuel out of the robot with the intake is not a concern.
+   *
    * @return The command to intake fuel at full speed.
    */
   public Command intakeFast() {
