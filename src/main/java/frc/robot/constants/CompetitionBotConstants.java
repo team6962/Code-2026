@@ -205,10 +205,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
                 .withAutoLinearAccelerationScalar(0.06)
                 .withAutoAngularAccelerationScalar(0.06)
-                .withTranslationFeedbackKP(0.25) // Not tuned
-                .withTranslationFeedbackKD(0.0) // Not tuned
-                .withAngleFeedbackKP(0.5) // Not tuned
-                .withAngleFeedbackKD(0.0)) // Not tuned
+                .withTranslationFeedbackKP(1.0) // Not tuned
+                .withTranslationFeedbackKD(0.1) // Not tuned
+                .withAngleFeedbackKP(1.0) // Not tuned
+                .withAngleFeedbackKD(0.1)) // Not tuned
         .withDriveMotor(
             baseConstants
                 .DriveMotor
@@ -241,9 +241,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .clone()
                 .withDataFusion(DataFusionMethod.Remote))
         .withSimulation(
-            new SimulationConstants()
-                .withInitialPose(new Pose2d(3.8, 0.662, new Rotation2d()))
-        );
+            new SimulationConstants().withInitialPose(new Pose2d(3.8, 0.662, new Rotation2d())));
   }
 
   @Override
@@ -300,8 +298,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .setAvgLatencyMs(20) // needs to be checked
                 .setLatencyStdDevMs(5)) // needs to be checked
         .withDrawWireframes(true)
-        .withMinTagsForHeadingUpdateWhileEnabled(
-            Integer.MAX_VALUE) // No heading updates from vision while enabled
+        .withMinTagsForHeadingUpdateWhileEnabled(2) // No heading updates from vision while enabled
         .withMinTagsForHeadingUpdateWhileDisabled(1);
   }
 
