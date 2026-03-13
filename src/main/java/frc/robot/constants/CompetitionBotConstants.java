@@ -53,7 +53,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(13)
-                    .withMotionMagicAcceleration(17))
+                    .withMotionMagicAcceleration(15))
             .withSlot0(
                 new Slot0Configs()
                     .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
@@ -196,7 +196,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .Driving
                 .clone()
                 .withMaxLinearVelocity(MetersPerSecond.of(4))
-                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(5))
+                .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(4.5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
                 .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
                 .withAutoLinearVelocity(MetersPerSecond.of(3.5))
