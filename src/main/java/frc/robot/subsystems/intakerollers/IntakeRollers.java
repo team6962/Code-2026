@@ -2,12 +2,12 @@ package frc.robot.subsystems.intakerollers;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
@@ -66,6 +66,7 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /** Returns command to make the motor move and stop */
+  @SuppressWarnings("unused")
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
@@ -93,12 +94,33 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
+   * Returns command where motor intakes fuel at full speed. This should only be used when shooting fuel out of the robot with the intake is not a concern.
+   * 
+   * @return The command to intake fuel at full speed.
+   */
+  public Command intakeFast() {
+    return startEnd(
+        () -> {
+          intakeMotor.setControl(new DutyCycleOut(1).withEnableFOC(false));
+        },
+        () -> {
+          intakeMotor.setControl(new CoastOut());
+        });
+  }
+
+  /**
    * Returns command where motor outtakes fuel
    *
    * @return
    */
   public Command outtake() {
-    return move(Volts.of(-5));
+    return startEnd(
+        () -> {
+          intakeMotor.setControl(new DutyCycleOut(-1).withEnableFOC(false));
+        },
+        () -> {
+          intakeMotor.setControl(new CoastOut());
+        });
   }
 
   /**
