@@ -1,31 +1,30 @@
 package frc.robot.auto;
 
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Inches;
 
 import com.team6962.lib.swerve.CommandSwerveDrive;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
+import frc.robot.auto.shoot.AutoShootConstants;
 
 public class AutoLowerHood {
   private CommandSwerveDrive swerveDrive;
-  private Distance HOOD_LOWERING_THRESHOLD = Meters.of(0.25);
+  private Distance HOOD_LOWERING_DISTANCE = Inches.of(30.0);
+  private Distance NEAR_OBSTACLES_X = Inches.of(182.11);
+  private Distance FAR_OBSTACLES_X = Inches.of(650.12).minus(NEAR_OBSTACLES_X);
 
   public AutoLowerHood(CommandSwerveDrive swerveDrive) {
     this.swerveDrive = swerveDrive;
   }
 
   public boolean shouldLowerHood() {
-    Translation2d robotPosition = swerveDrive.getPosition2d().getTranslation();
-    Distance leftTrenchDistance =
-        Meters.of(robotPosition.getDistance(FieldPositions.Trench.LEFT_CENTER));
-    Distance rightTrenchDistance =
-        Meters.of(robotPosition.getDistance(FieldPositions.Trench.RIGHT_CENTER));
-    if (leftTrenchDistance.lt(HOOD_LOWERING_THRESHOLD)
-        || rightTrenchDistance.lt(HOOD_LOWERING_THRESHOLD)) {
+    Distance robotX =
+        swerveDrive.getPosition2d().plus(AutoShootConstants.shooterTransform).getMeasureX();
+
+    if (robotX.isNear(NEAR_OBSTACLES_X, HOOD_LOWERING_DISTANCE)
+        || robotX.isNear(FAR_OBSTACLES_X, HOOD_LOWERING_DISTANCE)) {
       return true;
     } else {
       return false;
     }
   }
-  ;
 }

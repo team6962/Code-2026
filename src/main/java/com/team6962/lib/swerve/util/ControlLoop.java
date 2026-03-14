@@ -93,6 +93,7 @@ public interface ControlLoop extends AutoCloseable {
     public void start(Consumer<Double> updateFunction, Frequency updateFrequency) {
       this.updateFunction = updateFunction;
       notifier = new Notifier(this::threadedPeriodic);
+      notifier.setName("SwerveControlLoop");
       updatePeriodSeconds = updateFrequency.asPeriod().in(Seconds);
       notifier.startSingle(0);
     }

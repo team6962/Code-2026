@@ -1,7 +1,11 @@
 package com.team6962.lib.swerve.motion;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.NewtonMeters;
+import static edu.wpi.first.units.Units.Newtons;
+import static edu.wpi.first.units.Units.Ohms;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -21,7 +25,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Resistance;
+import edu.wpi.first.units.measure.Torque;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * A swerve motion that drives the robot at a specified field-relative velocity.
@@ -55,6 +64,27 @@ public class VelocityMotion implements SwerveMotion {
   /** Whether this motion has a non-zero rotation component. */
   private final boolean hasRotation;
 
+  /** The feedforward forces for each swerve module, which can be null if not used. */
+  private final Force[] forceFeedforwards;
+
+  /**
+   * Creates a new VelocityMotion with the specified field-relative velocity.
+   *
+   * @param velocity The target field-relative chassis speeds
+   * @param forceFeedforwards The feedforward forces for each swerve module, which can be null if
+   *     not used
+   * @param swerveDrive The swerve drive to control
+   */
+  public VelocityMotion(
+      ChassisSpeeds velocity, Force[] forceFeedforwards, MotionSwerveDrive swerveDrive) {
+    this.velocity = velocity;
+    this.hasTranslation =
+        Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01;
+    this.hasRotation = Math.abs(velocity.omegaRadiansPerSecond) > 0.01;
+    this.swerveDrive = swerveDrive;
+    this.forceFeedforwards = forceFeedforwards;
+  }
+
   /**
    * Creates a new VelocityMotion with the specified field-relative velocity.
    *
@@ -62,11 +92,7 @@ public class VelocityMotion implements SwerveMotion {
    * @param swerveDrive The swerve drive to control
    */
   public VelocityMotion(ChassisSpeeds velocity, MotionSwerveDrive swerveDrive) {
-    this.velocity = velocity;
-    this.hasTranslation =
-        Math.abs(velocity.vxMetersPerSecond) > 0.01 || Math.abs(velocity.vyMetersPerSecond) > 0.01;
-    this.hasRotation = Math.abs(velocity.omegaRadiansPerSecond) > 0.01;
-    this.swerveDrive = swerveDrive;
+    this(velocity, null, swerveDrive);
   }
 
   /**
@@ -86,6 +112,14 @@ public class VelocityMotion implements SwerveMotion {
           || hasRotation && otherVelocityMotion.hasRotation) {
         throw new IllegalArgumentException(
             "Cannot fuse two VelocityMotions with overlapping translation or rotation components.");
+      }
+
+      if (!otherVelocityMotion.hasRotation && !otherVelocityMotion.hasTranslation) {
+        return this;
+      }
+
+      if (!hasRotation && !hasTranslation) {
+        return otherVelocityMotion;
       }
 
       return new VelocityMotion(
@@ -153,6 +187,17 @@ public class VelocityMotion implements SwerveMotion {
       LinearVelocity driveVelocity = MetersPerSecond.of(state.speedMetersPerSecond);
       Angle steerAngle = state.angle.getMeasure();
 
+      Force ffForce = forceFeedforwards != null ? forceFeedforwards[i] : Newtons.of(0);
+      Torque ffWheelTorque = swerveDrive.getConstants().getWheelRadius(i).times(ffForce);
+      Torque ffMotorTorque = ffWheelTorque.div(swerveDrive.getConstants().DriveMotor.GearReduction);
+      double ffMotorTorqueNm = ffMotorTorque.in(NewtonMeters);
+      double motorKT = swerveDrive.getConstants().DriveMotor.SimulatedMotor.KtNMPerAmp;
+      double ffCurrentAmps = ffMotorTorqueNm / motorKT;
+      Current ffCurrent = Amps.of(ffCurrentAmps);
+      Resistance windingResistance =
+          Ohms.of(swerveDrive.getConstants().DriveMotor.SimulatedMotor.rOhms);
+      Voltage ffVoltage = ffCurrent.times(windingResistance);
+
       module.setControl(
           new VelocityControlRequest(
                   WheelMath.toAngular(driveVelocity, swerveDrive.getConstants().getWheelRadius(i))
@@ -162,6 +207,7 @@ public class VelocityMotion implements SwerveMotion {
               .withSlot(driveConstants.VelocitySlot)
               .withUpdateFreqHz(updateFrequencyHz)
               .withUseTimesync(useTimesync)
+              .withAdditionalFeedforward(ffVoltage)
               .toControlRequest(),
           new PositionControlRequest(steerAngle.in(Rotations))
               .withMotionProfileType(steerConstants.PositionControlMotionProfile)

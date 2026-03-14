@@ -3,6 +3,7 @@ package frc.robot.auto;
 import static edu.wpi.first.units.Units.Meters;
 
 import com.team6962.lib.logging.LoggingUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,7 +33,7 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
-  public Command neutralCycle() {
+  public Command doubleNeutralCycle() {
     return Commands.sequence(
         trench.driveToNeutral(),
         neutralIntake.intake(Meters.of(1)),
@@ -40,6 +41,14 @@ public class Autonomous {
         shootFuel.shootAllFuel(),
         trench.driveToNeutral(),
         neutralIntake.intake(Meters.of(1), Meters.of(2.5)),
+        trench.driveToAlliance(),
+        shootFuel.shootAllFuel());
+  }
+
+  public Command singleNeutralCycle() {
+    return Commands.sequence(
+        trench.driveToNeutral(),
+        neutralIntake.intake(Meters.of(1)),
         trench.driveToAlliance(),
         shootFuel.shootAllFuel());
   }
@@ -92,5 +101,47 @@ public class Autonomous {
         collectFuelFromHub.intakeBehindHubRight(),
         trench.driveToAlliance(Trench.RIGHT),
         shootFuel.shootAllFuel());
+  }
+
+  public Command leftNeutralCycle() {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(
+                        new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d()))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral_cycle.0")
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_neutral_cycle.1"),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  public Command leftDoubleNeutralCycle() {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(
+                        new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d()))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_double_neutral_cycle.0")
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_double_neutral_cycle.1"),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_double_neutral_cycle.2")
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        shootFuel.shootAllFuelStationary());
   }
 }

@@ -27,7 +27,7 @@ public class HopperConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120)) // everything needs to be tuned
-                  .withSupplyCurrentLimit(Amps.of(60)) // current limits might not be neccesary
+                  .withSupplyCurrentLimit(Amps.of(40))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true));
 
@@ -46,7 +46,7 @@ public class HopperConstants {
                   .withStatorCurrentLimitEnable(true)
                   .withStatorCurrentLimit(80)
                   .withSupplyCurrentLimitEnable(true)
-                  .withSupplyCurrentLimit(40));
+                  .withSupplyCurrentLimit(30));
   // Sensors
   // The CAN IDs for the sensors: kicker, upper hopper, and lower hopper.
   public static final int KICKER_SENSOR_CAN_ID = 30;
@@ -64,7 +64,7 @@ public class HopperConstants {
       Inches.of(15.0); // This isn't the correct distance
 
   // Threshold distances for determining if the Hopper is empty
-  public static final Distance LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD = Inches.of(16.0);
+  public static final Distance LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD = Inches.of(13.0);
 
   public static final CANrangeConfiguration KICKER_SENSOR_CONFIGURATION =
       new CANrangeConfiguration()
