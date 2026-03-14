@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -26,6 +27,8 @@ import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
+import frc.robot.auto.shoot.ShooterFunctions;
+import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
@@ -139,6 +142,7 @@ public class TeleopControls {
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
+    operator.b().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
 
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
@@ -162,6 +166,10 @@ public class TeleopControls {
 
     // Shoot - WORKS
     operator.rightTrigger().whileTrue(robot.getHopper().feed());
+
+    // Pass fuel to alliance zone
+    operator.back().whileTrue(Commands.print("Pass Left")); // this might be switched with start
+    operator.start().whileTrue(Commands.print("Pass Right")); // this might be switched with back
 
     // Fine control
     operator
@@ -187,7 +195,7 @@ public class TeleopControls {
         .whileTrue(this.robot.getTurret().moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE));
 
     operator
-        .povLeft()
+        .povRight()
         .and(() -> fineControl)
         .whileTrue(
             this.robot
