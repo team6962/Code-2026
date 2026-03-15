@@ -100,17 +100,23 @@ public class ShooterRollers extends SubsystemBase {
    * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
    *     coasts the motor on end
    */
-  public Command shoot(Supplier<AngularVelocity> targetVelocity) {
+  public Command shoot(Supplier<AngularVelocity> targetVelocitySupplier) {
     return runEnd(
         () -> {
+          AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+          if (targetVelocity == null) {
+            targetVelocity = getAngularVelocity();
+          }
+
           if (getAngularVelocity()
               .plus(ShooterRollersConstants.BANG_BANG_TOLERANCE)
-              .lt(targetVelocity.get())) {
+              .lt(targetVelocity)) {
             shooterRollerMotor1.setControl(new DutyCycleOut(1).withEnableFOC(false));
           } else {
             // defines a local function to set motor voltage to make it go
             shooterRollerMotor1.setControl(
-                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond))
+                new VelocityVoltage(targetVelocity.in(RotationsPerSecond))
                     .withEnableFOC(false));
           }
         },

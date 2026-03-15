@@ -48,7 +48,7 @@ public final class IntakeExtensionConstants {
               new MotionMagicConfigs()
                   // Not tuned
                   .withMotionMagicCruiseVelocity(20.0)
-                  .withMotionMagicAcceleration(8.0)
+                  .withMotionMagicAcceleration(1.5)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
@@ -61,7 +61,7 @@ public final class IntakeExtensionConstants {
                   .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(Amps.of(120))
+                  .withStatorCurrentLimit(Amps.of(15))
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true))

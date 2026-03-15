@@ -235,13 +235,14 @@ public class Turret extends SubsystemBase {
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
+    DogLog.forceNt.log("Turret/PositionDegrees", getPosition().in(Degrees), Degrees);
     DogLog.log("Turret/Velocity", getVelocity());
     DogLog.log("Turret/Acceleration", getAcceleration());
     DogLog.log("Turret/AppliedVoltage", getAppliedVoltage());
     DogLog.log("Turret/StatorCurrent", getStatorCurrent());
     DogLog.log("Turret/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Turret/HallSensorTriggered", isHallSensorTriggered());
-    DogLog.log("Turret/IsZeroed", isZeroed());
+    DogLog.forceNt.log("Turret/IsZeroed", isZeroed());
     DogLog.log(
         "Turret/ProfilePosition",
         Rotations.of(profilePositionSignal.getValue()).in(Radians),
@@ -263,7 +264,7 @@ public class Turret extends SubsystemBase {
     // Don't attempt to zero using the hall sensor if the robot is enabled or
     // if the turret has already been zeroed (which is always true in simulation),
     // to avoid interfering with normal operation
-    if (RobotState.isEnabled() || isZeroed()) {
+    if (RobotState.isEnabled()) {
       return;
     }
 
@@ -290,6 +291,8 @@ public class Turret extends SubsystemBase {
       }
 
       motor.setPosition(initialZeroAngle);
+
+      DogLog.log("Turret/SetPositionToInitial", getPosition());
     }
 
     // If hall sensor is triggered at a lesser angle than ever before, set the
@@ -300,6 +303,8 @@ public class Turret extends SubsystemBase {
         && (getPosition().isNear(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
             || !hasHallSensorBeenTriggered)) {
       motor.setPosition(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE);
+
+      DogLog.log("Turret/SetPositionToMin", getPosition());
     }
 
     // If hall sensor is triggered at a greater angle than ever before, set the
@@ -310,6 +315,8 @@ public class Turret extends SubsystemBase {
         && (getPosition().isNear(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
             || !hasHallSensorBeenTriggered)) {
       motor.setPosition(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE);
+
+      DogLog.log("Turret/SetPositionToMax", getPosition());
     }
 
     // If the hall sensor has exited the triggered range after being in it before,
@@ -509,15 +516,19 @@ public class Turret extends SubsystemBase {
 
           @Override
           public void execute() {
+            Angle unoptimizedTargetAngle = targetAngleSupplier.get();
+            AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+            if (unoptimizedTargetAngle == null) return;
+            if (targetVelocity == null) targetVelocity = RotationsPerSecond.of(0);
+
             Angle targetPosition =
                 clampPositionToSafeRange(
                     optimizeTarget(
-                        targetAngleSupplier.get(),
+                        unoptimizedTargetAngle,
                         getPosition(),
                         TurretConstants.MIN_ANGLE,
                         TurretConstants.MAX_ANGLE));
-
-            AngularVelocity targetVelocity = targetVelocitySupplier.get();
 
             TrapezoidProfile.State profileState =
                 profile.calculate(
@@ -621,5 +632,9 @@ public class Turret extends SubsystemBase {
               setPositionControl(getPosition());
             })
         .onlyIf(() -> isZeroed());
+  }
+
+  public void zero() {
+    motor.setPosition(Degrees.of(180));
   }
 }

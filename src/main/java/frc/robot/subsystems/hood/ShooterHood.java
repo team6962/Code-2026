@@ -222,7 +222,7 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
     DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Hood/ShouldBeLowered", shouldLowerHoodSupplier.get());
-    DogLog.log("Hood/IsZeroed", isZeroed);
+    DogLog.forceNt.log("Hood/IsZeroed", isZeroed);
     DogLog.log(
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
@@ -464,12 +464,16 @@ public class ShooterHood extends SubsystemBase {
                     getPosition().in(Rotations), getVelocity().in(RotationsPerSecond));
             previousUpdateTimestamp = Timer.getFPGATimestamp();
           }
-
+ 
           @Override
           public void execute() {
-            Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
-
+            Angle unclampedTargetPosition = targetAngleSupplier.get();
             AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+            if (unclampedTargetPosition == null) return;
+            if (targetVelocity == null) targetVelocity = RotationsPerSecond.of(0);
+
+            Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
 
             TrapezoidProfile.State profileState =
                 profile.calculate(

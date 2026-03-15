@@ -140,6 +140,8 @@ public class TeleopControls {
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
+    operator.b().onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
+
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 

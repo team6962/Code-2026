@@ -27,7 +27,7 @@ public final class ShooterRollersConstants {
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs())
-          .withSlot0(new Slot0Configs().withKV(0.124137931).withKP(0.1))
+          .withSlot0(new Slot0Configs().withKV(0.12).withKS(0.18058).withKP(0.1)) // 2.890 - 22.781, 3.22 - 25.126
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)

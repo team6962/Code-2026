@@ -71,7 +71,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     .withStatorCurrentLimit(Amps.of(120))
                     .withSupplyCurrentLimit(Amps.of(40)))
             .withMotionMagic(
-                new MotionMagicConfigs().withMotionMagicExpo_kV(3).withMotionMagicExpo_kA(0.4));
+                new MotionMagicConfigs().withMotionMagicExpo_kV(4.5).withMotionMagicExpo_kA(0.8));
 
     // MODULE PROPERTIES (TODO: Check in CAD)
     //                        MK4c MK4nA MK4nB

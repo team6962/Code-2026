@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,6 +55,7 @@ public class RobotContainer {
   private final ShooterFunctions hubFunctions;
   private final ShooterFunctions passFunctions;
   private final Autonomous autonomous;
+  private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
@@ -92,7 +95,7 @@ public class RobotContainer {
 
   private void configureAutonomousChooser() {
     // Set "Do Nothing" as the default option
-    autoChooser.setDefaultOption("Do Nothing", Commands.none());
+    autoChooser.setDefaultOption("Do Nothing", noneAutonomous);
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
     autoChooser.addOption(
@@ -166,6 +169,10 @@ public class RobotContainer {
 
   public void periodic() {
     DogLog.forceNt.log("BatteryVoltage", RobotController.getBatteryVoltage());
+
+    if (RobotState.isDisabled()) {
+      DogLog.forceNt.log("Auto Routine Selected", autoChooser.getSelected() != noneAutonomous);
+    }
   }
 
   public void latePeriodic() {
