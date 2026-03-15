@@ -142,6 +142,16 @@ public class TeleopControls {
 
     operator.b().onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
 
+    // Manual lower hood
+    operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
+
+    // Fixed backup shoot
+    operator.a().whileTrue(Commands.parallel(
+        robot.getShooterHood().moveTo(Degrees.of(22.5)),
+        robot.getTurret().moveTo(Degrees.of(180)),
+        robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))
+    ));
+
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
@@ -280,6 +290,8 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
+            .and(operator.a().negate())
+            .and(operator.y().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -302,6 +314,8 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
+            .and(operator.a().negate())
+            .and(operator.y().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
