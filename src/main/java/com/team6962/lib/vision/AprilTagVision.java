@@ -84,6 +84,8 @@ public class AprilTagVision extends SubsystemBase {
   }
 
   private void update() {
+    DogLog.time("Timing/AprilTagVision");
+
     // Update vision simulation with current robot pose
     if (visionSystemSim != null) {
       visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
@@ -129,5 +131,7 @@ public class AprilTagVision extends SubsystemBase {
     }
 
     DogLog.log("Vision/Measurements", measurements);
+
+    DogLog.timeEnd("Timing/AprilTagVision");
   }
 }

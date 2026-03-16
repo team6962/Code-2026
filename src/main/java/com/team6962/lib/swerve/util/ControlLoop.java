@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Consumer;
 
+import dev.doglog.DogLog;
+
 /**
  * A control loop abstraction that provides periodic execution of an update function at a
  * configurable frequency.
@@ -106,6 +108,8 @@ public interface ControlLoop extends AutoCloseable {
         return;
       }
 
+      DogLog.time("Timing/SwerveControlLoop");
+
       // Compute the actual delta time since the last update
       double currentTimestamp = Timer.getFPGATimestamp();
       double deltaTime = currentTimestamp - lastUpdateTimestamp;
@@ -113,6 +117,8 @@ public interface ControlLoop extends AutoCloseable {
 
       // Run the update function
       updateFunction.accept(deltaTime);
+
+      DogLog.timeEnd("Timing/SwerveControlLoop");
 
       // Schedule the next update
       currentTimestamp = Timer.getFPGATimestamp();
