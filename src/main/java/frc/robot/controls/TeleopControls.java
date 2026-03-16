@@ -140,7 +140,7 @@ public class TeleopControls {
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
-    operator.b().onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
+    operator.b().and(RobotState::isDisabled).onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
@@ -191,7 +191,7 @@ public class TeleopControls {
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Backup zero
-    operator.x().onTrue(this.robot.getShooterHood().zero());
+    operator.x().and(RobotState::isDisabled).onTrue(this.robot.getShooterHood().zero());
 
     operator
         .povLeft()
