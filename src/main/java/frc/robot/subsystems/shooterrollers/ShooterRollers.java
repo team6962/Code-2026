@@ -116,8 +116,7 @@ public class ShooterRollers extends SubsystemBase {
           } else {
             // defines a local function to set motor voltage to make it go
             shooterRollerMotor1.setControl(
-                new VelocityVoltage(targetVelocity.in(RotationsPerSecond))
-                    .withEnableFOC(false));
+                new VelocityVoltage(targetVelocity.in(RotationsPerSecond)).withEnableFOC(false));
           }
         },
         () -> {

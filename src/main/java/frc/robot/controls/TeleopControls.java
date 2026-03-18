@@ -140,17 +140,22 @@ public class TeleopControls {
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
 
-    operator.b().and(RobotState::isDisabled).onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
+    operator
+        .b()
+        .and(RobotState::isDisabled)
+        .onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
 
     // Fixed backup shoot
-    operator.a().whileTrue(Commands.parallel(
-        robot.getShooterHood().moveTo(Degrees.of(22.5)),
-        robot.getTurret().moveTo(Degrees.of(180)),
-        robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))
-    ));
+    operator
+        .a()
+        .whileTrue(
+            Commands.parallel(
+                robot.getShooterHood().moveTo(Degrees.of(22.5)),
+                robot.getTurret().moveTo(Degrees.of(180)),
+                robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
 
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());

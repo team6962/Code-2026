@@ -28,7 +28,8 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
-  private static Pose2d LEFT_START_POSE = new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d());
+  private static Pose2d LEFT_START_POSE =
+      new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d());
 
   private Command singleNeutralCycle(boolean rightSide) {
     return Commands.sequence(
@@ -87,7 +88,8 @@ public class Autonomous {
   }
 
   public Command preload() {
-    return shootFuel.shoot()
+    return shootFuel
+        .shoot()
         .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake());
   }
 
@@ -96,10 +98,6 @@ public class Autonomous {
       return pose;
     }
 
-    return new Pose2d(
-        pose.getX(),
-        8.0692625 - pose.getY(),
-        pose.getRotation().unaryMinus()
-    );
+    return new Pose2d(pose.getX(), 8.0692625 - pose.getY(), pose.getRotation().unaryMinus());
   }
 }

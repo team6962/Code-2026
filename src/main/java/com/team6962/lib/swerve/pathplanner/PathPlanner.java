@@ -3,9 +3,6 @@ package com.team6962.lib.swerve.pathplanner;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Newtons;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -25,6 +22,8 @@ import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PathPlanner {
   private CommandSwerveDrive drivetrain;
@@ -207,7 +206,8 @@ public class PathPlanner {
       PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName, splitIndex);
 
       if (mirrorPath) {
-        return mirroredPaths.computeIfAbsent(pathName + "." + splitIndex, key -> unmirroredPath.mirrorPath());
+        return mirroredPaths.computeIfAbsent(
+            pathName + "." + splitIndex, key -> unmirroredPath.mirrorPath());
       } else {
         return unmirroredPath;
       }
@@ -228,7 +228,8 @@ public class PathPlanner {
     return loadChoreoPath(pathName, splitIndex, false);
   }
 
-  private Command followPath(String pathName, boolean trackRotation, boolean trackTranslation, boolean mirrorPath) {
+  private Command followPath(
+      String pathName, boolean trackRotation, boolean trackTranslation, boolean mirrorPath) {
     if (pathName.contains(".")) {
       // Use the split index if it's included in the path name
       String[] parts = pathName.split("\\.");
@@ -243,11 +244,16 @@ public class PathPlanner {
       }
     }
 
-    return followPath(pathName, loadChoreoPath(pathName, mirrorPath), trackRotation, trackTranslation);
+    return followPath(
+        pathName, loadChoreoPath(pathName, mirrorPath), trackRotation, trackTranslation);
   }
 
   private Command followPath(
-      String pathName, int splitIndex, boolean trackRotation, boolean trackTranslation, boolean mirrorPath) {
+      String pathName,
+      int splitIndex,
+      boolean trackRotation,
+      boolean trackTranslation,
+      boolean mirrorPath) {
     return followPath(
         pathName + "." + splitIndex,
         loadChoreoPath(pathName, splitIndex, mirrorPath),

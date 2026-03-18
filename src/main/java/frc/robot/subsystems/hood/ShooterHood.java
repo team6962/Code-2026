@@ -464,7 +464,7 @@ public class ShooterHood extends SubsystemBase {
                     getPosition().in(Rotations), getVelocity().in(RotationsPerSecond));
             previousUpdateTimestamp = Timer.getFPGATimestamp();
           }
- 
+
           @Override
           public void execute() {
             Angle unclampedTargetPosition = targetAngleSupplier.get();

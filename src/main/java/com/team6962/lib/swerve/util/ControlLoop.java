@@ -3,13 +3,12 @@ package com.team6962.lib.swerve.util;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Seconds;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Consumer;
-
-import dev.doglog.DogLog;
 
 /**
  * A control loop abstraction that provides periodic execution of an update function at a
