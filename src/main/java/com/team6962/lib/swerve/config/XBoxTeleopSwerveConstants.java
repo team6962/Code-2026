@@ -50,7 +50,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double DefaultTranslationalSpeed = 0.5;
+  public double DefaultTranslationalSpeed = 1;
 
   /**
    * The angular speed used during teleop when not boostin or using the D-pad for fine control. This
@@ -62,7 +62,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double DefaultAngularSpeed = 0.5;
+  public double DefaultAngularSpeed = 1.0;
 
   /**
    * The translational speed used during teleop when boosting and not using the D-pad for fine
@@ -74,7 +74,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double BoostTranslationalSpeed = 1.0;
+  // public double BoostTranslationalSpeed = 1.0;
 
   /**
    * The angular speed used during teleop when boosting and not using the D-pad for fine control.
@@ -264,10 +264,10 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    * @param boostTranslationalSpeed The boost translational speed (0.0-1.0)
    * @return This XBoxTeleopSwerveConstants object
    */
-  public XBoxTeleopSwerveConstants withBoostTranslationalSpeed(double boostTranslationalSpeed) {
-    BoostTranslationalSpeed = boostTranslationalSpeed;
-    return this;
-  }
+  // public XBoxTeleopSwerveConstants withBoostTranslationalSpeed(double boostTranslationalSpeed) {
+  //   BoostTranslationalSpeed = boostTranslationalSpeed;
+  //   return this;
+  // }
 
   /**
    * Sets the boost angular speed, and returns this XBoxTeleopSwerveConstants for chaining.

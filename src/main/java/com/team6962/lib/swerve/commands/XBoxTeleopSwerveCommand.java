@@ -146,8 +146,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The translation speed scalar (0.0 to 1.0)
    */
   private double getNonFineControlTranslationScalar() {
-    return MathUtil.interpolate(
-        constants.DefaultTranslationalSpeed, constants.BoostTranslationalSpeed, getBoost());
+    return constants.DefaultTranslationalSpeed;
   }
 
   /**
@@ -157,11 +156,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
   private double getNonFineControlAngularScalar() {
-    return MathUtil.interpolate(
-        MathUtil.interpolate(
-            constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost()),
-        Math.signum(constants.DefaultAngularSpeed),
-        getAngularSuperBoost());
+    return constants.DefaultAngularSpeed;
   }
 
   /**
@@ -171,12 +166,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The fine control translation speed scalar (0.0 to 1.0)
    */
   private double getFineControlTranslationScalar() {
-    return MathUtil.interpolate(
-        constants.FineControlTranslationalSpeed,
-        constants.BoostedFineControlTranslationalSpeed,
-        getBoost());
+    return constants.FineControlTranslationalSpeed;
   }
-
   /**
    * Gets the angular speed scalar for fine control mode, interpolated based on boost and super
    * boost inputs.
@@ -184,13 +175,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The fine control angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
   private double getFineControlAngularScalar() {
-    return MathUtil.interpolate(
-        MathUtil.interpolate(
-            constants.FineControlAngularSpeed,
-            constants.BoostedFineControlAngularSpeed,
-            getBoost()),
-        Math.signum(constants.FineControlAngularSpeed),
-        getAngularSuperBoost());
+    return constants.FineControlAngularSpeed;
   }
 
   /**
@@ -198,24 +183,24 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    *
    * @return The boost value (0.0 when not pressed, up to 1.0 when fully pressed)
    */
-  private double getBoost() {
-    return constants.BoostAxis == Trigger.LeftTrigger
-        ? controller.getLeftTriggerAxis()
-        : // Axis 2
-        controller.getRightTriggerAxis(); // Axis 3
-  }
+  // private double getBoost() {
+  //   return constants.BoostAxis == Trigger.LeftTrigger
+  //       ? controller.getLeftTriggerAxis()
+  //       : // Axis 2
+  //       controller.getRightTriggerAxis(); // Axis 3
+  // }
 
   /**
    * Gets the current angular super boost value from the configured trigger axis.
    *
    * @return The super boost value (0.0 when not pressed, up to 1.0 when fully pressed)
    */
-  private double getAngularSuperBoost() {
-    return constants.AngularSuperBoostAxis == Trigger.LeftTrigger
-        ? controller.getLeftTriggerAxis()
-        : // Axis 3
-        controller.getRightTriggerAxis(); // Axis 2
-  }
+  // private double getAngularSuperBoost() {
+  //   return constants.AngularSuperBoostAxis == Trigger.LeftTrigger
+  //       ? controller.getLeftTriggerAxis()
+  //       : // Axis 3
+  //       controller.getRightTriggerAxis(); // Axis 2
+  // }
 
   /**
    * Gets the mapped translation input from the configured translation joystick, with deadband and
