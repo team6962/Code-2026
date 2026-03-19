@@ -1,5 +1,8 @@
 package com.team6962.lib.vision;
 
+import static edu.wpi.first.units.Units.InchesPerSecond;
+
+import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import dev.doglog.DogLog;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -67,6 +70,7 @@ public class AprilTagVision extends SubsystemBase {
 
     DogLog.log("Vision/Cameras/Count", visionConstants.Cameras.size());
 
+    notifier.setName("AprilTagVision");
     notifier.startPeriodic(0.02);
   }
 
@@ -80,6 +84,8 @@ public class AprilTagVision extends SubsystemBase {
   }
 
   private void update() {
+    DogLog.time("Timing/AprilTagVision");
+
     // Update vision simulation with current robot pose
     if (visionSystemSim != null) {
       visionSystemSim.update(swerveDrive.getSimulation().getRobotPosition());
@@ -105,10 +111,14 @@ public class AprilTagVision extends SubsystemBase {
 
         // Don't update rotation unless the conditions specified in vision constants are met
         boolean canUpdateRotation =
-            measurement.getPhotonEstimate().targetsUsed.size()
-                >= (RobotState.isEnabled()
-                    ? visionConstants.MinTagsForHeadingUpdateWhileEnabled
-                    : visionConstants.MinTagsForHeadingUpdateWhileDisabled);
+            new TranslationalVelocity(swerveDrive.getVelocity())
+                    .getSpeed()
+                    .lt(InchesPerSecond.of(6))
+                && Math.abs(swerveDrive.getVelocity().omegaRadiansPerSecond) < 0.5
+                && measurement.getPhotonEstimate().targetsUsed.size()
+                    >= (RobotState.isEnabled()
+                        ? visionConstants.MinTagsForHeadingUpdateWhileEnabled
+                        : visionConstants.MinTagsForHeadingUpdateWhileDisabled);
 
         if (!canUpdateRotation) {
           measurement = measurement.withIgnoredRotation();
@@ -121,5 +131,7 @@ public class AprilTagVision extends SubsystemBase {
     }
 
     DogLog.log("Vision/Measurements", measurements);
+
+    DogLog.timeEnd("Timing/AprilTagVision");
   }
 }

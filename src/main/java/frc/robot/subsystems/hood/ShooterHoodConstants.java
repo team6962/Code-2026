@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 public final class ShooterHoodConstants {
   public static final int MOTOR_CAN_ID = 20;
-  public static final int CANDI_CAN_ID = 40;
+  public static final int CANDI_CAN_ID = 20;
   public static final String CANBUS = "subsystems";
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
 

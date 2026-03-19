@@ -12,6 +12,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -30,6 +31,7 @@ public class ShooterRollers extends SubsystemBase {
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
+  private StatusSignal<Current> otherSupplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
   private ShooterRollersSim simulation;
@@ -62,6 +64,7 @@ public class ShooterRollers extends SubsystemBase {
     accelerationSignal = shooterRollerMotor1.getAcceleration();
     supplyCurrentSignal = shooterRollerMotor1.getSupplyCurrent();
     statorCurrentSignal = shooterRollerMotor1.getStatorCurrent();
+    otherSupplyCurrentSignal = shooterRollerMotor2.getSupplyCurrent();
 
     DogLog.tunable(
         "shooterRoller / input velocity",
@@ -75,6 +78,8 @@ public class ShooterRollers extends SubsystemBase {
     if (RobotBase.isSimulation()) {
       simulation = new ShooterRollersSim(shooterRollerMotor1);
     }
+
+    CurrentDrawLogger.add("Shooter Rollers", this::getSupplyCurrent);
   }
 
   /**
@@ -95,18 +100,23 @@ public class ShooterRollers extends SubsystemBase {
    * @return a Command that, when scheduled, drives the shooter roller to the supplied velocity and
    *     coasts the motor on end
    */
-  public Command shoot(Supplier<AngularVelocity> targetVelocity) {
+  public Command shoot(Supplier<AngularVelocity> targetVelocitySupplier) {
     return runEnd(
         () -> {
+          AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+          if (targetVelocity == null) {
+            targetVelocity = getAngularVelocity();
+          }
+
           if (getAngularVelocity()
               .plus(ShooterRollersConstants.BANG_BANG_TOLERANCE)
-              .lt(targetVelocity.get())) {
+              .lt(targetVelocity)) {
             shooterRollerMotor1.setControl(new DutyCycleOut(1).withEnableFOC(false));
           } else {
             // defines a local function to set motor voltage to make it go
             shooterRollerMotor1.setControl(
-                new VelocityVoltage(targetVelocity.get().in(RotationsPerSecond))
-                    .withEnableFOC(false));
+                new VelocityVoltage(targetVelocity.in(RotationsPerSecond)).withEnableFOC(false));
           }
         },
         () -> {
@@ -126,13 +136,14 @@ public class ShooterRollers extends SubsystemBase {
         velocitySignal,
         voltageSignal,
         supplyCurrentSignal,
+        otherSupplyCurrentSignal,
         statorCurrentSignal,
         accelerationSignal);
-    DogLog.log("shooterRoller/voltage", getMotorVoltage());
-    DogLog.log("shooterRoller/angularVelocity", getAngularVelocity());
-    DogLog.log("shooterRoller/statorCurrent", getStatorCurrent());
-    DogLog.log("shooterRoller/angularAcceleration", getAngularAcceleration());
-    DogLog.log("shooterRoller/supplyCurrent", getSupplyCurrent());
+    DogLog.log("Shooter Rollers/voltage", getMotorVoltage());
+    DogLog.log("Shooter Rollers/angularVelocity", getAngularVelocity());
+    DogLog.log("Shooter Rollers/statorCurrent", getStatorCurrent());
+    DogLog.log("Shooter Rollers/angularAcceleration", getAngularAcceleration());
+    DogLog.log("Shooter Rollers/supplyCurrent", getSupplyCurrent());
   }
 
   /** gets the angular velocity */
@@ -147,7 +158,7 @@ public class ShooterRollers extends SubsystemBase {
 
   /** gets the supply current */
   public Current getSupplyCurrent() {
-    return supplyCurrentSignal.getValue();
+    return supplyCurrentSignal.getValue().plus(otherSupplyCurrentSignal.getValue());
   }
 
   /** gets the stator current */

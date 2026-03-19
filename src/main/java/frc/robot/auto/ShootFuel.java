@@ -26,4 +26,35 @@ public class ShootFuel {
                 .repeatedly())
         .until(() -> robot.getHopper().isEmpty());
   }
+
+  /**
+   * Aligns the shooter then feeds fuel until the hopper is empty.
+   *
+   * @return the command to execute this sequence
+   */
+  public Command shootAllFuelStationary() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+            autoShoot,
+            Commands.waitUntil(
+                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                .andThen(robot.getHopper().feed().repeatedly()))
+        .until(() -> robot.getHopper().isEmpty());
+  }
+
+  /**
+   * Aligns the shooter then feeds fuel. This command does not end on its own.
+   *
+   * @return the command to execute this sequence
+   */
+  public Command shoot() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+        autoShoot,
+        Commands.waitUntil(
+                () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+            .andThen(robot.getHopper().feed().repeatedly()));
+  }
 }

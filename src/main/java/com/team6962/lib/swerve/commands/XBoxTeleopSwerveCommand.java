@@ -11,8 +11,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -38,6 +41,18 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private XboxController controller;
   private XBoxTeleopSwerveConstants constants;
+
+  /**
+   * Dynamic linear velocity limit that can be set at runtime to temporarily reduce the maximum
+   * speed of the robot.
+   */
+  private LinearVelocity dynamicLinearVelocityLimit = null;
+
+  /**
+   * Dynamic angular velocity limit that can be set at runtime to temporarily reduce the maximum
+   * rotation speed of the robot.
+   */
+  private AngularVelocity dynamicAngularVelocityLimit = null;
 
   /**
    * Constructs an XBoxTeleopSwerveCommand with the specified swerve drive and configuration
@@ -67,6 +82,50 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
+   * Adds dynamic velocity limits that will be applied on top of the configured maximum velocities.
+   * This can be used to temporarily reduce the robot's speed (e.g., when shooting) without changing
+   * the overall configuration. If either parameter is set to null, limits will be removed for the
+   * associated component. Because of this, {@link #removeDynamicVelocityLimits()} is equivalent to
+   * calling this method with null parameters.
+   *
+   * @param maxLinearVelocity The maximum linear velocity to apply
+   * @param maxAngularVelocity The maximum angular velocity to apply
+   */
+  public void addDynamicVelocityLimits(
+      LinearVelocity maxLinearVelocity, AngularVelocity maxAngularVelocity) {
+    this.dynamicLinearVelocityLimit = maxLinearVelocity;
+    this.dynamicAngularVelocityLimit = maxAngularVelocity;
+  }
+
+  /**
+   * Removes any dynamic velocity limits that were previously set, allowing the robot to return to
+   * its normal maximum speeds as defined in the configuration constants. This can be used to
+   * restore full speed after a temporary reduction (e.g., after shooting is complete).
+   */
+  public void removeDynamicVelocityLimits() {
+    this.dynamicLinearVelocityLimit = null;
+    this.dynamicAngularVelocityLimit = null;
+  }
+
+  /**
+   * Returns a command that applies temporary dynamic velocity limits while it is active. This can
+   * be used to create commands that temporarily reduce the robot's speed (e.g., when shooting)
+   * without changing the overall configuration constants. When this command ends, either naturally
+   * or through interruption, the velocity limits will be removed and the robot will return to its
+   * normal maximum speeds.
+   *
+   * @param maxLinearVelocity The maximum linear velocity to apply while the command is active
+   * @param maxAngularVelocity The maximum angular velocity to apply while the command is active
+   * @return A command that applies the specified velocity limits while it is active
+   */
+  public Command limitVelocity(
+      LinearVelocity maxLinearVelocity, AngularVelocity maxAngularVelocity) {
+    return Commands.startEnd(
+        () -> addDynamicVelocityLimits(maxLinearVelocity, maxAngularVelocity),
+        this::removeDynamicVelocityLimits);
+  }
+
+  /**
    * Converts fractional power values (0.0 to 1.0) to actual velocities based on the configured
    * maximum velocities.
    *
@@ -79,10 +138,45 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     double maxAngularVelocity =
         getSwerveDrive().getConstants().Driving.MaxAngularVelocity.in(RadiansPerSecond);
 
-    return new ChassisSpeeds(
-        fractionMaxSpeeds.vxMetersPerSecond * maxLinearVelocity,
-        fractionMaxSpeeds.vyMetersPerSecond * maxLinearVelocity,
-        fractionMaxSpeeds.omegaRadiansPerSecond * maxAngularVelocity);
+    ChassisSpeeds targetVelocity =
+        new ChassisSpeeds(
+            fractionMaxSpeeds.vxMetersPerSecond * maxLinearVelocity,
+            fractionMaxSpeeds.vyMetersPerSecond * maxLinearVelocity,
+            fractionMaxSpeeds.omegaRadiansPerSecond * maxAngularVelocity);
+
+    // Apply dynamic velocity limits if they are set
+    double dynamicLinearVelocityLimitMetersPerSecond =
+        dynamicLinearVelocityLimit != null ? dynamicLinearVelocityLimit.in(MetersPerSecond) : 0;
+    double dynamicAngularVelocityLimitRadiansPerSecond =
+        dynamicAngularVelocityLimit != null ? dynamicAngularVelocityLimit.in(RadiansPerSecond) : 0;
+
+    if (dynamicLinearVelocityLimitMetersPerSecond != 0
+        && Math.hypot(targetVelocity.vxMetersPerSecond, targetVelocity.vyMetersPerSecond)
+            > dynamicLinearVelocityLimitMetersPerSecond) {
+      double scale =
+          dynamicLinearVelocityLimitMetersPerSecond
+              / Math.hypot(targetVelocity.vxMetersPerSecond, targetVelocity.vyMetersPerSecond);
+      targetVelocity =
+          new ChassisSpeeds(
+              targetVelocity.vxMetersPerSecond * scale,
+              targetVelocity.vyMetersPerSecond * scale,
+              targetVelocity.omegaRadiansPerSecond);
+    }
+
+    if (dynamicAngularVelocityLimitRadiansPerSecond != 0
+        && Math.abs(targetVelocity.omegaRadiansPerSecond)
+            > dynamicAngularVelocityLimitRadiansPerSecond) {
+      double scale =
+          dynamicAngularVelocityLimitRadiansPerSecond
+              / Math.abs(targetVelocity.omegaRadiansPerSecond);
+      targetVelocity =
+          new ChassisSpeeds(
+              targetVelocity.vxMetersPerSecond,
+              targetVelocity.vyMetersPerSecond,
+              targetVelocity.omegaRadiansPerSecond * scale);
+    }
+
+    return targetVelocity;
   }
 
   /**

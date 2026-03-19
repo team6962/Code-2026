@@ -3,6 +3,7 @@ package com.team6962.lib.swerve.util;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Seconds;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
@@ -93,6 +94,7 @@ public interface ControlLoop extends AutoCloseable {
     public void start(Consumer<Double> updateFunction, Frequency updateFrequency) {
       this.updateFunction = updateFunction;
       notifier = new Notifier(this::threadedPeriodic);
+      notifier.setName("SwerveControlLoop");
       updatePeriodSeconds = updateFrequency.asPeriod().in(Seconds);
       notifier.startSingle(0);
     }
@@ -105,6 +107,8 @@ public interface ControlLoop extends AutoCloseable {
         return;
       }
 
+      DogLog.time("Timing/SwerveControlLoop");
+
       // Compute the actual delta time since the last update
       double currentTimestamp = Timer.getFPGATimestamp();
       double deltaTime = currentTimestamp - lastUpdateTimestamp;
@@ -112,6 +116,8 @@ public interface ControlLoop extends AutoCloseable {
 
       // Run the update function
       updateFunction.accept(deltaTime);
+
+      DogLog.timeEnd("Timing/SwerveControlLoop");
 
       // Schedule the next update
       currentTimestamp = Timer.getFPGATimestamp();
