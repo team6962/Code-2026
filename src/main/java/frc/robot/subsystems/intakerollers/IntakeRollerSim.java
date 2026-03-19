@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class IntakeRollerSim {
@@ -28,7 +29,7 @@ public class IntakeRollerSim {
 
   /** updates physicsSim */
   public void update() {
-    intakeMotor.setSupplyVoltage(12);
+    intakeMotor.setSupplyVoltage(RobotController.getBatteryVoltage());
     physicsSim.setInputVoltage(intakeMotor.getMotorVoltage());
     physicsSim.update(0.02);
 

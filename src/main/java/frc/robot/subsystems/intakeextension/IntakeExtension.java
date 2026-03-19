@@ -12,8 +12,8 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -62,8 +62,6 @@ public class IntakeExtension extends SubsystemBase {
   private double baseMotionMagicAcceleration =
       IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration;
   private double motionProfileConstraintScale = 1.0;
-  private double appliedCruiseVelocity = Double.NaN;
-  private double appliedAcceleration = Double.NaN;
 
   public boolean isZeroed = false;
 
@@ -175,7 +173,6 @@ public class IntakeExtension extends SubsystemBase {
         baseMotionMagicCruiseVelocity,
         newVelocity -> {
           baseMotionMagicCruiseVelocity = newVelocity;
-          applyMotionMagicConfig();
         });
 
     DogLog.tunable(
@@ -183,7 +180,6 @@ public class IntakeExtension extends SubsystemBase {
         baseMotionMagicAcceleration,
         newAcceleration -> {
           baseMotionMagicAcceleration = newAcceleration;
-          applyMotionMagicConfig();
         });
 
     if (RobotBase.isSimulation()) {
@@ -194,34 +190,27 @@ public class IntakeExtension extends SubsystemBase {
     }
 
     CurrentDrawLogger.add("Intake Extension", this::getSupplyCurrent);
-    applyMotionMagicConfig();
   }
 
   public void setMotionProfileConstraintScale(double scale) {
-    motionProfileConstraintScale = MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
-    applyMotionMagicConfig();
+    motionProfileConstraintScale = MathUtil.clamp(scale, 0.1, 1.0);
   }
 
-  private void applyMotionMagicConfig() {
-    double scaledCruiseVelocity = baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
-    double scaledAcceleration = baseMotionMagicAcceleration * motionProfileConstraintScale;
+  private double getScaledMotionMagicCruiseVelocity() {
+    return baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
+  }
 
-    if (Math.abs(scaledCruiseVelocity - appliedCruiseVelocity) < 1e-6
-        && Math.abs(scaledAcceleration - appliedAcceleration) < 1e-6) {
-      return;
-    }
+  private double getScaledMotionMagicAcceleration() {
+    return baseMotionMagicAcceleration * motionProfileConstraintScale;
+  }
 
-    motor
-        .getConfigurator()
-        .apply(
-            new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(scaledCruiseVelocity)
-                .withMotionMagicAcceleration(scaledAcceleration)
-                .withMotionMagicJerk(
-                    IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk));
-
-    appliedCruiseVelocity = scaledCruiseVelocity;
-    appliedAcceleration = scaledAcceleration;
+  private void setPositionControl(Distance position) {
+    motor.setControl(
+        new DynamicMotionMagicVoltage(
+                position.in(Meters),
+                getScaledMotionMagicCruiseVelocity(),
+                getScaledMotionMagicAcceleration())
+            .withJerk(IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk));
   }
 
   /**
@@ -233,15 +222,14 @@ public class IntakeExtension extends SubsystemBase {
   public Command extend() {
     return startEnd(
             () -> {
-              motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+              setPositionControl(IntakeExtensionConstants.MAX_POSITION);
             },
             () -> {
               if (!getPosition()
                   .isNear(
                       IntakeExtensionConstants.MAX_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                setPositionControl(getPosition());
               }
             })
         .until(
@@ -261,15 +249,14 @@ public class IntakeExtension extends SubsystemBase {
   public Command retract() {
     return startEnd(
             () -> {
-              motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
+              setPositionControl(IntakeExtensionConstants.RETRACT_POSITION);
             },
             () -> {
               if (!getPosition()
                   .isNear(
                       IntakeExtensionConstants.RETRACT_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                setPositionControl(getPosition());
               }
             })
         .until(
@@ -301,7 +288,7 @@ public class IntakeExtension extends SubsystemBase {
                           .plus(Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              setPositionControl(getPosition());
             })
         .onlyIf(() -> isZeroed || voltage.in(Volts) < 0);
   }
@@ -435,5 +422,11 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
     DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
     DogLog.log("Intake/MotionMagicScale", motionProfileConstraintScale);
+
+    if (motor.getAppliedControl() instanceof DynamicMotionMagicVoltage dynamicControlRequest) {
+      setPositionControl(Meters.of(dynamicControlRequest.Position));
+    } else if (motor.getAppliedControl() instanceof MotionMagicVoltage motionMagicControlRequest) {
+      setPositionControl(Meters.of(motionMagicControlRequest.Position));
+    }
   }
 }
