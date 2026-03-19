@@ -56,15 +56,20 @@ public class BrownoutProtection extends SubsystemBase {
         "BrownoutProtection/Start Limiting Voltage",
         startLimitingVoltage,
         value -> startLimitingVoltage = value);
-    DogLog.tunable("BrownoutProtection/Minimum Voltage", minimumVoltage, value -> minimumVoltage = value);
+    DogLog.tunable(
+        "BrownoutProtection/Minimum Voltage", minimumVoltage, value -> minimumVoltage = value);
     DogLog.tunable(
         "BrownoutProtection/Start Limiting Current",
         startLimitingCurrentAmps,
         value -> startLimitingCurrentAmps = value);
     DogLog.tunable(
-        "BrownoutProtection/Maximum Current", maximumCurrentAmps, value -> maximumCurrentAmps = value);
+        "BrownoutProtection/Maximum Current",
+        maximumCurrentAmps,
+        value -> maximumCurrentAmps = value);
     DogLog.tunable(
-        "BrownoutProtection/Minimum Drive Scale", minimumDriveScale, value -> minimumDriveScale = value);
+        "BrownoutProtection/Minimum Drive Scale",
+        minimumDriveScale,
+        value -> minimumDriveScale = value);
     DogLog.tunable(
         "BrownoutProtection/Minimum Mechanism Scale",
         minimumMechanismScale,

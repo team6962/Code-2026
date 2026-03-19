@@ -239,7 +239,8 @@ public class ShooterHood extends SubsystemBase {
     // brownout-scaled constraints if the hood is using Motion Magic position control.
     if (hoodMotor.getAppliedControl() instanceof DynamicMotionMagicVoltage dynamicControlRequest) {
       setPositionControl(Rotations.of(dynamicControlRequest.Position));
-    } else if (hoodMotor.getAppliedControl() instanceof MotionMagicVoltage motionMagicControlRequest) {
+    } else if (hoodMotor.getAppliedControl()
+        instanceof MotionMagicVoltage motionMagicControlRequest) {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
