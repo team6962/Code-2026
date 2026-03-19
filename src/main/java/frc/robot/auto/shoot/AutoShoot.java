@@ -420,7 +420,7 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetY", target.getY());
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.06));
+    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.1));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
     appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
