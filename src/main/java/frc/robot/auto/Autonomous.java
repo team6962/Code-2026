@@ -1,14 +1,10 @@
 package frc.robot.auto;
 
-import static edu.wpi.first.units.Units.Meters;
-
-import com.team6962.lib.logging.LoggingUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
-import frc.robot.auto.TrenchDriving.Trench;
-import java.util.Set;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -32,65 +28,76 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
-  public Command neutralCycle() {
+  private static Pose2d LEFT_START_POSE =
+      new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d());
+
+  private Command singleNeutralCycle(boolean rightSide) {
     return Commands.sequence(
-        trench.driveToNeutral(),
-        neutralIntake.intake(Meters.of(1)),
-        trench.driveToAlliance(),
-        shootFuel.shootAllFuel(),
-        trench.driveToNeutral(),
-        neutralIntake.intake(Meters.of(1), Meters.of(2.5)),
-        trench.driveToAlliance(),
-        shootFuel.shootAllFuel());
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.0", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        shootFuel.shoot());
   }
 
-  public Command depotThenNeutralCycle() {
+  private Command doubleNeutralCycle(boolean rightSide) {
     return Commands.sequence(
-        autoDepot.autoDepot(),
-        trench.driveToNeutral().deadlineFor(shootFuel.shootAllFuel()),
-        neutralIntake.intake(Meters.of(1)),
-        trench.driveToAlliance(),
-        shootFuel.shootAllFuel());
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.0", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.2", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        shootFuel.shoot());
   }
 
-  public Command neutralCycleThenOutpost() {
-    return Commands.defer(
-        () -> {
-          Trench nearestTrench = trench.getNearestTrench();
-
-          return LoggingUtil.logCommand(
-              "neutralCycleThenOutpost",
-              Commands.sequence(
-                  LoggingUtil.logCommand("driveToNeutral", trench.driveToNeutral()),
-                  LoggingUtil.logCommand("neutralIntake", neutralIntake.intake(Meters.of(1))),
-                  LoggingUtil.logCommand(
-                      "driveToAlliance",
-                      trench.driveToAlliance(nearestTrench, Rotation2d.fromDegrees(180))),
-                  LoggingUtil.logCommand("shootFuel", shootFuel.shootAllFuel()),
-                  LoggingUtil.logCommand("autoOutpost", autoOutpost.autoOutpost())));
-        },
-        Set.of(
-            robot.getSwerveDrive().useRotation(),
-            robot.getSwerveDrive().useTranslation(),
-            robot.getIntakeRollers(),
-            robot.getIntakeExtension(),
-            robot.getHopper().getBeltFloor(),
-            robot.getHopper().getKicker()));
+  public Command leftSingleNeutralCycle() {
+    return singleNeutralCycle(false);
   }
 
-  public Command intakeBehindHubLeft() {
-    return Commands.sequence(
-        trench.driveToNeutral(Trench.LEFT),
-        collectFuelFromHub.intakeBehindHubLeft(),
-        trench.driveToAlliance(Trench.LEFT),
-        shootFuel.shootAllFuel());
+  public Command rightSingleNeutralCycle() {
+    return singleNeutralCycle(true);
   }
 
-  public Command intakeBehindHubRight() {
-    return Commands.sequence(
-        trench.driveToNeutral(Trench.RIGHT),
-        collectFuelFromHub.intakeBehindHubRight(),
-        trench.driveToAlliance(Trench.RIGHT),
-        shootFuel.shootAllFuel());
+  public Command leftDoubleNeutralCycle() {
+    return doubleNeutralCycle(false);
+  }
+
+  public Command rightDoubleNeutralCycle() {
+    return doubleNeutralCycle(true);
+  }
+
+  public Command preload() {
+    return shootFuel
+        .shoot()
+        .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake());
+  }
+
+  private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
+    if (!mirrored) {
+      return pose;
+    }
+
+    return new Pose2d(pose.getX(), 8.0692625 - pose.getY(), pose.getRotation().unaryMinus());
   }
 }

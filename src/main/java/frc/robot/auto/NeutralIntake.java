@@ -49,7 +49,7 @@ public class NeutralIntake {
     } else {
       return new Pose2d(
           rightPose.getMeasureX(),
-          HUB_Y.minus(rightPose.getMeasureY()),
+          HUB_Y.times(2).minus(rightPose.getMeasureY()),
           rightPose.getRotation().times(-1));
     }
   }

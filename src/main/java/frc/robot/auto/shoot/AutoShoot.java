@@ -38,6 +38,12 @@ public class AutoShoot extends Command {
   public static Translation2d HUB_TRANSLATION =
       new Translation2d(4.62403825, 4.03463125); // Measured with CAD
 
+  public static Translation2d PASS_LEFT_TRANSLATION = new Translation2d(2, 2);
+
+  public static Translation2d PASS_RIGHT_TRANSLATION =
+      new Translation2d(
+          PASS_LEFT_TRANSLATION.getX(), HUB_TRANSLATION.getY() * 2 - PASS_LEFT_TRANSLATION.getY());
+
   /**
    * The swerve drive subsystem, used to get the shooter's pose and velocity for calculating
    * shooting parameters.
@@ -101,7 +107,7 @@ public class AutoShoot extends Command {
         robot.getTurret(),
         robot.getShooterHood(),
         robot.getShooterRollers(),
-        robot.getShooterFunctions());
+        robot.getHubFunctions());
   }
 
   /**
@@ -135,7 +141,7 @@ public class AutoShoot extends Command {
         robot.getTurret(),
         robot.getShooterHood(),
         robot.getShooterRollers(),
-        robot.getShooterFunctions(),
+        robot.getHubFunctions(),
         targetSupplier);
   }
 
