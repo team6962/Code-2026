@@ -27,7 +27,6 @@ import java.util.Map;
 
 public class PathPlanner {
   private CommandSwerveDrive drivetrain;
-  private ChassisSpeeds lastSpeeds;
   private boolean trackingTranslation = false;
   private boolean trackingRotation = false;
   private Map<String, PathPlannerPath> mirroredPaths = new HashMap<>();
@@ -42,21 +41,6 @@ public class PathPlanner {
         (speeds, ff) -> {
           ChassisSpeeds appliedSpeeds =
               ChassisSpeeds.fromRobotRelativeSpeeds(speeds, new Rotation2d(drivetrain.getYaw()));
-
-          if (lastSpeeds != null) {
-            appliedSpeeds.vxMetersPerSecond +=
-                (appliedSpeeds.vxMetersPerSecond - lastSpeeds.vxMetersPerSecond)
-                    / 0.02
-                    * drivetrain.getConstants().Driving.AutoLinearAccelerationScalar;
-            appliedSpeeds.vyMetersPerSecond +=
-                (appliedSpeeds.vyMetersPerSecond - lastSpeeds.vyMetersPerSecond)
-                    / 0.02
-                    * drivetrain.getConstants().Driving.AutoLinearAccelerationScalar;
-            appliedSpeeds.omegaRadiansPerSecond +=
-                (appliedSpeeds.omegaRadiansPerSecond - lastSpeeds.omegaRadiansPerSecond)
-                    / 0.02
-                    * drivetrain.getConstants().Driving.AutoAngularAccelerationScalar;
-          }
 
           if (!trackingTranslation) {
             appliedSpeeds.vxMetersPerSecond = 0;
@@ -149,7 +133,6 @@ public class PathPlanner {
           public void initialize() {
             trackingRotation = trackRotation;
             trackingTranslation = trackTranslation;
-            lastSpeeds = null;
             pathPlannerCommand.initialize();
           }
 
@@ -163,7 +146,6 @@ public class PathPlanner {
             pathPlannerCommand.end(interrupted);
             trackingRotation = false;
             trackingTranslation = false;
-            lastSpeeds = null;
           }
 
           @Override
