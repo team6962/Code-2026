@@ -56,7 +56,7 @@ public class IntakeExtension extends SubsystemBase {
   private StatusSignal<Double> closedLoopReferenceSignal;
 
   private IntakeExtensionSim simulation;
-  
+
   private double baseMotionMagicCruiseVelocity =
       IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity;
   private double baseMotionMagicAcceleration =
@@ -198,8 +198,7 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   public void setMotionProfileConstraintScale(double scale) {
-    motionProfileConstraintScale =
-        MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
+    motionProfileConstraintScale = MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
     applyMotionMagicConfig();
   }
 

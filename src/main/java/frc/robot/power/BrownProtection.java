@@ -15,8 +15,8 @@ import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.turret.Turret;
 
 /**
- * Dynamically slows drivetrain and lower-priority mechanism motion when battery voltage
- * drops or robot is drawing too high of a current.
+ * Dynamically slows drivetrain and lower-priority mechanism motion when battery voltage drops or
+ * robot is drawing too high of a current.
  */
 public class BrownProtection extends SubsystemBase {
   private final CommandSwerveDrive swerveDrive;
@@ -48,8 +48,7 @@ public class BrownProtection extends SubsystemBase {
         "Brownout/Start Limiting Voltage",
         startLimitingVoltage,
         value -> startLimitingVoltage = value);
-    DogLog.tunable(
-        "Brownout/Minimum Voltage", minimumVoltage, value -> minimumVoltage = value);
+    DogLog.tunable("Brownout/Minimum Voltage", minimumVoltage, value -> minimumVoltage = value);
     DogLog.tunable(
         "Brownout/Start Limiting Current",
         startLimitingCurrentAmps,
@@ -71,18 +70,14 @@ public class BrownProtection extends SubsystemBase {
     double totalCurrentAmps = CurrentDrawLogger.getTotalCurrent().in(Amps);
     double filteredTotalCurrentAmps = totalCurrentFilter.calculate(totalCurrentAmps);
 
-    double voltageBudget =
-        unitRange(filteredBatteryVoltage, minimumVoltage, startLimitingVoltage);
+    double voltageBudget = unitRange(filteredBatteryVoltage, minimumVoltage, startLimitingVoltage);
     double currentBudget =
-        1.0
-            - unitRange(
-                filteredTotalCurrentAmps, startLimitingCurrentAmps, maximumCurrentAmps);
+        1.0 - unitRange(filteredTotalCurrentAmps, startLimitingCurrentAmps, maximumCurrentAmps);
     double protectionBudget =
         RobotState.isDisabled() ? 1.0 : Math.min(voltageBudget, currentBudget);
 
     double driveScale = MathUtil.interpolate(minimumDriveScale, 1.0, protectionBudget);
-    double mechanismScale =
-        MathUtil.interpolate(minimumMechanismScale, 1.0, protectionBudget);
+    double mechanismScale = MathUtil.interpolate(minimumMechanismScale, 1.0, protectionBudget);
 
     swerveDrive.setVelocityScale(driveScale);
     swerveDrive.setMotionConstraintScale(driveScale);
