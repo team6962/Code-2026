@@ -156,7 +156,8 @@ public class VelocityMotion implements SwerveMotion {
     }
 
     ChassisSpeeds robotRelativeVelocity =
-        ChassisSpeeds.fromFieldRelativeSpeeds(scaledVelocity, new Rotation2d(swerveDrive.getHeading()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            scaledVelocity, new Rotation2d(swerveDrive.getHeading()));
 
     SwerveModuleState[] states =
         swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);

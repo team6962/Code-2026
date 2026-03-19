@@ -475,12 +475,11 @@ public class ShooterHood extends SubsystemBase {
             if (targetVelocity == null) targetVelocity = RotationsPerSecond.of(0);
 
             Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
-            
+
             TrapezoidProfile profile =
                 new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
-                        getScaledMotionMagicCruiseVelocity(),
-                        getScaledMotionMagicAcceleration()));
+                        getScaledMotionMagicCruiseVelocity(), getScaledMotionMagicAcceleration()));
 
             TrapezoidProfile.State profileState =
                 profile.calculate(
@@ -512,8 +511,7 @@ public class ShooterHood extends SubsystemBase {
   }
 
   public void setMotionProfileConstraintScale(double scale) {
-    motionProfileConstraintScale =
-        MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
+    motionProfileConstraintScale = MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
     applyMotionMagicConfig();
   }
 

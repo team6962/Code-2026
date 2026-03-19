@@ -80,6 +80,7 @@ public class Turret extends SubsystemBase {
 
   /** The current motor configuration */
   private TalonFXConfiguration config;
+
   private double baseMotionMagicCruiseVelocity;
   private double baseMotionMagicAcceleration;
   private double motionProfileConstraintScale = 1.0;
@@ -541,8 +542,7 @@ public class Turret extends SubsystemBase {
             TrapezoidProfile profile =
                 new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
-                        getScaledMotionMagicCruiseVelocity(),
-                        getScaledMotionMagicAcceleration()));
+                        getScaledMotionMagicCruiseVelocity(), getScaledMotionMagicAcceleration()));
 
             TrapezoidProfile.State profileState =
                 profile.calculate(
