@@ -191,7 +191,7 @@ public class TeleopControls {
         .whileTrue(this.robot.getTurret().moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE));
 
     operator
-        .povLeft()
+        .povRight()
         .and(() -> fineControl)
         .whileTrue(
             this.robot
