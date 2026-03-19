@@ -1,7 +1,17 @@
 {
+  "FMS": {
+    "window": {
+      "visible": false
+    }
+  },
   "Joysticks": {
     "window": {
       "visible": false
+    }
+  },
+  "Keyboard 1 Settings": {
+    "window": {
+      "visible": true
     }
   },
   "System Joysticks": {
@@ -21,15 +31,12 @@
           "incKey": 83
         },
         {
-          "decayRate": 0.20000000298023224,
-          "incKey": 46
+          "decayRate": 0.20000000298023224
         },
         {
-          "decayRate": 0.20000000298023224,
-          "incKey": 44
+          "decayRate": 0.20000000298023224
         },
         {
-          "decKey": 81,
           "incKey": 69
         }
       ],
@@ -55,8 +62,7 @@
           "key225": 49,
           "key270": 52,
           "key315": 55,
-          "key45": 57,
-          "key90": 54
+          "key45": 57
         }
       ],
       "povCount": 1
@@ -70,9 +76,15 @@
         {
           "decKey": 73,
           "incKey": 75
+        },
+        {},
+        {},
+        {
+          "decKey": 44,
+          "incKey": 46
         }
       ],
-      "axisCount": 2,
+      "axisCount": 5,
       "buttonCount": 10,
       "buttonKeys": [
         -1,
@@ -80,7 +92,7 @@
         -1,
         -1,
         -1,
-        -1,
+        39,
         -1,
         -1,
         -1,

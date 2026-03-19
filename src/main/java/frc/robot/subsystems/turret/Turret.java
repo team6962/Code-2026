@@ -70,6 +70,8 @@ public class Turret extends SubsystemBase {
    */
   private boolean isZeroed = false;
 
+  private Angle manualOffset = Degrees.of(0);
+
   /**
    * Indicates whether the hall sensor has been triggered. Used to detect when the turret has
    * finished being zeroed.
@@ -233,6 +235,7 @@ public class Turret extends SubsystemBase {
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
+    DogLog.log("Turret/ManualOffsetDegs", manualOffset);
     DogLog.log("Turret/Velocity", getVelocity());
     DogLog.log("Turret/Acceleration", getAcceleration());
     DogLog.log("Turret/AppliedVoltage", getAppliedVoltage());
@@ -413,6 +416,15 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public Command modifyOffsetAngle(Angle amount){
+    return runOnce(
+      () -> {
+        manualOffset = manualOffset.plus(amount);
+        moveTo(getPosition()).schedule();
+      }
+    );
+  }
+
   /**
    * Optimizes a target angle to take the shortest path from the current angle, while also ensuring
    * the result is within the safe range defined by the given minimum and maximum angles.
@@ -454,7 +466,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          clampPositionToSafeRange(targetAngle),
+                          clampPositionToSafeRange(targetAngle.plus(manualOffset)),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
@@ -557,7 +569,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          targetAngleSupplier.get(),
+                          targetAngleSupplier.get().plus(manualOffset),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));

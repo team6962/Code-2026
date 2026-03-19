@@ -219,6 +219,16 @@ public class TeleopControls {
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
     operator
+        .axisGreaterThan(Axis.kRightX.value, 0.5)
+        .and(() -> fineControl)
+        .onTrue(this.robot.getTurret().modifyOffsetAngle(Degrees.of(-3)));
+
+    operator
+        .axisLessThan(Axis.kRightX.value, -0.5)
+        .and(() -> fineControl)
+        .onTrue(this.robot.getTurret().modifyOffsetAngle(Degrees.of(3)));
+
+    operator
         .axisGreaterThan(Axis.kRightY.value, 0.5)
         .and(() -> fineControl)
         .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
