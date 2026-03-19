@@ -596,8 +596,8 @@ public class Turret extends SubsystemBase {
   }
 
   /**
-   * Applies a Dynamic Motion Magic position control request to move the turret to the target
-   * angle. If the turret is not yet zeroed, the motor is set to neutral mode instead.
+   * Applies a Dynamic Motion Magic position control request to move the turret to the target angle.
+   * If the turret is not yet zeroed, the motor is set to neutral mode instead.
    *
    * @param targetAngle The target angle to move the turret to
    */
