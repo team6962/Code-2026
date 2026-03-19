@@ -48,9 +48,6 @@ public class DriveToStateCommand extends Command {
   /** Whether the motion profiles have finished at least once. */
   private boolean motionProfilesFinished = false;
 
-  /** Most recent drivetrain motion profile scale used to create controllers. */
-  private double previousMotionConstraintScale = Double.NaN;
-
   /** Class representing the target state for the drive command. */
   public static class State {
     /** The target translation position. If null, the robot translation will not be controlled. */
@@ -183,17 +180,15 @@ public class DriveToStateCommand extends Command {
     DogLog.log("Drivetrain/DriveToState/FinalAngularVelocity", target.angularVelocity);
   }
 
-  /** Creates controllers for translation and rotation using the current scaled constraints. */
+  /** Creates controllers for translation and rotation using the configured constraints. */
   private void createControllers() {
-    previousMotionConstraintScale = swerveDrive.getMotionConstraintScale();
-
     if (target.translation != null) {
       translationController =
           new TranslationController(
               swerveDrive.getConstants().Driving.TranslationFeedbackKP,
               swerveDrive.getConstants().Driving.TranslationFeedbackKI,
               swerveDrive.getConstants().Driving.TranslationFeedbackKD,
-              swerveDrive.getScaledTranslationConstraints(),
+              swerveDrive.getConstants().Driving.getTranslationConstraints(),
               Hertz.of(50));
     }
 
@@ -203,7 +198,7 @@ public class DriveToStateCommand extends Command {
               swerveDrive.getConstants().Driving.AngleFeedbackKP,
               swerveDrive.getConstants().Driving.AngleFeedbackKI,
               swerveDrive.getConstants().Driving.AngleFeedbackKD,
-              new TrapezoidalProfile(swerveDrive.getScaledRotationConstraints()),
+              new TrapezoidalProfile(swerveDrive.getConstants().Driving.getRotationConstraints()),
               Hertz.of(50));
     }
   }
@@ -243,11 +238,6 @@ public class DriveToStateCommand extends Command {
 
   @Override
   public void execute() {
-    if (Math.abs(swerveDrive.getMotionConstraintScale() - previousMotionConstraintScale) > 0.05) {
-      createControllers();
-      createMotionProfiles();
-    }
-
     // Check if motion profiles have finished
     if ((translationController == null || translationController.isFinished())
         && (headingController == null || headingController.isFinished())) {

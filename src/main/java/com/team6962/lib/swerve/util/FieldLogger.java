@@ -7,7 +7,6 @@ import com.team6962.lib.swerve.localization.Localization;
 import com.team6962.lib.swerve.localization.Odometry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,43 +40,6 @@ public class FieldLogger implements SwerveComponent {
   /** Cached previous pose to detect user-initiated changes. */
   private Pose2d previousRobotPose;
 
-  /** Notifier for periodic field logging updates. */
-  private Notifier fieldLoggerNotifier;
-
-  /** Data structure to hold the latest robot and module poses for logging. */
-  private LogData logData;
-
-  /**
-   * Data structure to hold the robot pose and module poses for logging. This is cloned before being
-   * accessed in the logging thread to avoid concurrency issues.
-   */
-  private static class LogData implements Cloneable {
-    /** The robot's current pose on the field. */
-    public Pose2d robotPose;
-
-    /** The poses of the swerve modules relative to the robot. */
-    public Pose2d[] modulePoses;
-
-    public LogData(Pose2d robotPose, Pose2d[] modulePoses) {
-      this.robotPose = robotPose;
-      this.modulePoses = modulePoses;
-    }
-
-    @Override
-    public LogData clone() {
-      Pose2d clonedRobotPose = new Pose2d(robotPose.getTranslation(), robotPose.getRotation());
-      Pose2d[] clonedModulePoses = null;
-      if (modulePoses != null) {
-        clonedModulePoses = new Pose2d[modulePoses.length];
-        for (int i = 0; i < modulePoses.length; i++) {
-          clonedModulePoses[i] =
-              new Pose2d(modulePoses[i].getTranslation(), modulePoses[i].getRotation());
-        }
-      }
-      return new LogData(clonedRobotPose, clonedModulePoses);
-    }
-  }
-
   /**
    * Creates a new FieldLogger, which logs robot and module poses to NetworkTables.
    *
@@ -89,33 +51,6 @@ public class FieldLogger implements SwerveComponent {
     this.constants = constants;
     this.localization = localization;
     this.odometry = odometry;
-    fieldLoggerNotifier = new Notifier(this::threadedLog);
-    fieldLoggerNotifier.setName("FieldLogger");
-    fieldLoggerNotifier.startPeriodic(0.02);
-  }
-
-  /**
-   * Logs the robot pose and module poses to the Field2d widget. This method is called periodically
-   * by the Notifier in a separate thread.
-   */
-  private void threadedLog() {
-    LogData dataCopy;
-
-    synchronized (this) {
-      if (logData == null) {
-        return;
-      }
-
-      dataCopy = logData.clone();
-    }
-
-    if (dataCopy.robotPose != null) {
-      field.setRobotPose(dataCopy.robotPose);
-    }
-
-    if (dataCopy.modulePoses != null) {
-      field.getObject("Swerve Modules").setPoses(dataCopy.modulePoses);
-    }
   }
 
   @Override
@@ -153,11 +88,11 @@ public class FieldLogger implements SwerveComponent {
 
     previousRobotPose = robotPose;
 
-    synchronized (this) {
-      logData = new LogData(robotPose, modulePoses);
-    }
-
     field.setRobotPose(robotPose);
+
+    if (modulePoses != null) {
+      field.getObject("Swerve Modules").setPoses(modulePoses);
+    }
   }
 
   /**

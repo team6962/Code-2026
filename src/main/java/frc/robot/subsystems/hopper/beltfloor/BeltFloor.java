@@ -13,6 +13,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -36,6 +37,7 @@ public class BeltFloor extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
   private BeltFloorSim simulation;
+  private double voltageScale = 1.0;
 
   /**
    * Initializes the motor controller, configures status signals for logging, and sets up DogLog
@@ -78,11 +80,11 @@ public class BeltFloor extends SubsystemBase {
    * motor go clockwise.
    */
   private Command feedDump(Voltage targetVoltage) {
-
-    return startEnd(
+    return runEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          beltFloorMotor.setControl(new VoltageOut(targetVoltage).withEnableFOC(false));
+          beltFloorMotor.setControl(
+              new VoltageOut(targetVoltage.times(voltageScale)).withEnableFOC(false));
         },
         () -> {
           // defines a local function to stop motor
@@ -148,6 +150,11 @@ public class BeltFloor extends SubsystemBase {
     DogLog.log("Hopper/BeltFloor/StatorCurrent", getStatorCurrent());
     DogLog.log("Hopper/BeltFloor/AngularAcceleration", getAngularAcceleration());
     DogLog.log("Hopper/BeltFloor/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Hopper/BeltFloor/VoltageScale", voltageScale);
+  }
+
+  public void setVoltageScale(double scale) {
+    voltageScale = MathUtil.clamp(scale, 0.0, 1.0);
   }
 
   /** gets the angular velocity */

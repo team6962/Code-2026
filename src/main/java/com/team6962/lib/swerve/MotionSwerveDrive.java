@@ -35,7 +35,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -87,7 +86,6 @@ public class MotionSwerveDrive implements AutoCloseable {
   private SwerveDriveKinematics kinematics;
   private SwerveMotionManager motionManager;
   private volatile double velocityScale = 1.0;
-  private volatile double motionConstraintScale = 1.0;
 
   /**
    * Creates a new MotionSwerveDrive with the specified drivetrain configuration.
@@ -523,48 +521,6 @@ public class MotionSwerveDrive implements AutoCloseable {
    */
   public double getVelocityScale() {
     return velocityScale;
-  }
-
-  /**
-   * Sets runtime scale applied to auton drivetrain motion profile constraints.
-   *
-   * @param scale the constraint scale to apply
-   */
-  public void setMotionConstraintScale(double scale) {
-    motionConstraintScale = MathUtil.clamp(scale, 0.0, 1.0);
-  }
-
-  /**
-   * Gets runtime scale currently applied to auton drivetrain motion profile constraints.
-   *
-   * @return the constraint scale
-   */
-  public double getMotionConstraintScale() {
-    return motionConstraintScale;
-  }
-
-  /**
-   * Gets auton translation constraints after applying current runtime scale.
-   *
-   * @return scaled auton translation constraints
-   */
-  public TrapezoidProfile.Constraints getScaledTranslationConstraints() {
-    return new TrapezoidProfile.Constraints(
-        constants.Driving.AutoLinearVelocity.in(MetersPerSecond) * motionConstraintScale,
-        constants.Driving.AutoLinearAcceleration.in(MetersPerSecondPerSecond)
-            * motionConstraintScale);
-  }
-
-  /**
-   * Gets auton rotation constraints after applying current runtime scale.
-   *
-   * @return scaled auton rotation constraints
-   */
-  public TrapezoidProfile.Constraints getScaledRotationConstraints() {
-    return new TrapezoidProfile.Constraints(
-        constants.Driving.AutoAngularVelocity.in(RadiansPerSecond) * motionConstraintScale,
-        constants.Driving.AutoAngularAcceleration.in(RadiansPerSecondPerSecond)
-            * motionConstraintScale);
   }
 
   /**
