@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hopper.beltfloor;
+package frc.robot.subsystems.hopper.floor;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
@@ -22,50 +22,42 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
-/**
- * The {@class BeltFloor} class is responsible for controlling the moving belt floor at the bottom
- * of the hopper that moves fuel into the queue.
- */
-public class BeltFloor extends SubsystemBase {
-  private TalonFX beltFloorMotor;
+public class RollerFloor extends SubsystemBase {
+  private TalonFX rollerFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
-  private BeltFloorSim simulation;
+  private RollerFloorSim simulation;
 
-  /**
-   * Initializes the motor controller, configures status signals for logging, and sets up DogLog
-   * tunables for real-time testing.
-   */
-  public BeltFloor() {
-    beltFloorMotor =
+  public RollerFloor() {
+    rollerFloorMotor =
         new TalonFX(
-            HopperConstants.BELT_FLOOR_MOTOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
-    beltFloorMotor.getConfigurator().apply(HopperConstants.BELT_FLOOR_MOTOR_CONFIG);
+            HopperConstants.ROLLER_FLOOR_MOTOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
+    rollerFloorMotor.getConfigurator().apply(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG);
 
     /**
      * Assigning status signals to methods that retrieve the corresponding data from the motor
      * controller
      */
-    velocitySignal = beltFloorMotor.getVelocity();
-    voltageSignal = beltFloorMotor.getMotorVoltage();
-    accelerationSignal = beltFloorMotor.getAcceleration();
-    supplyCurrentSignal = beltFloorMotor.getSupplyCurrent();
-    statorCurrentSignal = beltFloorMotor.getStatorCurrent();
+    velocitySignal = rollerFloorMotor.getVelocity();
+    voltageSignal = rollerFloorMotor.getMotorVoltage();
+    accelerationSignal = rollerFloorMotor.getAcceleration();
+    supplyCurrentSignal = rollerFloorMotor.getSupplyCurrent();
+    statorCurrentSignal = rollerFloorMotor.getStatorCurrent();
 
     // Setup tunable dashboard control for testing
     DogLog.tunable(
-        "Hopper/BeltFloor/AppliedVoltage",
+        "Hopper/RollerFloor/AppliedVoltage",
         0.0,
         newVoltageDouble -> {
           Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
           feedDump(target).schedule();
         });
     if (RobotBase.isSimulation()) {
-      simulation = new BeltFloorSim(beltFloorMotor);
+      simulation = new RollerFloorSim(rollerFloorMotor);
     }
   }
 
@@ -79,36 +71,36 @@ public class BeltFloor extends SubsystemBase {
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          beltFloorMotor.setControl(new VoltageOut(targetVoltage));
+          rollerFloorMotor.setControl(new VoltageOut(targetVoltage));
         },
         () -> {
           // defines a local function to stop motor
-          beltFloorMotor.setControl(new CoastOut());
+          rollerFloorMotor.setControl(new CoastOut());
         });
   }
 
   /**
-   * Moves the belts to feed fuel from the hopper into the queue.
+   * Moves the rollers to feed fuel from the hopper into the queue.
    *
-   * @return A command that runs the belt floor motor to feed fuel.
+   * @return A command that runs the roller floor motor to feed fuel.
    */
   public Command feed() {
     return feedDump(Volts.of(8.0));
   }
 
   /**
-   * Moves the belts in reverse.
+   * Moves the rollers in reverse.
    *
-   * @return A command that runs the belt floor motor to move fuel away from the queue.
+   * @return A command that runs the roller floor motor to move fuel away from the queue.
    */
   public Command reverse() {
     return feedDump(Volts.of(-6.0));
   }
 
   /**
-   * Slowly runs the belts in reverse.
+   * Slowly runs the rollers in reverse.
    *
-   * @return A command that runs the belt floor motor at a low voltage to move fuel away from the
+   * @return A command that runs the roller floor motor at a low voltage to move fuel away from the
    *     queue.
    */
   public Command slowReverse() {
@@ -116,9 +108,9 @@ public class BeltFloor extends SubsystemBase {
   }
 
   /**
-   * Moves the belts in reverse to dump fuel out of the hopper.
+   * Moves the rollers in reverse to dump fuel out of the hopper.
    *
-   * @return A command that runs the belt floor motor to dump fuel.
+   * @return A command that runs the roller floor motor to dump fuel.
    */
   public Command dump() {
     return feedDump(Volts.of(-8.0));
@@ -139,12 +131,12 @@ public class BeltFloor extends SubsystemBase {
         supplyCurrentSignal,
         statorCurrentSignal,
         accelerationSignal);
-    DogLog.log("Hopper/BeltFloor/Voltage", getMotorVoltage());
-    DogLog.log("Hopper/BeltFloor/AngularVelocity", getAngularVelocity());
-    DogLog.log("Hopper/BeltFloor/BeltVelocity", getLinearVelocity());
-    DogLog.log("Hopper/BeltFloor/StatorCurrent", getStatorCurrent());
-    DogLog.log("Hopper/BeltFloor/AngularAcceleration", getAngularAcceleration());
-    DogLog.log("Hopper/BeltFloor/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Hopper/RollerFloor/Voltage", getMotorVoltage());
+    DogLog.log("Hopper/RollerFloor/AngularVelocity", getAngularVelocity());
+    DogLog.log("Hopper/RollerFloor/BeltVelocity", getLinearVelocity());
+    DogLog.log("Hopper/RollerFloor/StatorCurrent", getStatorCurrent());
+    DogLog.log("Hopper/RollerFloor/AngularAcceleration", getAngularAcceleration());
+    DogLog.log("Hopper/RollerFloor/SupplyCurrent", getSupplyCurrent());
   }
 
   /** gets the angular velocity */
@@ -163,7 +155,7 @@ public class BeltFloor extends SubsystemBase {
   public LinearVelocity getLinearVelocity() {
     return InchesPerSecond.of(
         (getAngularVelocity().in(RadiansPerSecond))
-            * HopperConstants.BELT_FLOOR_PULLEY_RADIUS.in(Inches));
+            * HopperConstants.ROLLER_FLOOR_PULLEY_RADIUS.in(Inches));
   }
 
   /** gets the supply current */

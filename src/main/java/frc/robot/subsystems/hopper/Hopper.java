@@ -4,7 +4,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.hopper.beltfloor.BeltFloor;
+import frc.robot.subsystems.hopper.floor.BeltFloor;
 import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.hopper.sensors.HopperSensors;
 
