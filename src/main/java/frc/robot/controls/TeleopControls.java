@@ -162,7 +162,7 @@ public class TeleopControls {
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
     // Disable shooting
-    // operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Toggle fine control mode - WORKS
     operator
