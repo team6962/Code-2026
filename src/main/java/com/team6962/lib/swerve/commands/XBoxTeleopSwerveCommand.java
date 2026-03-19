@@ -6,8 +6,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Joystick;
-import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Trigger;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -168,6 +166,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private double getFineControlTranslationScalar() {
     return constants.FineControlTranslationalSpeed;
   }
+
   /**
    * Gets the angular speed scalar for fine control mode, interpolated based on boost and super
    * boost inputs.
