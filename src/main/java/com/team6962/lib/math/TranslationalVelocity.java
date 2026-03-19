@@ -2,6 +2,7 @@ package com.team6962.lib.math;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
@@ -93,6 +95,22 @@ public class TranslationalVelocity {
   public TranslationalVelocity(Matrix<?, N1> vector) {
     this.x = MetersPerSecond.of(vector.get(0, 0));
     this.y = MetersPerSecond.of(vector.get(1, 0));
+  }
+
+  /**
+   * Creates a TranslationalVelocity from a Translation2d object and an AngularVelocity. The
+   * translational velocity is calculated based on the tangential velocity induced by the angular
+   * velocity at the given translation from the center of rotation. This is useful for calculating
+   * the translational velocity of a point on the robot given its position relative to the center
+   * of rotation and the robot's angular velocity.
+   * 
+   * @param translation The Translation2d representing the position of the point relative to the center of rotation
+   * @param angularVelocity The AngularVelocity representing the robot's angular velocity
+   * @return The TranslationalVelocity representing the velocity of the point
+   */
+  public TranslationalVelocity(Translation2d translation, AngularVelocity angularVelocity) {
+    this.x = MetersPerSecond.of(-angularVelocity.in(RadiansPerSecond) * translation.getY());
+    this.y = MetersPerSecond.of(angularVelocity.in(RadiansPerSecond) * translation.getX());
   }
 
   /**
