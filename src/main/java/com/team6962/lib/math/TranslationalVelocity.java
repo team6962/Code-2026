@@ -101,10 +101,11 @@ public class TranslationalVelocity {
    * Creates a TranslationalVelocity from a Translation2d object and an AngularVelocity. The
    * translational velocity is calculated based on the tangential velocity induced by the angular
    * velocity at the given translation from the center of rotation. This is useful for calculating
-   * the translational velocity of a point on the robot given its position relative to the center
-   * of rotation and the robot's angular velocity.
-   * 
-   * @param translation The Translation2d representing the position of the point relative to the center of rotation
+   * the translational velocity of a point on the robot given its position relative to the center of
+   * rotation and the robot's angular velocity.
+   *
+   * @param translation The Translation2d representing the position of the point relative to the
+   *     center of rotation
    * @param angularVelocity The AngularVelocity representing the robot's angular velocity
    * @return The TranslationalVelocity representing the velocity of the point
    */

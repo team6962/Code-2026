@@ -370,19 +370,20 @@ public class AutoShoot extends Command {
   }
 
   /**
-   * Calculates the shooter's translational velocity at the point of projectile exit, which is used to
-   * account for the effect of the shooter's movement on the projectile's trajectory. This is equal to
-   * the robot's translational velocity plus the tangential velocity at the shooter caused by the
-   * robot's angular velocity.
-    *
+   * Calculates the shooter's translational velocity at the point of projectile exit, which is used
+   * to account for the effect of the shooter's movement on the projectile's trajectory. This is
+   * equal to the robot's translational velocity plus the tangential velocity at the shooter caused
+   * by the robot's angular velocity.
+   *
    * @return the shooter's translational velocity at the point of projectile exit
    */
   private TranslationalVelocity calculateShooterVelocity() {
-    return swerveDrive.getTranslationalVelocity()
-      .plus(new TranslationalVelocity(
-        AutoShootConstants.shooterTransform.getTranslation(),
-        swerveDrive.getYawVelocity()
-      ));
+    return swerveDrive
+        .getTranslationalVelocity()
+        .plus(
+            new TranslationalVelocity(
+                AutoShootConstants.shooterTransform.getTranslation(),
+                swerveDrive.getYawVelocity()));
   }
 
   private ShootingParameters calculate(Time poseExtrapolationTime) {
