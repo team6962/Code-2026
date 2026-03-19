@@ -2,8 +2,10 @@ package com.team6962.lib.swerve;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -25,6 +27,7 @@ import com.team6962.lib.swerve.util.ControlLoop;
 import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -32,6 +35,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -82,6 +86,8 @@ public class MotionSwerveDrive implements AutoCloseable {
   private BaseStatusSignal[] statusSignals;
   private SwerveDriveKinematics kinematics;
   private SwerveMotionManager motionManager;
+  private volatile double velocityScale = 1.0;
+  private volatile double motionConstraintScale = 1.0;
 
   /**
    * Creates a new MotionSwerveDrive with the specified drivetrain configuration.
@@ -499,6 +505,66 @@ public class MotionSwerveDrive implements AutoCloseable {
    */
   public void updateMotion() {
     motionManager.update();
+  }
+
+  /**
+   * Sets runtime scale that is applied to requested drivetrain velocities.
+   *
+   * @param scale the velocity scale to apply
+   */
+  public void setVelocityScale(double scale) {
+    velocityScale = MathUtil.clamp(scale, 0.0, 1.0);
+  }
+
+  /**
+   * Gets runtime scale applied to requested drivetrain velocities.
+   *
+   * @return the velocity scale
+   */
+  public double getVelocityScale() {
+    return velocityScale;
+  }
+
+  /**
+   * Sets runtime scale applied to auton drivetrain motion profile constraints.
+   *
+   * @param scale the constraint scale to apply
+   */
+  public void setMotionConstraintScale(double scale) {
+    motionConstraintScale = MathUtil.clamp(scale, 0.0, 1.0);
+  }
+
+  /**
+   * Gets runtime scale currently applied to auton drivetrain motion profile constraints.
+   *
+   * @return the constraint scale
+   */
+  public double getMotionConstraintScale() {
+    return motionConstraintScale;
+  }
+
+  /**
+   * Gets auton translation constraints after applying current runtime scale.
+   *
+   * @return scaled auton translation constraints
+   */
+  public TrapezoidProfile.Constraints getScaledTranslationConstraints() {
+    return new TrapezoidProfile.Constraints(
+        constants.Driving.AutoLinearVelocity.in(MetersPerSecond) * motionConstraintScale,
+        constants.Driving.AutoLinearAcceleration.in(MetersPerSecondPerSecond)
+            * motionConstraintScale);
+  }
+
+  /**
+   * Gets auton rotation constraints after applying current runtime scale.
+   *
+   * @return scaled auton rotation constraints
+   */
+  public TrapezoidProfile.Constraints getScaledRotationConstraints() {
+    return new TrapezoidProfile.Constraints(
+        constants.Driving.AutoAngularVelocity.in(RadiansPerSecond) * motionConstraintScale,
+        constants.Driving.AutoAngularAcceleration.in(RadiansPerSecondPerSecond)
+            * motionConstraintScale);
   }
 
   /**

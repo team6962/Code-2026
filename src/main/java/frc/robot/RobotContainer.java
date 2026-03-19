@@ -26,6 +26,7 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
+import frc.robot.power.BrownProtection;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
@@ -54,6 +55,7 @@ public class RobotContainer {
   private final ShooterFunctions hubFunctions;
   private final ShooterFunctions passFunctions;
   private final Autonomous autonomous;
+  private final BrownProtection brownoutProtection;
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
@@ -73,6 +75,7 @@ public class RobotContainer {
     turret = new Turret();
     intakeExtension = new IntakeExtension();
     hopper = new Hopper();
+    brownoutProtection = new BrownProtection(swerveDrive, turret, shooterHood, intakeExtension);
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
