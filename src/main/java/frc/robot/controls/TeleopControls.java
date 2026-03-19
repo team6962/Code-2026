@@ -178,7 +178,6 @@ public class TeleopControls {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-
     // Feeding
     operator.x().whileTrue(robot.getHopper().feed());
 
@@ -198,9 +197,8 @@ public class TeleopControls {
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Backup zero
-SmartDashboard.putData("Shooter Hood Zeroing", 
-    this.robot.getShooterHood().zero()
-        .onlyIf(RobotState::isDisabled));
+    SmartDashboard.putData(
+        "Shooter Hood Zeroing", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
 
     operator
         .povLeft()
@@ -334,7 +332,7 @@ SmartDashboard.putData("Shooter Hood Zeroing",
         .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125)))//Temporary values
+                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
         .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(robot.getHopper().feed());
 
