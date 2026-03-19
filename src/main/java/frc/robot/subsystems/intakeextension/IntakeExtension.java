@@ -21,6 +21,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -55,6 +56,14 @@ public class IntakeExtension extends SubsystemBase {
   private StatusSignal<Double> closedLoopReferenceSignal;
 
   private IntakeExtensionSim simulation;
+  
+  private double baseMotionMagicCruiseVelocity =
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity;
+  private double baseMotionMagicAcceleration =
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration;
+  private double motionProfileConstraintScale = 1.0;
+  private double appliedCruiseVelocity = Double.NaN;
+  private double appliedAcceleration = Double.NaN;
 
   public boolean isZeroed = false;
 
@@ -163,22 +172,18 @@ public class IntakeExtension extends SubsystemBase {
 
     DogLog.tunable(
         "IntakeExtension/Velocity",
-        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity,
+        baseMotionMagicCruiseVelocity,
         newVelocity -> {
-          MotionMagicConfigs config = new MotionMagicConfigs();
-          StatusUtil.check(motor.getConfigurator().refresh(config));
-          config.MotionMagicCruiseVelocity = newVelocity;
-          motor.getConfigurator().apply(config);
+          baseMotionMagicCruiseVelocity = newVelocity;
+          applyMotionMagicConfig();
         });
 
     DogLog.tunable(
         "IntakeExtension/Acceleration",
-        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration,
+        baseMotionMagicAcceleration,
         newAcceleration -> {
-          MotionMagicConfigs config = new MotionMagicConfigs();
-          StatusUtil.check(motor.getConfigurator().refresh(config));
-          config.MotionMagicAcceleration = newAcceleration;
-          motor.getConfigurator().apply(config);
+          baseMotionMagicAcceleration = newAcceleration;
+          applyMotionMagicConfig();
         });
 
     if (RobotBase.isSimulation()) {
@@ -189,6 +194,35 @@ public class IntakeExtension extends SubsystemBase {
     }
 
     CurrentDrawLogger.add("Intake Extension", this::getSupplyCurrent);
+    applyMotionMagicConfig();
+  }
+
+  public void setMotionProfileConstraintScale(double scale) {
+    motionProfileConstraintScale =
+        MathUtil.clamp(Math.round(scale * 20.0) / 20.0, 0.1, 1.0);
+    applyMotionMagicConfig();
+  }
+
+  private void applyMotionMagicConfig() {
+    double scaledCruiseVelocity = baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
+    double scaledAcceleration = baseMotionMagicAcceleration * motionProfileConstraintScale;
+
+    if (Math.abs(scaledCruiseVelocity - appliedCruiseVelocity) < 1e-6
+        && Math.abs(scaledAcceleration - appliedAcceleration) < 1e-6) {
+      return;
+    }
+
+    motor
+        .getConfigurator()
+        .apply(
+            new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(scaledCruiseVelocity)
+                .withMotionMagicAcceleration(scaledAcceleration)
+                .withMotionMagicJerk(
+                    IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk));
+
+    appliedCruiseVelocity = scaledCruiseVelocity;
+    appliedAcceleration = scaledAcceleration;
   }
 
   /**
@@ -401,5 +435,6 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
     DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
+    DogLog.log("Intake/MotionMagicScale", motionProfileConstraintScale);
   }
 }
