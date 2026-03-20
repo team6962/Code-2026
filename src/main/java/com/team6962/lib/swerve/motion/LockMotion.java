@@ -1,21 +1,23 @@
 package com.team6962.lib.swerve.motion;
 
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Meters;
+// import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.team6962.lib.math.SwerveKinematicsUtil;
-import com.team6962.lib.math.WheelMath;
+// import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.control.PositionControlRequest;
 import com.team6962.lib.swerve.MotionSwerveDrive;
-import com.team6962.lib.swerve.config.DriveMotorConstants;
+// import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
+
+// import edu.wpi.first.units.measure.Distance;
 
 /**
  * A swerve motion that locks the wheels in an X pattern to resist being pushed.
@@ -75,22 +77,24 @@ public class LockMotion implements SwerveMotion {
     for (int i = 0; i < swerveDrive.getModules().length; i++) {
       SwerveModule module = swerveDrive.getModules()[i];
 
-      Distance drivePosition = Meters.of(targetPositions[i].distanceMeters);
+      // Distance drivePosition = Meters.of(targetPositions[i].distanceMeters);
       Angle steerAngle = targetPositions[i].angle.getMeasure();
 
-      DriveMotorConstants driveConstants = swerveDrive.getConstants().DriveMotor;
+      // DriveMotorConstants driveConstants = swerveDrive.getConstants().DriveMotor;
       SteerMotorConstants steerConstants = swerveDrive.getConstants().SteerMotor;
 
       module.setControl(
-          new PositionControlRequest(
-                  WheelMath.toAngular(drivePosition, swerveDrive.getConstants().getWheelRadius(i))
-                      .in(Rotations))
-              .withMotionProfileType(driveConstants.PositionControlMotionProfile)
-              .withOutputType(driveConstants.OutputType)
-              .withSlot(driveConstants.PositionSlot)
-              .withUpdateFreqHz(updateFrequencyHz)
-              .withUseTimesync(useTimesync)
-              .toControlRequest(),
+          new StaticBrake(),
+          // new PositionControlRequest(
+          //         WheelMath.toAngular(drivePosition,
+          // swerveDrive.getConstants().getWheelRadius(i))
+          //             .in(Rotations))
+          //     .withMotionProfileType(driveConstants.PositionControlMotionProfile)
+          //     .withOutputType(driveConstants.OutputType)
+          //     .withSlot(driveConstants.PositionSlot)
+          //     .withUpdateFreqHz(updateFrequencyHz)
+          //     .withUseTimesync(useTimesync)
+          //     .toControlRequest(),
           new PositionControlRequest(steerAngle.in(Rotations))
               .withMotionProfileType(steerConstants.PositionControlMotionProfile)
               .withOutputType(steerConstants.OutputType)
