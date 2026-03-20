@@ -5,11 +5,13 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -161,8 +163,8 @@ public class TeleopControls {
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
-    // Disable shooting
-    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    // Pass
+    operator.leftTrigger().whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
     operator
@@ -178,8 +180,9 @@ public class TeleopControls {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // Shooting
-    operator.x().whileTrue(robot.getHopper().feed());
+    // stop Shooting
+    operator.x()
+        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
     operator
@@ -329,12 +332,17 @@ public class TeleopControls {
 
     operator
         .rightTrigger()
+        .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
                 MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
         .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(robot.getHopper().feed());
 
+
+    Trigger intakeSlowRetract = operator.leftStick();
+
+    intakeSlowRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().moveAtVoltage(Volts.of(-3))); // Needs to be tuned
     // ShooterFunctions functions = robot.getHubFunctions();
 
     // driver
