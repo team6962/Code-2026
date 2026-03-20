@@ -11,7 +11,6 @@ import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -264,7 +263,6 @@ public class TeleopControls {
             .and(driver.leftStick().negate())
             .and(operator.leftBumper().negate())
             .and(operator.rightTrigger().negate())
-            .and(driver.a().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
@@ -324,15 +322,13 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.leftTrigger().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
 
     operator
         .rightTrigger()
-        .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
                 MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
