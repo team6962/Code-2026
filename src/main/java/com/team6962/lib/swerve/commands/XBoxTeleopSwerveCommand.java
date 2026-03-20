@@ -240,8 +240,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The translation speed scalar (0.0 to 1.0)
    */
   private double getNonFineControlTranslationScalar() {
-    return MathUtil.interpolate(
-        constants.DefaultTranslationalSpeed, constants.BoostTranslationalSpeed, getBoost());
+    return constants.DefaultTranslationalSpeed;
   }
 
   /**
@@ -251,11 +250,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
   private double getNonFineControlAngularScalar() {
-    return MathUtil.interpolate(
-        MathUtil.interpolate(
-            constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost()),
-        Math.signum(constants.DefaultAngularSpeed),
-        getAngularSuperBoost());
+    return constants.DefaultAngularSpeed;
   }
 
   /**

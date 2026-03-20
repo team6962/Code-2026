@@ -58,6 +58,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
+    RobotController.setBrownoutVoltage(4.6);
 
     CurrentDrawLogger.start();
 

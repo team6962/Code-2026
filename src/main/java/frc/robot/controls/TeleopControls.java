@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -177,8 +178,8 @@ public class TeleopControls {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // Shoot - WORKS
-    operator.rightTrigger().whileTrue(robot.getHopper().feed());
+    // Shooting
+    operator.x().whileTrue(robot.getHopper().feed());
 
     // Fine control
     operator
@@ -196,7 +197,8 @@ public class TeleopControls {
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Backup zero
-    operator.x().and(RobotState::isDisabled).onTrue(this.robot.getShooterHood().zero());
+    SmartDashboard.putData(
+        "Shooter Hood Zeroing", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
 
     operator
         .povLeft()
@@ -326,11 +328,11 @@ public class TeleopControls {
     autoPassTrigger.whileTrue(autoPass);
 
     operator
-        .leftStick()
+        .rightTrigger()
         .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125)))
+                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
         .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(robot.getHopper().feed());
 
