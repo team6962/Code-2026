@@ -25,6 +25,7 @@ import frc.robot.RobotContainer;
 // import frc.robot.auto.AutoClimb;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
+import frc.robot.auto.AutoZoneDefense;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
@@ -42,6 +43,7 @@ public class TeleopControls {
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
+  private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -54,6 +56,7 @@ public class TeleopControls {
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoDepot = new AutoDepot(robot);
+    this.autoZoneDefense = new AutoZoneDefense(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -106,14 +109,19 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
-    // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
+    // Driver left bumper resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
     // driver.b().onTrue(autoClimb.climb());
     // driver.x().onTrue(autoClimb.unclimb());
+
+    // Auto Defense
+    driver.a().whileTrue(autoZoneDefense.defendRightBump());
+    driver.b().whileTrue(autoZoneDefense.defendRightTrench());
+    driver.x().whileTrue(autoZoneDefense.defendLeftTrench());
+    driver.y().whileTrue(autoZoneDefense.defendLeftBump());
 
     // Auto Depot
     driver.leftBumper().whileTrue(autoDepot.autoDepot());

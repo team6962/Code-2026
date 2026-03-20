@@ -14,6 +14,7 @@ public class FieldPositions {
 
   public static
   class Trench { // values need to be tuned and need to check if in alliance or neutral zone
+    public static final double TRENCH_DISTANCE = Inches.of(115.61).in(Meters);
     public static final Translation2d RIGHT_ALLIANCE =
         new Translation2d(
             Inches.of(115.61).in(Meters), // original = 165.61
@@ -33,6 +34,7 @@ public class FieldPositions {
   }
 
   public static class OpposingSide { // Needs to be tested
+    public static final double OPPOSING_TRENCH_DISTANCE = Inches.of(469.11).in(Meters);
     public static final Translation2d OPPOSING_ALLIANCE_RIGHT_TRENCH =
         new Translation2d(Inches.of(510.61).in(Meters), Inches.of(25.175).in(Meters));
 
