@@ -32,7 +32,7 @@ public class FieldPositions {
         new Translation2d(Inches.of(182.11).in(Meters), Inches.of(292.76).in(Meters));
   }
 
-  public static class OpposingSide { //Needs to be tested
+  public static class OpposingSide { // Needs to be tested
     public static final Translation2d OPPOSING_ALLIANCE_RIGHT_TRENCH =
         new Translation2d(Inches.of(510.61).in(Meters), Inches.of(25.175).in(Meters));
 
@@ -56,10 +56,9 @@ public class FieldPositions {
 
     public static final Translation2d OPPOSING_ALLIANCE_LEFT_BUMP =
         new Translation2d(Inches.of(510.61).in(Meters), Inches.of(218.518).in(Meters));
-
   }
 
-    public static class Bump {
+  public static class Bump {
     public static final Translation2d RIGHT_ALLIANCE =
         new Translation2d(Inches.of(115.61).in(Meters), Inches.of(98.85).in(Meters));
     public static final Translation2d LEFT_ALLIANCE =
@@ -68,8 +67,8 @@ public class FieldPositions {
         new Translation2d(Inches.of(248.61).in(Meters), Inches.of(98.85).in(Meters));
     public static final Translation2d LEFT_NEUTRAL =
         new Translation2d(Inches.of(248.61).in(Meters), Inches.of(218.518).in(Meters));
-    }  
-  
+  }
+
   public static final Translation2d TOWER = new Translation2d(Inches.of(147.47), Inches.of(41.56));
   public static final Pose2d DEPOT_OUTSIDE = new Pose2d(1.518, 5.947, Rotation2d.kZero);
   public static final Pose2d DEPOT_INSIDE = new Pose2d(0.546, 5.947, Rotation2d.kZero);
