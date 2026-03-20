@@ -369,6 +369,23 @@ public class AutoShoot extends Command {
     }
   }
 
+  /**
+   * Calculates the shooter's translational velocity at the point of projectile exit, which is used
+   * to account for the effect of the shooter's movement on the projectile's trajectory. This is
+   * equal to the robot's translational velocity plus the tangential velocity at the shooter caused
+   * by the robot's angular velocity.
+   *
+   * @return the shooter's translational velocity at the point of projectile exit
+   */
+  private TranslationalVelocity calculateShooterVelocity() {
+    return swerveDrive
+        .getTranslationalVelocity()
+        .plus(
+            new TranslationalVelocity(
+                AutoShootConstants.shooterTransform.getTranslation(),
+                swerveDrive.getYawVelocity()));
+  }
+
   private ShootingParameters calculate(Time poseExtrapolationTime) {
     // Get the target position and initial shooter state
     Translation2d target = targetSupplier.get();
@@ -379,7 +396,7 @@ public class AutoShoot extends Command {
     twist.dtheta *= poseExtrapolationTime.in(Seconds);
     Pose2d shooterPose =
         swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
-    TranslationalVelocity shooterVelocity = swerveDrive.getTranslationalVelocity();
+    TranslationalVelocity shooterVelocity = calculateShooterVelocity();
 
     DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
 
@@ -404,7 +421,7 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetY", target.getY());
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.03));
+    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.1));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
     appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
