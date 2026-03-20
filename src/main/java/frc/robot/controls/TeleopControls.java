@@ -180,8 +180,7 @@ public class TeleopControls {
                 .ignoringDisable(true));
 
     // stop Shooting
-    operator.x()
-        .whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    operator.x().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
     operator
@@ -335,10 +334,11 @@ public class TeleopControls {
         .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(robot.getHopper().feed());
 
-
     Trigger intakeSlowRetract = operator.leftStick();
 
-    intakeSlowRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().moveAtVoltage(Volts.of(-3))); // Needs to be tuned
+    intakeSlowRetract
+        .and(() -> !fineControl)
+        .whileTrue(robot.getIntakeExtension().moveAtVoltage(Volts.of(-3))); // Needs to be tuned
     // ShooterFunctions functions = robot.getHubFunctions();
 
     // driver
