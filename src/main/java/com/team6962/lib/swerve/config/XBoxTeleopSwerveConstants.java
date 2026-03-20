@@ -65,30 +65,6 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
   public double DefaultAngularSpeed = 1.0;
 
   /**
-   * The translational speed used during teleop when boosting and not using the D-pad for fine
-   * control. This is represented as a fraction of the maximum robot speed, where 1.0 is the maximum
-   * speed and 0.0 is stationary.
-   *
-   * <ul>
-   *   <li><b>Minimum Value:</b> 0.0
-   *   <li><b>Maximum Value:</b> 1.0
-   * </ul>
-   */
-  public double BoostTranslationalSpeed = 1.0;
-
-  /**
-   * The angular speed used during teleop when boosting and not using the D-pad for fine control.
-   * This is represented as a fraction of the maximum robot angular speed, where 1.0 is the maximum
-   * angular speed and 0.0 is stationary.
-   *
-   * <ul>
-   *   <li><b>Minimum Value:</b> 0.0
-   *   <li><b>Maximum Value:</b> 1.0
-   * </ul>
-   */
-  public double BoostAngularSpeed = 1.0;
-
-  /**
    * When true, the D-pad on the Xbox controller will enable fine control mode, where the robot
    * moves slowly in the direction of the D-pad presses. Fine control is robot centric.
    */
@@ -255,28 +231,6 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    */
   public XBoxTeleopSwerveConstants withDefaultAngularSpeed(double defaultAngularSpeed) {
     DefaultAngularSpeed = defaultAngularSpeed;
-    return this;
-  }
-
-  /**
-   * Sets the boost translational speed, and returns this XBoxTeleopSwerveConstants for chaining.
-   *
-   * @param boostTranslationalSpeed The boost translational speed (0.0-1.0)
-   * @return This XBoxTeleopSwerveConstants object
-   */
-  public XBoxTeleopSwerveConstants withBoostTranslationalSpeed(double boostTranslationalSpeed) {
-    BoostTranslationalSpeed = boostTranslationalSpeed;
-    return this;
-  }
-
-  /**
-   * Sets the boost angular speed, and returns this XBoxTeleopSwerveConstants for chaining.
-   *
-   * @param boostAngularSpeed The boost angular speed (0.0-1.0)
-   * @return This XBoxTeleopSwerveConstants object
-   */
-  public XBoxTeleopSwerveConstants withBoostAngularSpeed(double boostAngularSpeed) {
-    BoostAngularSpeed = boostAngularSpeed;
     return this;
   }
 
