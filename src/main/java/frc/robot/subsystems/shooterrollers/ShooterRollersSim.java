@@ -33,10 +33,10 @@ public class ShooterRollersSim {
   public void update() {
     motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
     double motorVoltage = invert(motorSim.getMotorVoltage(), false);
-    Angle position = physicsSim.getAngularPosition();
-    AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
     physicsSim.setInput(motorVoltage);
     physicsSim.update(0.02);
+    Angle position = physicsSim.getAngularPosition();
+    AngularVelocity velocity = RadiansPerSecond.of(physicsSim.getAngularVelocityRadPerSec());
     motorSim.setRawRotorPosition(
         invert(position, false)
             .times(ShooterRollersConstants.MOTOR_CONFIGURATION.Feedback.SensorToMechanismRatio));

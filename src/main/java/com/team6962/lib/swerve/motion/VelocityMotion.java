@@ -141,15 +141,23 @@ public class VelocityMotion implements SwerveMotion {
    */
   @Override
   public void update(double deltaTimeSeconds) {
-    if (Math.abs(velocity.omegaRadiansPerSecond) < 0.01
-        && Math.abs(velocity.vxMetersPerSecond) < 0.01
-        && Math.abs(velocity.vyMetersPerSecond) < 0.01) {
+    double velocityScale = swerveDrive.getVelocityScale();
+    ChassisSpeeds scaledVelocity =
+        new ChassisSpeeds(
+            velocity.vxMetersPerSecond * velocityScale,
+            velocity.vyMetersPerSecond * velocityScale,
+            velocity.omegaRadiansPerSecond * velocityScale);
+
+    if (Math.abs(scaledVelocity.omegaRadiansPerSecond) < 0.01
+        && Math.abs(scaledVelocity.vxMetersPerSecond) < 0.01
+        && Math.abs(scaledVelocity.vyMetersPerSecond) < 0.01) {
       brake();
       return;
     }
 
     ChassisSpeeds robotRelativeVelocity =
-        ChassisSpeeds.fromFieldRelativeSpeeds(velocity, new Rotation2d(swerveDrive.getHeading()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            scaledVelocity, new Rotation2d(swerveDrive.getHeading()));
 
     SwerveModuleState[] states =
         swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);
@@ -234,6 +242,7 @@ public class VelocityMotion implements SwerveMotion {
     DogLog.log(basePath + "LinearVelocityX", velocity.vxMetersPerSecond);
     DogLog.log(basePath + "LinearVelocityY", velocity.vyMetersPerSecond);
     DogLog.log(basePath + "AngularVelocity", velocity.omegaRadiansPerSecond);
+    DogLog.log(basePath + "VelocityScale", swerveDrive.getVelocityScale());
   }
 
   /** Sets all motors to neutral/brake mode */

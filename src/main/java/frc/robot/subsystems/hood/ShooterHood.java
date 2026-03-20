@@ -10,6 +10,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -19,6 +20,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -56,6 +58,11 @@ public class ShooterHood extends SubsystemBase {
   private ShooterHoodSim simulation;
   private boolean isZeroed = false;
   private double kG = ShooterHoodConstants.kG;
+  private double baseMotionMagicCruiseVelocity =
+      ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity;
+  private double baseMotionMagicAcceleration =
+      ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration;
+  private double motionProfileConstraintScale = 1.0;
 
   private Supplier<Boolean> shouldLowerHoodSupplier;
 
@@ -79,6 +86,11 @@ public class ShooterHood extends SubsystemBase {
       ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration =
           1000.0; // 30.0;
     }
+
+    baseMotionMagicCruiseVelocity =
+        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity;
+    baseMotionMagicAcceleration =
+        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration;
 
     hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION);
     candi.getConfigurator().apply(ShooterHoodConstants.CANDI_CONFIGURATION);
@@ -153,24 +165,16 @@ public class ShooterHood extends SubsystemBase {
 
     DogLog.tunable(
         "Hood/Hood Cruise Velocity",
-        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity,
+        baseMotionMagicCruiseVelocity,
         newCruiseVelocity -> {
-          hoodMotor
-              .getConfigurator()
-              .apply(
-                  ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic
-                      .withMotionMagicCruiseVelocity(newCruiseVelocity));
+          baseMotionMagicCruiseVelocity = newCruiseVelocity;
         });
 
     DogLog.tunable(
         "Hood/Hood Acceleration",
-        ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration,
+        baseMotionMagicAcceleration,
         newAcceleration -> {
-          hoodMotor
-              .getConfigurator()
-              .apply(
-                  ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.withMotionMagicAcceleration(
-                      newAcceleration));
+          baseMotionMagicAcceleration = newAcceleration;
         });
 
     DogLog.tunable(
@@ -227,12 +231,16 @@ public class ShooterHood extends SubsystemBase {
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
         Degrees);
+    DogLog.log("Hood/MotionMagicScale", motionProfileConstraintScale);
 
     // LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
 
-    // Update the currently applied control request with a new gravity feedforward
-    // voltage if the control request is a MotionMagicVoltage
-    if (hoodMotor.getAppliedControl() instanceof MotionMagicVoltage motionMagicControlRequest) {
+    // Update currently applied control request with the latest gravity feedforward and
+    // brownout-scaled constraints if the hood is using Motion Magic position control.
+    if (hoodMotor.getAppliedControl() instanceof DynamicMotionMagicVoltage dynamicControlRequest) {
+      setPositionControl(Rotations.of(dynamicControlRequest.Position));
+    } else if (hoodMotor.getAppliedControl()
+        instanceof MotionMagicVoltage motionMagicControlRequest) {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
@@ -391,22 +399,24 @@ public class ShooterHood extends SubsystemBase {
   }
 
   /**
-   * Applies a control request to move to a specific position with a MotionMagicVoltage control
+   * Applies a control request to move to a specific position with a Dynamic Motion Magic voltage
    * request, including an additional gravity feedforward. The gravity feedforward will be
-   * automatically updated in periodic().
+   * automatically updated in periodic.
    *
    * @param position The target position to move to.
    */
   private void setPositionControl(Angle position) {
     if (!isZeroed) {
       hoodMotor.setControl(new NeutralOut());
-    } else if (shouldLowerHoodSupplier.get()) {
-      hoodMotor.setControl(
-          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
-              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
+      Angle targetPosition =
+          shouldLowerHoodSupplier.get() ? ShooterHoodConstants.MIN_ANGLE : position;
       hoodMotor.setControl(
-          new MotionMagicVoltage(position)
+          new DynamicMotionMagicVoltage(
+                  targetPosition.in(Rotations),
+                  getScaledMotionMagicCruiseVelocity(),
+                  getScaledMotionMagicAcceleration())
+              .withJerk(ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     }
   }
@@ -415,9 +425,7 @@ public class ShooterHood extends SubsystemBase {
     if (!isZeroed) {
       hoodMotor.setControl(new NeutralOut());
     } else if (shouldLowerHoodSupplier.get()) {
-      hoodMotor.setControl(
-          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
-              .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
+      setPositionControl(ShooterHoodConstants.MIN_ANGLE);
     } else {
       hoodMotor.setControl(
           new PositionVoltage(position)
@@ -445,15 +453,6 @@ public class ShooterHood extends SubsystemBase {
       Supplier<Angle> targetAngleSupplier, Supplier<AngularVelocity> targetVelocitySupplier) {
     Command command =
         new Command() {
-          private TrapezoidProfile profile =
-              new TrapezoidProfile(
-                  new TrapezoidProfile.Constraints(
-                      ShooterHoodConstants.MOTOR_CONFIGURATION
-                          .MotionMagic
-                          .MotionMagicCruiseVelocity,
-                      ShooterHoodConstants.MOTOR_CONFIGURATION
-                          .MotionMagic
-                          .MotionMagicAcceleration));
           private TrapezoidProfile.State previousProfileState;
           private double previousUpdateTimestamp;
 
@@ -474,6 +473,11 @@ public class ShooterHood extends SubsystemBase {
             if (targetVelocity == null) targetVelocity = RotationsPerSecond.of(0);
 
             Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
+
+            TrapezoidProfile profile =
+                new TrapezoidProfile(
+                    new TrapezoidProfile.Constraints(
+                        getScaledMotionMagicCruiseVelocity(), getScaledMotionMagicAcceleration()));
 
             TrapezoidProfile.State profileState =
                 profile.calculate(
@@ -502,6 +506,18 @@ public class ShooterHood extends SubsystemBase {
     command.addRequirements(this);
 
     return command;
+  }
+
+  public void setMotionProfileConstraintScale(double scale) {
+    motionProfileConstraintScale = MathUtil.clamp(scale, 0.1, 1.0);
+  }
+
+  private double getScaledMotionMagicCruiseVelocity() {
+    return baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
+  }
+
+  private double getScaledMotionMagicAcceleration() {
+    return baseMotionMagicAcceleration * motionProfileConstraintScale;
   }
 
   /**

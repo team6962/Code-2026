@@ -12,8 +12,8 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -21,6 +21,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -55,6 +56,12 @@ public class IntakeExtension extends SubsystemBase {
   private StatusSignal<Double> closedLoopReferenceSignal;
 
   private IntakeExtensionSim simulation;
+
+  private double baseMotionMagicCruiseVelocity =
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity;
+  private double baseMotionMagicAcceleration =
+      IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration;
+  private double motionProfileConstraintScale = 1.0;
 
   public boolean isZeroed = false;
 
@@ -163,22 +170,16 @@ public class IntakeExtension extends SubsystemBase {
 
     DogLog.tunable(
         "IntakeExtension/Velocity",
-        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicCruiseVelocity,
+        baseMotionMagicCruiseVelocity,
         newVelocity -> {
-          MotionMagicConfigs config = new MotionMagicConfigs();
-          StatusUtil.check(motor.getConfigurator().refresh(config));
-          config.MotionMagicCruiseVelocity = newVelocity;
-          motor.getConfigurator().apply(config);
+          baseMotionMagicCruiseVelocity = newVelocity;
         });
 
     DogLog.tunable(
         "IntakeExtension/Acceleration",
-        IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicAcceleration,
+        baseMotionMagicAcceleration,
         newAcceleration -> {
-          MotionMagicConfigs config = new MotionMagicConfigs();
-          StatusUtil.check(motor.getConfigurator().refresh(config));
-          config.MotionMagicAcceleration = newAcceleration;
-          motor.getConfigurator().apply(config);
+          baseMotionMagicAcceleration = newAcceleration;
         });
 
     if (RobotBase.isSimulation()) {
@@ -191,6 +192,27 @@ public class IntakeExtension extends SubsystemBase {
     CurrentDrawLogger.add("Intake Extension", this::getSupplyCurrent);
   }
 
+  public void setMotionProfileConstraintScale(double scale) {
+    motionProfileConstraintScale = MathUtil.clamp(scale, 0.1, 1.0);
+  }
+
+  private double getScaledMotionMagicCruiseVelocity() {
+    return baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
+  }
+
+  private double getScaledMotionMagicAcceleration() {
+    return baseMotionMagicAcceleration * motionProfileConstraintScale;
+  }
+
+  private void setPositionControl(Distance position) {
+    motor.setControl(
+        new DynamicMotionMagicVoltage(
+                position.in(Meters),
+                getScaledMotionMagicCruiseVelocity(),
+                getScaledMotionMagicAcceleration())
+            .withJerk(IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk));
+  }
+
   /**
    * Extends the intake outwards until it reaches the maximum position, then holds it there. Only
    * runs if the intake is zeroed, which happens when the CANdi is triggered.
@@ -200,15 +222,14 @@ public class IntakeExtension extends SubsystemBase {
   public Command extend() {
     return startEnd(
             () -> {
-              motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+              setPositionControl(IntakeExtensionConstants.MAX_POSITION);
             },
             () -> {
               if (!getPosition()
                   .isNear(
                       IntakeExtensionConstants.MAX_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                setPositionControl(getPosition());
               }
             })
         .until(
@@ -228,15 +249,14 @@ public class IntakeExtension extends SubsystemBase {
   public Command retract() {
     return startEnd(
             () -> {
-              motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
+              setPositionControl(IntakeExtensionConstants.RETRACT_POSITION);
             },
             () -> {
               if (!getPosition()
                   .isNear(
                       IntakeExtensionConstants.RETRACT_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                setPositionControl(getPosition());
               }
             })
         .until(
@@ -268,7 +288,7 @@ public class IntakeExtension extends SubsystemBase {
                           .plus(Volts.of(IntakeExtensionConstants.MOTOR_CONFIGURATION.Slot0.kG))));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              setPositionControl(getPosition());
             })
         .onlyIf(() -> isZeroed || voltage.in(Volts) < 0);
   }
@@ -401,5 +421,12 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
     DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
+    DogLog.log("Intake/MotionMagicScale", motionProfileConstraintScale);
+
+    if (motor.getAppliedControl() instanceof DynamicMotionMagicVoltage dynamicControlRequest) {
+      setPositionControl(Meters.of(dynamicControlRequest.Position));
+    } else if (motor.getAppliedControl() instanceof MotionMagicVoltage motionMagicControlRequest) {
+      setPositionControl(Meters.of(motionMagicControlRequest.Position));
+    }
   }
 }

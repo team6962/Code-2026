@@ -1,6 +1,6 @@
 package frc.robot;
 
-import frc.robot.constants.CompetitionBotConstants;
+import frc.robot.constants.CompetitionBotSimConstants;
 import frc.robot.constants.RobotConstants;
 
 public class Preferences {
@@ -27,5 +27,5 @@ public class Preferences {
    * corresponds to the robot being simulated. This is used to determine which subsystems exist on
    * the simulated robot and to provide the correct configuration values for those subsystems.
    */
-  public static final RobotConstants simulatedRobot = new CompetitionBotConstants();
+  public static final RobotConstants simulatedRobot = new CompetitionBotSimConstants();
 }
