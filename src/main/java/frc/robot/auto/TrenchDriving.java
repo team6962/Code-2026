@@ -19,8 +19,10 @@ import frc.robot.RobotContainer;
 /** Handles driving through the trenches autonomously. */
 public class TrenchDriving {
   public static Distance OBSTACLES_CENTER_X = Meters.of(4.67);
+  public static Distance OBSTACLES_CENTER_OPPOSITE_X = Meters.of( 11.870988);
   private static Distance RIGHT_TRENCH_CENTER_Y = Inches.of(24.92);
   private static Distance HUB_Y = Meters.of(4.03463125);
+  private static Distance CENTER_FIELD_X = Meters.of(8.270494);
   private static Distance TRENCH_INITIAL_X = Inches.of(48);
   private static Distance TRENCH_FINAL_X = Inches.of(48);
   private static Distance NEAR_TRENCH_ENTERANCE_DISTANCE = Inches.of(60);
@@ -32,7 +34,9 @@ public class TrenchDriving {
 
   public static enum Trench {
     LEFT,
-    RIGHT
+    RIGHT,
+    LEFT_OPPOSITE,
+    RIGHT_OPPOSITE
   }
 
   /**
@@ -44,13 +48,60 @@ public class TrenchDriving {
     this.robot = robot;
   }
 
+  //Checks if the robot is on the left side of the field
+  public Boolean isOnLeftSide() {
+    Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
+    if (robotX.lt(CENTER_FIELD_X)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public Trench getNearestTrench() {
     Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
+    Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
 
-    if (robotY.lt(HUB_Y)) {
+    if (robotY.lt(HUB_Y) && robotX.lt(CENTER_FIELD_X)) {
       return Trench.RIGHT;
-    } else {
+    } else if (robotY.gt(HUB_Y) && robotX.lt(CENTER_FIELD_X)){
       return Trench.LEFT;
+    } else if (robotY.lt(HUB_Y) && robotX.gt(CENTER_FIELD_X)) {
+      return Trench.RIGHT_OPPOSITE;
+    } else {
+      return Trench.LEFT_OPPOSITE;
+    }
+  }
+
+
+  public Command getNearestTrenchDriveCommand() {
+    Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
+    Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
+
+    Trench nearestTrench; 
+
+    if (robotY.lt(HUB_Y) && robotX.lt(CENTER_FIELD_X)) {
+      nearestTrench = Trench.RIGHT;
+    } else if (robotY.gt(HUB_Y) && robotX.lt(CENTER_FIELD_X)){
+      nearestTrench = Trench.LEFT;
+    } else if (robotY.lt(HUB_Y) && robotX.gt(CENTER_FIELD_X)) {
+      nearestTrench = Trench.RIGHT_OPPOSITE;
+    } else {
+      nearestTrench = Trench.LEFT_OPPOSITE;
+    }
+
+    if (nearestTrench == Trench.RIGHT || nearestTrench == Trench.LEFT) {
+      if (robotX.lt(OBSTACLES_CENTER_X)) {
+        return driveToNeutral(nearestTrench);
+      } else {
+        return driveToAlliance(nearestTrench);
+      }
+    } else {
+        if (robotX.lt(OBSTACLES_CENTER_OPPOSITE_X)) {
+          return driveToAlliance(nearestTrench);
+        } else{
+          return driveToNeutral(nearestTrench);
+        }
     }
   }
 
@@ -60,6 +111,10 @@ public class TrenchDriving {
     }
 
     if (trench == Trench.RIGHT) {
+      return RIGHT_TRENCH_CENTER_Y;
+    } else if (trench == Trench.LEFT) {
+      return HUB_Y.times(2).minus(RIGHT_TRENCH_CENTER_Y);
+    } else if (trench == Trench.RIGHT_OPPOSITE) {
       return RIGHT_TRENCH_CENTER_Y;
     } else {
       return HUB_Y.times(2).minus(RIGHT_TRENCH_CENTER_Y);
@@ -81,31 +136,57 @@ public class TrenchDriving {
   }
 
   private Pose2d getInitialAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    return new Pose2d(
+    if (isOnLeftSide())
+      return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_INITIAL_X),
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
+    else 
+      return new Pose2d(
+        OBSTACLES_CENTER_OPPOSITE_X.plus(TRENCH_INITIAL_X),
         getNearestTrenchCenterY(overrideTrench),
         getTrenchRobotOrientation(overrideOrientation));
   }
 
   private Pose2d getFinalAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    return new Pose2d(
+    if (isOnLeftSide()) {
+      return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_FINAL_X),
+        getNearestTrenchCenterY(overrideTrench),
+        getTrenchRobotOrientation(overrideOrientation));
+    } else
+      return new Pose2d(
+        OBSTACLES_CENTER_OPPOSITE_X.plus(TRENCH_FINAL_X),
         getNearestTrenchCenterY(overrideTrench),
         getTrenchRobotOrientation(overrideOrientation));
   }
 
   private Pose2d getInitialNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    return new Pose2d(
-        OBSTACLES_CENTER_X.plus(TRENCH_INITIAL_X),
-        getNearestTrenchCenterY(overrideTrench),
-        getTrenchRobotOrientation(overrideOrientation));
+    if (isOnLeftSide()) {
+      return new Pose2d(
+          OBSTACLES_CENTER_X.plus(TRENCH_INITIAL_X),
+          getNearestTrenchCenterY(overrideTrench),
+          getTrenchRobotOrientation(overrideOrientation));
+    } else {
+      return new Pose2d(
+          OBSTACLES_CENTER_OPPOSITE_X.minus(TRENCH_INITIAL_X),
+          getNearestTrenchCenterY(overrideTrench),
+          getTrenchRobotOrientation(overrideOrientation));
+    }
   }
 
   private Pose2d getFinalNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    return new Pose2d(
-        OBSTACLES_CENTER_X.plus(TRENCH_FINAL_X),
-        getNearestTrenchCenterY(overrideTrench),
-        getTrenchRobotOrientation(overrideOrientation));
+    if (isOnLeftSide()) {
+      return new Pose2d(
+          OBSTACLES_CENTER_X.plus(TRENCH_FINAL_X),
+          getNearestTrenchCenterY(overrideTrench),
+          getTrenchRobotOrientation(overrideOrientation));
+    } else {
+      return new Pose2d(
+          OBSTACLES_CENTER_OPPOSITE_X.minus(TRENCH_FINAL_X),
+          getNearestTrenchCenterY(overrideTrench),
+          getTrenchRobotOrientation(overrideOrientation));
+    }
   }
 
   private boolean isInTrench(double x) {
