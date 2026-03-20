@@ -329,7 +329,6 @@ public class TeleopControls {
 
     operator
         .rightTrigger()
-        .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
                 MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
