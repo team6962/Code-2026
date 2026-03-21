@@ -4,6 +4,16 @@
       "visible": false
     }
   },
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
+  "Keyboard 1 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "System Joysticks": {
     "window": {
       "visible": false
@@ -29,7 +39,6 @@
           "incKey": 44
         },
         {
-          "decKey": 81,
           "incKey": 69
         }
       ],
@@ -80,7 +89,7 @@
         -1,
         -1,
         -1,
-        -1,
+        39,
         -1,
         -1,
         -1,

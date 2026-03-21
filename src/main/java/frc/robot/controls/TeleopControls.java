@@ -35,6 +35,7 @@ public class TeleopControls {
   private RobotContainer robot;
   // private AutoClimb autoClimb;
   private ShootFuel shootFuel;
+  private TrenchDriving trenchDriving;
   private AutoOutpost autoOutpost;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
@@ -52,7 +53,7 @@ public class TeleopControls {
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoDepot = new AutoDepot(robot);
-
+    this.trenchDriving = new TrenchDriving(robot);
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
 
@@ -161,6 +162,8 @@ public class TeleopControls {
 
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
+
+    operator.rightBumper().whileTrue(trenchDriving.getNearestTrenchDriveCommand());
 
     // Disable shooting
     operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
