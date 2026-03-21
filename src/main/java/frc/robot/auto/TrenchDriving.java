@@ -62,14 +62,28 @@ public class TrenchDriving {
     Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
     Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
 
-    if (robotY.lt(HUB_Y) && robotX.lt(CENTER_FIELD_X)) {
-      return Trench.RIGHT;
-    } else if (robotY.gt(HUB_Y) && robotX.lt(CENTER_FIELD_X)){
-      return Trench.LEFT;
-    } else if (robotY.lt(HUB_Y) && robotX.gt(CENTER_FIELD_X)) {
-      return Trench.RIGHT_OPPOSITE;
+  //   if (robotY.lt(HUB_Y) && robotX.lt(CENTER_FIELD_X)) {
+  //     return Trench.RIGHT;
+  //   } else if (robotY.gt(HUB_Y) && robotX.lt(CENTER_FIELD_X)){
+  //     return Trench.LEFT;
+  //   } else if (robotY.lt(HUB_Y) && robotX.gt(CENTER_FIELD_X)) {
+  //     return Trench.RIGHT_OPPOSITE;
+  //   } else {
+  //     return Trench.LEFT_OPPOSITE;
+  //   }
+  // }
+    if (robotX.lt(CENTER_FIELD_X)) {
+      if (robotY.lt(HUB_Y)) {
+        return Trench.RIGHT;
+      } else {
+        return Trench.LEFT;
+      }
     } else {
-      return Trench.LEFT_OPPOSITE;
+      if (robotY.lt(HUB_Y)) {
+        return Trench.RIGHT_OPPOSITE;
+      } else {
+        return Trench.LEFT_OPPOSITE;
+      }
     }
   }
 
@@ -87,16 +101,14 @@ public class TrenchDriving {
     // } else {
     //   nearestTrench = Trench.LEFT_OPPOSITE;
     // }
-    if (robotX.lt(CENTER_FIELD_X)) {
-      if (robotY.lt(HUB_Y)) {
-        System.out.println("right trench");
+    if (isOnLeftSide()) {
+      if (robotY.lt(HUB_Y)) { //It should be less than the center y of the field but I have no idea why it seems to think the center is around 0.7 meters
         if (robotX.lt(OBSTACLES_CENTER_X)) {
           return driveToNeutral(Trench.RIGHT);
         } else {
           return driveToAlliance(Trench.RIGHT);
         }
       } else {
-          System.out.println("left trench");
         if (robotX.lt(OBSTACLES_CENTER_X)) {
           return driveToNeutral(Trench.LEFT);
         } else {
@@ -105,14 +117,12 @@ public class TrenchDriving {
       }
     } else {
       if (robotY.lt(HUB_Y)) {
-          System.out.println("right opposite trench");
         if (robotX.gt(OBSTACLES_CENTER_OPPOSITE_X)) {
           return driveToNeutral(Trench.RIGHT_OPPOSITE);
         } else {
           return driveToAlliance(Trench.RIGHT_OPPOSITE);
         }
       } else {
-          System.out.println("left opposite trench");
         if (robotX.gt(OBSTACLES_CENTER_OPPOSITE_X)) {
           return driveToNeutral(Trench.LEFT_OPPOSITE);
         } else {
@@ -237,7 +247,9 @@ public class TrenchDriving {
 
   private boolean isInTrench(double x) {
     return x > OBSTACLES_CENTER_X.minus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters)
-        && x < OBSTACLES_CENTER_X.plus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters);
+        && x < OBSTACLES_CENTER_X.plus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters)
+        && x > OBSTACLES_CENTER_OPPOSITE_X.minus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters)
+        && x < OBSTACLES_CENTER_OPPOSITE_X.plus(NEAR_TRENCH_ENTERANCE_DISTANCE).in(Meters);
   }
 
   /**
