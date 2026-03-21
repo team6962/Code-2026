@@ -1,15 +1,12 @@
 package com.team6962.lib.swerve.motion;
 
 import static edu.wpi.first.units.Units.Hertz;
-// import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.team6962.lib.math.SwerveKinematicsUtil;
-// import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.control.PositionControlRequest;
 import com.team6962.lib.swerve.MotionSwerveDrive;
-// import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.SteerMotorConstants;
 import com.team6962.lib.swerve.module.SwerveModule;
 import dev.doglog.DogLog;
