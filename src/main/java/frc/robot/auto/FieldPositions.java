@@ -14,6 +14,7 @@ public class FieldPositions {
 
   public static
   class Trench { // values need to be tuned and need to check if in alliance or neutral zone
+    public static final double TRENCH_DISTANCE = Inches.of(182.11).in(Meters);
     public static final Translation2d RIGHT_ALLIANCE =
         new Translation2d(
             Inches.of(115.61).in(Meters), // original = 165.61
@@ -30,6 +31,16 @@ public class FieldPositions {
         new Translation2d(Inches.of(182.11).in(Meters), Inches.of(24.92).in(Meters));
     public static final Translation2d LEFT_CENTER =
         new Translation2d(Inches.of(182.11).in(Meters), Inches.of(292.76).in(Meters));
+  }
+
+  public static class OpposingSide { // Tested in simulation
+    public static final double OPPOSING_TRENCH_DISTANCE = Inches.of(469.11).in(Meters);
+    public static final double OPPOSING_NEUTRAL_X = Inches.of(427.61).in(Meters);
+    public static final double OPPOSING_ALLIANCE_X = Inches.of(512.61).in(Meters);
+    public static final double RIGHT_TRENCH_Y = Inches.of(25.175).in(Meters);
+    public static final double LEFT_TRENCH_Y = Inches.of(292.353).in(Meters);
+    public static final double RIGHT_BUMP_Y = Inches.of(98.85).in(Meters);
+    public static final double LEFT_BUMP_Y = Inches.of(218.518).in(Meters);
   }
 
   public static class Bump {

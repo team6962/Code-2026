@@ -24,6 +24,8 @@ import frc.robot.RobotContainer;
 // import frc.robot.auto.AutoClimb;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
+import frc.robot.auto.AutoZoneDefense;
+import frc.robot.auto.FieldPositions;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
@@ -41,6 +43,7 @@ public class TeleopControls {
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
+  private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -53,6 +56,7 @@ public class TeleopControls {
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoDepot = new AutoDepot(robot);
+    this.autoZoneDefense = new AutoZoneDefense(robot);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -105,14 +109,21 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
-    // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
+    // Driver left bumper resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
     // driver.b().onTrue(autoClimb.climb());
     // driver.x().onTrue(autoClimb.unclimb());
+
+    // Auto Defense
+    driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
+    driver
+        .b()
+        .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
+    driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
+    driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
 
     // Auto Depot
     driver.leftBumper().whileTrue(autoDepot.autoDepot());
@@ -161,8 +172,8 @@ public class TeleopControls {
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
-    // Disable shooting
-    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    // Pass
+    operator.leftTrigger().whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
     operator
@@ -178,8 +189,8 @@ public class TeleopControls {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // Shooting
-    operator.x().whileTrue(robot.getHopper().feed());
+    // stop Shooting
+    operator.x().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
     operator
@@ -261,7 +272,6 @@ public class TeleopControls {
             .and(driver.leftStick().negate())
             .and(operator.leftBumper().negate())
             .and(operator.rightTrigger().negate())
-            .and(driver.a().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
@@ -297,8 +307,7 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -321,15 +330,14 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.leftTrigger().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
 
     operator
         .rightTrigger()
-        .or(driver.a())
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
                 MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values

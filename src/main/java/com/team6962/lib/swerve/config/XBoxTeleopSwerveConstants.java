@@ -28,7 +28,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    * facing directly away from the driver station. This constant can be set to null to make no
    * button zero the robot's yaw.
    */
-  public Button ZeroYawButton = Button.kY;
+  public Button ZeroYawButton = Button.kLeftBumper;
 
   /** When held, this button will enable the boost speeds for translation and rotation. */
   public Trigger BoostAxis = Trigger.RightTrigger;
