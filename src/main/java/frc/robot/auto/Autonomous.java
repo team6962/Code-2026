@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.auto.shoot.AutoShoot;
+import frc.robot.controls.TeleopControls;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -16,6 +18,8 @@ public class Autonomous {
   public final AutoOutpost autoOutpost;
   public final AutoEdgeIntake autoEdgeIntake;
   public final CollectFuelFromHub collectFuelFromHub;
+  public final AutoShoot autoPassLeft;
+  public final AutoShoot autoPassRight;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -26,6 +30,10 @@ public class Autonomous {
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
+    this.autoPassLeft = new AutoShoot(robot, () -> AutoShoot.PASS_LEFT_TRANSLATION);
+    this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION);
+
+    
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -91,6 +99,29 @@ public class Autonomous {
     return shootFuel
         .shoot()
         .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake());
+  }
+
+  public Command passToAllianceThenShoot() {
+    return Commands.sequence(Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition((LEFT_START_POSE))),
+        // shootFuel.shoot(),
+        robot
+            .getSwerveDrive()
+            .followPath("pass_cycle.0"),
+        robot.getSwerveDrive()
+            .followPath("pass_cycle.1")
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(), autoPassRight, robot.getHopper().feed()),
+        robot
+            .getSwerveDrive()
+            .followPath("pass_cycle.2")
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        shootFuel.shoot());
   }
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
