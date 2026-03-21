@@ -221,12 +221,12 @@ public class TeleopControls {
     operator
         .axisGreaterThan(Axis.kRightX.value, 0.5)
         .and(() -> fineControl)
-        .onTrue(this.robot.getTurret().modifyOffsetAngle(Degrees.of(-3)));
+        .whileTrue(this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2))); //I don't know if the -2 multiplyer is to high or too low
 
     operator
         .axisLessThan(Axis.kRightX.value, -0.5)
         .and(() -> fineControl)
-        .onTrue(this.robot.getTurret().modifyOffsetAngle(Degrees.of(3)));
+        .whileTrue(this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2))); //I don't know if the -2 multiplyer is to high or too low
 
     operator
         .axisGreaterThan(Axis.kRightY.value, 0.5)

@@ -415,11 +415,16 @@ public class Turret extends SubsystemBase {
       return position;
     }
   }
-
-  public Command modifyOffsetAngle(Angle amount){
+/**
+ *Commands the manual offset to run once. It sets the manual offset to the provided angle.
+ Afterwards, it moves the turret to the position that had the manual offset for improved accuracy.
+ * 
+ */
+  public Command setOffsetAngle(Angle newOffset){
     return runOnce(
       () -> {
-        manualOffset = manualOffset.plus(amount);
+        System.out.println("manual offset set to " + newOffset);
+        manualOffset = newOffset;
         moveTo(getPosition()).schedule();
       }
     );
