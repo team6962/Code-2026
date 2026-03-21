@@ -26,6 +26,7 @@ import frc.robot.RobotContainer;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.AutoZoneDefense;
+import frc.robot.auto.FieldPositions;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
@@ -118,10 +119,12 @@ public class TeleopControls {
     // driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Defense
-    driver.a().whileTrue(autoZoneDefense.defendRightBump());
-    driver.b().whileTrue(autoZoneDefense.defendRightTrench());
-    driver.x().whileTrue(autoZoneDefense.defendLeftTrench());
-    driver.y().whileTrue(autoZoneDefense.defendLeftBump());
+    driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
+    driver
+        .b()
+        .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
+    driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
+    driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
 
     // Auto Depot
     driver.leftBumper().whileTrue(autoDepot.autoDepot());
@@ -305,8 +308,7 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -330,6 +332,7 @@ public class TeleopControls {
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
             .and(operator.leftTrigger().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);

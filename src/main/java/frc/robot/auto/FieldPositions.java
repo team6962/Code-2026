@@ -33,31 +33,14 @@ public class FieldPositions {
         new Translation2d(Inches.of(182.11).in(Meters), Inches.of(292.76).in(Meters));
   }
 
-  public static class OpposingSide { // Needs to be tested
+  public static class OpposingSide { // Tested in simulation
     public static final double OPPOSING_TRENCH_DISTANCE = Inches.of(469.11).in(Meters);
-    public static final Translation2d OPPOSING_ALLIANCE_RIGHT_TRENCH =
-        new Translation2d(Inches.of(510.61).in(Meters), Inches.of(25.175).in(Meters));
-
-    public static final Translation2d OPPOSING_NEUTRAL_RIGHT_TRENCH =
-        new Translation2d(Inches.of(429.61).in(Meters), Inches.of(25.175).in(Meters));
-
-    public static final Translation2d OPPOSING_NEUTRAL_LEFT_TRENCH =
-        new Translation2d(Inches.of(429.61).in(Meters), Inches.of(292.353).in(Meters));
-
-    public static final Translation2d OPPOSING_ALLIANCE_LEFT_TRENCH =
-        new Translation2d(Inches.of(510.61).in(Meters), Inches.of(292.353).in(Meters));
-
-    public static final Translation2d OPPOSING_ALLIANCE_RIGHT_BUMP =
-        new Translation2d(Inches.of(510.61).in(Meters), Inches.of(98.85).in(Meters));
-
-    public static final Translation2d OPPOSING_NEUTRAL_RIGHT_BUMP =
-        new Translation2d(Inches.of(429.61).in(Meters), Inches.of(98.85).in(Meters));
-
-    public static final Translation2d OPPOSING_NEUTRAL_LEFT_BUMP =
-        new Translation2d(Inches.of(429.61).in(Meters), Inches.of(218.518).in(Meters));
-
-    public static final Translation2d OPPOSING_ALLIANCE_LEFT_BUMP =
-        new Translation2d(Inches.of(510.61).in(Meters), Inches.of(218.518).in(Meters));
+    public static final double OPPOSING_NEUTRAL_X = Inches.of(427.61).in(Meters);
+    public static final double OPPOSING_ALLIANCE_X = Inches.of(512.61).in(Meters);
+    public static final double RIGHT_TRENCH_Y = Inches.of(25.175).in(Meters);
+    public static final double LEFT_TRENCH_Y = Inches.of(292.353).in(Meters);
+    public static final double RIGHT_BUMP_Y = Inches.of(98.85).in(Meters);
+    public static final double LEFT_BUMP_Y = Inches.of(218.518).in(Meters);
   }
 
   public static class Bump {

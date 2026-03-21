@@ -17,8 +17,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.units.measure.Angle;
 
-// import edu.wpi.first.units.measure.Distance;
-
 /**
  * A swerve motion that locks the wheels in an X pattern to resist being pushed.
  *
