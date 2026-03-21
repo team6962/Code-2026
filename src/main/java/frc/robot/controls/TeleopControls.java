@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
@@ -345,11 +344,6 @@ public class TeleopControls {
         .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
         .whileTrue(robot.getHopper().feed());
 
-    Trigger intakeSlowRetract = operator.leftStick();
-
-    intakeSlowRetract
-        .and(() -> !fineControl)
-        .whileTrue(robot.getIntakeExtension().moveAtVoltage(Volts.of(-3))); // Needs to be tuned
     // ShooterFunctions functions = robot.getHubFunctions();
 
     // driver
