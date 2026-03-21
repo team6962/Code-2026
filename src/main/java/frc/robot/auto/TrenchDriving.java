@@ -6,6 +6,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.team6962.lib.math.AngleMath;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -49,7 +51,7 @@ public class TrenchDriving {
   }
 
   //Checks if the robot is on the left side of the field
-  public Boolean isOnLeftSide() {
+  public Boolean isOwnAlliance() {
     Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
     if (robotX.lt(CENTER_FIELD_X)) {
       return true;
@@ -61,6 +63,10 @@ public class TrenchDriving {
   public Trench getNearestTrench() {
     Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
     Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
+
+    DogLog.log("Trench Driving/RobotX", robotX.in(Meters), Meters);
+    DogLog.log("Trench Driving/RobotY", robotY.in(Meters), Meters);
+
 
   //   if (robotY.lt(HUB_Y) && robotX.lt(CENTER_FIELD_X)) {
   //     return Trench.RIGHT;
@@ -89,6 +95,8 @@ public class TrenchDriving {
 
 
   public Command getNearestTrenchDriveCommand() {
+   return Commands.defer( 
+    () -> {
     Distance robotY = Meters.of(robot.getSwerveDrive().getPosition2d().getY());
     Distance robotX = Meters.of(robot.getSwerveDrive().getPosition2d().getX());
 
@@ -101,7 +109,7 @@ public class TrenchDriving {
     // } else {
     //   nearestTrench = Trench.LEFT_OPPOSITE;
     // }
-    if (isOnLeftSide()) {
+    if (isOwnAlliance()) {
       if (robotY.lt(HUB_Y)) { //It should be less than the center y of the field but I have no idea why it seems to think the center is around 0.7 meters
         if (robotX.lt(OBSTACLES_CENTER_X)) {
           return driveToNeutral(Trench.RIGHT);
@@ -130,6 +138,7 @@ public class TrenchDriving {
         }
       }
     }
+  } , robot.getSwerveDrive().useMotionSet());
 
     // if (nearestTrench == Trench.RIGHT || nearestTrench == Trench.LEFT) {
     //   if (robotX.lt(OBSTACLES_CENTER_X)) {
@@ -178,7 +187,7 @@ public class TrenchDriving {
  * @return
  */
   private Pose2d getInitialAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    if (isOnLeftSide())
+    if (isOwnAlliance())
       return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_INITIAL_X),
         getTrenchCenterY(overrideTrench),
@@ -197,7 +206,7 @@ public class TrenchDriving {
    * @return
    */
   private Pose2d getFinalAlliancePose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    if (isOnLeftSide()) {
+    if (isOwnAlliance()) {
       return new Pose2d(
         OBSTACLES_CENTER_X.minus(TRENCH_FINAL_X),
         getTrenchCenterY(overrideTrench),
@@ -213,7 +222,7 @@ public class TrenchDriving {
    * Gets inital pose for driving through trench from neutral zone
    */
   private Pose2d getInitialNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    if (isOnLeftSide()) {
+    if (isOwnAlliance()) {
       return new Pose2d(
           OBSTACLES_CENTER_X.plus(TRENCH_INITIAL_X),
           getTrenchCenterY(overrideTrench),
@@ -232,7 +241,7 @@ public class TrenchDriving {
  * @return
  */
   private Pose2d getFinalNeutralPose(Trench overrideTrench, Rotation2d overrideOrientation) {
-    if (isOnLeftSide()) {
+    if (isOwnAlliance()) {
       return new Pose2d(
           OBSTACLES_CENTER_X.plus(TRENCH_FINAL_X),
           getTrenchCenterY(overrideTrench),
