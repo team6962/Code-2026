@@ -74,7 +74,8 @@ public class DriveToClump {
                       .MaxLinearAcceleration
                       .in(MetersPerSecondPerSecond);
 
-              double distance = error.getNorm();
+              double robotRadius = 0.73; //Needs to be tuned
+              double distance = Math.max(0, error.getNorm() - robotRadius);
               double finalSpeed = Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration * distance));
 
               ChassisSpeeds finalVelocity =
