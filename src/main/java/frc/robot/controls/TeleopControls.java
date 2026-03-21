@@ -308,6 +308,8 @@ public class TeleopControls {
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
             .and(operator.x().negate())
+            .and(operator.a().negate())
+            .and(operator.y().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -332,6 +334,8 @@ public class TeleopControls {
             .and(inAllianceZone.negate())
             .and(operator.leftTrigger().negate())
             .and(operator.x().negate())
+            .and(operator.a().negate())
+            .and(operator.y().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
