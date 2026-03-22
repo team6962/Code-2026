@@ -248,9 +248,7 @@ public class DriveToStateCommand extends Command {
     if (translationController != null) {
       TranslationalVelocity currentTranslationalVelocity =
           translationController.calculate(
-              swerveDrive.getPosition2d().getTranslation(),
-              swerveDrive.getTranslationalVelocity(),
-              0);
+              swerveDrive.getPosition2d().getTranslation(), swerveDrive.getTranslationalVelocity());
 
       currentSpeeds =
           new ChassisSpeeds(
@@ -258,16 +256,14 @@ public class DriveToStateCommand extends Command {
               currentTranslationalVelocity.y.in(MetersPerSecond),
               currentSpeeds.omegaRadiansPerSecond);
 
-      TranslationalVelocity nextTranslationalVelocity =
-          translationController.calculate(
-              swerveDrive.getPosition2d().getTranslation(),
-              swerveDrive.getTranslationalVelocity(),
-              0.02);
+      TranslationalVelocity profileTranslationalVelocity = translationController.sample(0);
+
+      TranslationalVelocity nextTranslationalVelocity = translationController.sample(0.02);
 
       Vector<N2> acceleration =
           nextTranslationalVelocity
               .toVector()
-              .minus(currentTranslationalVelocity.toVector())
+              .minus(profileTranslationalVelocity.toVector())
               .div(0.02);
 
       currentTranslationalVelocity =
@@ -297,16 +293,12 @@ public class DriveToStateCommand extends Command {
               currentSpeeds.vyMetersPerSecond,
               currentAngularVelocity.in(RadiansPerSecond));
 
-      AngularVelocity nextAngularVelocity =
-          RadiansPerSecond.of(
-              headingController.calculate(
-                  new MotionProfile.State(
-                      swerveDrive.getYaw().in(Radians),
-                      swerveDrive.getYawVelocity().in(RadiansPerSecond)),
-                  0.02));
+      AngularVelocity profileAngularVelocity = RadiansPerSecond.of(headingController.sample(0));
+
+      AngularVelocity nextAngularVelocity = RadiansPerSecond.of(headingController.sample(0.02));
 
       AngularAcceleration angularAcceleration =
-          nextAngularVelocity.minus(currentAngularVelocity).div(Seconds.of(0.02));
+          nextAngularVelocity.minus(profileAngularVelocity).div(Seconds.of(0.02));
 
       currentAngularVelocity =
           currentAngularVelocity.plus(
