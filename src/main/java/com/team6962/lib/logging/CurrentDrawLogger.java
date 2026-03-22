@@ -45,8 +45,10 @@ public class CurrentDrawLogger extends SubsystemBase {
     DogLog.log("CurrentDraw/BatteryVoltage", batteryVoltage);
     DogLog.log("CurrentDraw/TotalCurrent", totalCurrent);
 
-    for (Device device : devices) {
-      DogLog.log("CurrentDraw/" + device.getName(), device.getCurrent());
+    synchronized (devices) {
+      for (Device device : devices) {
+        DogLog.log("CurrentDraw/" + device.getName(), device.getCurrent());
+      }
     }
   }
 
