@@ -154,7 +154,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.907879))) // Measured on 971 practice field
+                .withWheelRadius(Inches.of(1.859))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -203,12 +203,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
                 .withAutoAngularVelocity(RotationsPerSecond.of(1))
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
-                .withAutoLinearAccelerationScalar(0.06)
-                .withAutoAngularAccelerationScalar(0.06)
-                .withTranslationFeedbackKP(1.0) // Not tuned
-                .withTranslationFeedbackKD(0.1) // Not tuned
-                .withAngleFeedbackKP(1.0) // Not tuned
-                .withAngleFeedbackKD(0.1)) // Not tuned
+                .withTranslationFeedbackKP(1.0)
+                .withTranslationFeedbackKD(0.1)
+                .withAngleFeedbackKP(1.0)
+                .withAngleFeedbackKD(0.1))
         .withDriveMotor(
             baseConstants
                 .DriveMotor
