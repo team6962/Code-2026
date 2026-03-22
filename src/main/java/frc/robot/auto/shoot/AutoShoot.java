@@ -351,7 +351,7 @@ public class AutoShoot extends Command {
     return angles;
   }
 
-  private static class ShootingParameters {
+  private class ShootingParameters {
     public Angle turretAngle;
     public Angle hoodAngle;
     public AngularVelocity rollerSpeed;
@@ -363,7 +363,11 @@ public class AutoShoot extends Command {
     }
 
     public void log(String path) {
-      DogLog.log(path + "/TurretAngle", turretAngle.in(Radians), Radians);
+      DogLog.log(
+          path + "/TurretAngle",
+          AngleMath.toContinuous(AngleMath.toDiscrete(turretAngle), turret.getPosition())
+              .in(Radians),
+          Radians);
       DogLog.log(path + "/HoodAngle", hoodAngle.in(Degrees), Degrees);
       DogLog.log(path + "/RollerSpeed", rollerSpeed.in(RotationsPerSecond), RotationsPerSecond);
     }
@@ -421,7 +425,7 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetY", target.getY());
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.1));
+    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.09));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
     appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
