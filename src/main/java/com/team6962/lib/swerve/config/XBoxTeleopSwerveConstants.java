@@ -62,7 +62,9 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double DefaultAngularSpeed = 1.0;
+  public double DefaultAngularSpeed = 0.75;
+
+  public double BoostAngularSpeed = 1.0;
 
   /**
    * When true, the D-pad on the Xbox controller will enable fine control mode, where the robot

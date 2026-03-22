@@ -250,7 +250,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
   private double getNonFineControlAngularScalar() {
-    return constants.DefaultAngularSpeed;
+    return MathUtil.interpolate(
+        constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost());
   }
 
   /**
