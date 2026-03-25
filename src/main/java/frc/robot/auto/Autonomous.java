@@ -127,7 +127,8 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getIntakeRollers().intake(),
-                shootFuel.shoot()));
+                shootFuel.shoot()),
+        shootFuel.shoot());
   }
 
   public Command leftPassCycle() {
