@@ -31,7 +31,7 @@ public class Autonomous {
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
     this.autoPassLeft = new AutoShoot(robot, () -> AutoShoot.PASS_LEFT_TRANSLATION);
-    this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION);
+    this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION); 
 
     
   }
@@ -101,28 +101,41 @@ public class Autonomous {
         .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake());
   }
 
-  public Command passToAllianceThenShoot() {
+  public Command passCycle(boolean rightSide) {
     return Commands.sequence(Commands.runOnce(
             () ->
                 robot
                     .getSwerveDrive()
                     .getLocalization()
-                    .resetPosition((LEFT_START_POSE))),
+                    .resetPosition((mirrorPose(LEFT_START_POSE, rightSide)))),
         // shootFuel.shoot(),
         robot
             .getSwerveDrive()
-            .followPath("pass_cycle.0"),
+            .followPath("pass_cycle.0", rightSide),
         robot.getSwerveDrive()
-            .followPath("pass_cycle.1")
+            .followPath("pass_cycle.1", rightSide)
             .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(), autoPassRight, robot.getHopper().feed()),
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(), rightSide ? autoPassLeft : autoPassRight, robot.getHopper().feed()),
         robot
             .getSwerveDrive()
-            .followPath("pass_cycle.2")
+            .followPath("pass_cycle.2", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        shootFuel.shoot());
+        robot
+            .getSwerveDrive()
+            .followPath("pass_cycle.3", rightSide)
+            .deadlineFor(
+              robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake(), shootFuel.shoot()
+            )
+        );
   }
+  public Command leftPassCycle(){
+    return passCycle(false);
+  }
+  public Command rightPassCycle() {
+    return passCycle(true);
+  }
+
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
     if (!mirrored) {

@@ -312,8 +312,8 @@ public class TeleopControls {
             robot.getPassFunctions(),
             () ->
                 robot.getSwerveDrive().getPosition2d().getY() > AutoShoot.HUB_TRANSLATION.getY()
-                    ? AutoShoot.PASS_RIGHT_TRANSLATION
-                    : AutoShoot.PASS_LEFT_TRANSLATION,
+                    ? AutoShoot.PASS_LEFT_TRANSLATION
+                    : AutoShoot.PASS_RIGHT_TRANSLATION,
             () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
             () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
 
