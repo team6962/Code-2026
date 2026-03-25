@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.auto.shoot.AutoShoot;
-import frc.robot.controls.TeleopControls;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -31,9 +30,7 @@ public class Autonomous {
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
     this.autoPassLeft = new AutoShoot(robot, () -> AutoShoot.PASS_LEFT_TRANSLATION);
-    this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION); 
-
-    
+    this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION);
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -102,20 +99,23 @@ public class Autonomous {
   }
 
   public Command passCycle(boolean rightSide) {
-    return Commands.sequence(Commands.runOnce(
+    return Commands.sequence(
+        Commands.runOnce(
             () ->
                 robot
                     .getSwerveDrive()
                     .getLocalization()
                     .resetPosition((mirrorPose(LEFT_START_POSE, rightSide)))),
         // shootFuel.shoot(),
+        robot.getSwerveDrive().followPath("pass_cycle.0", rightSide),
         robot
             .getSwerveDrive()
-            .followPath("pass_cycle.0", rightSide),
-        robot.getSwerveDrive()
             .followPath("pass_cycle.1", rightSide)
             .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(), rightSide ? autoPassLeft : autoPassRight, robot.getHopper().feed()),
+                robot.getIntakeExtension().extend(),
+                robot.getIntakeRollers().intakeFast(),
+                rightSide ? autoPassLeft : autoPassRight,
+                robot.getHopper().feed()),
         robot
             .getSwerveDrive()
             .followPath("pass_cycle.2", rightSide)
@@ -125,17 +125,18 @@ public class Autonomous {
             .getSwerveDrive()
             .followPath("pass_cycle.3", rightSide)
             .deadlineFor(
-              robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake(), shootFuel.shoot()
-            )
-        );
+                robot.getIntakeExtension().extend(),
+                robot.getIntakeRollers().intake(),
+                shootFuel.shoot()));
   }
-  public Command leftPassCycle(){
+
+  public Command leftPassCycle() {
     return passCycle(false);
   }
+
   public Command rightPassCycle() {
     return passCycle(true);
   }
-
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
     if (!mirrored) {
