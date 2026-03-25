@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
-public class RollerFloor extends SubsystemBase {
+public class RollerFloor extends SubsystemBase implements HopperFloor{
   private TalonFX rollerFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
@@ -66,7 +66,7 @@ public class RollerFloor extends SubsystemBase {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  private Command feedDump(Voltage targetVoltage) {
+  public Command feedDump(Voltage targetVoltage) {
 
     return startEnd(
         () -> {

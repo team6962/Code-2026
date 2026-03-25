@@ -27,7 +27,7 @@ import frc.robot.subsystems.hopper.HopperConstants;
  * The {@class BeltFloor} class is responsible for controlling the moving belt floor at the bottom
  * of the hopper that moves fuel into the queue.
  */
-public class BeltFloor extends SubsystemBase {
+public class BeltFloor extends SubsystemBase implements HopperFloor{
   private TalonFX beltFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
@@ -77,7 +77,7 @@ public class BeltFloor extends SubsystemBase {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  private Command feedDump(Voltage targetVoltage) {
+  public Command feedDump(Voltage targetVoltage) {
 
     return startEnd(
         () -> {
