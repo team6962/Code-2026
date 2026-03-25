@@ -246,7 +246,7 @@ public class TeleopControls {
     // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Intake extension and retraction - WORKS
-    Trigger intakeRetract = operator.rightStick().or(driver.back());
+    Trigger intakeRetract = operator.rightStick();
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
@@ -262,6 +262,7 @@ public class TeleopControls {
             .and(operator.leftBumper().negate())
             .and(operator.rightTrigger().negate())
             .and(driver.a().negate())
+            .and(operator.x().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
@@ -327,13 +328,22 @@ public class TeleopControls {
 
     autoPassTrigger.whileTrue(autoPass);
 
-    operator
-        .rightTrigger()
-        .or(driver.a())
+    Trigger shootButtonsTrigger = operator.rightTrigger().or(driver.back());
+
+    shootButtonsTrigger
+        .and(inAllianceZone)
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
-        .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
+                MetersPerSecond.of(0.5), RotationsPerSecond.of(0.125))) // Temporary values
+        .and(autoShoot.isReadyToShoot())
+        .whileTrue(robot.getHopper().feed());
+
+    shootButtonsTrigger
+        .and(inAllianceZone.negate())
+        .whileTrue(
+            teleopSwerveCommand.limitVelocity(
+                MetersPerSecond.of(1.5), RotationsPerSecond.of(0.5))) // Temporary values
+        .and(autoPass.isReadyToShoot())
         .whileTrue(robot.getHopper().feed());
 
     // ShooterFunctions functions = robot.getHubFunctions();

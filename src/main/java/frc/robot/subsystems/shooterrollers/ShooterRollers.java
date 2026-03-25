@@ -1,6 +1,9 @@
 package frc.robot.subsystems.shooterrollers;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -9,11 +12,13 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -21,13 +26,17 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
   private TalonFX shooterRollerMotor1;
   private TalonFX shooterRollerMotor2;
+  private StatusSignal<Angle> angleSignal;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<AngularAcceleration> accelerationSignal;
   private StatusSignal<Current> supplyCurrentSignal;
@@ -59,6 +68,7 @@ public class ShooterRollers extends SubsystemBase {
     shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION);
 
     // defines the variables we are keeping track of
+    angleSignal = shooterRollerMotor1.getPosition();
     velocitySignal = shooterRollerMotor1.getVelocity();
     voltageSignal = shooterRollerMotor1.getMotorVoltage();
     accelerationSignal = shooterRollerMotor1.getAcceleration();
@@ -71,6 +81,42 @@ public class ShooterRollers extends SubsystemBase {
         0.0,
         newVelocity -> {
           CommandScheduler.getInstance().schedule(shoot(RotationsPerSecond.of(newVelocity)));
+        });
+
+    DogLog.tunable(
+        "shooterRoller/kS",
+        ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kS,
+        value -> {
+          shooterRollerMotor1
+              .getConfigurator()
+              .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKS(value));
+        });
+
+    DogLog.tunable(
+        "shooterRoller/kV",
+        ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kV,
+        value -> {
+          shooterRollerMotor1
+              .getConfigurator()
+              .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKV(value));
+        });
+
+    DogLog.tunable(
+        "shooterRoller/kP",
+        ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kP,
+        value -> {
+          shooterRollerMotor1
+              .getConfigurator()
+              .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKP(value));
+        });
+
+    DogLog.tunable(
+        "shooterRoller/kI",
+        ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kI,
+        value -> {
+          shooterRollerMotor1
+              .getConfigurator()
+              .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKI(value));
         });
 
     shooterRollerMotor2.setControl(
@@ -133,6 +179,7 @@ public class ShooterRollers extends SubsystemBase {
 
     // this will log stuff every once in a while
     BaseStatusSignal.refreshAll(
+        angleSignal,
         velocitySignal,
         voltageSignal,
         supplyCurrentSignal,
@@ -169,5 +216,31 @@ public class ShooterRollers extends SubsystemBase {
   /** gets the motor voltage */
   public Voltage getMotorVoltage() {
     return voltageSignal.getValue();
+  }
+
+  public Command sysId() {
+    SysIdRoutine routine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.per(Second).of(2), Volts.of(7), Seconds.of(5)),
+            new SysIdRoutine.Mechanism(
+                voltage ->
+                    shooterRollerMotor1.setControl(new VoltageOut(voltage).withEnableFOC(false)),
+                log ->
+                    log.motor("Shooter Rollers")
+                        .angularPosition(angleSignal.getValue())
+                        .angularVelocity(getAngularVelocity())
+                        .angularAcceleration(getAngularAcceleration())
+                        .voltage(getMotorVoltage()),
+                this,
+                "Shooter Rollers"));
+
+    return Commands.sequence(
+        routine.quasistatic(Direction.kForward),
+        Commands.waitSeconds(5),
+        routine.quasistatic(Direction.kReverse),
+        Commands.waitSeconds(5),
+        routine.dynamic(Direction.kForward),
+        Commands.waitSeconds(5),
+        routine.dynamic(Direction.kReverse));
   }
 }

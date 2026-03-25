@@ -130,6 +130,8 @@ public class RobotContainer {
     autoChooser.addOption("Right Pass Fuel Cycle", autonomous.rightPassCycle());
     autoChooser.addOption("Preload", autonomous.preload());
 
+    autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
+
     autoChooser.addOption(
         "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
     autoChooser.addOption(

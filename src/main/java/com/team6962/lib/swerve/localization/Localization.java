@@ -102,11 +102,7 @@ public class Localization implements SwerveComponent {
     // Compute the chassis velocity based on the twist and delta time
     velocity =
         ChassisSpeeds.fromRobotRelativeSpeeds(
-            new ChassisSpeeds(
-                twist.dx / deltaTimeSeconds,
-                twist.dy / deltaTimeSeconds,
-                twist.dtheta / deltaTimeSeconds),
-            new Rotation2d(poseEstimator.getEstimatedPosition().getRotation().getMeasureZ()));
+            odometry.getRobotRelativeVelocity(), new Rotation2d(yaw));
 
     // Update the translational velocity
     translationalVelocity =
