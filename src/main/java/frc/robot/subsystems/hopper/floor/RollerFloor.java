@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
-public class RollerFloor extends SubsystemBase implements HopperFloor{
+public class RollerFloor extends SubsystemBase implements HopperFloor {
   private TalonFX rollerFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;

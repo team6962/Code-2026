@@ -27,7 +27,7 @@ import frc.robot.subsystems.hopper.HopperConstants;
  * The {@class BeltFloor} class is responsible for controlling the moving belt floor at the bottom
  * of the hopper that moves fuel into the queue.
  */
-public class BeltFloor extends SubsystemBase implements HopperFloor{
+public class BeltFloor extends SubsystemBase implements HopperFloor {
   private TalonFX beltFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
