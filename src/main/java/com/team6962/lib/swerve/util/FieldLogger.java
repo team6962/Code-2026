@@ -8,6 +8,7 @@ import com.team6962.lib.swerve.localization.Odometry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -125,7 +126,7 @@ public class FieldLogger implements SwerveComponent {
       isPublished = true;
     }
 
-    if (previousRobotPose != null) {
+    if (RobotBase.isSimulation() && previousRobotPose != null) {
       Pose2d updatedRobotPose = field.getRobotPose();
 
       if (!previousRobotPose.equals(updatedRobotPose)) {
@@ -156,8 +157,6 @@ public class FieldLogger implements SwerveComponent {
     synchronized (this) {
       logData = new LogData(robotPose, modulePoses);
     }
-
-    field.setRobotPose(robotPose);
   }
 
   /**
