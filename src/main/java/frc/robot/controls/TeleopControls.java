@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
@@ -333,8 +335,11 @@ public class TeleopControls {
     shootButtonsTrigger
         .and(inAllianceZone)
         .whileTrue(
-            teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(0.5), RotationsPerSecond.of(0.125))) // Temporary values
+            teleopSwerveCommand
+                .limitVelocity(MetersPerSecond.of(1), RotationsPerSecond.of(3.0 / 16.0))
+                .alongWith(
+                    teleopSwerveCommand.limitAcceleration(
+                        MetersPerSecondPerSecond.of(2), RotationsPerSecondPerSecond.of(0.375))))
         .and(autoShoot.isReadyToShoot())
         .whileTrue(robot.getHopper().feed());
 
