@@ -116,7 +116,9 @@ public class BrownoutProtection extends SubsystemBase {
     double voltageHeadroomFraction =
         mapToUnitRange(recentMinimumBatteryVoltageVolts, minimumVoltage, startLimitingVoltage);
     double currentHeadroomFraction =
-        1.0 - mapToUnitRange(recentMaximumTotalCurrentAmps, startLimitingCurrentAmps, maximumCurrentAmps);
+        1.0
+            - mapToUnitRange(
+                recentMaximumTotalCurrentAmps, startLimitingCurrentAmps, maximumCurrentAmps);
     // 1.0 means there is enough electrical headroom for full performance. 0.0 means outputs
     // should be clamped to their configured minimum scaling factors.
     double allowedPerformanceFraction =
@@ -134,8 +136,7 @@ public class BrownoutProtection extends SubsystemBase {
         MathUtil.interpolate(
             minimumPriorityMechanismScalingFactor, 1.0, allowedPerformanceFraction);
     double reducedMechanismScalingFactor =
-        MathUtil.interpolate(
-            minimumReducedMechanismScalingFactor, 1.0, allowedPerformanceFraction);
+        MathUtil.interpolate(minimumReducedMechanismScalingFactor, 1.0, allowedPerformanceFraction);
 
     double driveVelocityScalingFactor =
         priorityMode == PriorityMode.DRIVING
@@ -174,14 +175,10 @@ public class BrownoutProtection extends SubsystemBase {
     DogLog.log("BrownoutProtection/VoltageHeadroomFraction", voltageHeadroomFraction);
     DogLog.log("BrownoutProtection/CurrentHeadroomFraction", currentHeadroomFraction);
     DogLog.log("BrownoutProtection/AllowedPerformanceFraction", allowedPerformanceFraction);
-    DogLog.log(
-        "BrownoutProtection/DriveVelocityScalingFactor", driveVelocityScalingFactor);
-    DogLog.log(
-        "BrownoutProtection/ShooterAimingScalingFactor", shooterAimingScalingFactor);
-    DogLog.log(
-        "BrownoutProtection/IntakeMotionScalingFactor", intakeMotionScalingFactor);
-    DogLog.log(
-        "BrownoutProtection/BeltFloorVoltageScalingFactor", beltFloorVoltageScalingFactor);
+    DogLog.log("BrownoutProtection/DriveVelocityScalingFactor", driveVelocityScalingFactor);
+    DogLog.log("BrownoutProtection/ShooterAimingScalingFactor", shooterAimingScalingFactor);
+    DogLog.log("BrownoutProtection/IntakeMotionScalingFactor", intakeMotionScalingFactor);
+    DogLog.log("BrownoutProtection/BeltFloorVoltageScalingFactor", beltFloorVoltageScalingFactor);
     DogLog.log(
         "BrownoutProtection/IntakeRollerVoltageScalingFactor", intakeRollerVoltageScalingFactor);
   }
@@ -200,7 +197,8 @@ public class BrownoutProtection extends SubsystemBase {
 
     boolean intakeActive =
         intakeExtension.getCurrentCommand() != null
-            || intakeRollers.getAppliedVoltage().in(Volts) > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS
+            || intakeRollers.getAppliedVoltage().in(Volts)
+                > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS
             || beltFloor.getMotorVoltage().in(Volts) > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS;
 
     return intakeActive ? PriorityMode.INTAKING : PriorityMode.DRIVING;
