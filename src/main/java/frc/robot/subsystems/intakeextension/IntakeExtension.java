@@ -209,8 +209,7 @@ public class IntakeExtension extends SubsystemBase {
         new DynamicMotionMagicVoltage(
                 position.in(Meters),
                 getScaledMotionMagicCruiseVelocity(),
-                getScaledMotionMagicAcceleration())
-            .withJerk(IntakeExtensionConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk));
+                getScaledMotionMagicAcceleration()));
   }
 
   /**

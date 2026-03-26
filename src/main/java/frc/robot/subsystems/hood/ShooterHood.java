@@ -416,7 +416,6 @@ public class ShooterHood extends SubsystemBase {
                   targetPosition.in(Rotations),
                   getScaledMotionMagicCruiseVelocity(),
                   getScaledMotionMagicAcceleration())
-              .withJerk(ShooterHoodConstants.MOTOR_CONFIGURATION.MotionMagic.MotionMagicJerk)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     }
   }

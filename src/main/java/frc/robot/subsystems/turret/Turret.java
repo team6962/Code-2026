@@ -608,7 +608,6 @@ public class Turret extends SubsystemBase {
                   targetAngle.in(Rotations),
                   getScaledMotionMagicCruiseVelocity(),
                   getScaledMotionMagicAcceleration())
-              .withJerk(config.MotionMagic.MotionMagicJerk)
               .withFeedForward(
                   targetAngle.lt(TurretConstants.MIN_KW_ANGLE)
                       ? -TurretConstants.kW
