@@ -74,11 +74,10 @@ public class Autonomous {
         shootFuel.shoot());
   }
 
-public Command moveBackwardAndShoot() {
+  public Command moveBackwardAndShoot() {
     return Commands.sequence(
-        robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT), 
-        shootFuel.shoot()
-    ).until(() -> hopperSensors.isHopperEmpty());
+            robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT), shootFuel.shoot())
+        .until(() -> hopperSensors.isHopperEmpty());
   }
 
   public Command leftSingleNeutralCycle() {
