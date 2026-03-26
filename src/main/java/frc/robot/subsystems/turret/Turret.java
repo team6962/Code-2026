@@ -420,14 +420,9 @@ public class Turret extends SubsystemBase {
  Afterwards, it moves the turret to the position that had the manual offset for improved accuracy.
  * 
  */
-  public Command setOffsetAngle(Angle newOffset){
-    return run(
-      () -> {
-        System.out.println("manual offset set to " + newOffset);
-        manualOffset = newOffset;
-        moveTo(getPosition()).schedule();
-      }
-    );
+  public void setOffsetAngle(Angle newOffset){
+    System.out.println("manual offset set to " + newOffset);
+    manualOffset = newOffset;
   }
 
   /**
