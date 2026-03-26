@@ -13,13 +13,13 @@ import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
@@ -33,8 +33,9 @@ import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.TurretConstants;
+import java.util.List;
 
-public class TeleopControls {
+public class TeleopControls extends SubsystemBase {
   private RobotContainer robot;
   // private AutoClimb autoClimb;
   private ShootFuel shootFuel;
@@ -43,6 +44,9 @@ public class TeleopControls {
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
+
+  private ControllerRumble driverRumble = new ControllerRumble(driver);
+  private ControllerRumble operatorRumble = new ControllerRumble(operator);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -378,23 +382,24 @@ public class TeleopControls {
     //                                     functions.getHoodAngle(shootingTestDistance),
     //                                     Degrees.of(1))),
     //                 robot.getHopper().feed())));
-  }
 
-  private Command rumble(
-      CommandXboxController controller, RumbleType rumbleType, double intensity) {
-    return Commands.startEnd(
-        () -> controller.setRumble(rumbleType, intensity),
-        () -> controller.setRumble(rumbleType, 0.0));
+    new ShiftFeedback(List.of(driverRumble, operatorRumble));
   }
 
   private Command fineControlEnableRumble() {
     return Commands.sequence(
-        rumble(operator, RumbleType.kLeftRumble, 1).withTimeout(1.0 / 3.0),
+        operatorRumble.rumble(1, 0).withTimeout(1.0 / 3.0),
         Commands.waitSeconds(1.0 / 3.0),
-        rumble(operator, RumbleType.kRightRumble, 1).withTimeout(1.0 / 3.0));
+        operatorRumble.rumble(0, 1).withTimeout(1.0 / 3.0));
   }
 
   private Command fineControlDisableRumble() {
-    return Commands.sequence(rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0));
+    return operatorRumble.rumble(1, 1).withTimeout(1.0);
+  }
+
+  @Override
+  public void periodic() {
+    ControllerLogging.logInputs(driver.getHID());
+    ControllerLogging.logInputs(operator.getHID());
   }
 }
