@@ -421,7 +421,7 @@ public class Turret extends SubsystemBase {
  * 
  */
   public Command setOffsetAngle(Angle newOffset){
-    return runOnce(
+    return run(
       () -> {
         System.out.println("manual offset set to " + newOffset);
         manualOffset = newOffset;

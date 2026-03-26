@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.Set;
+
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
@@ -219,14 +221,13 @@ public class TeleopControls {
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
     operator
-        .axisGreaterThan(Axis.kRightX.value, 0.5)
+        .axisMagnitudeGreaterThan(Axis.kRightX.value, 0.1)
         .and(() -> fineControl)
-        .whileTrue(this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2))); //I don't know if the -2 multiplyer is to high or too low
-
-    operator
-        .axisLessThan(Axis.kRightX.value, -0.5)
-        .and(() -> fineControl)
-        .whileTrue(this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2))); //I don't know if the -2 multiplyer is to high or too low
+        .whileTrue(
+            Commands.defer(() -> {
+                return this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2));
+            }, Set.of(this.robot.getTurret()))
+        ); //I don't know if the -2 multiplyer is to high or too low
 
     operator
         .axisGreaterThan(Axis.kRightY.value, 0.5)
