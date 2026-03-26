@@ -79,6 +79,7 @@ public class RobotContainer {
     brownoutProtection =
         new BrownoutProtection(
             swerveDrive,
+            shooterRollers,
             turret,
             shooterHood,
             intakeExtension,
