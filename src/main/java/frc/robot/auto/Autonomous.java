@@ -1,5 +1,8 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +29,23 @@ public class Autonomous {
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
+  }
+  public Command trenchCheck() {
+    double y;
+    double x;
+    if (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)) {
+      y = Inches.of(24.97).in(Meters);
+    }
+    else {
+      y = Inches.of(292.31).in(Meters);
+    }
+    if (robot.getSwerveDrive().getPosition2d().getX() < Inches.of(182.11).in(Meters)) {
+      x = Inches.of(215.61).in(Meters);
+    }
+    else {
+      x = 148.61;
+    }
+    return robot.getSwerveDrive().driveTo(new Pose2d(x,y,new Rotation2d().k180deg));
   }
 
   private static Pose2d LEFT_START_POSE =
