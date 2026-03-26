@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.hopper.sensors.HopperSensors;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -16,6 +17,7 @@ public class Autonomous {
   public final AutoOutpost autoOutpost;
   public final AutoEdgeIntake autoEdgeIntake;
   public final CollectFuelFromHub collectFuelFromHub;
+  public final HopperSensors hopperSensors;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -26,6 +28,7 @@ public class Autonomous {
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
+    this.hopperSensors = new HopperSensors();
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -69,6 +72,13 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         shootFuel.shoot());
+  }
+
+public Command moveBackwardAndShoot() {
+    return Commands.sequence(
+        robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT), 
+        shootFuel.shoot()
+    ).until(() -> hopperSensors.isHopperEmpty());
   }
 
   public Command leftSingleNeutralCycle() {
