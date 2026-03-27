@@ -60,6 +60,7 @@ public class ShooterHood extends SubsystemBase {
   private Supplier<Boolean> shouldLowerHoodSupplier;
 
   private Angle manualOffset = Degrees.of(0);
+
   /** Initializes the motor and status signal */
   public ShooterHood(Supplier<Boolean> shouldLowerHoodSupplier) {
     hoodMotor =
@@ -327,10 +328,10 @@ public class ShooterHood extends SubsystemBase {
     return hallSensorTriggeredSignal.getValue();
   }
 
-   public void setOffsetAngle(Angle newOffset){
+  public void setOffsetAngle(Angle newOffset) {
     System.out.println("manual offset set to " + newOffset);
     manualOffset = newOffset;
-   }
+  }
 
   /**
    * Returns a command that moves the hood to the given target angle.
@@ -362,7 +363,8 @@ public class ShooterHood extends SubsystemBase {
   public Command moveTo(Supplier<Angle> targetAngleSupplier) {
     return runEnd(
         () -> {
-          Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get().plus(manualOffset));
+          Angle clampedAngle =
+              clampPositionToSafeRange(targetAngleSupplier.get().plus(manualOffset));
           DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
           setPositionControl(clampedAngle);
         },

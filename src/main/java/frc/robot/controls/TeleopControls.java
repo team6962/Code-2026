@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
@@ -244,35 +243,41 @@ public class TeleopControls extends SubsystemBase {
         .axisMagnitudeGreaterThan(Axis.kRightX.value, 0.1)
         .and(() -> fineControl)
         .whileTrue(
-            Commands.run(() -> {
-                this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2));
-            })
-        );
-    
-    operator.axisGreaterThan(Axis.kRightX.value, 0.1).negate()
+            Commands.run(
+                () -> {
+                  this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX()) * -2));
+                }));
+
+    operator
+        .axisGreaterThan(Axis.kRightX.value, 0.1)
+        .negate()
         .and(() -> fineControl)
         .onTrue(
-            Commands.run(() -> {
-                this.robot.getTurret().setOffsetAngle(Degrees.zero());
-            })
-        );
+            Commands.run(
+                () -> {
+                  this.robot.getTurret().setOffsetAngle(Degrees.zero());
+                }));
 
     operator
         .axisMagnitudeGreaterThan(Axis.kLeftY.value, 0.1)
         .and(() -> fineControl)
         .whileTrue(
-            Commands.run(() -> {
-                this.robot.getShooterHood().setOffsetAngle(Degrees.of((operator.getLeftY())*-2));
-            })
-        );
-    
-    operator.axisGreaterThan(Axis.kLeftY.value, 0.1).negate()
+            Commands.run(
+                () -> {
+                  this.robot
+                      .getShooterHood()
+                      .setOffsetAngle(Degrees.of((operator.getLeftY()) * -2));
+                }));
+
+    operator
+        .axisGreaterThan(Axis.kLeftY.value, 0.1)
+        .negate()
         .and(() -> fineControl)
         .onTrue(
-            Commands.run(() -> {
-                this.robot.getShooterHood().setOffsetAngle(Degrees.zero());
-            })
-        );
+            Commands.run(
+                () -> {
+                  this.robot.getShooterHood().setOffsetAngle(Degrees.zero());
+                }));
 
     // operator
     //     .axisLessThan(Axis.kRightY.value, -0.5)
