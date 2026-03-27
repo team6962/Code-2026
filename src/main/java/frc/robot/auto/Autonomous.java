@@ -33,19 +33,38 @@ public class Autonomous {
   public Command trenchCheck() {
     double y;
     double x;
-    if (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)) {
-      y = Inches.of(24.97).in(Meters);
+    if ((robot.getSwerveDrive().getPosition2d().getY() 
+    < Inches.of(14.97).in(Meters) 
+    || (robot.getSwerveDrive().getPosition2d().getY() 
+    > Inches.of(34.97).in(Meters)
+    && robot.getSwerveDrive().getPosition2d().getY() 
+    < Inches.of(158.84).in(Meters)))
+    ||
+    (robot.getSwerveDrive().getPosition2d().getY() 
+    > Inches.of(302.31).in(Meters) 
+    || (robot.getSwerveDrive().getPosition2d().getY() 
+    < Inches.of(282.31).in(Meters)
+    && robot.getSwerveDrive().getPosition2d().getY() 
+    > Inches.of(158.84).in(Meters)))
+    ) {
+      if (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)) {
+        y = Inches.of(24.97).in(Meters);
+      }
+      else {
+        y = Inches.of(292.31).in(Meters);
+      }
+      if (robot.getSwerveDrive().getPosition2d().getX() < Inches.of(182.11).in(Meters)) {
+        x = Inches.of(225.61).in(Meters);
+      }
+      else {
+        x = Inches.of(138.61).in(Meters);
+      }
+      return robot.getSwerveDrive().driveTo(new Pose2d(x,y,new Rotation2d().kZero)); 
     }
     else {
-      y = Inches.of(292.31).in(Meters);
+      return Commands.none();
     }
-    if (robot.getSwerveDrive().getPosition2d().getX() < Inches.of(182.11).in(Meters)) {
-      x = Inches.of(215.61).in(Meters);
-    }
-    else {
-      x = 148.61;
-    }
-    return robot.getSwerveDrive().driveTo(new Pose2d(x,y,new Rotation2d().k180deg));
+    
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -64,8 +83,7 @@ public class Autonomous {
             .followPath("left_neutral.0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-              robot.getSwerveDrive().followPath("left_neutral.1", rightSide), trenchCheck(),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
         shootFuel.shoot());
   }
 
