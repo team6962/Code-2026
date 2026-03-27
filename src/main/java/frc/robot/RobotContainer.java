@@ -178,10 +178,9 @@ public class RobotContainer {
     }
 
     double currentTime = DriverStation.getMatchTime();
-    if ((int)currentTime == 10) {
+    if ((int)currentTime == 10 || (int)currentTime == 40 || (int)currentTime == 65 || (int)currentTime == 90 || (int)currentTime == 115 || (int)currentTime == 140 || (int)currentTime == 150) {
       teleopControls.shiftTimerRumble().schedule();
     }
-
   }
 
   public void latePeriodic() {
