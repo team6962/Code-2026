@@ -259,7 +259,7 @@ public class TeleopControls extends SubsystemBase {
                 }));
 
     operator
-        .axisMagnitudeGreaterThan(Axis.kLeftY.value, 0.1)
+        .axisMagnitudeGreaterThan(Axis.kRightY.value, 0.1)
         .and(() -> fineControl)
         .whileTrue(
             Commands.run(
@@ -270,7 +270,7 @@ public class TeleopControls extends SubsystemBase {
                 }));
 
     operator
-        .axisGreaterThan(Axis.kLeftY.value, 0.1)
+        .axisGreaterThan(Axis.kRightY.value, 0.1)
         .negate()
         .and(() -> fineControl)
         .onTrue(
