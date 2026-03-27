@@ -74,13 +74,12 @@ public class Autonomous {
         shootFuel.shoot());
   }
 
-// Auto starting at the Mid-Hub position, moving backwards and then shooting.
+  // Auto starting at the Mid-Hub position, moving backwards and then shooting.
   public Command moveBackwardAndShoot() {
     return Commands.sequence(
-            robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT),
-            Commands.parallel(
-              shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(),
-              autoShoot));
+        robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT),
+        Commands.parallel(
+            shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
   public Command leftSingleNeutralCycle() {
