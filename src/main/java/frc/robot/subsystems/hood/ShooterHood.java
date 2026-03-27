@@ -16,7 +16,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.team6962.lib.logging.LoggingUtil;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -187,6 +187,8 @@ public class ShooterHood extends SubsystemBase {
     } else {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
     }
+
+    CurrentDrawLogger.add("Shooter Hood", this::getSupplyCurrent);
   }
 
   @Override
@@ -222,13 +224,13 @@ public class ShooterHood extends SubsystemBase {
     DogLog.log("Hood/StatorCurrent", getStatorCurrent());
     DogLog.log("Hood/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Hood/ShouldBeLowered", shouldLowerHoodSupplier.get());
-    DogLog.log("Hood/IsZeroed", isZeroed);
+    DogLog.forceNt.log("Hood/IsZeroed", isZeroed);
     DogLog.log(
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
         Degrees);
 
-    LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
+    // LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
 
     // Update the currently applied control request with a new gravity feedforward
     // voltage if the control request is a MotionMagicVoltage
@@ -236,7 +238,9 @@ public class ShooterHood extends SubsystemBase {
       setPositionControl(motionMagicControlRequest.getPositionMeasure());
     }
 
-    if (isHallSensorTriggered() && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
+    if (RobotState.isDisabled()
+        && isHallSensorTriggered()
+        && getPosition().lt(ShooterHoodConstants.MIN_ANGLE)) {
       hoodMotor.setPosition(ShooterHoodConstants.MIN_ANGLE);
       isZeroed = true;
     }
@@ -405,7 +409,7 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setControl(new NeutralOut());
     } else if (shouldLowerHoodSupplier.get()) {
       hoodMotor.setControl(
-          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
       hoodMotor.setControl(
@@ -419,7 +423,7 @@ public class ShooterHood extends SubsystemBase {
       hoodMotor.setControl(new NeutralOut());
     } else if (shouldLowerHoodSupplier.get()) {
       hoodMotor.setControl(
-          new PositionVoltage(ShooterHoodConstants.MIN_ANGLE)
+          new MotionMagicVoltage(ShooterHoodConstants.MIN_ANGLE)
               .withFeedForward(Math.cos(getPosition().in(Radians)) * kG));
     } else {
       hoodMotor.setControl(
@@ -470,9 +474,13 @@ public class ShooterHood extends SubsystemBase {
 
           @Override
           public void execute() {
-            Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
-
+            Angle unclampedTargetPosition = targetAngleSupplier.get();
             AngularVelocity targetVelocity = targetVelocitySupplier.get();
+
+            if (unclampedTargetPosition == null) return;
+            if (targetVelocity == null) targetVelocity = RotationsPerSecond.of(0);
+
+            Angle targetPosition = clampPositionToSafeRange(targetAngleSupplier.get());
 
             TrapezoidProfile.State profileState =
                 profile.calculate(

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
@@ -29,6 +30,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -185,6 +187,8 @@ public class IntakeExtension extends SubsystemBase {
     } else {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
+
+    CurrentDrawLogger.add("Intake Extension", this::getSupplyCurrent);
   }
 
   /**
@@ -200,7 +204,12 @@ public class IntakeExtension extends SubsystemBase {
                   new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              if (!getPosition()
+                  .isNear(
+                      IntakeExtensionConstants.MAX_POSITION,
+                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              }
             })
         .until(
             () ->
@@ -223,7 +232,12 @@ public class IntakeExtension extends SubsystemBase {
                   new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
             },
             () -> {
-              motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              if (!getPosition()
+                  .isNear(
+                      IntakeExtensionConstants.RETRACT_POSITION,
+                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              }
             })
         .until(
             () ->
@@ -358,7 +372,9 @@ public class IntakeExtension extends SubsystemBase {
       simulation.update();
     }
 
-    if (isHallSensorTriggered() && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
+    if (RobotState.isDisabled()
+        && isHallSensorTriggered()
+        && getPosition().lt(IntakeExtensionConstants.MIN_POSITION)) {
       motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
     }
 

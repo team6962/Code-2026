@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +26,6 @@ import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
-import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
@@ -46,21 +47,26 @@ public class RobotContainer {
   private final ShooterRollers shooterRollers;
   private final IntakeRollers intakeRollers;
   private final AprilTagVision aprilTagVision;
-  private final Climb climb;
+  // private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-  private final ShooterFunctions shooterFunctions;
+  private final ShooterFunctions hubFunctions;
+  private final ShooterFunctions passFunctions;
   private final Autonomous autonomous;
+  private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
+    RobotController.setBrownoutVoltage(4.6);
+
+    CurrentDrawLogger.start();
 
     constants = RobotConstants.generate();
 
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
-    climb = new Climb();
+    // climb = new Climb();
     AutoLowerHood autoLowerHood = new AutoLowerHood(swerveDrive);
     shooterHood = new ShooterHood(autoLowerHood::shouldLowerHood);
     intakeRollers = new IntakeRollers();
@@ -72,9 +78,10 @@ public class RobotContainer {
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
-    shooterFunctions =
+    hubFunctions =
         new ShooterFunctions(
             RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv");
+    passFunctions = new ShooterFunctions("shooter_pass_data.csv");
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
@@ -88,7 +95,7 @@ public class RobotContainer {
 
   private void configureAutonomousChooser() {
     // Set "Do Nothing" as the default option
-    autoChooser.setDefaultOption("Do Nothing", Commands.none());
+    autoChooser.setDefaultOption("Do Nothing", noneAutonomous);
     // Add the Drive Straight auto as an optional selection
     autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
     autoChooser.addOption(
@@ -115,11 +122,26 @@ public class RobotContainer {
             getHopper().feed(),
             getIntakeExtension().extend().repeatedly()));
 
-    autoChooser.addOption("Neutral Cycle", autonomous.neutralCycle());
-    autoChooser.addOption("Depot + Neutral", autonomous.depotThenNeutralCycle());
-    autoChooser.addOption("Outpost + Neutral", autonomous.neutralCycleThenOutpost());
-    autoChooser.addOption("Intake Behind Hub Left", autonomous.intakeBehindHubLeft());
-    autoChooser.addOption("Intake Behind Hub Right", autonomous.intakeBehindHubRight());
+    autoChooser.addOption("Left Single Neutral Cycle", autonomous.leftSingleNeutralCycle());
+    autoChooser.addOption("Left Double Neutral Cycle", autonomous.leftDoubleNeutralCycle());
+    autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
+    autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
+    autoChooser.addOption("Preload", autonomous.preload());
+
+    autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
+
+    autoChooser.addOption(
+        "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Front Right Steer", swerveDrive.getModules()[1].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Back Left Steer", swerveDrive.getModules()[2].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Back Right Steer", swerveDrive.getModules()[3].getSteerMechanism().sysId());
+    autoChooser.addOption(
+        "SysId Front Drive", swerveDrive.driveSysId("Front Drive", true, true, false, false, 0));
+    autoChooser.addOption(
+        "SysId Back Drive", swerveDrive.driveSysId("Back Drive", false, false, true, true, 2));
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
@@ -149,6 +171,10 @@ public class RobotContainer {
 
   public void periodic() {
     DogLog.forceNt.log("BatteryVoltage", RobotController.getBatteryVoltage());
+
+    if (RobotState.isDisabled()) {
+      DogLog.forceNt.log("Auto Routine Selected", autoChooser.getSelected() != noneAutonomous);
+    }
   }
 
   public void latePeriodic() {
@@ -171,16 +197,20 @@ public class RobotContainer {
     return shooterRollers;
   }
 
-  public Climb getClimb() {
-    return climb;
-  }
+  // public Climb getClimb() {
+  //   return climb;
+  // }
 
   public Hopper getHopper() {
     return hopper;
   }
 
-  public ShooterFunctions getShooterFunctions() {
-    return shooterFunctions;
+  public ShooterFunctions getHubFunctions() {
+    return hubFunctions;
+  }
+
+  public ShooterFunctions getPassFunctions() {
+    return passFunctions;
   }
 
   public RobotVisualizer getVisualizer() {
