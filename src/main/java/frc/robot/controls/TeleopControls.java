@@ -34,6 +34,7 @@ import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.TurretConstants;
 import java.util.List;
+import java.util.Set;
 
 public class TeleopControls extends SubsystemBase {
   private RobotContainer robot;
@@ -53,12 +54,44 @@ public class TeleopControls extends SubsystemBase {
   private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
+  private double hubMaxLinearVelocity = 1;
+  private double hubMaxAngularVelocity = 0.1;
+  private double hubMaxLinearAcceleration = 2;
+  private double hubMaxAngularAcceleration = 0.25;
+  private double passMaxLinearVelocity = 1.5;
+  private double passMaxAngularVelocity = 0.5;
+
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoDepot = new AutoDepot(robot);
+
+    DogLog.tunable(
+        "TeleopControls/hubMaxLinearVelocity",
+        hubMaxLinearVelocity,
+        value -> hubMaxLinearVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxAngularVelocity",
+        hubMaxAngularVelocity,
+        value -> hubMaxAngularVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxLinearAcceleration",
+        hubMaxLinearAcceleration,
+        value -> hubMaxLinearAcceleration = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxAngularAcceleration",
+        hubMaxAngularAcceleration,
+        value -> hubMaxAngularAcceleration = value);
+    DogLog.tunable(
+        "TeleopControls/passMaxLinearVelocity",
+        passMaxLinearVelocity,
+        value -> passMaxLinearVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/passMaxAngularVelocity",
+        passMaxAngularVelocity,
+        value -> passMaxAngularVelocity = value);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -259,21 +292,6 @@ public class TeleopControls extends SubsystemBase {
     intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
     intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
 
-    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
-    // fully tested
-    Trigger load =
-        new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
-            .and(() -> !fineControl)
-            .and(driver.leftStick().negate())
-            .and(operator.leftBumper().negate())
-            .and(operator.rightTrigger().negate())
-            .and(driver.a().negate())
-            .and(operator.x().negate())
-            .and(() -> !robot.getHopper().getSensors().isKickerFull())
-            .and(() -> !robot.getHopper().isEmpty());
-
-    load.whileTrue(robot.getHopper().load());
-
     // Climb retraction
     // Command autodescend = robot.getClimb().descend();
     // Trigger climbRetract =
@@ -339,21 +357,42 @@ public class TeleopControls extends SubsystemBase {
     shootButtonsTrigger
         .and(inAllianceZone)
         .whileTrue(
-            teleopSwerveCommand
-                .limitVelocity(MetersPerSecond.of(1), RotationsPerSecond.of(3.0 / 16.0))
-                .alongWith(
-                    teleopSwerveCommand.limitAcceleration(
-                        MetersPerSecondPerSecond.of(2), RotationsPerSecondPerSecond.of(0.375))))
+            Commands.defer(
+                () ->
+                    teleopSwerveCommand
+                        .limitVelocity(
+                            MetersPerSecond.of(hubMaxLinearVelocity),
+                            RotationsPerSecond.of(hubMaxAngularVelocity))
+                        .alongWith(
+                            teleopSwerveCommand.limitAcceleration(
+                                MetersPerSecondPerSecond.of(hubMaxLinearAcceleration),
+                                RotationsPerSecondPerSecond.of(hubMaxAngularAcceleration))),
+                Set.of()))
         .and(autoShoot.isReadyToShoot())
         .whileTrue(robot.getHopper().feed());
 
     shootButtonsTrigger
         .and(inAllianceZone.negate())
         .whileTrue(
-            teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(1.5), RotationsPerSecond.of(0.5))) // Temporary values
-        .and(autoPass.isReadyToShoot())
-        .whileTrue(robot.getHopper().feed());
+            Commands.defer(
+                    () ->
+                        teleopSwerveCommand.limitVelocity(
+                            MetersPerSecond.of(passMaxLinearVelocity),
+                            RotationsPerSecond.of(passMaxAngularVelocity)),
+                    Set.of())
+                .alongWith(robot.getHopper().feed())); // Temporary values
+
+    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
+    // fully tested
+    Trigger load =
+        new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
+            .and(() -> !fineControl)
+            .and(shootButtonsTrigger.negate())
+            .and(operator.x().negate())
+            .and(() -> !robot.getHopper().getSensors().isKickerFull())
+            .and(() -> !robot.getHopper().isEmpty());
+
+    load.whileTrue(robot.getHopper().load());
 
     // ShooterFunctions functions = robot.getHubFunctions();
 

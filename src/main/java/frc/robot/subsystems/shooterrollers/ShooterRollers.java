@@ -77,14 +77,14 @@ public class ShooterRollers extends SubsystemBase {
     otherSupplyCurrentSignal = shooterRollerMotor2.getSupplyCurrent();
 
     DogLog.tunable(
-        "shooterRoller / input velocity",
+        "Shooter Rollers/TargetVelocity",
         0.0,
         newVelocity -> {
           CommandScheduler.getInstance().schedule(shoot(RotationsPerSecond.of(newVelocity)));
         });
 
     DogLog.tunable(
-        "shooterRoller/kS",
+        "Shooter Rollers/kS",
         ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kS,
         value -> {
           shooterRollerMotor1
@@ -93,7 +93,7 @@ public class ShooterRollers extends SubsystemBase {
         });
 
     DogLog.tunable(
-        "shooterRoller/kV",
+        "Shooter Rollers/kV",
         ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kV,
         value -> {
           shooterRollerMotor1
@@ -102,7 +102,7 @@ public class ShooterRollers extends SubsystemBase {
         });
 
     DogLog.tunable(
-        "shooterRoller/kP",
+        "Shooter Rollers/kP",
         ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kP,
         value -> {
           shooterRollerMotor1
@@ -111,13 +111,18 @@ public class ShooterRollers extends SubsystemBase {
         });
 
     DogLog.tunable(
-        "shooterRoller/kI",
+        "Shooter Rollers/kI",
         ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kI,
         value -> {
           shooterRollerMotor1
               .getConfigurator()
               .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKI(value));
         });
+
+    DogLog.tunable(
+        "Shooter Rollers/BangBangTolerance",
+        ShooterRollersConstants.BANG_BANG_TOLERANCE.in(RotationsPerSecond),
+        value -> ShooterRollersConstants.BANG_BANG_TOLERANCE = RotationsPerSecond.of(value));
 
     shooterRollerMotor2.setControl(
         new Follower(shooterRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
