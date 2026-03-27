@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import java.util.Set;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
@@ -258,7 +257,7 @@ public class TeleopControls extends SubsystemBase {
             })
         );
 
-        operator
+    operator
         .axisMagnitudeGreaterThan(Axis.kLeftY.value, 0.1)
         .and(() -> fineControl)
         .whileTrue(
@@ -274,11 +273,6 @@ public class TeleopControls extends SubsystemBase {
                 this.robot.getShooterHood().setOffsetAngle(Degrees.zero());
             })
         );
-
-    operator
-        .axisGreaterThan(Axis.kRightY.value, 0.5)
-        .and(() -> fineControl)
-        .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
 
     // operator
     //     .axisLessThan(Axis.kRightY.value, -0.5)
