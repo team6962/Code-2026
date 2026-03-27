@@ -13,6 +13,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
@@ -175,6 +176,12 @@ public class RobotContainer {
     if (RobotState.isDisabled()) {
       DogLog.forceNt.log("Auto Routine Selected", autoChooser.getSelected() != noneAutonomous);
     }
+
+    double currentTime = DriverStation.getMatchTime();
+    if ((int)currentTime == 10) {
+      teleopControls.shiftTimerRumble().schedule();
+    }
+
   }
 
   public void latePeriodic() {

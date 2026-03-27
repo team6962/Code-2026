@@ -113,7 +113,6 @@ public class TeleopControls {
     // Auto Climb and Unclimb
     // driver.b().onTrue(autoClimb.climb());
     // driver.x().onTrue(autoClimb.unclimb());
-
     // Auto Depot
     driver.leftBumper().whileTrue(autoDepot.autoDepot());
 
@@ -378,8 +377,13 @@ public class TeleopControls {
   private Command rumble(
       CommandXboxController controller, RumbleType rumbleType, double intensity) {
     return Commands.startEnd(
-        () -> controller.setRumble(rumbleType, intensity),
-        () -> controller.setRumble(rumbleType, 0.0));
+        () -> {
+            controller.setRumble(rumbleType, intensity);
+        },
+        
+        () -> {
+            controller.setRumble(rumbleType, 0.0);
+        });
   }
 
   private Command fineControlEnableRumble() {
@@ -392,4 +396,16 @@ public class TeleopControls {
   private Command fineControlDisableRumble() {
     return Commands.sequence(rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0));
   }
+
+  public Command shiftTimerRumble() {
+    return Commands.sequence(
+        Commands.repeatingSequence(
+            rumble(driver, RumbleType.kBothRumble, 0.5).withTimeout(1.0 / 3.0),
+            Commands.waitSeconds(2.0 / 3.0)
+        ).withTimeout(10),
+        rumble(driver, RumbleType.kBothRumble, 1).withTimeout(2.0 / 3.0)
+    );
+  }
 }
+
+
