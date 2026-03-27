@@ -74,14 +74,14 @@
           "incKey": 76
         },
         {
-          "decKey": 73,
-          "incKey": 75
+          "decKey": 44,
+          "incKey": 46
         },
         {},
         {},
         {
-          "decKey": 44,
-          "incKey": 46
+          "decayRate": 0.5,
+          "keyRate": 0.5
         }
       ],
       "axisCount": 5,

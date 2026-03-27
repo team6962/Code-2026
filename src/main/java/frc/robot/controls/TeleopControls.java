@@ -227,13 +227,30 @@ public class TeleopControls {
             Commands.run(() -> {
                 this.robot.getTurret().setOffsetAngle(Degrees.of((operator.getRightX())*-2));
             })
-        ); //I don't know if the -2 multiplier is too high or too low
+        );
     
     operator.axisGreaterThan(Axis.kRightX.value, 0.1).negate()
         .and(() -> fineControl)
         .onTrue(
             Commands.run(() -> {
                 this.robot.getTurret().setOffsetAngle(Degrees.zero());
+            })
+        );
+
+        operator
+        .axisMagnitudeGreaterThan(Axis.kLeftY.value, 0.1)
+        .and(() -> fineControl)
+        .whileTrue(
+            Commands.run(() -> {
+                this.robot.getShooterHood().setOffsetAngle(Degrees.of((operator.getLeftY())*-2));
+            })
+        );
+    
+    operator.axisGreaterThan(Axis.kLeftY.value, 0.1).negate()
+        .and(() -> fineControl)
+        .onTrue(
+            Commands.run(() -> {
+                this.robot.getShooterHood().setOffsetAngle(Degrees.zero());
             })
         );
 
