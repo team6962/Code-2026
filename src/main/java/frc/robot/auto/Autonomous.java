@@ -84,6 +84,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide), trenchCheck(),
         shootFuel.shoot());
   }
 
@@ -102,11 +103,14 @@ public class Autonomous {
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
         shootFuel.shootAllFuelStationary(),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide), trenchCheck(),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.2", rightSide)
+            .followPath("left_neutral.3", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            trenchCheck(),
+            robot.getSwerveDrive().followPath("left_neutral.4", rightSide),
         shootFuel.shoot());
   }
 
