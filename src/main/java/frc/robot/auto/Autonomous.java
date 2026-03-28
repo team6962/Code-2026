@@ -121,9 +121,10 @@ public class Autonomous {
             .followPath("pass_cycle.2", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("pass_cycle.3", rightSide),
         robot
             .getSwerveDrive()
-            .followPath("pass_cycle.3", rightSide)
+            .followPath("pass_cycle.4", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getIntakeRollers().intake(),
