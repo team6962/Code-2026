@@ -206,7 +206,8 @@ public class AutoShoot extends Command {
     this.shooterFunctions = shooterFunctions;
 
     DogLog.tunable("AutoShoot/PredictionTime", predictionTime, value -> value = predictionTime);
-    DogLog.tunable("AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+    DogLog.tunable(
+        "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
 
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
@@ -445,7 +446,8 @@ public class AutoShoot extends Command {
             Meters.of(
                 optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
-    return new ShootingParameters(turretAngleTarget.plus(turretError), hoodAngleTarget, rollerSpeedTarget);
+    return new ShootingParameters(
+        turretAngleTarget.plus(turretError), hoodAngleTarget, rollerSpeedTarget);
   }
 
   @Override
