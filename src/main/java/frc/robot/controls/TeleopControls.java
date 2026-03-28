@@ -280,7 +280,7 @@ public class TeleopControls extends SubsystemBase {
                 }));
 
     // operator
-    //     .axisLessThan(Axis.kRightY.value, -0.5)
+    //     .axisLessThan(Axis.kLeftY.value, -0.5)
     //     .and(() -> fineControl)
     //     .whileTrue(
     //
