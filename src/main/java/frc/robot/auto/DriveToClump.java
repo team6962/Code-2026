@@ -56,8 +56,13 @@ public class DriveToClump {
                 return Commands.none();
               }
 
-              Translation2d error =
-                  fuelPosition.minus(robot.getSwerveDrive().getPosition2d().getTranslation());
+              // Translation2d error =
+              //     fuelPosition.minus(robot.getSwerveDrive().getPosition2d().getTranslation());
+
+              Translation2d currentPosition =
+                  robot.getSwerveDrive().getPosition2d().getTranslation();
+              Translation2d centerError = fuelPosition.minus(currentPosition);
+              double distanceToCenter = centerError.getNorm();
 
               double maxVelocity =
                   robot
@@ -75,20 +80,27 @@ public class DriveToClump {
                       .in(MetersPerSecondPerSecond);
 
               double robotRadius = 0.73; // Needs to be tuned
-              double distance = Math.max(0, error.getNorm() - robotRadius);
-              double finalSpeed = Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration * distance));
+              if (distanceToCenter <= robotRadius) {
+                return Commands.none();
+              }
+              Translation2d targetPosition =
+                  fuelPosition.minus(centerError.div(distanceToCenter).times(robotRadius));
+              Translation2d error = targetPosition.minus(currentPosition);
+              double distanceToTarget = error.getNorm();
+              double finalSpeed =
+                  Math.min(maxVelocity, Math.sqrt(2 * maxAcceleration * distanceToTarget));
 
               ChassisSpeeds finalVelocity =
                   new ChassisSpeeds(
-                      error.getX() / distance * finalSpeed,
-                      error.getY() / distance * finalSpeed,
+                      error.getX() / distanceToTarget * finalSpeed,
+                      error.getY() / distanceToTarget * finalSpeed,
                       0);
 
               return Commands.either(
                   Commands.deadline(
                       robot
                           .getSwerveDrive()
-                          .driveTo(new Pose2d(fuelPosition, error.getAngle()), finalVelocity),
+                          .driveTo(new Pose2d(targetPosition, error.getAngle()), finalVelocity),
                       robot.getIntakeRollers().intake()),
                   Commands.none(),
                   robot.getIntakeExtension()::isExtended);
