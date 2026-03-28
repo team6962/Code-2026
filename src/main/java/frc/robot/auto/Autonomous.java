@@ -114,7 +114,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getIntakeRollers().intakeFast(),
-                rightSide ? autoPassLeft : autoPassRight,
+                rightSide ? autoPassRight : autoPassLeft,
                 robot.getHopper().feed()),
         robot
             .getSwerveDrive()
