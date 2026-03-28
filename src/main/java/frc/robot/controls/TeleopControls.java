@@ -26,6 +26,8 @@ import frc.robot.RobotContainer;
 // import frc.robot.auto.AutoClimb;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
+import frc.robot.auto.AutoZoneDefense;
+import frc.robot.auto.FieldPositions;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
@@ -45,6 +47,7 @@ public class TeleopControls extends SubsystemBase {
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
+  private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
 
   private ControllerRumble driverRumble = new ControllerRumble(driver);
   private ControllerRumble operatorRumble = new ControllerRumble(operator);
@@ -67,6 +70,7 @@ public class TeleopControls extends SubsystemBase {
     this.shootFuel = new ShootFuel(robot);
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoDepot = new AutoDepot(robot);
+    this.autoZoneDefense = new AutoZoneDefense(robot);
 
     DogLog.tunable(
         "TeleopControls/hubMaxLinearVelocity",
@@ -144,14 +148,21 @@ public class TeleopControls extends SubsystemBase {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
-    // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
+    // Driver left bumper resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
     // Auto Climb and Unclimb
     // driver.b().onTrue(autoClimb.climb());
     // driver.x().onTrue(autoClimb.unclimb());
+
+    // Auto Defense
+    driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
+    driver
+        .b()
+        .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
+    driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
+    driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
 
     // Auto Depot
     driver.leftBumper().whileTrue(autoDepot.autoDepot());
@@ -200,8 +211,8 @@ public class TeleopControls extends SubsystemBase {
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
-    // Disable shooting
-    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    // Pass
+    operator.leftTrigger().whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
     operator
@@ -217,8 +228,8 @@ public class TeleopControls extends SubsystemBase {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // Shooting
-    operator.x().whileTrue(robot.getHopper().feed());
+    // stop Shooting
+    operator.x().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
     operator
@@ -322,8 +333,7 @@ public class TeleopControls extends SubsystemBase {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -346,12 +356,14 @@ public class TeleopControls extends SubsystemBase {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.leftTrigger().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
 
+    // operator
+    //     .rightTrigger()
     Trigger shootButtonsTrigger = operator.rightTrigger().or(driver.back());
 
     shootButtonsTrigger
