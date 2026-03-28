@@ -11,6 +11,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -22,6 +23,7 @@ import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -79,6 +81,10 @@ public class Turret extends SubsystemBase {
   /** The current motor configuration */
   private TalonFXConfiguration config;
 
+  private double baseMotionMagicCruiseVelocity;
+  private double baseMotionMagicAcceleration;
+  private double motionProfileConstraintScale = 1.0;
+
   /** Assigns Status Signal variables to the different methods part of the motor.get() */
   public Turret() {
     // Assigns PID values and sets motor config
@@ -103,6 +109,8 @@ public class Turret extends SubsystemBase {
     config.MotionMagic.MotionMagicCruiseVelocity = TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY;
     config.MotionMagic.MotionMagicAcceleration = TurretConstants.MOTION_MAGIC_ACCELERATION;
     config.Feedback.SensorToMechanismRatio = TurretConstants.SENSOR_TO_MECHANISM_RATIO;
+    baseMotionMagicCruiseVelocity = config.MotionMagic.MotionMagicCruiseVelocity;
+    baseMotionMagicAcceleration = config.MotionMagic.MotionMagicAcceleration;
 
     config.MotorOutput.NeutralMode = TurretConstants.MOTOR_NEUTRAL_MODE;
 
@@ -167,19 +175,17 @@ public class Turret extends SubsystemBase {
 
     DogLog.tunable(
         "Turret/Turret Cruise Velocity",
-        config.MotionMagic.MotionMagicCruiseVelocity,
-        newVel ->
-            motor
-                .getConfigurator()
-                .apply(config.MotionMagic.withMotionMagicCruiseVelocity(newVel)));
+        baseMotionMagicCruiseVelocity,
+        newVel -> {
+          baseMotionMagicCruiseVelocity = newVel;
+        });
 
     DogLog.tunable(
         "Turret/Turret Max Acceleration",
-        config.MotionMagic.MotionMagicAcceleration,
-        newAccel ->
-            motor
-                .getConfigurator()
-                .apply(config.MotionMagic.withMotionMagicAcceleration(newAccel)));
+        baseMotionMagicAcceleration,
+        newAccel -> {
+          baseMotionMagicAcceleration = newAccel;
+        });
 
     DogLog.tunable("Turret/Turret kW", TurretConstants.kW, newKW -> TurretConstants.kW = newKW);
 
@@ -247,10 +253,13 @@ public class Turret extends SubsystemBase {
         "Turret/ProfilePosition",
         Rotations.of(profilePositionSignal.getValue()).in(Radians),
         Radians);
+    DogLog.log("Turret/MotionMagicScale", motionProfileConstraintScale);
 
     // LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
 
-    if (motor.getAppliedControl() instanceof MotionMagicVoltage control) {
+    if (motor.getAppliedControl() instanceof DynamicMotionMagicVoltage dynamicControlRequest) {
+      setPositionControl(Rotations.of(dynamicControlRequest.Position));
+    } else if (motor.getAppliedControl() instanceof MotionMagicVoltage control) {
       setPositionControl(control.getPositionMeasure());
     }
   }
@@ -498,11 +507,6 @@ public class Turret extends SubsystemBase {
       Supplier<Angle> targetAngleSupplier, Supplier<AngularVelocity> targetVelocitySupplier) {
     Command command =
         new Command() {
-          private TrapezoidProfile profile =
-              new TrapezoidProfile(
-                  new TrapezoidProfile.Constraints(
-                      TurretConstants.MOTION_MAGIC_CRUISE_VELOCITY,
-                      TurretConstants.MOTION_MAGIC_ACCELERATION));
           private TrapezoidProfile.State previousProfileState;
           private double previousUpdateTimestamp;
 
@@ -529,6 +533,11 @@ public class Turret extends SubsystemBase {
                         getPosition(),
                         TurretConstants.MIN_ANGLE,
                         TurretConstants.MAX_ANGLE));
+
+            TrapezoidProfile profile =
+                new TrapezoidProfile(
+                    new TrapezoidProfile.Constraints(
+                        getScaledMotionMagicCruiseVelocity(), getScaledMotionMagicAcceleration()));
 
             TrapezoidProfile.State profileState =
                 profile.calculate(
@@ -587,15 +596,19 @@ public class Turret extends SubsystemBase {
   }
 
   /**
-   * Applies a Motion Magic position control request to move the turret to the target angle. If the
-   * turret is not yet zeroed, the motor is set to neutral mode instead.
+   * Applies a Dynamic Motion Magic position control request to move the turret to the target angle.
+   * If the turret is not yet zeroed, the motor is set to neutral mode instead.
    *
    * @param targetAngle The target angle to move the turret to
    */
   private void setPositionControl(Angle targetAngle) {
     if (isZeroed()) {
       motor.setControl(
-          new MotionMagicVoltage(targetAngle)
+          new DynamicMotionMagicVoltage(
+                  targetAngle.in(Rotations),
+                  getScaledMotionMagicCruiseVelocity(),
+                  getScaledMotionMagicAcceleration())
+              .withJerk(config.MotionMagic.MotionMagicJerk)
               .withFeedForward(
                   targetAngle.lt(TurretConstants.MIN_KW_ANGLE)
                       ? -TurretConstants.kW
@@ -632,6 +645,18 @@ public class Turret extends SubsystemBase {
               setPositionControl(getPosition());
             })
         .onlyIf(() -> isZeroed());
+  }
+
+  public void setMotionProfileConstraintScale(double scale) {
+    motionProfileConstraintScale = MathUtil.clamp(scale, 0.1, 1.0);
+  }
+
+  private double getScaledMotionMagicCruiseVelocity() {
+    return baseMotionMagicCruiseVelocity * motionProfileConstraintScale;
+  }
+
+  private double getScaledMotionMagicAcceleration() {
+    return baseMotionMagicAcceleration * motionProfileConstraintScale;
   }
 
   public void zero() {

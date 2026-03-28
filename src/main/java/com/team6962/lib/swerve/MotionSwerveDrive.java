@@ -25,6 +25,7 @@ import com.team6962.lib.swerve.util.ControlLoop;
 import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -82,6 +83,7 @@ public class MotionSwerveDrive implements AutoCloseable {
   private BaseStatusSignal[] statusSignals;
   private SwerveDriveKinematics kinematics;
   private SwerveMotionManager motionManager;
+  private volatile double velocityScale = 1.0;
 
   /**
    * Creates a new MotionSwerveDrive with the specified drivetrain configuration.
@@ -499,6 +501,24 @@ public class MotionSwerveDrive implements AutoCloseable {
    */
   public void updateMotion() {
     motionManager.update();
+  }
+
+  /**
+   * Sets runtime scale that is applied to requested drivetrain velocities.
+   *
+   * @param scale the velocity scale to apply
+   */
+  public void setVelocityScale(double scale) {
+    velocityScale = MathUtil.clamp(scale, 0.0, 1.0);
+  }
+
+  /**
+   * Gets runtime scale applied to requested drivetrain velocities.
+   *
+   * @return the velocity scale
+   */
+  public double getVelocityScale() {
+    return velocityScale;
   }
 
   /**

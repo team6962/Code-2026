@@ -153,29 +153,11 @@ public class DriveToStateCommand extends Command {
     this.swerveDrive = swerveDrive;
     this.target = target;
 
-    // Initialize translation and rotation controllers with PID constants
-    // and motion profile constraints
     if (target.translation != null) {
-      translationController =
-          new TranslationController(
-              swerveDrive.getConstants().Driving.TranslationFeedbackKP,
-              swerveDrive.getConstants().Driving.TranslationFeedbackKI,
-              swerveDrive.getConstants().Driving.TranslationFeedbackKD,
-              swerveDrive.getConstants().Driving.getTranslationConstraints(),
-              Hertz.of(50));
-
       addRequirements(swerveDrive.useTranslation());
     }
 
     if (target.angle != null) {
-      headingController =
-          new ProfiledController(
-              swerveDrive.getConstants().Driving.AngleFeedbackKP,
-              swerveDrive.getConstants().Driving.AngleFeedbackKI,
-              swerveDrive.getConstants().Driving.AngleFeedbackKD,
-              new TrapezoidalProfile(swerveDrive.getConstants().Driving.getRotationConstraints()),
-              Hertz.of(50));
-
       addRequirements(swerveDrive.useRotation());
     }
   }
@@ -184,6 +166,8 @@ public class DriveToStateCommand extends Command {
   public void initialize() {
     // Reset state
     motionProfilesFinished = false;
+
+    createControllers();
 
     // Generate initial motion profiles
     createMotionProfiles();
@@ -196,6 +180,29 @@ public class DriveToStateCommand extends Command {
     DogLog.log("Drivetrain/DriveToState/FinalVelocityX", target.translationalVelocity.x);
     DogLog.log("Drivetrain/DriveToState/FinalVelocityY", target.translationalVelocity.y);
     DogLog.log("Drivetrain/DriveToState/FinalAngularVelocity", target.angularVelocity);
+  }
+
+  /** Creates controllers for translation and rotation using the configured constraints. */
+  private void createControllers() {
+    if (target.translation != null) {
+      translationController =
+          new TranslationController(
+              swerveDrive.getConstants().Driving.TranslationFeedbackKP,
+              swerveDrive.getConstants().Driving.TranslationFeedbackKI,
+              swerveDrive.getConstants().Driving.TranslationFeedbackKD,
+              swerveDrive.getConstants().Driving.getTranslationConstraints(),
+              Hertz.of(50));
+    }
+
+    if (target.angle != null) {
+      headingController =
+          new ProfiledController(
+              swerveDrive.getConstants().Driving.AngleFeedbackKP,
+              swerveDrive.getConstants().Driving.AngleFeedbackKI,
+              swerveDrive.getConstants().Driving.AngleFeedbackKD,
+              new TrapezoidalProfile(swerveDrive.getConstants().Driving.getRotationConstraints()),
+              Hertz.of(50));
+    }
   }
 
   /** Creates motion profiles for translation and rotation controllers. */
