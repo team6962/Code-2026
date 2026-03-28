@@ -30,41 +30,30 @@ public class Autonomous {
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
+
   public Command trenchCheck() {
     double y;
     double x;
-    if ((robot.getSwerveDrive().getPosition2d().getY() 
-    < Inches.of(14.97).in(Meters) 
-    || (robot.getSwerveDrive().getPosition2d().getY() 
-    > Inches.of(34.97).in(Meters)
-    && robot.getSwerveDrive().getPosition2d().getY() 
-    < Inches.of(158.84).in(Meters)))
-    ||
-    (robot.getSwerveDrive().getPosition2d().getY() 
-    > Inches.of(302.31).in(Meters) 
-    || (robot.getSwerveDrive().getPosition2d().getY() 
-    < Inches.of(282.31).in(Meters)
-    && robot.getSwerveDrive().getPosition2d().getY() 
-    > Inches.of(158.84).in(Meters)))
-    ) {
+    if ((robot.getSwerveDrive().getPosition2d().getY() < Inches.of(14.97).in(Meters)
+            || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(34.97).in(Meters)
+                && robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)))
+        || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(302.31).in(Meters)
+            || (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(282.31).in(Meters)
+                && robot.getSwerveDrive().getPosition2d().getY() > Inches.of(158.84).in(Meters)))) {
       if (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)) {
         y = Inches.of(24.97).in(Meters);
-      }
-      else {
+      } else {
         y = Inches.of(292.31).in(Meters);
       }
       if (robot.getSwerveDrive().getPosition2d().getX() < Inches.of(182.11).in(Meters)) {
         x = Inches.of(225.61).in(Meters);
-      }
-      else {
+      } else {
         x = Inches.of(138.61).in(Meters);
       }
-      return robot.getSwerveDrive().driveTo(new Pose2d(x,y,new Rotation2d().kZero)); 
-    }
-    else {
+      return robot.getSwerveDrive().driveTo(new Pose2d(x, y, new Rotation2d().kZero));
+    } else {
       return Commands.none();
     }
-    
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -84,7 +73,8 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide), trenchCheck(),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        trenchCheck(),
         shootFuel.shoot());
   }
 
@@ -103,14 +93,15 @@ public class Autonomous {
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
         shootFuel.shootAllFuelStationary(),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide), trenchCheck(),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        trenchCheck(),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.3", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            trenchCheck(),
-            robot.getSwerveDrive().followPath("left_neutral.4", rightSide),
+        trenchCheck(),
+        robot.getSwerveDrive().followPath("left_neutral.4", rightSide),
         shootFuel.shoot());
   }
 
