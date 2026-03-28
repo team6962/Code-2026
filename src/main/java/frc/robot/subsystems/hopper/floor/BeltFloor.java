@@ -77,7 +77,7 @@ public class BeltFloor extends SubsystemBase implements HopperFloor {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  public Command feedDump(Voltage targetVoltage) {
+  private Command feedDump(Voltage targetVoltage) {
 
     return startEnd(
         () -> {

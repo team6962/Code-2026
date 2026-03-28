@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.floor.BeltFloor;
+import frc.robot.subsystems.hopper.floor.HopperFloor;
 import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.hopper.sensors.HopperSensors;
 
@@ -13,7 +14,7 @@ import frc.robot.subsystems.hopper.sensors.HopperSensors;
  * their respective subsystem file
  */
 public class Hopper extends SubsystemBase {
-  private final BeltFloor beltFloor;
+  private final HopperFloor beltFloor;
   private final Kicker kicker;
   private final HopperSensors sensors;
 
@@ -83,8 +84,8 @@ public class Hopper extends SubsystemBase {
     return sensors.isHopperEmpty() && sensors.isKickerEmpty();
   }
 
-  /** Getters for the belt floor(check BeltFloor.java) for more information. */
-  public BeltFloor getBeltFloor() {
+  /** Getters for the belt floor(check HopperFloor.java) for more information. */
+  public HopperFloor getBeltFloor() {
     return beltFloor;
   }
 
