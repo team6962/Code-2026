@@ -154,7 +154,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.859))) // Measured on 971 practice field
+                .withWheelRadius(Inches.of(1.94))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -270,8 +270,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(-7.882).in(Meters),
                         Inches.of(20.601426).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(-18.224755).in(Radians),
-                        Degrees.of(-26.25).in(Radians),
+                        Degrees.of(-18.551436).in(Radians),
+                        Degrees.of(-18.909798).in(Radians),
                         Degrees.of(47).in(Radians)))),
             new AprilTagCameraConstants(
                 "Monochrome-4",
@@ -281,8 +281,8 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(-12.118).in(Meters),
                         Inches.of(20.601426).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(18.224755).in(Radians),
-                        Degrees.of(-26.25).in(Radians),
+                        Degrees.of(18.551436).in(Radians),
+                        Degrees.of(-18.909798).in(Radians),
                         -Degrees.of(47).in(Radians)))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
