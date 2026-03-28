@@ -1,17 +1,22 @@
 package com.team6962.lib.swerve.commands;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Joystick;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Trigger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
@@ -53,6 +58,10 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * rotation speed of the robot.
    */
   private AngularVelocity dynamicAngularVelocityLimit = null;
+
+  private SlewRateLimiter xSlewRateLimiter;
+  private SlewRateLimiter ySlewRateLimiter;
+  private SlewRateLimiter angularSlewRateLimiter;
 
   /**
    * Constructs an XBoxTeleopSwerveCommand with the specified swerve drive and configuration
@@ -97,6 +106,14 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     this.dynamicAngularVelocityLimit = maxAngularVelocity;
   }
 
+  public void addDynamicAccelerationLimits(
+      LinearAcceleration linearAccelerationLimit, AngularAcceleration angularAccelerationLimit) {
+    xSlewRateLimiter = new SlewRateLimiter(linearAccelerationLimit.in(MetersPerSecondPerSecond));
+    ySlewRateLimiter = new SlewRateLimiter(linearAccelerationLimit.in(MetersPerSecondPerSecond));
+    angularSlewRateLimiter =
+        new SlewRateLimiter(angularAccelerationLimit.in(RadiansPerSecondPerSecond));
+  }
+
   /**
    * Removes any dynamic velocity limits that were previously set, allowing the robot to return to
    * its normal maximum speeds as defined in the configuration constants. This can be used to
@@ -105,6 +122,12 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   public void removeDynamicVelocityLimits() {
     this.dynamicLinearVelocityLimit = null;
     this.dynamicAngularVelocityLimit = null;
+  }
+
+  public void removeDynamicAccelerationLimits() {
+    xSlewRateLimiter = null;
+    ySlewRateLimiter = null;
+    angularSlewRateLimiter = null;
   }
 
   /**
@@ -123,6 +146,13 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     return Commands.startEnd(
         () -> addDynamicVelocityLimits(maxLinearVelocity, maxAngularVelocity),
         this::removeDynamicVelocityLimits);
+  }
+
+  public Command limitAcceleration(
+      LinearAcceleration linearAccelerationLimit, AngularAcceleration angularAccelerationLimit) {
+    return Commands.startEnd(
+        () -> addDynamicAccelerationLimits(linearAccelerationLimit, angularAccelerationLimit),
+        this::removeDynamicAccelerationLimits);
   }
 
   /**
@@ -174,6 +204,14 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
               targetVelocity.vxMetersPerSecond,
               targetVelocity.vyMetersPerSecond,
               targetVelocity.omegaRadiansPerSecond * scale);
+    }
+
+    if (xSlewRateLimiter != null) {
+      targetVelocity =
+          new ChassisSpeeds(
+              xSlewRateLimiter.calculate(targetVelocity.vxMetersPerSecond),
+              ySlewRateLimiter.calculate(targetVelocity.vyMetersPerSecond),
+              angularSlewRateLimiter.calculate(targetVelocity.omegaRadiansPerSecond));
     }
 
     return targetVelocity;
@@ -240,8 +278,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The translation speed scalar (0.0 to 1.0)
    */
   private double getNonFineControlTranslationScalar() {
-    return MathUtil.interpolate(
-        constants.DefaultTranslationalSpeed, constants.BoostTranslationalSpeed, getBoost());
+    return constants.DefaultTranslationalSpeed;
   }
 
   /**
@@ -252,10 +289,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    */
   private double getNonFineControlAngularScalar() {
     return MathUtil.interpolate(
-        MathUtil.interpolate(
-            constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost()),
-        Math.signum(constants.DefaultAngularSpeed),
-        getAngularSuperBoost());
+        constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost());
   }
 
   /**

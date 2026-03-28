@@ -23,15 +23,15 @@ public final class ShooterRollersConstants {
   public static final String CANBUS_NAME = "subsystems";
   public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(0.003072714);
   public static final AngularVelocity FIXED_FLYWHEEL_VELOCITY = RotationsPerSecond.of(24.25);
-  public static final AngularVelocity BANG_BANG_TOLERANCE = RotationsPerSecond.of(4);
+  public static AngularVelocity BANG_BANG_TOLERANCE = RotationsPerSecond.of(6);
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withFeedback(new FeedbackConfigs())
           .withSlot0(
               new Slot0Configs()
                   .withKV(0.12)
-                  .withKS(0.18058)
-                  .withKP(0.1)) // 2.890 - 22.781, 3.22 - 25.126
+                  .withKS(0.198)
+                  .withKP(0.3)) // 2.890 - 22.781, 3.22 - 25.126
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)

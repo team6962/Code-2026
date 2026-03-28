@@ -127,7 +127,7 @@ public class Turret extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS1Closed();
+    hallSensorTriggeredSignal = candi.getS2Closed();
     profilePositionSignal = motor.getClosedLoopReference();
 
     // Tunable angle input, PID values, Motion Magic constraints

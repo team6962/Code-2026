@@ -58,6 +58,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     LoggingUtil.logGitProperties();
+    RobotController.setBrownoutVoltage(4.6);
 
     CurrentDrawLogger.start();
 
@@ -126,6 +127,8 @@ public class RobotContainer {
     autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
     autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
     autoChooser.addOption("Preload", autonomous.preload());
+
+    autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
 
     autoChooser.addOption(
         "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
