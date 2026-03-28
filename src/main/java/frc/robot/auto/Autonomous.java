@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
@@ -34,8 +35,8 @@ public class Autonomous {
   public Command trenchCheck() {
     double y;
     double x;
-    if ((robot.getSwerveDrive().getPosition2d().getY() < Inches.of(14.97).in(Meters)
-            || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(34.97).in(Meters)
+    if ((robot.getSwerveDrive().getPosition2d().getY() < Inches.of(15.97).in(Meters)
+            || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(35.97).in(Meters)
                 && robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)))
         || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(302.31).in(Meters)
             || (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(282.31).in(Meters)
@@ -72,8 +73,11 @@ public class Autonomous {
             .followPath("left_neutral.0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+                Commands.print("netural0"),
+        robot.getSwerveDrive().followPath("left_neutral.1", rightSide), trenchCheck(),
+        Commands.print("netural1"),
         robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        Commands.print("netural2"),
         trenchCheck(),
         shootFuel.shoot());
   }
@@ -101,7 +105,6 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         trenchCheck(),
-        robot.getSwerveDrive().followPath("left_neutral.4", rightSide),
         shootFuel.shoot());
   }
 

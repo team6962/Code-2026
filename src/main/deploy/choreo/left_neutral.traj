@@ -8,14 +8,14 @@
     {"x":7.754868984222412, "y":7.0899858474731445, "heading":0.0, "intervals":25, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
     {"x":8.467582702636719, "y":6.555449962615967, "heading":-1.8692959527408952, "intervals":33, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.866230487823486, "y":4.595486640930176, "heading":-1.8692959527408952, "intervals":53, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":6.273321628570557, "y":7.426932334899902, "heading":0.0, "intervals":28, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":6.273321628570557, "y":7.426932334899902, "heading":0.0, "intervals":28, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":3.408, "y":7.5, "heading":0.0, "intervals":25, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":5.721074104309082, "y":7.4253153800964355, "heading":0.0, "intervals":33, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.213088512420654, "y":6.7752580642700195, "heading":-1.4108840551324806, "intervals":45, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.126909255981445, "y":4.039065361022949, "heading":-1.9018922488625816, "intervals":33, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":6.308206081390381, "y":3.457355260848999, "heading":1.594600939174493, "intervals":82, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":6.103530406951904, "y":7.012250900268555, "heading":2.5661680713290727, "intervals":21, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":5.575682163238525, "y":7.432374954223633, "heading":3.141592653589793, "intervals":24, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":5.575682163238525, "y":7.432374954223633, "heading":3.141592653589793, "intervals":24, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":3.4104273319244385, "y":7.453919887542725, "heading":3.141592653589793, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
@@ -554,7 +554,7 @@
     {"t":12.97603, "x":3.43039, "y":7.45458, "heading":-3.13879, "vx":-0.50105, "vy":-0.01648, "omega":-0.04667, "ax":6.28846, "ay":0.20711, "alpha":0.57567, "fx":[89.24358,89.05199,89.01766,89.23657], "fy":[-0.16503,5.8498,6.25301,-0.19509]},
     {"t":13.01587, "x":3.41542, "y":7.45408, "heading":-3.14065, "vx":-0.25053, "vy":-0.00823, "omega":-0.02374, "ax":6.28872, "ay":0.20656, "alpha":0.59582, "fx":[89.25042,89.05355,89.01675,89.24366], "fy":[-0.28287,5.93442,6.37083,-0.3104]},
     {"t":13.05571, "x":3.41043, "y":7.45392, "heading":3.14159, "vx":0.0, "vy":0.0, "omega":0.0, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
-  "splits":[0,110,191]
+  "splits":[0,110,163,191,430]
  },
  "events":[]
 }
