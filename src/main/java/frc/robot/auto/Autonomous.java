@@ -71,6 +71,70 @@ public class Autonomous {
         shootFuel.shoot());
   }
 
+  private Command depotOutpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.0", rightSide),
+        shootFuel.shoot(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.1", rightSide),
+        robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        shootFuel.shoot(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.3", rightSide),
+        shootFuel.shoot());
+  }
+
+  private Command depotCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.0", rightSide),
+        shootFuel.shoot(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.1", rightSide),
+        robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        shootFuel.shoot());
+  }
+
+    private Command outpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.3", rightSide),
+        shootFuel.shoot());
+  }
+
   public Command leftSingleNeutralCycle() {
     return singleNeutralCycle(false);
   }
@@ -85,6 +149,30 @@ public class Autonomous {
 
   public Command rightDoubleNeutralCycle() {
     return doubleNeutralCycle(true);
+  }
+
+  public Command leftDepotOutpostCycle() {
+    return depotOutpostCycle(false);
+  }
+
+  public Command rightDepotOutpostCycle() {
+    return depotOutpostCycle(true);
+  }
+
+    public Command leftDepotCycle() {
+    return depotCycle(false);
+  }
+
+  public Command rightDepotCycle() {
+    return depotCycle(true);
+  }
+
+    public Command leftOutpostCycle() {
+    return outpostCycle(false);
+  }
+
+  public Command rightOutpostCycle() {
+    return outpostCycle(true);
   }
 
   public Command preload() {
