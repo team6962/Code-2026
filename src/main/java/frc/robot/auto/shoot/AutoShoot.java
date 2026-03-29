@@ -448,7 +448,9 @@ public class AutoShoot extends Command {
                 optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
     return new ShootingParameters(
-        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))), hoodAngleTarget, rollerSpeedTarget);
+        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))),
+        hoodAngleTarget,
+        rollerSpeedTarget);
   }
 
   @Override
