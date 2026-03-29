@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
@@ -54,7 +55,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
         0.0,
         newVoltageDouble -> {
           Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
-          feedDump(target).schedule();
+          CommandScheduler.getInstance().schedule(feedDump(target));
         });
     if (RobotBase.isSimulation()) {
       simulation = new RollerFloorSim(rollerFloorMotor);
@@ -84,6 +85,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    *
    * @return A command that runs the roller floor motor to feed fuel.
    */
+  @Override
   public Command feed() {
     return feedDump(Volts.of(8.0));
   }
@@ -93,6 +95,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    *
    * @return A command that runs the roller floor motor to move fuel away from the queue.
    */
+  @Override
   public Command reverse() {
     return feedDump(Volts.of(-6.0));
   }
@@ -103,6 +106,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    * @return A command that runs the roller floor motor at a low voltage to move fuel away from the
    *     queue.
    */
+  @Override
   public Command slowReverse() {
     return feedDump(Volts.of(-1.0));
   }
@@ -112,6 +116,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    *
    * @return A command that runs the roller floor motor to dump fuel.
    */
+  @Override
   public Command dump() {
     return feedDump(Volts.of(-8.0));
   }
