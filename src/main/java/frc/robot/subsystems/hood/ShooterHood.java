@@ -329,9 +329,13 @@ public class ShooterHood extends SubsystemBase {
   }
 
   public void setOffsetAngle(Angle newOffset) {
-    System.out.println("manual offset set to " + newOffset);
     manualOffset = newOffset;
   }
+ /**
+  * Manual correction to shooter hood if auto shoot is consistently off
+  * @param targetAngle
+  * @return
+  */
 
   /**
    * Returns a command that moves the hood to the given target angle.
@@ -476,7 +480,7 @@ public class ShooterHood extends SubsystemBase {
 
           @Override
           public void execute() {
-            Angle unclampedTargetPosition = targetAngleSupplier.get();
+            Angle unclampedTargetPosition = targetAngleSupplier.get().plus(manualOffset);
             AngularVelocity targetVelocity = targetVelocitySupplier.get();
 
             if (unclampedTargetPosition == null) return;

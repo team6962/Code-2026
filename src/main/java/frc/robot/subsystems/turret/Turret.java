@@ -435,7 +435,6 @@ public class Turret extends SubsystemBase {
    * accuracy.
    */
   public void setOffsetAngle(Angle newOffset) {
-    System.out.println("manual offset set to " + newOffset);
     manualOffset = newOffset;
   }
 
