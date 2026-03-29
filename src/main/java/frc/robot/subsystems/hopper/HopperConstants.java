@@ -48,7 +48,7 @@ public class HopperConstants {
                   .withSupplyCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(30));
 
-  // belt floor
+  // roller floor
   public static final int ROLLER_FLOOR_MOTOR_CAN_ID = 30; // dummy
   public static final DCMotor ROLLER_FLOOR_MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1); // dummy
   public static final double ROLLER_FLOOR_GEARING = 2.5; // dummy
