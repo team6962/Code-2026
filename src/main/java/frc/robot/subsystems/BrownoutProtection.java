@@ -3,8 +3,8 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+
+import java.util.function.BooleanSupplier;
 
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.swerve.CommandSwerveDrive;
@@ -18,7 +18,6 @@ import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.beltfloor.BeltFloor;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
-import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
 
 /**
@@ -30,12 +29,11 @@ import frc.robot.subsystems.turret.Turret;
  */
 public class BrownoutProtection extends SubsystemBase {
   private static final int ELECTRICAL_SAMPLE_WINDOW = 8;
-  private static final double ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS = 1.0;
-  private static final double ACTIVE_SHOOTER_SPEED_THRESHOLD_RPS = 5.0;
 
   private final CommandSwerveDrive swerveDrive;
   private final XBoxTeleopSwerveCommand teleopSwerveCommand;
-  private final ShooterRollers shooterRollers;
+  private final BooleanSupplier shootingActive;
+  private final BooleanSupplier intakingActive;
   private final Turret turret;
   private final ShooterHood shooterHood;
   private final IntakeExtension intakeExtension;
@@ -65,7 +63,8 @@ public class BrownoutProtection extends SubsystemBase {
   public BrownoutProtection(
       CommandSwerveDrive swerveDrive,
       XBoxTeleopSwerveCommand teleopSwerveCommand,
-      ShooterRollers shooterRollers,
+      BooleanSupplier shootingActive,
+      BooleanSupplier intakingActive,
       Turret turret,
       ShooterHood shooterHood,
       IntakeExtension intakeExtension,
@@ -73,7 +72,8 @@ public class BrownoutProtection extends SubsystemBase {
       IntakeRollers intakeRollers) {
     this.swerveDrive = swerveDrive;
     this.teleopSwerveCommand = teleopSwerveCommand;
-    this.shooterRollers = shooterRollers;
+    this.shootingActive = shootingActive;
+    this.intakingActive = intakingActive;
     this.turret = turret;
     this.shooterHood = shooterHood;
     this.intakeExtension = intakeExtension;
@@ -202,24 +202,9 @@ public class BrownoutProtection extends SubsystemBase {
   }
 
   private PriorityMode determinePriorityMode() {
-    boolean shooterActive =
-        shooterRollers.getCurrentCommand() != null
-            || Math.abs(shooterRollers.getMotorVoltage().in(Volts))
-                > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS
-            || Math.abs(shooterRollers.getAngularVelocity().in(RotationsPerSecond))
-                > ACTIVE_SHOOTER_SPEED_THRESHOLD_RPS;
-
-    if (shooterActive) {
-      return PriorityMode.SHOOTING;
-    }
-
-    boolean intakeActive =
-        intakeExtension.getCurrentCommand() != null
-            || intakeRollers.getAppliedVoltage().in(Volts)
-                > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS
-            || beltFloor.getMotorVoltage().in(Volts) > ACTIVE_MECHANISM_VOLTAGE_THRESHOLD_VOLTS;
-
-    return intakeActive ? PriorityMode.INTAKING : PriorityMode.DRIVING;
+    if (shootingActive.getAsBoolean()) return PriorityMode.SHOOTING;
+    if (intakingActive.getAsBoolean()) return PriorityMode.INTAKING;
+    return PriorityMode.DRIVING;
   }
 
   private void recordElectricalSample(double batteryVoltageVolts, double totalCurrentAmps) {

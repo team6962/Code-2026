@@ -88,15 +88,16 @@ public class RobotContainer {
     teleopControls.configureBindings();
 
     brownoutProtection =
-        new BrownoutProtection(
-            swerveDrive,
-            teleopControls.getTeleopSwerveCommand(),
-            shooterRollers,
-            turret,
-            shooterHood,
-            intakeExtension,
-            hopper.getBeltFloor(),
-            intakeRollers);
+      new BrownoutProtection(
+          swerveDrive,
+          teleopControls.getTeleopSwerveCommand(),
+          teleopControls.getShootingActiveTrigger(),
+          teleopControls.getIntakingActiveTrigger(),
+          turret,
+          shooterHood,
+          intakeExtension,
+          hopper.getBeltFloor(),
+          intakeRollers);
 
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);

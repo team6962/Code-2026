@@ -48,6 +48,9 @@ public class TeleopControls {
   private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
+  private Trigger shootingActiveTrigger;
+  private Trigger intakingActiveTrigger;
+
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
@@ -248,11 +251,11 @@ public class TeleopControls {
 
     // Intake extension and retraction - WORKS
     Trigger intakeRetract = operator.rightStick();
-    Trigger intakeExtend =
+    intakingActiveTrigger =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
     intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
-    intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
+    intakingActiveTrigger.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
 
     // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
     // fully tested
@@ -295,39 +298,12 @@ public class TeleopControls {
                 robot.getSwerveDrive().getPosition2d().getX()
                     < TrenchDriving.OBSTACLES_CENTER_X.in(Meters));
 
-    Trigger autoshootTrigger =
-        new Trigger(RobotState::isTeleop)
-            .and(RobotState::isEnabled)
-            .and(inAllianceZone)
-            .and(operator.a().negate())
-            .and(operator.y().negate())
-            .and(() -> !fineControl);
-
-    autoshootTrigger.whileTrue(autoShoot);
-
-    AutoShoot autoPass =
-        new AutoShoot(
-            robot.getSwerveDrive(),
-            robot.getTurret(),
-            robot.getShooterHood(),
-            robot.getShooterRollers(),
-            robot.getPassFunctions(),
-            () ->
-                robot.getSwerveDrive().getPosition2d().getY() > AutoShoot.HUB_TRANSLATION.getY()
-                    ? AutoShoot.PASS_RIGHT_TRANSLATION
-                    : AutoShoot.PASS_LEFT_TRANSLATION,
-            () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
-            () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
-
-    Trigger autoPassTrigger =
-        new Trigger(RobotState::isTeleop)
-            .and(RobotState::isEnabled)
-            .and(inAllianceZone.negate())
-            .and(operator.a().negate())
-            .and(operator.y().negate())
-            .and(() -> !fineControl);
-
-    autoPassTrigger.whileTrue(autoPass);
+    shootingActiveTrigger =
+    new Trigger(RobotState::isTeleop)
+        .and(RobotState::isEnabled)
+        .and(operator.a().negate())
+        .and(operator.y().negate())
+        .and(() -> !fineControl);
 
     Trigger shootButtonsTrigger = operator.rightTrigger().or(driver.back());
 
@@ -344,7 +320,7 @@ public class TeleopControls {
         .whileTrue(
             teleopSwerveCommand.limitVelocity(
                 MetersPerSecond.of(1.5), RotationsPerSecond.of(0.5))) // Temporary values
-        .and(autoPass.isReadyToShoot())
+        .and(autoShoot.isReadyToShoot())
         .whileTrue(robot.getHopper().feed());
 
     // ShooterFunctions functions = robot.getHubFunctions();
@@ -396,5 +372,13 @@ public class TeleopControls {
   
   public XBoxTeleopSwerveCommand getTeleopSwerveCommand() {
    return teleopSwerveCommand;
+  }
+
+  public Trigger getShootingActiveTrigger() {
+   return shootingActiveTrigger;
+  }
+
+  public Trigger getIntakingActiveTrigger() {
+   return intakingActiveTrigger;
   }
 }
