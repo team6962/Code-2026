@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hopper.beltfloor;
+package frc.robot.subsystems.hopper.floor;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -12,21 +12,21 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.hopper.HopperConstants;
 
-/** class for simulator for the belt floor */
-public class BeltFloorSim {
+/** class for simulator for the roller floor */
+public class RollerFloorSim {
   private TalonFXSimState motorSim;
   private DCMotorSim physicsSim;
 
-  /** simulator for the belt floor */
-  public BeltFloorSim(TalonFX motor) {
+  /** simulator for the roller floor */
+  public RollerFloorSim(TalonFX motor) {
     motorSim = motor.getSimState();
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                HopperConstants.BELT_FLOOR_MOTOR_PHYSICS,
-                HopperConstants.BELT_FLOOR_MOMENT_OF_INERTIA.in(KilogramSquareMeters),
-                HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio),
-            HopperConstants.BELT_FLOOR_MOTOR_PHYSICS);
+                HopperConstants.ROLLER_FLOOR_MOTOR_PHYSICS,
+                HopperConstants.ROLLER_FLOOR_MOMENT_OF_INERTIA.in(KilogramSquareMeters),
+                HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio),
+            HopperConstants.ROLLER_FLOOR_MOTOR_PHYSICS);
   }
 
   /** updates the simulation */
@@ -39,10 +39,10 @@ public class BeltFloorSim {
     physicsSim.update(0.02);
     motorSim.setRawRotorPosition(
         invert(position, false)
-            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
+            .times(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
     motorSim.setRotorVelocity(
         invert(velocity, false)
-            .times(HopperConstants.BELT_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
+            .times(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.Feedback.SensorToMechanismRatio));
   }
 
   private static Angle invert(Angle angle, boolean shouldBeInverted) {

@@ -190,7 +190,9 @@ public class DriveToStateCommand extends Command {
 
     DogLog.log(
         "Drivetrain/DriveToState/FinalTarget",
-        new Pose2d(target.translation, new Rotation2d(target.angle)));
+        new Pose2d(
+            target.translation,
+            new Rotation2d(target.angle != null ? target.angle : Radians.of(0))));
     DogLog.log("Drivetrain/DriveToState/FinalVelocityX", target.translationalVelocity.x);
     DogLog.log("Drivetrain/DriveToState/FinalVelocityY", target.translationalVelocity.y);
     DogLog.log("Drivetrain/DriveToState/FinalAngularVelocity", target.angularVelocity);
