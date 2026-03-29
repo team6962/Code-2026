@@ -302,24 +302,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
-    return super.getSphereCameraConstants()
-        .withName("Color-3")
-        .withClassId(0)
-        .withFOVHeight(Rotation2d.fromDegrees(47.23))
-        .withFOVWidth(Rotation2d.fromDegrees(60.48))
-        .withCameraHeightPixels(600)
-        .withCameraWidthPixels(800)
-        .withFocalLengthX(686.17)
-        .withFocalLengthY(686.21)
-        .withMaxDetectionRange(
-            Inches.of(426.708074544)) // Farthest distance the camera can detect a target
-        .withSphereDiameter(Inches.of(5.91))
-        .withMaxTargets(50) // Temporary value until we tune object detection
-        .withRobotToCameraTransform(
-            new Transform3d(
-                new Translation3d(
-                    Inches.of(12.6644).in(Meters), 0, 0), // Placeholder for real camera transform
-                new Rotation3d(0, Degrees.of(25.2).in(Radians), 0)));
+    return super.getSphereCameraConstants();
   }
 
   @Override
