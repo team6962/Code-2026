@@ -95,6 +95,12 @@ public class AutoShoot extends Command {
   /** The last time that periodic() was executed. */
   private double previousPeriodicTimestamp = -1.0;
 
+  /** The prediction time used for calculating future positions of the robot. */
+  private double predictionTime = 0.09;
+
+  /** The error between the turret's position and the release angle. */
+  private Angle turretError = Degrees.of(2);
+
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
    * shoot at the hub.
@@ -198,6 +204,10 @@ public class AutoShoot extends Command {
     this.rollers = rollers;
     this.targetSupplier = targetSupplier;
     this.shooterFunctions = shooterFunctions;
+
+    DogLog.tunable("AutoShoot/PredictionTime", predictionTime, value -> value = predictionTime);
+    DogLog.tunable(
+        "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
 
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
@@ -436,7 +446,8 @@ public class AutoShoot extends Command {
             Meters.of(
                 optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
-    return new ShootingParameters(turretAngleTarget, hoodAngleTarget, rollerSpeedTarget);
+    return new ShootingParameters(
+        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))), hoodAngleTarget, rollerSpeedTarget);
   }
 
   @Override
@@ -448,7 +459,7 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetY", target.getY());
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.09));
+    ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
     appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
