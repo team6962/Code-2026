@@ -5,10 +5,10 @@ import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import java.util.function.Supplier;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -32,29 +32,36 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
-  public Command trenchCheck() {
-    double y;
-    double x;
-    if ((robot.getSwerveDrive().getPosition2d().getY() < Inches.of(15.97).in(Meters)
-            || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(35.97).in(Meters)
-                && robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)))
-        || (robot.getSwerveDrive().getPosition2d().getY() > Inches.of(302.31).in(Meters)
-            || (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(282.31).in(Meters)
-                && robot.getSwerveDrive().getPosition2d().getY() > Inches.of(158.84).in(Meters)))) {
-      if (robot.getSwerveDrive().getPosition2d().getY() < Inches.of(158.84).in(Meters)) {
-        y = Inches.of(24.97).in(Meters);
-      } else {
-        y = Inches.of(292.31).in(Meters);
-      }
-      if (robot.getSwerveDrive().getPosition2d().getX() < Inches.of(182.11).in(Meters)) {
-        x = Inches.of(225.61).in(Meters);
-      } else {
-        x = Inches.of(138.61).in(Meters);
-      }
-      return robot.getSwerveDrive().driveTo(new Pose2d(x, y, new Rotation2d().kZero));
-    } else {
-      return Commands.none();
-    }
+  public Command trenchCheck(
+      Pose2d targetPose,
+      Supplier<Command> needsTrenchCheck,
+      Supplier<Command> doesntNeedTrenchCheck) {
+    return Commands.defer(
+        () -> {
+          double robotY = robot.getSwerveDrive().getPosition2d().getY();
+          double robotX = robot.getSwerveDrive().getPosition2d().getX();
+          Rotation2d robotRotation = robot.getSwerveDrive().getPosition2d().getRotation();
+          double y;
+          double x;
+          if ((robotY < Inches.of(15.97).in(Meters)
+                  || (robotY > Inches.of(35.97).in(Meters)
+                      && robotY < Inches.of(158.84).in(Meters)))
+              || (robotY > Inches.of(302.31).in(Meters)
+                  || (robotY < Inches.of(282.31).in(Meters)
+                      && robotY > Inches.of(158.84).in(Meters)))
+              || (Math.abs(robotRotation.getDegrees() - targetPose.getRotation().getDegrees())
+                  > 15)) {
+            if (robotY < Inches.of(158.84).in(Meters)) {
+              y = Inches.of(24.97).in(Meters);
+            } else {
+              y = Inches.of(292.31).in(Meters);
+            }
+            return robot.getSwerveDrive().driveTo(targetPose).andThen(needsTrenchCheck.get());
+          } else {
+            return doesntNeedTrenchCheck.get();
+          }
+        },
+        robot.getSwerveDrive().useMotionSet());
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -73,12 +80,12 @@ public class Autonomous {
             .followPath("left_neutral.0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-                Commands.print("netural0"),
-        robot.getSwerveDrive().followPath("left_neutral.1", rightSide), trenchCheck(),
-        Commands.print("netural1"),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
-        Commands.print("netural2"),
-        trenchCheck(),
+        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        trenchCheck(
+            mirrorPose(
+                new Pose2d(6.273321628570557, 7.426932334899902, Rotation2d.kZero), rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.2", rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral.2", rightSide)),
         shootFuel.shoot());
   }
 
@@ -96,15 +103,23 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        trenchCheck(
+            mirrorPose(
+                new Pose2d(6.273321628570557, 7.426932334899902, Rotation2d.kZero), rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.2", rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral.2", rightSide)),
         shootFuel.shootAllFuelStationary(),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
-        trenchCheck(),
-        robot
-            .getSwerveDrive()
-            .followPath("left_neutral.3", rightSide)
+        trenchCheck(
+                mirrorPose(new Pose2d(3.408, 7.5, Rotation2d.kZero), rightSide),
+                () -> robot.getSwerveDrive().followPath("left_neutral_stopping.3", rightSide),
+                () -> robot.getSwerveDrive().followPath("left_neutral.3", rightSide))
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        trenchCheck(),
+        trenchCheck(
+            mirrorPose(
+                new Pose2d(5.575682163238525, 7.432374954223633, Rotation2d.k180deg), rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.4", rightSide),
+            () -> robot.getSwerveDrive().followPath("left_neutral.4", rightSide)),
         shootFuel.shoot());
   }
 
