@@ -17,7 +17,6 @@ public class Autonomous {
   public final AutoOutpost autoOutpost;
   public final AutoEdgeIntake autoEdgeIntake;
   public final CollectFuelFromHub collectFuelFromHub;
-  public final AutoShoot autoShoot;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -28,7 +27,6 @@ public class Autonomous {
     this.autoOutpost = new AutoOutpost(robot, shootFuel);
     this.autoEdgeIntake = new AutoEdgeIntake(robot);
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
-    this.autoShoot = new AutoShoot(robot);
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -76,6 +74,7 @@ public class Autonomous {
 
   // Auto starting at the Mid-Hub position, moving backwards and then shooting.
   public Command moveBackwardAndShoot() {
+    AutoShoot autoShoot = new AutoShoot(robot);
     return Commands.sequence(
         robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT),
         Commands.parallel(
