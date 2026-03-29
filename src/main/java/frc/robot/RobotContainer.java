@@ -76,15 +76,6 @@ public class RobotContainer {
     turret = new Turret();
     intakeExtension = new IntakeExtension();
     hopper = new Hopper();
-    brownoutProtection =
-        new BrownoutProtection(
-            swerveDrive,
-            shooterRollers,
-            turret,
-            shooterHood,
-            intakeExtension,
-            hopper.getBeltFloor(),
-            intakeRollers);
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
     fuelClumpLocalization =
@@ -95,6 +86,17 @@ public class RobotContainer {
     passFunctions = new ShooterFunctions("shooter_pass_data.csv");
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
+
+    brownoutProtection =
+        new BrownoutProtection(
+            swerveDrive,
+            teleopControls.getTeleopSwerveCommand(),
+            shooterRollers,
+            turret,
+            shooterHood,
+            intakeExtension,
+            hopper.getBeltFloor(),
+            intakeRollers);
 
     driveStraightAuto = new DriveStraightAuto(this);
     autonomous = new Autonomous(this);

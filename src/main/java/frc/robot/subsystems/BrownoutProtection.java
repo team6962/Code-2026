@@ -1,11 +1,14 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotController;
@@ -21,6 +24,9 @@ import frc.robot.subsystems.turret.Turret;
 /**
  * Dynamically slows subsystems when electrical headroom gets tight, prioritizing shooter/feed while
  * shooting, intake while intaking, and drivetrain otherwise.
+ *
+ * Drive limits are applied as hard velocity caps directly in {@link XBoxTeleopSwerveCommand} so
+ * autonomous paths are unaffected
  */
 public class BrownoutProtection extends SubsystemBase {
   private static final int ELECTRICAL_SAMPLE_WINDOW = 8;
@@ -28,6 +34,7 @@ public class BrownoutProtection extends SubsystemBase {
   private static final double ACTIVE_SHOOTER_SPEED_THRESHOLD_RPS = 5.0;
 
   private final CommandSwerveDrive swerveDrive;
+  private final XBoxTeleopSwerveCommand teleopSwerveCommand;
   private final ShooterRollers shooterRollers;
   private final Turret turret;
   private final ShooterHood shooterHood;
@@ -57,6 +64,7 @@ public class BrownoutProtection extends SubsystemBase {
 
   public BrownoutProtection(
       CommandSwerveDrive swerveDrive,
+      XBoxTeleopSwerveCommand teleopSwerveCommand,
       ShooterRollers shooterRollers,
       Turret turret,
       ShooterHood shooterHood,
@@ -64,6 +72,7 @@ public class BrownoutProtection extends SubsystemBase {
       BeltFloor beltFloor,
       IntakeRollers intakeRollers) {
     this.swerveDrive = swerveDrive;
+    this.teleopSwerveCommand = teleopSwerveCommand;
     this.shooterRollers = shooterRollers;
     this.turret = turret;
     this.shooterHood = shooterHood;
@@ -159,7 +168,16 @@ public class BrownoutProtection extends SubsystemBase {
             ? prioritizedMechanismScalingFactor
             : reducedMechanismScalingFactor;
 
-    swerveDrive.setVelocityScale(driveVelocityScalingFactor);
+    // Apply drive limits as hard velocity caps in teleop command only
+    // Auton paths go through PathPlanner/VelocityMotion, are never affected
+    double maxLinearVelocityMetersPerSecond =
+        swerveDrive.getConstants().Driving.MaxLinearVelocity.in(MetersPerSecond);
+    double maxAngularVelocityRadiansPerSecond =
+        swerveDrive.getConstants().Driving.MaxAngularVelocity.in(RadiansPerSecond);
+    teleopSwerveCommand.addDynamicVelocityLimits(
+        MetersPerSecond.of(driveVelocityScalingFactor * maxLinearVelocityMetersPerSecond),
+        RadiansPerSecond.of(driveVelocityScalingFactor * maxAngularVelocityRadiansPerSecond));
+
     turret.setMotionProfileConstraintScale(shooterAimingScalingFactor);
     shooterHood.setMotionProfileConstraintScale(shooterAimingScalingFactor);
     intakeExtension.setMotionProfileConstraintScale(intakeMotionScalingFactor);

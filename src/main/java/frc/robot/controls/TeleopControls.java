@@ -41,6 +41,7 @@ public class TeleopControls {
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
+  private XBoxTeleopSwerveCommand teleopSwerveCommand;
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
@@ -97,7 +98,7 @@ public class TeleopControls {
     Trigger teleopEnabledTrigger =
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled());
 
-    XBoxTeleopSwerveCommand teleopSwerveCommand =
+    teleopSwerveCommand =
         new XBoxTeleopSwerveCommand(
             robot.getSwerveDrive(), robot.getConstants().getTeleopSwerveConstants());
 
@@ -391,5 +392,9 @@ public class TeleopControls {
 
   private Command fineControlDisableRumble() {
     return Commands.sequence(rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0));
+  }
+  
+  public XBoxTeleopSwerveCommand getTeleopSwerveCommand() {
+   return teleopSwerveCommand;
   }
 }

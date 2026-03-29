@@ -69,10 +69,13 @@ public class FieldLogger implements SwerveComponent {
     }
 
     Pose2d robotPose = localization.getPosition2d();
-    Pose2d[] modulePoses = null;
+
+    previousRobotPose = robotPose;
+
+    field.setRobotPose(robotPose);
 
     if (!constants.Timing.MinimizeLogging) {
-      modulePoses = new Pose2d[4];
+      Pose2d[] modulePoses = new Pose2d[4];
       SwerveModuleState[] moduleStates = odometry.getStates();
 
       for (int i = 0; i < 4; i++) {
@@ -84,13 +87,7 @@ public class FieldLogger implements SwerveComponent {
 
         modulePoses[i] = robotPose.plus(relativePose.minus(new Pose2d()));
       }
-    }
 
-    previousRobotPose = robotPose;
-
-    field.setRobotPose(robotPose);
-
-    if (modulePoses != null) {
       field.getObject("Swerve Modules").setPoses(modulePoses);
     }
   }

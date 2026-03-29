@@ -1,10 +1,8 @@
 package com.team6962.lib.swerve.commands;
 
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.team6962.lib.control.MotionProfile;
 import com.team6962.lib.control.ProfiledController;
@@ -13,15 +11,11 @@ import com.team6962.lib.control.TrapezoidalProfile;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-import dev.doglog.DogLog;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -153,35 +147,8 @@ public class DriveToStateCommand extends Command {
     this.swerveDrive = swerveDrive;
     this.target = target;
 
-    if (target.translation != null) {
-      addRequirements(swerveDrive.useTranslation());
-    }
-
-    if (target.angle != null) {
-      addRequirements(swerveDrive.useRotation());
-    }
-  }
-
-  @Override
-  public void initialize() {
-    // Reset state
-    motionProfilesFinished = false;
-
-    createControllers();
-
-    // Generate initial motion profiles
-    createMotionProfiles();
-
-    DogLog.log(
-        "Drivetrain/DriveToState/FinalTarget",
-        new Pose2d(target.translation, new Rotation2d(target.angle)));
-    DogLog.log("Drivetrain/DriveToState/FinalVelocityX", target.translationalVelocity.x);
-    DogLog.log("Drivetrain/DriveToState/FinalVelocityY", target.translationalVelocity.y);
-    DogLog.log("Drivetrain/DriveToState/FinalAngularVelocity", target.angularVelocity);
-  }
-
-  /** Creates controllers for translation and rotation using the configured constraints. */
-  private void createControllers() {
+    // Initialize translation and rotation controllers with PID constants
+    // and motion profile constraints
     if (target.translation != null) {
       translationController =
           new TranslationController(
@@ -190,6 +157,8 @@ public class DriveToStateCommand extends Command {
               swerveDrive.getConstants().Driving.TranslationFeedbackKD,
               swerveDrive.getConstants().Driving.getTranslationConstraints(),
               Hertz.of(50));
+
+      addRequirements(swerveDrive.useTranslation());
     }
 
     if (target.angle != null) {
@@ -200,7 +169,18 @@ public class DriveToStateCommand extends Command {
               swerveDrive.getConstants().Driving.AngleFeedbackKD,
               new TrapezoidalProfile(swerveDrive.getConstants().Driving.getRotationConstraints()),
               Hertz.of(50));
+
+      addRequirements(swerveDrive.useRotation());
     }
+  }
+
+  @Override
+  public void initialize() {
+    // Reset state
+    motionProfilesFinished = false;
+
+    // Generate initial motion profiles
+    createMotionProfiles();
   }
 
   /** Creates motion profiles for translation and rotation controllers. */
@@ -247,38 +227,16 @@ public class DriveToStateCommand extends Command {
       createMotionProfiles();
     }
 
-    // Current target pose and speeds for logging
+    // Current target pose for logging
     Pose2d currentTarget = new Pose2d();
-    ChassisSpeeds currentSpeeds = new ChassisSpeeds();
 
     // Calculate and apply velocity commands for translation and rotation
     if (translationController != null) {
-      TranslationalVelocity currentTranslationalVelocity =
+      TranslationalVelocity outputTranslationalVelocity =
           translationController.calculate(
               swerveDrive.getPosition2d().getTranslation(), swerveDrive.getTranslationalVelocity());
 
-      currentSpeeds =
-          new ChassisSpeeds(
-              currentTranslationalVelocity.x.in(MetersPerSecond),
-              currentTranslationalVelocity.y.in(MetersPerSecond),
-              currentSpeeds.omegaRadiansPerSecond);
-
-      TranslationalVelocity profileTranslationalVelocity = translationController.sample(0);
-
-      TranslationalVelocity nextTranslationalVelocity = translationController.sample(0.02);
-
-      Vector<N2> acceleration =
-          nextTranslationalVelocity
-              .toVector()
-              .minus(profileTranslationalVelocity.toVector())
-              .div(0.02);
-
-      currentTranslationalVelocity =
-          currentTranslationalVelocity.plus(
-              new TranslationalVelocity(acceleration)
-                  .times(swerveDrive.getConstants().Driving.AutoLinearAccelerationScalar));
-
-      swerveDrive.applyVelocityMotion(currentTranslationalVelocity);
+      swerveDrive.applyVelocityMotion(outputTranslationalVelocity);
 
       // Add translation to current target pose
       currentTarget =
@@ -287,32 +245,14 @@ public class DriveToStateCommand extends Command {
     }
 
     if (headingController != null) {
-      MotionProfile.State angularState =
-          new MotionProfile.State(
-              swerveDrive.getYaw().in(Radians), swerveDrive.getYawVelocity().in(RadiansPerSecond));
+      AngularVelocity outputAngularVelocity =
+          RadiansPerSecond.of(
+              headingController.calculate(
+                  new MotionProfile.State(
+                      swerveDrive.getYaw().in(Radians),
+                      swerveDrive.getYawVelocity().in(RadiansPerSecond))));
 
-      AngularVelocity currentAngularVelocity =
-          RadiansPerSecond.of(headingController.calculate(angularState));
-
-      currentSpeeds =
-          new ChassisSpeeds(
-              currentSpeeds.vxMetersPerSecond,
-              currentSpeeds.vyMetersPerSecond,
-              currentAngularVelocity.in(RadiansPerSecond));
-
-      AngularVelocity profileAngularVelocity = RadiansPerSecond.of(headingController.sample(0));
-
-      AngularVelocity nextAngularVelocity = RadiansPerSecond.of(headingController.sample(0.02));
-
-      AngularAcceleration angularAcceleration =
-          nextAngularVelocity.minus(profileAngularVelocity).div(Seconds.of(0.02));
-
-      currentAngularVelocity =
-          currentAngularVelocity.plus(
-              angularAcceleration.times(
-                  Seconds.of(swerveDrive.getConstants().Driving.AutoAngularAccelerationScalar)));
-
-      swerveDrive.applyVelocityMotion(currentAngularVelocity);
+      swerveDrive.applyVelocityMotion(outputAngularVelocity);
 
       // Add rotation to current target pose
       currentTarget =
@@ -323,20 +263,6 @@ public class DriveToStateCommand extends Command {
 
     // Log current target pose
     swerveDrive.getFieldLogger().getField().getObject("Current Target").setPose(currentTarget);
-
-    DogLog.log("Drivetrain/DriveToState/ProfilePose", currentTarget);
-    DogLog.log(
-        "Drivetrain/DriveToState/ProfileVelocityX",
-        currentSpeeds.vxMetersPerSecond,
-        MetersPerSecond);
-    DogLog.log(
-        "Drivetrain/DriveToState/ProfileVelocityY",
-        currentSpeeds.vyMetersPerSecond,
-        MetersPerSecond);
-    DogLog.log(
-        "Drivetrain/DriveToState/ProfileAngularVelocity",
-        currentSpeeds.omegaRadiansPerSecond,
-        RadiansPerSecond);
   }
 
   @Override

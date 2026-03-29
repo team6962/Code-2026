@@ -25,7 +25,6 @@ import com.team6962.lib.swerve.util.ControlLoop;
 import com.team6962.lib.swerve.util.FieldLogger;
 import com.team6962.lib.swerve.util.SwerveComponent;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -83,7 +82,6 @@ public class MotionSwerveDrive implements AutoCloseable {
   private BaseStatusSignal[] statusSignals;
   private SwerveDriveKinematics kinematics;
   private SwerveMotionManager motionManager;
-  private volatile double velocityScale = 1.0;
 
   /**
    * Creates a new MotionSwerveDrive with the specified drivetrain configuration.
@@ -381,21 +379,6 @@ public class MotionSwerveDrive implements AutoCloseable {
   }
 
   /**
-   * Checks if the robot is within a translational tolerance of a target pose.
-   *
-   * @param target The target pose to check against
-   * @param translationTolerance Maximum allowed translation error from target position
-   * @return {@code true} if within the translational tolerance, {@code false} otherwise
-   */
-  public boolean isNear(Pose2d target, Distance translationTolerance) {
-    Pose2d current = getPosition2d();
-
-    double linearError = current.getTranslation().getDistance(target.getTranslation());
-
-    return linearError <= translationTolerance.in(Meters);
-  }
-
-  /**
    * Gets the current field-relative velocity of the robot as a {@link ChassisSpeeds} object.
    *
    * @return The {@link ChassisSpeeds} (vx, vy, omega)
@@ -501,24 +484,6 @@ public class MotionSwerveDrive implements AutoCloseable {
    */
   public void updateMotion() {
     motionManager.update();
-  }
-
-  /**
-   * Sets runtime scale that is applied to requested drivetrain velocities.
-   *
-   * @param scale the velocity scale to apply
-   */
-  public void setVelocityScale(double scale) {
-    velocityScale = MathUtil.clamp(scale, 0.0, 1.0);
-  }
-
-  /**
-   * Gets runtime scale applied to requested drivetrain velocities.
-   *
-   * @return the velocity scale
-   */
-  public double getVelocityScale() {
-    return velocityScale;
   }
 
   /**

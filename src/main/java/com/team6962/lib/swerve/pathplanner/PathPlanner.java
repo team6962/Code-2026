@@ -68,7 +68,7 @@ public class PathPlanner {
             }
           }
 
-          drivetrain.applyMotion(new VelocityMotion(appliedSpeeds, forces, drivetrain));
+          drivetrain.applyMotion(new VelocityMotion(appliedSpeeds, drivetrain));
         },
         new PPHolonomicDriveController(
             new PIDConstants(
