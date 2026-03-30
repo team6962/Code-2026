@@ -411,12 +411,12 @@ public class AutoShoot extends Command {
    *
    * @return the shooter's translational velocity at the point of projectile exit
    */
-  private TranslationalVelocity calculateShooterVelocity() {
+  private TranslationalVelocity calculateShooterVelocity(Pose2d robotPose) {
     return swerveDrive
         .getTranslationalVelocity()
         .plus(
             new TranslationalVelocity(
-                AutoShootConstants.shooterTransform.getTranslation(),
+                AutoShootConstants.shooterTransform.getTranslation().rotateBy(robotPose.getRotation()),
                 swerveDrive.getYawVelocity()));
   }
 
@@ -430,7 +430,7 @@ public class AutoShoot extends Command {
     twist.dtheta *= poseExtrapolationTime.in(Seconds);
     Pose2d shooterPose =
         swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
-    TranslationalVelocity shooterVelocity = calculateShooterVelocity();
+    TranslationalVelocity shooterVelocity = calculateShooterVelocity(swerveDrive.getPosition2d().exp(twist));
 
     DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
 
