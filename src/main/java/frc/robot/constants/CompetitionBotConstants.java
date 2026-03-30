@@ -41,6 +41,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+
 import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
@@ -247,14 +249,14 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     return super.getAprilTagVisionConstants()
         .withCameras(
             new AprilTagCameraConstants(
-                "Monochrome-7",
+                "Monochrome-7", // Swerve Right
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-12.866392).in(Meters),
-                        Inches.of(-12.866926).in(Meters),
-                        Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, -(3 * Math.PI) / 4))),
-            new AprilTagCameraConstants(
+                        Inches.of(-12.708583).in(Meters),
+                        Inches.of(-12.708684).in(Meters),
+                        Inches.of(8.265366).in(Meters)),
+                    new Rotation3d(0, Units.degreesToRadians(-20), -(3 * Math.PI) / 4))),
+            new AprilTagCameraConstants( // Swerve Left
                 "Monochrome-9",
                 new Transform3d(
                     new Translation3d(
@@ -263,27 +265,27 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(7.688516).in(Meters)),
                     new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))),
             new AprilTagCameraConstants(
-                "Monochrome-8",
+                "Monochrome-8", // Beast Left
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.293558).in(Meters),
-                        Inches.of(-7.882).in(Meters),
-                        Inches.of(20.601426).in(Meters)),
+                        Inches.of(-10.262832).in(Meters),
+                        Inches.of(-7.906432).in(Meters),
+                        Inches.of(20.616499).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(-18.551436).in(Radians),
-                        Degrees.of(-18.909798).in(Radians),
-                        Degrees.of(47).in(Radians)))),
+                        Degrees.of(-16.484106).in(Radians),
+                        Degrees.of(-19.832535).in(Radians),
+                        Degrees.of(43).in(Radians)))),
             new AprilTagCameraConstants(
-                "Monochrome-4",
+                "Monochrome-4", // Beast Right
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.293558).in(Meters),
-                        Inches.of(-12.118).in(Meters),
-                        Inches.of(20.601426).in(Meters)),
+                        Inches.of(-10.262832).in(Meters),
+                        Inches.of(-12.093568).in(Meters),
+                        Inches.of(20.616499).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(18.551436).in(Radians),
-                        Degrees.of(-18.909798).in(Radians),
-                        -Degrees.of(47).in(Radians)))))
+                        Degrees.of(16.484106).in(Radians),
+                        Degrees.of(-19.832535).in(Radians),
+                        -Degrees.of(43).in(Radians)))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
         .withMultiTagStdDevs(VecBuilder.fill(0.03, 0.03, 0.03, 0.15))
