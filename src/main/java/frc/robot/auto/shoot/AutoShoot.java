@@ -27,9 +27,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
+import frc.robot.auto.FieldPositions;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
+
+import java.text.FieldPosition;
 import java.util.function.Supplier;
 import org.apache.commons.math3.util.Pair;
 
@@ -385,11 +388,13 @@ public class AutoShoot extends Command {
     public Angle turretAngle;
     public Angle hoodAngle;
     public AngularVelocity rollerSpeed;
+    public Distance distance;
 
-    public ShootingParameters(Angle turretAngle, Angle hoodAngle, AngularVelocity rollerSpeed) {
+    public ShootingParameters(Angle turretAngle, Angle hoodAngle, AngularVelocity rollerSpeed, Distance distance) {
       this.turretAngle = turretAngle;
       this.hoodAngle = hoodAngle;
       this.rollerSpeed = rollerSpeed;
+      this.distance = distance;
     }
 
     public void log(String path) {
@@ -400,6 +405,7 @@ public class AutoShoot extends Command {
           Radians);
       DogLog.log(path + "/HoodAngle", hoodAngle.in(Degrees), Degrees);
       DogLog.log(path + "/RollerSpeed", rollerSpeed.in(RotationsPerSecond), RotationsPerSecond);
+      DogLog.log(path + "/Distance", distance.in(Inches), Inches);
     }
   }
 
@@ -447,7 +453,7 @@ public class AutoShoot extends Command {
                 optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
     return new ShootingParameters(
-        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))), hoodAngleTarget, rollerSpeedTarget);
+        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))), hoodAngleTarget, rollerSpeedTarget, Meters.of(shooterPose.getTranslation().getDistance(target)));
   }
 
   @Override
@@ -509,8 +515,8 @@ public class AutoShoot extends Command {
     // angles
     // and roller speed
     readyToShoot =
-        rollers
-                .getAngularVelocity()
+        appliedShootingParameters.distance.gt(Inches.of(83.75))
+            && rollers.getAngularVelocity()
                 .isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance)
             && hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance)
             && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)

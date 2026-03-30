@@ -4,6 +4,11 @@
       "visible": false
     }
   },
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "System Joysticks": {
     "window": {
       "visible": false
@@ -21,8 +26,7 @@
           "incKey": 83
         },
         {
-          "decayRate": 0.20000000298023224,
-          "incKey": 46
+          "decayRate": 0.20000000298023224
         },
         {
           "decayRate": 0.20000000298023224,
@@ -77,7 +81,7 @@
       "buttonKeys": [
         -1,
         -1,
-        -1,
+        46,
         -1,
         -1,
         -1,
