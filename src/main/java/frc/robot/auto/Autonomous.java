@@ -47,10 +47,7 @@ public class Autonomous {
     return Commands.defer(
         () -> {
           double robotY = robot.getSwerveDrive().getPosition2d().getY();
-          double robotX = robot.getSwerveDrive().getPosition2d().getX();
           Rotation2d robotRotation = robot.getSwerveDrive().getPosition2d().getRotation();
-          double y;
-          double x;
           if ((robotY < Inches.of(15.97).in(Meters)
                   || (robotY > Inches.of(35.97).in(Meters)
                       && robotY < Inches.of(158.84).in(Meters)))
@@ -59,11 +56,7 @@ public class Autonomous {
                       && robotY > Inches.of(158.84).in(Meters)))
               || (Math.abs(robotRotation.getDegrees() - targetPose.getRotation().getDegrees())
                   > 15)) {
-            if (robotY < Inches.of(158.84).in(Meters)) {
-              y = Inches.of(24.97).in(Meters);
-            } else {
-              y = Inches.of(292.31).in(Meters);
-            }
+
             return robot.getSwerveDrive().driveTo(targetPose).andThen(needsTrenchCheck.get());
           } else {
             return doesntNeedTrenchCheck.get();
