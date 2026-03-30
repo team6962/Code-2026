@@ -21,7 +21,6 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -184,12 +183,13 @@ public class IntakeExtension extends SubsystemBase {
           config.MotionMagicAcceleration = newAcceleration;
           motor.getConfigurator().apply(config);
         });
-    
+
     DogLog.tunable(
         "IntakeExtension/TargetPosition",
         0,
         (double newTarget) -> {
-          CommandScheduler.getInstance().schedule(newTarget > 0 ? extend() : newTarget < 0 ? retract() : idle());
+          CommandScheduler.getInstance()
+              .schedule(newTarget > 0 ? extend() : newTarget < 0 ? retract() : idle());
         });
 
     if (RobotBase.isSimulation()) {
@@ -380,17 +380,19 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   /**
-   * Returns a command that extends the intake, but only if the intake is not already running a command
-   * to extend or retract it.
-   * 
-   * @return A command that extends the intake if it is not already moving, and does nothing otherwise.
+   * Returns a command that extends the intake, but only if the intake is not already running a
+   * command to extend or retract it.
+   *
+   * @return A command that extends the intake if it is not already moving, and does nothing
+   *     otherwise.
    */
   public Command requestExtend() {
-    return Commands.runOnce(() -> {
-      if (getCurrentCommand() == null) {
-        CommandScheduler.getInstance().schedule(extend());
-      }
-    });
+    return Commands.runOnce(
+        () -> {
+          if (getCurrentCommand() == null) {
+            CommandScheduler.getInstance().schedule(extend());
+          }
+        });
   }
 
   @Override

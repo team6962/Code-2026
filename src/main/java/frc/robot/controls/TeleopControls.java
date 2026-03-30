@@ -184,7 +184,11 @@ public class TeleopControls extends SubsystemBase {
     // Intake without driving - WORKS
     driver
         .rightStick()
-        .whileTrue(this.robot.getIntakeRollers().intake().alongWith(robot.getIntakeExtension().requestExtend()));
+        .whileTrue(
+            this.robot
+                .getIntakeRollers()
+                .intake()
+                .alongWith(robot.getIntakeExtension().requestExtend()));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
@@ -246,8 +250,9 @@ public class TeleopControls extends SubsystemBase {
         "Zero Shooter Hood", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
     SmartDashboard.putData(
         "Zero Turret",
-        Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true).onlyIf(RobotState::isDisabled)
-    );
+        Commands.runOnce(() -> robot.getTurret().zero())
+            .ignoringDisable(true)
+            .onlyIf(RobotState::isDisabled));
 
     operator
         .povLeft()
