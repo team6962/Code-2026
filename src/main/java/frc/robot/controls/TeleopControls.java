@@ -387,11 +387,11 @@ public class TeleopControls extends SubsystemBase {
         .and(inAllianceZone.negate())
         .whileTrue(
             Commands.defer(
-                    () ->
-                        teleopSwerveCommand.limitVelocity(
-                            MetersPerSecond.of(passMaxLinearVelocity),
-                            RotationsPerSecond.of(passMaxAngularVelocity)),
-                    Set.of()))
+                () ->
+                    teleopSwerveCommand.limitVelocity(
+                        MetersPerSecond.of(passMaxLinearVelocity),
+                        RotationsPerSecond.of(passMaxAngularVelocity)),
+                Set.of()))
         .and(autoPass.isReadyToShoot())
         .whileTrue(robot.getHopper().feed()); // Temporary values
 

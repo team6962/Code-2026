@@ -416,7 +416,9 @@ public class AutoShoot extends Command {
         .getTranslationalVelocity()
         .plus(
             new TranslationalVelocity(
-                AutoShootConstants.shooterTransform.getTranslation().rotateBy(robotPose.getRotation()),
+                AutoShootConstants.shooterTransform
+                    .getTranslation()
+                    .rotateBy(robotPose.getRotation()),
                 swerveDrive.getYawVelocity()));
   }
 
@@ -430,7 +432,8 @@ public class AutoShoot extends Command {
     twist.dtheta *= poseExtrapolationTime.in(Seconds);
     Pose2d shooterPose =
         swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
-    TranslationalVelocity shooterVelocity = calculateShooterVelocity(swerveDrive.getPosition2d().exp(twist));
+    TranslationalVelocity shooterVelocity =
+        calculateShooterVelocity(swerveDrive.getPosition2d().exp(twist));
 
     DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
 
@@ -447,7 +450,9 @@ public class AutoShoot extends Command {
                 optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
     return new ShootingParameters(
-        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))), hoodAngleTarget, rollerSpeedTarget);
+        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))),
+        hoodAngleTarget,
+        rollerSpeedTarget);
   }
 
   @Override
