@@ -14,6 +14,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -32,6 +33,8 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This subsystem controls the extension of the intake out of the robot and back in. */
@@ -181,6 +184,14 @@ public class IntakeExtension extends SubsystemBase {
           motor.getConfigurator().apply(config);
         });
 
+    DogLog.tunable(
+        "IntakeExtension/TargetPosition",
+        0,
+        (double newTarget) -> {
+          CommandScheduler.getInstance()
+              .schedule(newTarget > 0 ? extend() : newTarget < 0 ? retract() : idle());
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new IntakeExtensionSim(motor);
       isZeroed = true;
@@ -209,6 +220,8 @@ public class IntakeExtension extends SubsystemBase {
                       IntakeExtensionConstants.MAX_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
                 motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+              } else {
+                motor.setControl(new CoastOut());
               }
             })
         .until(
@@ -364,6 +377,22 @@ public class IntakeExtension extends SubsystemBase {
    */
   private Distance getClosedLoopReference() {
     return Meters.of(closedLoopReferenceSignal.getValue());
+  }
+
+  /**
+   * Returns a command that extends the intake, but only if the intake is not already running a
+   * command to extend or retract it.
+   *
+   * @return A command that extends the intake if it is not already moving, and does nothing
+   *     otherwise.
+   */
+  public Command requestExtend() {
+    return Commands.runOnce(
+        () -> {
+          if (getCurrentCommand() == null) {
+            CommandScheduler.getInstance().schedule(extend());
+          }
+        });
   }
 
   @Override

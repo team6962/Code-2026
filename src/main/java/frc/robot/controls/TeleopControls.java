@@ -58,7 +58,7 @@ public class TeleopControls extends SubsystemBase {
   private double tunableRollerVelocity = 0;
 
   private double hubMaxLinearVelocity = 1;
-  private double hubMaxAngularVelocity = 0.1;
+  private double hubMaxAngularVelocity = 0.25;
   private double hubMaxLinearAcceleration = 2;
   private double hubMaxAngularAcceleration = 0.25;
   private double passMaxLinearVelocity = 1.5;
@@ -184,17 +184,16 @@ public class TeleopControls extends SubsystemBase {
     // Intake without driving - WORKS
     driver
         .rightStick()
-        .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
+        .whileTrue(
+            this.robot
+                .getIntakeRollers()
+                .intake()
+                .alongWith(robot.getIntakeExtension().requestExtend()));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
-
-    operator
-        .b()
-        .and(RobotState::isDisabled)
-        .onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
@@ -248,7 +247,12 @@ public class TeleopControls extends SubsystemBase {
 
     // Backup zero
     SmartDashboard.putData(
-        "Shooter Hood Zeroing", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
+        "Zero Shooter Hood", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
+    SmartDashboard.putData(
+        "Zero Turret",
+        Commands.runOnce(() -> robot.getTurret().zero())
+            .ignoringDisable(true)
+            .onlyIf(RobotState::isDisabled));
 
     operator
         .povLeft()
@@ -387,12 +391,13 @@ public class TeleopControls extends SubsystemBase {
         .and(inAllianceZone.negate())
         .whileTrue(
             Commands.defer(
-                    () ->
-                        teleopSwerveCommand.limitVelocity(
-                            MetersPerSecond.of(passMaxLinearVelocity),
-                            RotationsPerSecond.of(passMaxAngularVelocity)),
-                    Set.of())
-                .alongWith(robot.getHopper().feed())); // Temporary values
+                () ->
+                    teleopSwerveCommand.limitVelocity(
+                        MetersPerSecond.of(passMaxLinearVelocity),
+                        RotationsPerSecond.of(passMaxAngularVelocity)),
+                Set.of()))
+        .and(autoPass.isReadyToShoot())
+        .whileTrue(robot.getHopper().feed()); // Temporary values
 
     // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
     // fully tested
