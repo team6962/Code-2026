@@ -20,15 +20,15 @@ import frc.robot.subsystems.hopper.HopperConstants;
  */
 public class HopperSensors extends SubsystemBase {
   private CANrange kickerSensor;
-  // private CANrange upperHopperSensor;
+  private CANrange upperHopperSensor;
   private CANrange lowerHopperSensor;
 
   private StatusSignal<Distance> kickerDistance;
-  // private StatusSignal<Distance> upperHopperDistance;
+  private StatusSignal<Distance> upperHopperDistance;
   private StatusSignal<Distance> lowerHopperDistance;
 
-  // private Distance upperHopperSensorFullThreshold =
-  //     HopperConstants.UPPER_HOPPER_SENSOR_FULL_THRESHOLD;
+  private Distance upperHopperSensorFullThreshold =
+      HopperConstants.UPPER_HOPPER_SENSOR_FULL_THRESHOLD;
   private Distance lowerHopperSensorEmptyThreshold =
       HopperConstants.LOWER_HOPPER_SENSOR_EMPTY_THRESHOLD;
   private Distance kickerSensorFullThreshold = HopperConstants.KICKER_SENSOR_FULL_THRESHOLD;
@@ -52,25 +52,24 @@ public class HopperSensors extends SubsystemBase {
         new CANrange(HopperConstants.KICKER_SENSOR_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     kickerSensor.getConfigurator().apply(HopperConstants.KICKER_SENSOR_CONFIGURATION);
 
-    // upperHopperSensor =
-    //     new CANrange(HopperConstants.UPPER_HOPPER_CAN_ID, new
-    // CANBus(HopperConstants.CANBUS_NAME));
-    // upperHopperSensor.getConfigurator().apply(HopperConstants.UPPER_HOPPER_CONFIGURATION);
+    upperHopperSensor =
+        new CANrange(HopperConstants.UPPER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
+    upperHopperSensor.getConfigurator().apply(HopperConstants.UPPER_HOPPER_CONFIGURATION);
 
     lowerHopperSensor =
         new CANrange(HopperConstants.LOWER_HOPPER_CAN_ID, new CANBus(HopperConstants.CANBUS_NAME));
     lowerHopperSensor.getConfigurator().apply(HopperConstants.LOWER_HOPPER_CONFIGURATION);
 
     this.kickerDistance = kickerSensor.getDistance();
-    // this.upperHopperDistance = upperHopperSensor.getDistance();
+    this.upperHopperDistance = upperHopperSensor.getDistance();
     this.lowerHopperDistance = lowerHopperSensor.getDistance();
 
-    // DogLog.tunable(
-    //     "HopperSensors/Hopper Full Threshold (in)",
-    //     upperHopperSensorFullThreshold.in(Inches),
-    //     newValue -> {
-    //       upperHopperSensorFullThreshold = Inches.of(newValue);
-    //     });
+    DogLog.tunable(
+        "HopperSensors/Hopper Full Threshold (in)",
+        upperHopperSensorFullThreshold.in(Inches),
+        newValue -> {
+          upperHopperSensorFullThreshold = Inches.of(newValue);
+        });
 
     DogLog.tunable(
         "HopperSensors/Hopper Empty Threshold (in)",
@@ -126,9 +125,9 @@ public class HopperSensors extends SubsystemBase {
    *
    * @return The distance to the detected object in the Upper Hopper.
    */
-  // private Distance getUpperHopperDistance() {
-  //   return upperHopperDistance.getValue();
-  // }
+  private Distance getUpperHopperDistance() {
+    return upperHopperDistance.getValue();
+  }
 
   /**
    * Gets the current distance measured by the Lower Hopper sensor.
@@ -146,9 +145,9 @@ public class HopperSensors extends SubsystemBase {
    * @return {@code true} if the distance is less than UPPER_HOPPER_SENSOR_THRESHOLD indicating an
    *     object is present.
    */
-  // public boolean isHopperFull() {
-  //   return upperHopperDistance.getValue().lt(upperHopperSensorFullThreshold);
-  // }
+  public boolean isHopperFull() {
+    return upperHopperDistance.getValue().lt(upperHopperSensorFullThreshold);
+  }
 
   /**
    * Checks if the Hopper is considered empty. Determined by the Lower Hopper sensor detecting an
@@ -224,9 +223,9 @@ public class HopperSensors extends SubsystemBase {
     }
 
     DogLog.log("Hopper/Sensors/KickerDistance", getKickerDistance());
-    // DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());
+    DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());
     DogLog.log("Hopper/Sensors/LowerHopperDistance", getLowerHopperDistance());
-    // DogLog.log("Hopper/Sensors/HopperFull", isHopperFull());
+    DogLog.log("Hopper/Sensors/HopperFull", isHopperFull());
     DogLog.log("Hopper/Sensors/HopperEmpty", isHopperEmpty());
     DogLog.log("Hopper/Sensors/KickerFull", isKickerFull());
     DogLog.log("Hopper/Sensors/KickerEmpty", isKickerEmpty());

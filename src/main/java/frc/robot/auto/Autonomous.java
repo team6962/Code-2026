@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.auto.shoot.AutoShoot;
+import frc.robot.subsystems.hopper.sensors.HopperSensors;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -19,6 +20,7 @@ public class Autonomous {
   public final CollectFuelFromHub collectFuelFromHub;
   public final AutoShoot autoPassLeft;
   public final AutoShoot autoPassRight;
+  public final HopperSensors hopperSensors;
 
   public Autonomous(RobotContainer robot) {
     this.robot = robot;
@@ -31,6 +33,7 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
     this.autoPassLeft = new AutoShoot(robot, () -> AutoShoot.PASS_LEFT_TRANSLATION);
     this.autoPassRight = new AutoShoot(robot, () -> AutoShoot.PASS_RIGHT_TRANSLATION);
+    this.hopperSensors = new HopperSensors();
   }
 
   private static Pose2d LEFT_START_POSE =
@@ -116,9 +119,10 @@ public class Autonomous {
                 robot.getIntakeRollers().intakeFast(),
                 rightSide ? autoPassRight : autoPassLeft,
                 robot.getHopper().feed()),
-        robot
-            .getSwerveDrive()
-            .followPath("pass_cycle.2", rightSide)
+        Commands.either(
+                robot.getSwerveDrive().followPath("pass_cycle.2", rightSide),
+                robot.getSwerveDrive().followPath("pass_cycle_not_full.2", rightSide),
+                () -> hopperSensors.isHopperFull())
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("pass_cycle.3", rightSide),
