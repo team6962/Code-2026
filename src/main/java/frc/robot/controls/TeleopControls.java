@@ -58,7 +58,7 @@ public class TeleopControls extends SubsystemBase {
   private double tunableRollerVelocity = 0;
 
   private double hubMaxLinearVelocity = 1;
-  private double hubMaxAngularVelocity = 0.1;
+  private double hubMaxAngularVelocity = 0.25;
   private double hubMaxLinearAcceleration = 2;
   private double hubMaxAngularAcceleration = 0.25;
   private double passMaxLinearVelocity = 1.5;
@@ -391,8 +391,9 @@ public class TeleopControls extends SubsystemBase {
                         teleopSwerveCommand.limitVelocity(
                             MetersPerSecond.of(passMaxLinearVelocity),
                             RotationsPerSecond.of(passMaxAngularVelocity)),
-                    Set.of())
-                .alongWith(robot.getHopper().feed())); // Temporary values
+                    Set.of()))
+        .and(autoPass.isReadyToShoot())
+        .whileTrue(robot.getHopper().feed()); // Temporary values
 
     // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
     // fully tested
