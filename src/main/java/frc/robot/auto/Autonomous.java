@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import frc.robot.auto.shoot.AutoShoot;
 import java.util.function.Supplier;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
@@ -127,6 +128,15 @@ public class Autonomous {
             robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
             shootFuel.shoot())
         .withTimeout(20);
+  }
+
+  // Auto starting at the Mid-Hub position, moving backwards and then shooting.
+  public Command moveBackwardAndShoot() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+    return Commands.sequence(
+        robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT),
+        Commands.parallel(
+            shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
   public Command leftSingleNeutralCycle() {
