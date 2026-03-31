@@ -41,6 +41,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class CompetitionBotConstants extends BaseRobotConstants {
@@ -154,7 +155,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.907879))) // Measured on 971 practice field
+                .withWheelRadius(Inches.of(1.94))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -203,12 +204,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withAutoLinearAcceleration(MetersPerSecondPerSecond.of(3))
                 .withAutoAngularVelocity(RotationsPerSecond.of(1))
                 .withAutoAngularAcceleration(RotationsPerSecondPerSecond.of(0.5))
-                .withAutoLinearAccelerationScalar(0.06)
-                .withAutoAngularAccelerationScalar(0.06)
-                .withTranslationFeedbackKP(1.0) // Not tuned
-                .withTranslationFeedbackKD(0.1) // Not tuned
-                .withAngleFeedbackKP(1.0) // Not tuned
-                .withAngleFeedbackKD(0.1)) // Not tuned
+                .withTranslationFeedbackKP(1.0)
+                .withTranslationFeedbackKD(0.1)
+                .withAngleFeedbackKP(1.0)
+                .withAngleFeedbackKD(0.1))
         .withDriveMotor(
             baseConstants
                 .DriveMotor
@@ -249,14 +248,14 @@ public class CompetitionBotConstants extends BaseRobotConstants {
     return super.getAprilTagVisionConstants()
         .withCameras(
             new AprilTagCameraConstants(
-                "Monochrome-7",
+                "Monochrome-7", // Swerve Right
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-12.866392).in(Meters),
-                        Inches.of(-12.866926).in(Meters),
-                        Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, -(3 * Math.PI) / 4))),
-            new AprilTagCameraConstants(
+                        Inches.of(-12.708583).in(Meters),
+                        Inches.of(-12.708684).in(Meters),
+                        Inches.of(8.265366).in(Meters)),
+                    new Rotation3d(0, Units.degreesToRadians(-20), -(3 * Math.PI) / 4))),
+            new AprilTagCameraConstants( // Swerve Left
                 "Monochrome-9",
                 new Transform3d(
                     new Translation3d(
@@ -265,27 +264,27 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(7.688516).in(Meters)),
                     new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))),
             new AprilTagCameraConstants(
-                "Monochrome-8",
+                "Monochrome-8", // Beast Left
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.293558).in(Meters),
-                        Inches.of(-7.882).in(Meters),
-                        Inches.of(20.601426).in(Meters)),
+                        Inches.of(-10.262832).in(Meters),
+                        Inches.of(-7.906432).in(Meters),
+                        Inches.of(20.616499).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(-18.224755).in(Radians),
-                        Degrees.of(-26.25).in(Radians),
-                        Math.PI / 4))),
+                        Degrees.of(-16.484106).in(Radians),
+                        Degrees.of(-19.832535).in(Radians),
+                        Degrees.of(43).in(Radians)))),
             new AprilTagCameraConstants(
-                "Monochrome-4",
+                "Monochrome-4", // Beast Right
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.293558).in(Meters),
-                        Inches.of(-12.118).in(Meters),
-                        Inches.of(20.601426).in(Meters)),
+                        Inches.of(-10.262832).in(Meters),
+                        Inches.of(-12.093568).in(Meters),
+                        Inches.of(20.616499).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(18.224755).in(Radians),
-                        Degrees.of(-26.25).in(Radians),
-                        -Math.PI / 4))))
+                        Degrees.of(16.484106).in(Radians),
+                        Degrees.of(-19.832535).in(Radians),
+                        -Degrees.of(43).in(Radians)))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
         .withMultiTagStdDevs(VecBuilder.fill(0.03, 0.03, 0.03, 0.15))
@@ -304,24 +303,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
   @Override
   public SphereCameraConstants getSphereCameraConstants() {
-    return super.getSphereCameraConstants()
-        .withName("Color-3")
-        .withClassId(0)
-        .withFOVHeight(Rotation2d.fromDegrees(47.23))
-        .withFOVWidth(Rotation2d.fromDegrees(60.48))
-        .withCameraHeightPixels(600)
-        .withCameraWidthPixels(800)
-        .withFocalLengthX(686.17)
-        .withFocalLengthY(686.21)
-        .withMaxDetectionRange(
-            Inches.of(426.708074544)) // Farthest distance the camera can detect a target
-        .withSphereDiameter(Inches.of(5.91))
-        .withMaxTargets(50) // Temporary value until we tune object detection
-        .withRobotToCameraTransform(
-            new Transform3d(
-                new Translation3d(
-                    Inches.of(12.6644).in(Meters), 0, 0), // Placeholder for real camera transform
-                new Rotation3d(0, Degrees.of(25.2).in(Radians), 0)));
+    return super.getSphereCameraConstants();
   }
 
   @Override

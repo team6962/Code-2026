@@ -47,6 +47,26 @@ public class HopperConstants {
                   .withStatorCurrentLimit(80)
                   .withSupplyCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(30));
+
+  // roller floor
+  public static final int ROLLER_FLOOR_MOTOR_CAN_ID = 30; // dummy
+  public static final DCMotor ROLLER_FLOOR_MOTOR_PHYSICS = DCMotor.getKrakenX60Foc(1); // dummy
+  public static final double ROLLER_FLOOR_GEARING = 2.5; // dummy
+  public static final MomentOfInertia ROLLER_FLOOR_MOMENT_OF_INERTIA =
+      KilogramSquareMeters.of(0.02); // dummy
+  public static final Distance ROLLER_FLOOR_PULLEY_RADIUS = Inches.of(0.51); // dummy
+  public static final TalonFXConfiguration ROLLER_FLOOR_MOTOR_CONFIG =
+      new TalonFXConfiguration()
+          .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ROLLER_FLOOR_GEARING))
+          .withSlot0(new Slot0Configs().withKV(0.124137931).withKP(0.01)) // dummt
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimitEnable(true)
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimitEnable(true)
+                  .withSupplyCurrentLimit(40));
+  // dummy
+
   // Sensors
   // The CAN IDs for the sensors: kicker, upper hopper, and lower hopper.
   public static final int KICKER_SENSOR_CAN_ID = 30;
@@ -57,7 +77,7 @@ public class HopperConstants {
   public static final Distance KICKER_SENSOR_FULL_THRESHOLD = Inches.of(5.0);
 
   // Threshold distances for determining if the Kicker is empty
-  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(20.0);
+  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(13.0);
 
   // Threshold distances for determining if the Hopper is full
   public static final Distance UPPER_HOPPER_SENSOR_FULL_THRESHOLD =

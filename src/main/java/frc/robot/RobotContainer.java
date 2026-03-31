@@ -10,6 +10,7 @@ import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -57,7 +58,10 @@ public class RobotContainer {
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
+    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
+
     LoggingUtil.logGitProperties();
+    RobotController.setBrownoutVoltage(4.6);
 
     CurrentDrawLogger.start();
 
@@ -137,6 +141,7 @@ public class RobotContainer {
     autoChooser.addOption("Right Double Off Center Neutral Cycle", autonomous.rightDoubleOffCenterNeutralCycle());
     autoChooser.addOption("Preload", autonomous.preload());
 
+    autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
 
     autoChooser.addOption(
         "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());

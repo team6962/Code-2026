@@ -1,10 +1,14 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
+import java.util.function.Supplier;
 
 /** Contains autonomous command sequences that can be selected on the dashboard. */
 public class Autonomous {
@@ -28,13 +32,41 @@ public class Autonomous {
     this.collectFuelFromHub = new CollectFuelFromHub(robot);
   }
 
+  public Command trenchCheck(
+      Pose2d targetPose,
+      Supplier<Command> needsTrenchCheck,
+      Supplier<Command> doesntNeedTrenchCheck) {
+    return Commands.defer(
+        () -> {
+          double robotY = robot.getSwerveDrive().getPosition2d().getY();
+          Rotation2d robotRotation = robot.getSwerveDrive().getPosition2d().getRotation();
+          if ((robotY < Inches.of(15.97).in(Meters)
+                  || (robotY > Inches.of(35.97).in(Meters)
+                      && robotY < Inches.of(158.84).in(Meters)))
+              || (robotY > Inches.of(302.31).in(Meters)
+                  || (robotY < Inches.of(282.31).in(Meters)
+                      && robotY > Inches.of(158.84).in(Meters)))
+              || (Math.abs(robotRotation.getDegrees() - targetPose.getRotation().getDegrees())
+                  > 15)) {
+            return robot.getSwerveDrive().driveTo(targetPose).andThen(needsTrenchCheck.get());
+          } else {
+            return doesntNeedTrenchCheck.get();
+          }
+        },
+        robot.getSwerveDrive().useMotionSet());
+  }
+
   private static Pose2d LEFT_START_POSE =
-      new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d());
+      new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d());
 
   private static Pose2d RIGHT_START_POSE =
       new Pose2d(4.436294078826904, 4.156, new Rotation2d());
 
   private Command singleNeutralCycle(boolean rightSide) {
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
+
     return Commands.sequence(
         Commands.runOnce(
             () ->
@@ -48,30 +80,56 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
         shootFuel.shoot());
   }
 
   private Command doubleNeutralCycle(boolean rightSide) {
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.3");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.4");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.5");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.6");
+
     return Commands.sequence(
-        Commands.runOnce(
-            () ->
-                robot
-                    .getSwerveDrive()
-                    .getLocalization()
-                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
-        robot
-            .getSwerveDrive()
-            .followPath("left_neutral.0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
-        shootFuel.shootAllFuelStationary(),
-        robot
-            .getSwerveDrive()
-            .followPath("left_neutral.2", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        shootFuel.shoot());
+            Commands.runOnce(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .getLocalization()
+                        .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.0", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.1", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+            shootFuel.shootAllFuelStationary().withTimeout(5),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.3", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.4", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.5", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
+            shootFuel.shoot())
+        .withTimeout(20);
   }
 
   private Command leftDepotOutpostCycle(boolean rightSide) {
@@ -319,9 +377,7 @@ public class Autonomous {
   }
 
   public Command preload() {
-    return shootFuel
-        .shoot()
-        .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake());
+    return shootFuel.shoot();
   }
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {

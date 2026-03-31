@@ -29,7 +29,7 @@ public class IntakeRollers extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Voltage> appliedVoltageSignal;
   private IntakeRollerSim simulation;
-  private double intakeVoltage = 8.0;
+  private double intakeVoltage = 5.0;
   private double intakeStallVoltage = 12.0;
   private Debouncer stallDebouncer = new Debouncer(0.25, DebounceType.kRising);
   private boolean stalling = false;
@@ -102,7 +102,7 @@ public class IntakeRollers extends SubsystemBase {
   public Command intakeFast() {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new DutyCycleOut(1).withEnableFOC(false));
+          intakeMotor.setControl(new VoltageOut(7).withEnableFOC(false));
         },
         () -> {
           intakeMotor.setControl(new CoastOut());

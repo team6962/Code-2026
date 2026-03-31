@@ -28,9 +28,9 @@ public final class IntakeExtensionConstants {
   public static final int MOTOR_CAN_ID = 40;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
   public static final Mass MOVING_MASS = Pounds.of(12);
-  public static final Distance MAX_POSITION = Inches.of(10.06);
+  public static final Distance MAX_POSITION = Inches.of(10.1);
   public static final Distance MIN_POSITION = Inches.of(0);
-  public static final Distance RETRACT_POSITION = Inches.of(4.15);
+  public static final Distance RETRACT_POSITION = Inches.of(3);
   public static final Angle ANGLE = Degrees.of(-18.5);
   public static final Distance PINION_RADIUS = Inches.of(0.75);
   public static final int CANDI_DEVICE_ID = 20;
@@ -48,7 +48,7 @@ public final class IntakeExtensionConstants {
               new MotionMagicConfigs()
                   // Not tuned
                   .withMotionMagicCruiseVelocity(20.0)
-                  .withMotionMagicAcceleration(1.5)
+                  .withMotionMagicAcceleration(12.0)
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
@@ -61,7 +61,7 @@ public final class IntakeExtensionConstants {
                   .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(Amps.of(15))
+                  .withStatorCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimit(Amps.of(60))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true))
