@@ -43,11 +43,11 @@ public class Autonomous {
           Rotation2d robotRotation = robot.getSwerveDrive().getPosition2d().getRotation();
           double y;
           double x;
-          if ((robotY < Inches.of(14.75).in(Meters)
-                  || (robotY > Inches.of(35.92).in(Meters)
+          if ((robotY <= Inches.of(14.75).in(Meters)
+                  || (robotY >= Inches.of(35.92).in(Meters)
                       && (robotY < Inches.of(158.84).in(Meters)))
-              || (robotY > Inches.of(302.938).in(Meters))
-                  || (robotY < Inches.of(282.088).in(Meters)
+              || (robotY >= Inches.of(302.938).in(Meters))
+                  || (robotY <= Inches.of(282.088).in(Meters)
                       && robotY > Inches.of(158.84).in(Meters)))
               || (Math.abs(robotRotation.getDegrees() - targetPose.getRotation().getDegrees())
                   > 30)) {
