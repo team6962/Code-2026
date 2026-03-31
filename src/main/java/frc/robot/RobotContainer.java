@@ -131,14 +131,19 @@ public class RobotContainer {
     autoChooser.addOption("Left Depot Outpost Cycle", autonomous.leftDepotOutpostCycle());
     autoChooser.addOption("Left Outpost Cycle", autonomous.leftOutpostCycle());
     autoChooser.addOption("Left Depot Cycle", autonomous.leftDepotCycle());
-    autoChooser.addOption("Left Single Off Center Neutral Cycle", autonomous.leftSingleOffCenterNeutralCycle());
-    autoChooser.addOption("Left Double Off Center Neutral Cycle", autonomous.leftDoubleOffCenterNeutralCycle());
+    autoChooser.addOption(
+        "Left Single Off Center Neutral Cycle", autonomous.leftSingleOffCenterNeutralCycle());
+    autoChooser.addOption(
+        "Left Double Off Center Neutral Cycle", autonomous.leftDoubleOffCenterNeutralCycle());
     autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
     autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
-    autoChooser.addOption("Right Depot Outpost Cycle", autonomous.rightDepotOutpostCycle());    autoChooser.addOption("Right Outpost Cycle", autonomous.rightOutpostCycle());
+    autoChooser.addOption("Right Depot Outpost Cycle", autonomous.rightDepotOutpostCycle());
+    autoChooser.addOption("Right Outpost Cycle", autonomous.rightOutpostCycle());
     autoChooser.addOption("Right Depot Cycle", autonomous.rightDepotCycle());
-    autoChooser.addOption("Right Single Off Center Neutral Cycle", autonomous.rightSingleOffCenterNeutralCycle());
-    autoChooser.addOption("Right Double Off Center Neutral Cycle", autonomous.rightDoubleOffCenterNeutralCycle());
+    autoChooser.addOption(
+        "Right Single Off Center Neutral Cycle", autonomous.rightSingleOffCenterNeutralCycle());
+    autoChooser.addOption(
+        "Right Double Off Center Neutral Cycle", autonomous.rightDoubleOffCenterNeutralCycle());
     autoChooser.addOption("Preload", autonomous.preload());
 
     autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
