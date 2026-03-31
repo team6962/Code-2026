@@ -39,8 +39,24 @@ public class ShootFuel {
             autoShoot,
             Commands.waitUntil(
                     () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .andThen(robot.getHopper().feed().repeatedly()))
+                .andThen(robot.getHopper().feed().repeatedly()),
+            Commands.sequence(
+                pulseIntake(),
+                Commands.sequence(
+                        robot.getIntakeExtension().retract(), robot.getIntakeExtension().extend())
+                    .repeatedly()),
+            robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
+  }
+
+  private Command pulseIntake() {
+    return Commands.sequence(
+        Commands.waitSeconds(2),
+        Commands.sequence(
+                robot.getIntakeExtension().retractSlow().withTimeout(0.5),
+                Commands.waitSeconds(0.25),
+                robot.getIntakeExtension().extendSlow().withTimeout(0.5))
+            .repeatedly());
   }
 
   /**
@@ -55,6 +71,48 @@ public class ShootFuel {
         autoShoot,
         Commands.waitUntil(
                 () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-            .andThen(robot.getHopper().feed().repeatedly()));
+            .andThen(robot.getHopper().feed().repeatedly()),
+        pulseIntake());
+  }
+
+  public Command shootOnTheMove() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+        autoShoot,
+        Commands.waitUntil(
+                () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+            .andThen(
+                robot
+                    .getHopper()
+                    .feed()
+                    .onlyWhile(
+                        () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                    .repeatedly()));
+  }
+
+  public Command shootAllFuelOnTheMove() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+            autoShoot,
+            Commands.waitUntil(
+                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                .andThen(
+                    robot
+                        .getHopper()
+                        .feed()
+                        .onlyWhile(
+                            () ->
+                                autoShoot.isReadyToShoot().getAsBoolean()
+                                    || RobotBase.isSimulation())
+                        .repeatedly()),
+            Commands.sequence(
+                pulseIntake(),
+                Commands.sequence(
+                        robot.getIntakeExtension().retract(), robot.getIntakeExtension().extend())
+                    .repeatedly()),
+            robot.getIntakeRollers().intake())
+        .until(() -> robot.getHopper().isEmpty());
   }
 }
