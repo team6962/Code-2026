@@ -59,6 +59,8 @@ public class Autonomous {
   private static Pose2d LEFT_START_POSE =
       new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d());
 
+  private static Pose2d RIGHT_START_POSE = new Pose2d(4.436294078826904, 4.156, new Rotation2d());
+
   private Command singleNeutralCycle(boolean rightSide) {
     robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
     robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
@@ -129,6 +131,181 @@ public class Autonomous {
         .withTimeout(20);
   }
 
+  private Command leftDepotOutpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("left_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot.getSwerveDrive().followPath("left_depot_outpost.1", rightSide),
+        robot.getIntakeExtension().extend(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_depot_outpost.3", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        robot.getSwerveDrive().followPath("left_depot_outpost.5", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command rightDepotOutpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(RIGHT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("right_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.1", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend()),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("right_depot_outpost.3", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        robot.getSwerveDrive().followPath("right_depot_outpost.5", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command leftDepotCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("left_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot.getSwerveDrive().followPath("left_depot_outpost.1", rightSide),
+        robot.getIntakeExtension().extend(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_depot_outpost.3", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command rightDepotCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(RIGHT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("right_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.1", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend()),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.2", rightSide)
+            .deadlineFor(robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("right_depot_outpost.3", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command leftOutpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("left_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("left_depot_outpost.4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        robot.getSwerveDrive().followPath("left_depot_outpost.5", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command rightOutpostCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(RIGHT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("right_depot_outpost.0", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath("right_depot_outpost.4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().retract()),
+        robot.getSwerveDrive().followPath("right_depot_outpost.5", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command doubleOffCenterNeutralCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.0", rightSide),
+        robot
+            .getSwerveDrive()
+            .followPath("left_off_center_neutral.1", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.2", rightSide),
+        shootFuel.shootAllFuelStationary(),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.3", rightSide),
+        robot
+            .getSwerveDrive()
+            .followPath("left_off_center_neutral.4", rightSide)
+            .deadlineFor(robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.5", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
+  private Command singleOffCenterNeutralCycle(boolean rightSide) {
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.0", rightSide),
+        robot
+            .getSwerveDrive()
+            .followPath("left_off_center_neutral.1", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_off_center_neutral.2", rightSide),
+        shootFuel.shootAllFuelStationary());
+  }
+
   public Command leftSingleNeutralCycle() {
     return singleNeutralCycle(false);
   }
@@ -143,6 +320,46 @@ public class Autonomous {
 
   public Command rightDoubleNeutralCycle() {
     return doubleNeutralCycle(true);
+  }
+
+  public Command leftDepotOutpostCycle() {
+    return leftDepotOutpostCycle(false);
+  }
+
+  public Command rightDepotOutpostCycle() {
+    return rightDepotOutpostCycle(false);
+  }
+
+  public Command leftDepotCycle() {
+    return leftDepotCycle(false);
+  }
+
+  public Command rightDepotCycle() {
+    return rightDepotCycle(false);
+  }
+
+  public Command leftOutpostCycle() {
+    return leftOutpostCycle(false);
+  }
+
+  public Command rightOutpostCycle() {
+    return rightOutpostCycle(false);
+  }
+
+  public Command leftSingleOffCenterNeutralCycle() {
+    return singleOffCenterNeutralCycle(false);
+  }
+
+  public Command rightSingleOffCenterNeutralCycle() {
+    return singleOffCenterNeutralCycle(true);
+  }
+
+  public Command leftDoubleOffCenterNeutralCycle() {
+    return doubleOffCenterNeutralCycle(false);
+  }
+
+  public Command rightDoubleOffCenterNeutralCycle() {
+    return doubleOffCenterNeutralCycle(true);
   }
 
   public Command preload() {
