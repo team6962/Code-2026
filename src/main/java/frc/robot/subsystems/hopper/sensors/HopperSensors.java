@@ -8,6 +8,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,6 +42,9 @@ public class HopperSensors extends SubsystemBase {
   private double jamTimeWhenEmpty = 0.25;
 
   private int simulatedFuelCount = 0;
+
+  private Debouncer emptyDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kRising);
+  private boolean empty = true;
 
   /**
    * Constructs a new HopperSensors instance. Initializes the CANrange sensors for the Kicker, Upper
@@ -164,6 +168,15 @@ public class HopperSensors extends SubsystemBase {
   }
 
   /**
+   * Checks if the hopper and kicker are empty.
+   *
+   * @return True if the hopper is empty, false otherwise.
+   */
+  public boolean isEmpty() {
+    return empty;
+  }
+
+  /**
    * Checks if the kicker is considered full. Determined by the Kicker sensor detecting an object
    * within the defined threshold.
    *
@@ -223,6 +236,8 @@ public class HopperSensors extends SubsystemBase {
       lastKickerNotFullTimestamp = Timer.getFPGATimestamp();
     }
 
+    empty = emptyDebouncer.calculate(isHopperEmpty() && isKickerEmpty());
+
     DogLog.log("Hopper/Sensors/KickerDistance", getKickerDistance());
     // DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());
     DogLog.log("Hopper/Sensors/LowerHopperDistance", getLowerHopperDistance());
@@ -231,5 +246,6 @@ public class HopperSensors extends SubsystemBase {
     DogLog.log("Hopper/Sensors/KickerFull", isKickerFull());
     DogLog.log("Hopper/Sensors/KickerEmpty", isKickerEmpty());
     DogLog.log("Hopper/Sensors/FeedingSuccessfully", isFeedingSuccessfully());
+    DogLog.log("Hopper/Sensors/Empty", isEmpty());
   }
 }

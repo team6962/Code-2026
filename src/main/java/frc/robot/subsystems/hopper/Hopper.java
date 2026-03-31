@@ -21,7 +21,9 @@ public class Hopper extends SubsystemBase {
   private double kickerClearTime = 0.5;
   private double beltFloorPulseTime = 0.2;
 
-  /** Constructor for the Hopper subsystem, which initializes the floor, kicker, and sensors */
+  /**
+   * Constructor for the Hopper subsystem, which initializes the hopper floor, kicker, and sensors
+   */
   public Hopper() {
     floor = new BeltFloor();
     kicker = new Kicker();
@@ -42,7 +44,7 @@ public class Hopper extends SubsystemBase {
         });
   }
 
-  /** Command to dump the hopper, which runs the floor in reverse. */
+  /** Command to dump the hopper, which runs the belt floor in reverse. */
   public Command dump() {
     return floor.dump();
   }
@@ -81,7 +83,7 @@ public class Hopper extends SubsystemBase {
    * @return
    */
   public boolean isEmpty() {
-    return sensors.isHopperEmpty() && sensors.isKickerEmpty();
+    return sensors.isEmpty();
   }
 
   /**
