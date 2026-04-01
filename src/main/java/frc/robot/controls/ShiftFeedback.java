@@ -89,7 +89,7 @@ public class ShiftFeedback extends SubsystemBase {
       return;
     }
 
-    if (RobotState.isEnabled() && teleopStartTimeSeconds < 0) {
+    if (RobotState.isEnabled() && RobotState.isTeleop() && teleopStartTimeSeconds < 0) {
       teleopStartTimeSeconds = Timer.getFPGATimestamp();
     } else if (RobotState.isDisabled() && teleopStartTimeSeconds >= 0) {
       teleopStartTimeSeconds = -1;
