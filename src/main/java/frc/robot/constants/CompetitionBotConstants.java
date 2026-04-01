@@ -259,10 +259,10 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 "Monochrome-9",
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-12.866392).in(Meters),
-                        Inches.of(12.866926).in(Meters),
-                        Inches.of(7.688516).in(Meters)),
-                    new Rotation3d(0, -Math.PI / 6, (3 * Math.PI) / 4))),
+                        Inches.of(-12.708583).in(Meters),
+                        Inches.of(12.708684).in(Meters),
+                        Inches.of(8.265366).in(Meters)),
+                    new Rotation3d(0, Units.degreesToRadians(-20), (3 * Math.PI) / 4))),
             new AprilTagCameraConstants(
                 "Monochrome-8", // Beast Left
                 new Transform3d(
