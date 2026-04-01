@@ -147,7 +147,6 @@ public class RobotContainer {
         "SysId Front Drive", swerveDrive.driveSysId("Front Drive", true, true, false, false, 0));
     autoChooser.addOption(
         "SysId Back Drive", swerveDrive.driveSysId("Back Drive", false, false, true, true, 2));
-    autoChooser.addOption("Move Back From Hub and Shoot", autonomous.moveBackwardAndShoot());
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 

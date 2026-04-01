@@ -1,7 +1,6 @@
 package frc.robot.subsystems.hopper.sensors;
 
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -10,7 +9,6 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -47,8 +45,6 @@ public class HopperSensors extends SubsystemBase {
 
   private Debouncer emptyDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kRising);
   private boolean empty = true;
-  private LinearFilter kickerFilter = LinearFilter.movingAverage(5);
-  private Distance currentKickerDistance = Inches.of(0);
 
   /**
    * Constructs a new HopperSensors instance. Initializes the CANrange sensors for the Kicker, Upper
@@ -125,7 +121,7 @@ public class HopperSensors extends SubsystemBase {
    * @return The distance to the detected object in the Kicker.
    */
   private Distance getKickerDistance() {
-    return currentKickerDistance;
+    return kickerDistance.getValue();
   }
 
   /**
@@ -188,7 +184,7 @@ public class HopperSensors extends SubsystemBase {
    */
   public boolean isKickerFull() {
     return RobotBase.isReal()
-        ? getKickerDistance().lt(kickerSensorFullThreshold)
+        ? kickerDistance.getValue().lt(kickerSensorFullThreshold)
         : simulatedFuelCount >= 0;
   }
 
@@ -201,7 +197,7 @@ public class HopperSensors extends SubsystemBase {
    */
   public boolean isKickerEmpty() {
     return RobotBase.isReal()
-        ? getKickerDistance().gt(kickerSensorEmptyThreshold)
+        ? kickerDistance.getValue().gt(kickerSensorEmptyThreshold)
         : simulatedFuelCount <= 0;
   }
 
@@ -225,9 +221,8 @@ public class HopperSensors extends SubsystemBase {
   @Override
   public void periodic() {
     StatusUtil.check(
-        BaseStatusSignal.refreshAll(kickerDistance, upperHopperDistance, lowerHopperDistance));
-
-    currentKickerDistance = Meters.of(kickerFilter.calculate(kickerDistance.getValueAsDouble()));
+        BaseStatusSignal.refreshAll(
+            kickerDistance /* , upperHopperDistance */, lowerHopperDistance));
 
     if (isKickerFull()) {
       lastKickerFullTimetstamp = Timer.getFPGATimestamp();
@@ -240,7 +235,7 @@ public class HopperSensors extends SubsystemBase {
       lastKickerNotFullTimestamp = Timer.getFPGATimestamp();
     }
 
-    empty = emptyDebouncer.calculate(isHopperEmpty());
+    empty = emptyDebouncer.calculate(isHopperEmpty() && isKickerEmpty());
 
     DogLog.log("Hopper/Sensors/KickerDistance", getKickerDistance());
     DogLog.log("Hopper/Sensors/UpperHopperDistance", getUpperHopperDistance());

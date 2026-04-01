@@ -77,7 +77,7 @@ public class HopperConstants {
   public static final Distance KICKER_SENSOR_FULL_THRESHOLD = Inches.of(5.0);
 
   // Threshold distances for determining if the Kicker is empty
-  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(13.0);
+  public static final Distance KICKER_SENSOR_EMPTY_THRESHOLD = Inches.of(17.0);
 
   // Threshold distances for determining if the Hopper is full
   public static final Distance UPPER_HOPPER_SENSOR_FULL_THRESHOLD =

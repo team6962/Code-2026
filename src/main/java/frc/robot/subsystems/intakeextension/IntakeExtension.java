@@ -15,7 +15,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -244,55 +243,6 @@ public class IntakeExtension extends SubsystemBase {
             () -> {
               motor.setControl(
                   new MotionMagicVoltage(IntakeExtensionConstants.RETRACT_POSITION.in(Meters)));
-            },
-            () -> {
-              if (!getPosition()
-                  .isNear(
-                      IntakeExtensionConstants.RETRACT_POSITION,
-                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              }
-            })
-        .until(
-            () ->
-                getPosition()
-                    .isNear(
-                        IntakeExtensionConstants.RETRACT_POSITION,
-                        IntakeExtensionConstants.POSITION_TOLERANCE));
-  }
-
-  public Command extendSlow() {
-    return startEnd(
-            () -> {
-              motor.setControl(
-                  new DynamicMotionMagicVoltage(
-                      IntakeExtensionConstants.MAX_POSITION.in(Meters), 3.0, 6.0));
-            },
-            () -> {
-              if (!getPosition()
-                  .isNear(
-                      IntakeExtensionConstants.MAX_POSITION,
-                      IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              } else {
-                motor.setControl(new CoastOut());
-              }
-            })
-        .until(
-            () ->
-                getPosition()
-                    .isNear(
-                        IntakeExtensionConstants.MAX_POSITION,
-                        IntakeExtensionConstants.POSITION_TOLERANCE))
-        .onlyIf(() -> isZeroed);
-  }
-
-  public Command retractSlow() {
-    return startEnd(
-            () -> {
-              motor.setControl(
-                  new DynamicMotionMagicVoltage(
-                      IntakeExtensionConstants.RETRACT_POSITION.in(Meters), 1.0, 3.0));
             },
             () -> {
               if (!getPosition()
