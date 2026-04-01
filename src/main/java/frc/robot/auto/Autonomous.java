@@ -66,9 +66,13 @@ public class Autonomous {
   }
 
   private static Pose2d LEFT_START_POSE =
-      new Pose2d(4.436294078826904, 7.646793365478516, new Rotation2d());
+      new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d());
 
   private Command singleNeutralCycle(boolean rightSide) {
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
+
     return Commands.sequence(
         Commands.runOnce(
             () ->
@@ -82,46 +86,65 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
-        trenchCheck(
-            mirrorPose(
-                new Pose2d(6.273321628570557, 7.426932334899902, Rotation2d.kZero), rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.2", rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral.2", rightSide)),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
         shootFuel.shoot());
   }
 
   private Command doubleNeutralCycle(boolean rightSide) {
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.3");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.4");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.5");
+    robot.getSwerveDrive().loadChoreoPath("left_neutral.6");
+
     return Commands.sequence(
-        Commands.runOnce(
-            () ->
-                robot
-                    .getSwerveDrive()
-                    .getLocalization()
-                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
-        robot
-            .getSwerveDrive()
-            .followPath("left_neutral.0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
-        trenchCheck(
-            mirrorPose(
-                new Pose2d(6.273321628570557, 7.426932334899902, Rotation2d.kZero), rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.2", rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral.2", rightSide)),
-        shootFuel.shootAllFuelStationary(),
-        trenchCheck(
-                mirrorPose(new Pose2d(3.408, 7.5, Rotation2d.kZero), rightSide),
-                () -> robot.getSwerveDrive().followPath("left_neutral_stopping.3", rightSide),
-                () -> robot.getSwerveDrive().followPath("left_neutral.3", rightSide))
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        trenchCheck(
-            mirrorPose(
-                new Pose2d(5.575682163238525, 7.432374954223633, Rotation2d.k180deg), rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral_stopping.4", rightSide),
-            () -> robot.getSwerveDrive().followPath("left_neutral.4", rightSide)),
-        shootFuel.shoot());
+            Commands.runOnce(
+                () ->
+                    robot
+                        .getSwerveDrive()
+                        .getLocalization()
+                        .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.0", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.1", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+            shootFuel.shootAllFuelStationary().withTimeout(5),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.3", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.4", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot
+                .getSwerveDrive()
+                .followPath("left_neutral.5", rightSide)
+                .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
+            shootFuel.shoot())
+        .withTimeout(20);
+  }
+
+  // Auto starting at the Mid-Hub position, moving backwards and then shooting.
+  public Command moveBackwardAndShoot() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+    return Commands.sequence(
+        robot.getSwerveDrive().driveTo(FieldPositions.HUB_FURTHER_FRONT),
+        Commands.parallel(
+            shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
   public Command leftSingleNeutralCycle() {

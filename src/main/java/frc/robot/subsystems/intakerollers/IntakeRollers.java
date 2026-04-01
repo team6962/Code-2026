@@ -102,7 +102,7 @@ public class IntakeRollers extends SubsystemBase {
   public Command intakeFast() {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new DutyCycleOut(1).withEnableFOC(false));
+          intakeMotor.setControl(new VoltageOut(7).withEnableFOC(false));
         },
         () -> {
           intakeMotor.setControl(new CoastOut());
