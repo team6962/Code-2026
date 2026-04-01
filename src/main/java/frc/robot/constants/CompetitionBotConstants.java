@@ -267,24 +267,24 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 "Monochrome-8", // Beast Left
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.262832).in(Meters),
-                        Inches.of(-7.906432).in(Meters),
-                        Inches.of(20.616499).in(Meters)),
+                        Inches.of(-10.282993).in(Meters),
+                        Inches.of(-7.725981).in(Meters),
+                        Inches.of(20.606557).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(-16.484106).in(Radians),
-                        Degrees.of(-19.832535).in(Radians),
-                        Degrees.of(43).in(Radians)))),
+                        Degrees.of(-19.804560).in(Radians),
+                        Degrees.of(-26.25).in(Radians),
+                        Degrees.of(50).in(Radians)))),
             new AprilTagCameraConstants(
                 "Monochrome-4", // Beast Right
                 new Transform3d(
                     new Translation3d(
-                        Inches.of(-10.262832).in(Meters),
-                        Inches.of(-12.093568).in(Meters),
-                        Inches.of(20.616499).in(Meters)),
+                        Inches.of(-10.282993).in(Meters),
+                        Inches.of(-12.274019).in(Meters),
+                        Inches.of(20.606557).in(Meters)),
                     new Rotation3d(
-                        Degrees.of(16.484106).in(Radians),
-                        Degrees.of(-19.832535).in(Radians),
-                        -Degrees.of(43).in(Radians)))))
+                        Degrees.of(19.804560).in(Radians),
+                        Degrees.of(-26.25).in(Radians),
+                        -Degrees.of(50).in(Radians)))))
         // Note that standard deviations are not fully tuned
         .withSingleTagStdDevs(VecBuilder.fill(20.0, 20.0, 20.0, 60.0))
         .withMultiTagStdDevs(VecBuilder.fill(0.03, 0.03, 0.03, 0.15))
