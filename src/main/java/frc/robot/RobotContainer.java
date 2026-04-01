@@ -129,6 +129,8 @@ public class RobotContainer {
     autoChooser.addOption("Left Double Neutral Cycle", autonomous.leftDoubleNeutralCycle());
     autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
     autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
+    autoChooser.addOption("Left Pass Fuel Cycle", autonomous.leftPassCycle());
+    autoChooser.addOption("Right Pass Fuel Cycle", autonomous.rightPassCycle());
     autoChooser.addOption("Preload", autonomous.preload());
 
     autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
