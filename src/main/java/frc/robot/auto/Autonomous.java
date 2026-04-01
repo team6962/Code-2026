@@ -113,7 +113,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
-        shootFuel.shootAllFuelStationary().withTimeout(4),
+        shootFuel.shootAllFuelStationary().withTimeout(20.0 - 13.2),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.3", rightSide)
