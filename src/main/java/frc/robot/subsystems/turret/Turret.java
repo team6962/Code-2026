@@ -70,6 +70,8 @@ public class Turret extends SubsystemBase {
    */
   private boolean isZeroed = false;
 
+  private Angle manualOffset = Degrees.of(0);
+
   /**
    * Indicates whether the hall sensor has been triggered. Used to detect when the turret has
    * finished being zeroed.
@@ -235,6 +237,7 @@ public class Turret extends SubsystemBase {
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
+    DogLog.log("Turret/ManualOffsetDegs", manualOffset);
     DogLog.forceNt.log("Turret/PositionDegrees", getPosition().in(Degrees), Degrees);
     DogLog.log("Turret/Velocity", getVelocity());
     DogLog.log("Turret/Acceleration", getAcceleration());
@@ -427,6 +430,15 @@ public class Turret extends SubsystemBase {
   }
 
   /**
+   * Commands the manual offset to run once. It sets the manual offset to the provided angle.
+   * Afterwards, it moves the turret to the position that had the manual offset for improved
+   * accuracy.
+   */
+  public void setOffsetAngle(Angle newOffset) {
+    manualOffset = newOffset;
+  }
+
+  /**
    * Optimizes a target angle to take the shortest path from the current angle, while also ensuring
    * the result is within the safe range defined by the given minimum and maximum angles.
    *
@@ -467,7 +479,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          clampPositionToSafeRange(targetAngle),
+                          clampPositionToSafeRange(targetAngle.plus(manualOffset)),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));
@@ -525,7 +537,7 @@ public class Turret extends SubsystemBase {
             Angle targetPosition =
                 clampPositionToSafeRange(
                     optimizeTarget(
-                        unoptimizedTargetAngle,
+                        unoptimizedTargetAngle.plus(manualOffset),
                         getPosition(),
                         TurretConstants.MIN_ANGLE,
                         TurretConstants.MAX_ANGLE));
@@ -574,7 +586,7 @@ public class Turret extends SubsystemBase {
               Angle optimizedTargetPosition =
                   clampPositionToSafeRange(
                       optimizeTarget(
-                          targetAngleSupplier.get(),
+                          targetAngleSupplier.get().plus(manualOffset),
                           getPosition(),
                           TurretConstants.MIN_ANGLE,
                           TurretConstants.MAX_ANGLE));

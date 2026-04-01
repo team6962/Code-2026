@@ -59,6 +59,8 @@ public class ShooterHood extends SubsystemBase {
 
   private Supplier<Boolean> shouldLowerHoodSupplier;
 
+  private Angle manualOffset = Degrees.of(0);
+
   /** Initializes the motor and status signal */
   public ShooterHood(Supplier<Boolean> shouldLowerHoodSupplier) {
     hoodMotor =
@@ -215,6 +217,7 @@ public class ShooterHood extends SubsystemBase {
         profileReferenceSignal,
         hallSensorTriggeredSignal);
     DogLog.log("Hood/Position", getPosition().in(Degrees), Degrees);
+    DogLog.log("Hood/ManualOffsetDegs", manualOffset);
     DogLog.log("Hood/Velocity", getVelocity());
     DogLog.log("Hood/Acceleration", getAcceleration());
     DogLog.log("Hood/AppliedVoltage", getAppliedVoltage());
@@ -325,6 +328,17 @@ public class ShooterHood extends SubsystemBase {
     return hallSensorTriggeredSignal.getValue();
   }
 
+  public void setOffsetAngle(Angle newOffset) {
+    manualOffset = newOffset;
+  }
+
+  /**
+   * Manual correction to shooter hood if auto shoot is consistently off
+   *
+   * @param targetAngle
+   * @return
+   */
+
   /**
    * Returns a command that moves the hood to the given target angle.
    *
@@ -355,7 +369,8 @@ public class ShooterHood extends SubsystemBase {
   public Command moveTo(Supplier<Angle> targetAngleSupplier) {
     return runEnd(
         () -> {
-          Angle clampedAngle = clampPositionToSafeRange(targetAngleSupplier.get());
+          Angle clampedAngle =
+              clampPositionToSafeRange(targetAngleSupplier.get().plus(manualOffset));
           DogLog.log("Hood/TargetPosition", clampedAngle.in(Degrees));
           setPositionControl(clampedAngle);
         },
@@ -467,7 +482,7 @@ public class ShooterHood extends SubsystemBase {
 
           @Override
           public void execute() {
-            Angle unclampedTargetPosition = targetAngleSupplier.get();
+            Angle unclampedTargetPosition = targetAngleSupplier.get().plus(manualOffset);
             AngularVelocity targetVelocity = targetVelocitySupplier.get();
 
             if (unclampedTargetPosition == null) return;
