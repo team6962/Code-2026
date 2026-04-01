@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,6 +49,7 @@ public class TeleopControls extends SubsystemBase {
   private Distance shootingTestDistance = Inches.of(206);
   private AutoDepot autoDepot;
   private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
+  private AutoShoot autoShoot;
 
   private ControllerRumble driverRumble = new ControllerRumble(driver);
   private ControllerRumble operatorRumble = new ControllerRumble(operator);
@@ -316,7 +318,7 @@ public class TeleopControls extends SubsystemBase {
 
     // climbRetract.onTrue(robot.getClimb().descend());
 
-    AutoShoot autoShoot =
+    autoShoot =
         new AutoShoot(
             robot.getSwerveDrive(),
             robot.getTurret(),
@@ -456,10 +458,32 @@ public class TeleopControls extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (!fineControl) {
+      autoShoot.setHoodOffset(mapOffset(operator.getLeftY(), Degrees.of(5)));
+      autoShoot.setTurretOffset(mapOffset(-operator.getLeftX(), Degrees.of(10)));
+    } else {
+      autoShoot.setHoodOffset(Degrees.of(0));
+      autoShoot.setTurretOffset(Degrees.of(0));
+    }
+
     ControllerLogging.logInputs(driver.getHID());
     ControllerLogging.logInputs(operator.getHID());
 
     DogLog.forceNt.log("TeleopControls/DriverConnected", driver.isConnected());
     DogLog.forceNt.log("TeleopControls/OperatorConnected", operator.isConnected());
+  }
+
+  private Angle mapOffset(double joystickInput, Angle maxOffset) {
+    if (Math.abs(joystickInput) < 0.1) {
+      return Degrees.of(0);
+    } else {
+      joystickInput -= Math.signum(joystickInput) * 0.1;
+      joystickInput /= 0.9;
+
+      return Degrees.of(
+          Math.signum(joystickInput)
+              * Math.pow(Math.abs(joystickInput), 2)
+              * maxOffset.in(Degrees));
+    }
   }
 }

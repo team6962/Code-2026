@@ -101,6 +101,9 @@ public class AutoShoot extends Command {
   /** The error between the turret's position and the release angle. */
   private Angle turretError = Degrees.of(2);
 
+  private Angle hoodOffset = Degrees.of(0);
+  private Angle turretOffset = Degrees.of(0);
+
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
    * shoot at the hub.
@@ -236,6 +239,16 @@ public class AutoShoot extends Command {
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(rollers, rollersCommand))
         .whileTrue(rollersCommand);
+  }
+
+  public Angle setHoodOffset(Angle offset) {
+    this.hoodOffset = offset;
+    return hoodOffset;
+  }
+
+  public Angle setTurretOffset(Angle offset) {
+    this.turretOffset = offset;
+    return turretOffset;
   }
 
   @Override
@@ -463,6 +476,9 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetX", target.getX());
     DogLog.log("AutoShoot/TargetY", target.getY());
 
+    DogLog.log("AutoShoot/HoodOffset", hoodOffset.in(Degrees), Degrees);
+    DogLog.log("AutoShoot/TurretOffset", turretOffset.in(Degrees), Degrees);
+
     // Calculate the ideal shooting angles and roller speed to hit the target
     ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
@@ -474,8 +490,8 @@ public class AutoShoot extends Command {
     Angle previousHoodAngleTarget = hoodAngleTarget;
 
     // Set the target angles and roller speed
-    turretAngleTarget = appliedShootingParameters.turretAngle;
-    hoodAngleTarget = appliedShootingParameters.hoodAngle;
+    turretAngleTarget = appliedShootingParameters.turretAngle.plus(turretOffset);
+    hoodAngleTarget = appliedShootingParameters.hoodAngle.plus(hoodOffset);
     rollerSpeedTarget = appliedShootingParameters.rollerSpeed;
 
     if (previousTurretAngleTarget != null && previousHoodAngleTarget != null) {
