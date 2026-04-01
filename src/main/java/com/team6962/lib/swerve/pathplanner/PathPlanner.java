@@ -168,12 +168,28 @@ public class PathPlanner {
   }
 
   public PathPlannerPath loadChoreoPath(String pathName, boolean mirrorPath) {
+    if (pathName.contains(".")) {
+      // Use the split index if it's included in the path name
+      String[] parts = pathName.split("\\.");
+
+      if (parts.length == 2) {
+        try {
+          int splitIndex = Integer.parseInt(parts[1]);
+          return loadChoreoPath(parts[0], splitIndex, mirrorPath);
+        } catch (NumberFormatException e) {
+          DriverStation.reportError("Invalid split index in path name: " + pathName, true);
+        }
+      }
+    }
+
     try {
       PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName);
 
       if (mirrorPath) {
+        System.out.println("Loaded path: " + pathName + " (mirrored)");
         return mirroredPaths.computeIfAbsent(pathName, key -> unmirroredPath.mirrorPath());
       } else {
+        System.out.println("Loaded path: " + pathName + " (unmirrored)");
         return unmirroredPath;
       }
     } catch (Exception e) {
@@ -188,9 +204,11 @@ public class PathPlanner {
       PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName, splitIndex);
 
       if (mirrorPath) {
+        System.out.println("Loaded path: " + pathName + "." + splitIndex + " (split, mirrored)");
         return mirroredPaths.computeIfAbsent(
             pathName + "." + splitIndex, key -> unmirroredPath.mirrorPath());
       } else {
+        System.out.println("Loaded path: " + pathName + "." + splitIndex + " (split, unmirrored)");
         return unmirroredPath;
       }
     } catch (Exception e) {

@@ -131,6 +131,9 @@ public class RobotContainer {
     autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
     autoChooser.addOption("Preload", autonomous.preload());
 
+    autoChooser.addOption("Left Bump", autonomous.bump(false));
+    autoChooser.addOption("Right Bump", autonomous.bump(true));
+
     autoChooser.addOption("SysId Shooter Rollers", shooterRollers.sysId());
 
     autoChooser.addOption(

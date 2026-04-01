@@ -184,6 +184,7 @@ public class TeleopControls extends SubsystemBase {
     // Intake without driving - WORKS
     driver
         .rightStick()
+        .and(RobotState::isEnabled)
         .whileTrue(
             this.robot
                 .getIntakeRollers()
@@ -211,7 +212,7 @@ public class TeleopControls extends SubsystemBase {
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
     // Pass
-    operator.leftTrigger().whileTrue(robot.getHopper().feed());
+    operator.leftTrigger().and(RobotState::isEnabled).whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
     operator
@@ -247,12 +248,13 @@ public class TeleopControls extends SubsystemBase {
 
     // Backup zero
     SmartDashboard.putData(
-        "Zero Shooter Hood", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
+        "Zero Shooter Hood",
+        this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled).ignoringDisable(true));
     SmartDashboard.putData(
         "Zero Turret",
         Commands.runOnce(() -> robot.getTurret().zero())
-            .ignoringDisable(true)
-            .onlyIf(RobotState::isDisabled));
+            .onlyIf(RobotState::isDisabled)
+            .ignoringDisable(true));
 
     operator
         .povLeft()
@@ -368,7 +370,8 @@ public class TeleopControls extends SubsystemBase {
 
     // operator
     //     .rightTrigger()
-    Trigger shootButtonsTrigger = operator.rightTrigger().or(driver.back());
+    Trigger shootButtonsTrigger =
+        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
 
     shootButtonsTrigger
         .and(inAllianceZone)
