@@ -162,18 +162,24 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getIntakeRollers().intakeFast(),
-                rightSide ? autoPassRight : autoPassLeft,
+                rightSide ? autoPassLeft : autoPassRight,
                 robot.getHopper().feed()),
         Commands.either(
-                robot.getSwerveDrive().followPath("pass_cycle.2", rightSide),
-                robot.getSwerveDrive().followPath("pass_cycle_not_full.2", rightSide),
+                Commands.sequence(robot.getSwerveDrive().followPath("pass_cycle_full.2", rightSide),
+                trenchCheck(mirrorPose(new Pose2d(6.009798049926758, 7.468980312347412, Rotation2d.kZero), rightSide), 
+                () -> robot.getSwerveDrive().followPath("pass_cycle_full_stopping.3", rightSide), 
+                () -> robot.getSwerveDrive().followPath("pass_cycle_full.3", rightSide))),
+                Commands.sequence(robot.getSwerveDrive().followPath("pass_cycle.2", rightSide), 
+                trenchCheck(mirrorPose(new Pose2d(6.009798049926758, 7.468980312347412, Rotation2d.k180deg), rightSide), 
+                () -> robot.getSwerveDrive().followPath("pass_cycle_stopping.3", rightSide), 
+                () -> robot.getSwerveDrive().followPath("pass_cycle.3", rightSide))),
                 () -> hopperSensors.isHopperFull())
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("pass_cycle.3", rightSide),
+        robot.getSwerveDrive().followPath("pass_cycle.4", rightSide),
         robot
             .getSwerveDrive()
-            .followPath("pass_cycle.4", rightSide)
+            .followPath("pass_cycle.5", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getIntakeRollers().intake(),

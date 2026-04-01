@@ -150,7 +150,8 @@ public class HopperSensors extends SubsystemBase {
    *     object is present.
    */
   public boolean isHopperFull() {
-    return upperHopperDistance.getValue().lt(upperHopperSensorFullThreshold);
+    // return upperHopperDistance.getValue().lt(upperHopperSensorFullThreshold);
+    return true;
   }
 
   /**
