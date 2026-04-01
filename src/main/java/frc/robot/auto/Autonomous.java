@@ -77,7 +77,11 @@ public class Autonomous {
             .followPath("left_neutral.0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.1", rightSide),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.1", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
         shootFuel.shoot());
   }
@@ -92,42 +96,41 @@ public class Autonomous {
     robot.getSwerveDrive().loadChoreoPath("left_neutral.6");
 
     return Commands.sequence(
-            Commands.runOnce(
-                () ->
-                    robot
-                        .getSwerveDrive()
-                        .getLocalization()
-                        .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
-            robot
-                .getSwerveDrive()
-                .followPath("left_neutral.0", rightSide)
-                .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot
-                .getSwerveDrive()
-                .followPath("left_neutral.1", rightSide)
-                .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
-            shootFuel.shootAllFuelStationary().withTimeout(4),
-            robot
-                .getSwerveDrive()
-                .followPath("left_neutral.3", rightSide)
-                .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot
-                .getSwerveDrive()
-                .followPath("left_neutral.4", rightSide)
-                .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot
-                .getSwerveDrive()
-                .followPath("left_neutral.5", rightSide)
-                .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
-            shootFuel.shoot())
-        .withTimeout(20);
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.0", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.1", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        shootFuel.shootAllFuelStationary().withTimeout(4),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.3", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.4", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral.5", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
+        shootFuel.shoot());
   }
 
   public Command bump(boolean rightSide) {

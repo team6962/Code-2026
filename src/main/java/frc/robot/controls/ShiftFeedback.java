@@ -28,7 +28,7 @@ public class ShiftFeedback extends SubsystemBase {
   private boolean winAutoInTesting = false;
 
   /** Whether to enable feedback. */
-  private boolean feedbackEnabled = false;
+  private boolean feedbackEnabled = true;
 
   /**
    * Creates a new ShiftFeedback subsystem and schedules rumble commands on the provided
@@ -60,7 +60,7 @@ public class ShiftFeedback extends SubsystemBase {
   private double getRumbleIntensity() {
     if (RobotState.isDisabled()
         || !RobotState.isTeleop()
-        || !feedbackEnabled
+        || !isFeedbackEnabled()
         || teleopStartTimeSeconds < 0.0) return 0.0;
 
     double timeUntilSwitchSeconds = getTimeUntilSwitch();
@@ -77,7 +77,9 @@ public class ShiftFeedback extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (!feedbackEnabled && !isPlayingMatch()) {
+    DogLog.forceNt.log("ShiftFeedback/FeedbackEnabled", isFeedbackEnabled());
+
+    if (!isFeedbackEnabled()) {
       DogLog.forceNt.log("ShiftFeedback/TeleopElapsedTime", NEARLY_ZERO);
       DogLog.forceNt.log("ShiftFeedback/TeleopRemainingTime", NEARLY_ZERO);
       DogLog.forceNt.log("ShiftFeedback/TimeUntilSwitch", NEARLY_ZERO);
@@ -231,6 +233,10 @@ public class ShiftFeedback extends SubsystemBase {
    */
   private boolean isPlayingMatch() {
     return DriverStation.getMatchType() != MatchType.None;
+  }
+
+  private boolean isFeedbackEnabled() {
+    return feedbackEnabled || isPlayingMatch();
   }
 
   /**

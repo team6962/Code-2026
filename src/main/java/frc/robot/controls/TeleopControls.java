@@ -247,14 +247,24 @@ public class TeleopControls extends SubsystemBase {
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Backup zero
-    SmartDashboard.putData(
-        "Zero Shooter Hood",
-        this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled).ignoringDisable(true));
-    SmartDashboard.putData(
-        "Zero Turret",
-        Commands.runOnce(() -> robot.getTurret().zero())
-            .onlyIf(RobotState::isDisabled)
-            .ignoringDisable(true));
+    SmartDashboard.putData("Zero Shooter Hood", this.robot.getShooterHood().zero());
+    SmartDashboard.putData("Zero Turret", robot.getTurret().zero());
+    SmartDashboard.putData("Zero Intake Retracted", robot.getIntakeExtension().zeroRetracted());
+    SmartDashboard.putData("Zero Intake Extended", robot.getIntakeExtension().zeroExtended());
+
+    operator
+        .povUp()
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE));
+
+    operator
+        .povDown()
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot
+                .getShooterHood()
+                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     operator
         .povLeft()
@@ -262,7 +272,7 @@ public class TeleopControls extends SubsystemBase {
         .whileTrue(this.robot.getTurret().moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE));
 
     operator
-        .povLeft()
+        .povRight()
         .and(() -> fineControl)
         .whileTrue(
             this.robot
@@ -288,18 +298,6 @@ public class TeleopControls extends SubsystemBase {
                 this.robot
                     .getIntakeExtension()
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
-
-    // operator
-    //     .axisGreaterThan(Axis.kRightY.value, 0.5)
-    //     .and(() -> fineControl)
-    //     .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
-
-    // operator
-    //     .axisLessThan(Axis.kRightY.value, -0.5)
-    //     .and(() -> fineControl)
-    //     .whileTrue(
-    //
-    // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Intake extension and retraction - WORKS
     Trigger intakeRetract = operator.rightStick();
@@ -460,5 +458,8 @@ public class TeleopControls extends SubsystemBase {
   public void periodic() {
     ControllerLogging.logInputs(driver.getHID());
     ControllerLogging.logInputs(operator.getHID());
+
+    DogLog.forceNt.log("TeleopControls/DriverConnected", driver.isConnected());
+    DogLog.forceNt.log("TeleopControls/OperatorConnected", operator.isConnected());
   }
 }

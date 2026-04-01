@@ -481,4 +481,22 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
     DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
   }
+
+  public Command zeroRetracted() {
+    return Commands.runOnce(
+            () -> {
+              motor.setPosition(IntakeExtensionConstants.MIN_POSITION.in(Meters));
+              isZeroed = true;
+            })
+        .ignoringDisable(true);
+  }
+
+  public Command zeroExtended() {
+    return Commands.runOnce(
+            () -> {
+              motor.setPosition(IntakeExtensionConstants.MAX_POSITION.in(Meters));
+              isZeroed = true;
+            })
+        .ignoringDisable(true);
+  }
 }
