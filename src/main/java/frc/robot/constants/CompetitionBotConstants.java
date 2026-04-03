@@ -155,7 +155,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.94))) // Measured on 971 practice field
+                .withWheelRadius(Inches.of(1.966))) // Measured on 971 practice field
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
