@@ -28,7 +28,6 @@ import frc.robot.RobotContainer;
 import frc.robot.auto.AutoDepot;
 import frc.robot.auto.AutoOutpost;
 import frc.robot.auto.AutoZoneDefense;
-import frc.robot.auto.FieldPositions;
 import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
@@ -159,19 +158,19 @@ public class TeleopControls extends SubsystemBase {
     // driver.x().onTrue(autoClimb.unclimb());
 
     // Auto Defense
-    driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
-    driver
-        .b()
-        .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
-    driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
-    driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
+    // driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
+    // driver
+    //     .b()
+    //     .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
+    // driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
+    // driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
 
     // Auto Depot
-    driver.leftBumper().whileTrue(autoDepot.autoDepot());
+    // driver.leftBumper().whileTrue(autoDepot.autoDepot());
 
-    driver // Auto Drive to Outpost
-        .rightBumper()
-        .whileTrue(autoOutpost.autoOutpost());
+    // driver // Auto Drive to Outpost
+    //     .rightBumper()
+    //     .whileTrue(autoOutpost.autoOutpost());
 
     // Dump fuel - WORKS
     driver
