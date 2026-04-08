@@ -93,7 +93,6 @@ public class Autonomous {
     robot.getSwerveDrive().loadChoreoPath("left_neutral.3");
     robot.getSwerveDrive().loadChoreoPath("left_neutral.4");
     robot.getSwerveDrive().loadChoreoPath("left_neutral.5");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.6");
 
     return Commands.sequence(
         Commands.runOnce(
@@ -129,7 +128,6 @@ public class Autonomous {
             .followPath("left_neutral.5", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.6", rightSide),
         shootFuel.shoot());
   }
 
