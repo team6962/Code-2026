@@ -24,11 +24,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
-// import frc.robot.auto.AutoClimb;
-import frc.robot.auto.AutoDepot;
-import frc.robot.auto.AutoOutpost;
-import frc.robot.auto.AutoZoneDefense;
-import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
@@ -41,13 +36,13 @@ import java.util.Set;
 public class TeleopControls extends SubsystemBase {
   private RobotContainer robot;
   // private AutoClimb autoClimb;
-  private ShootFuel shootFuel;
-  private AutoOutpost autoOutpost;
+  //   private ShootFuel shootFuel;
+  //   private AutoOutpost autoOutpost;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
-  private AutoDepot autoDepot;
-  private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
+  //   private AutoDepot autoDepot;
+  //   private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
   private AutoShoot autoShoot;
 
   private ControllerRumble driverRumble = new ControllerRumble(driver);
@@ -68,10 +63,10 @@ public class TeleopControls extends SubsystemBase {
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
-    this.shootFuel = new ShootFuel(robot);
-    this.autoOutpost = new AutoOutpost(robot, shootFuel);
-    this.autoDepot = new AutoDepot(robot);
-    this.autoZoneDefense = new AutoZoneDefense(robot);
+    // this.shootFuel = new ShootFuel(robot);
+    // this.autoOutpost = new AutoOutpost(robot, shootFuel);
+    // this.autoDepot = new AutoDepot(robot);
+    // this.autoZoneDefense = new AutoZoneDefense(robot);
 
     DogLog.tunable(
         "TeleopControls/hubMaxLinearVelocity",
@@ -212,7 +207,7 @@ public class TeleopControls extends SubsystemBase {
     // Unjam hopper - WORKS
     operator.leftBumper().whileTrue(robot.getHopper().unjam());
 
-    // Pass
+    // Backup shoot
     operator.leftTrigger().and(RobotState::isEnabled).whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
@@ -408,6 +403,7 @@ public class TeleopControls extends SubsystemBase {
             .and(() -> !fineControl)
             .and(shootButtonsTrigger.negate())
             .and(operator.x().negate())
+            .and(operator.leftTrigger().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
             .and(() -> !robot.getHopper().isEmpty());
 
