@@ -256,7 +256,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                         Inches.of(8.265366).in(Meters)),
                     new Rotation3d(0, Units.degreesToRadians(-20), -(3 * Math.PI) / 4))),
             new AprilTagCameraConstants( // Swerve Left
-                "Monochrome-9",
+                "Monochrome-1",
                 new Transform3d(
                     new Translation3d(
                         Inches.of(-12.708583).in(Meters),
