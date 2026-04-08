@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
+import java.util.function.Supplier;
 
 public class RollerFloor extends SubsystemBase implements HopperFloor {
   private TalonFX rollerFloorMotor;
@@ -32,6 +33,9 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
   private RollerFloorSim simulation;
+
+  private Voltage feedVoltage = Volts.of(8);
+  private Voltage dumpVoltage = Volts.of(-8);
 
   public RollerFloor() {
     rollerFloorMotor =
@@ -54,9 +58,24 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
         "Hopper/RollerFloor/AppliedVoltage",
         0.0,
         newVoltageDouble -> {
-          Voltage target = edu.wpi.first.units.Units.Volts.of(newVoltageDouble);
-          CommandScheduler.getInstance().schedule(feedDump(target));
+          Voltage target = Volts.of(newVoltageDouble);
+          CommandScheduler.getInstance().schedule(move(target));
         });
+
+    DogLog.tunable(
+        "Hopper/RollerFloor/FeedVoltage",
+        feedVoltage.in(Volts),
+        newVoltageDouble -> {
+          feedVoltage = Volts.of(newVoltageDouble);
+        });
+
+    DogLog.tunable(
+        "Hopper/RollerFloor/DumpVoltage",
+        dumpVoltage.in(Volts),
+        newVoltageDouble -> {
+          dumpVoltage = Volts.of(newVoltageDouble);
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new RollerFloorSim(rollerFloorMotor);
     }
@@ -67,17 +86,30 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    * to feed fuel to the shooter. If you want to dump instead, use a negative voltage to make the
    * motor go clockwise.
    */
-  private Command feedDump(Voltage targetVoltage) {
+  private Command move(Supplier<Voltage> targetVoltage) {
 
     return startEnd(
         () -> {
           // defines a local function to set motor voltage to make it go
-          rollerFloorMotor.setControl(new VoltageOut(targetVoltage));
+          rollerFloorMotor.setControl(new VoltageOut(targetVoltage.get()));
         },
         () -> {
           // defines a local function to stop motor
           rollerFloorMotor.setControl(new CoastOut());
         });
+  }
+
+  /**
+   * Rotates the motor by applying the specified voltage. Positive voltage feeds fuel to the
+   * shooter, while negative voltage dumps fuel out of the hopper.
+   *
+   * @param targetVoltage The voltage to apply to the motor, where positive values feed fuel and
+   *     negative values dump fuel.
+   * @return A command that runs the roller floor motor at the specified voltage to feed or dump
+   *     fuel.
+   */
+  private Command move(Voltage targetVoltage) {
+    return move(() -> targetVoltage);
   }
 
   /**
@@ -87,28 +119,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    */
   @Override
   public Command feed() {
-    return feedDump(Volts.of(8.0));
-  }
-
-  /**
-   * Moves the rollers in reverse.
-   *
-   * @return A command that runs the roller floor motor to move fuel away from the queue.
-   */
-  @Override
-  public Command reverse() {
-    return feedDump(Volts.of(-6.0));
-  }
-
-  /**
-   * Slowly runs the rollers in reverse.
-   *
-   * @return A command that runs the roller floor motor at a low voltage to move fuel away from the
-   *     queue.
-   */
-  @Override
-  public Command slowReverse() {
-    return feedDump(Volts.of(-1.0));
+    return move(() -> feedVoltage);
   }
 
   /**
@@ -118,7 +129,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    */
   @Override
   public Command dump() {
-    return feedDump(Volts.of(-8.0));
+    return move(() -> dumpVoltage);
   }
 
   @Override

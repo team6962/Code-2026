@@ -102,27 +102,6 @@ public class BeltFloor extends SubsystemBase implements HopperFloor {
   }
 
   /**
-   * Moves the belts in reverse.
-   *
-   * @return A command that runs the belt floor motor to move fuel away from the queue.
-   */
-  @Override
-  public Command reverse() {
-    return feedDump(Volts.of(-6.0));
-  }
-
-  /**
-   * Slowly runs the belts in reverse.
-   *
-   * @return A command that runs the belt floor motor at a low voltage to move fuel away from the
-   *     queue.
-   */
-  @Override
-  public Command slowReverse() {
-    return feedDump(Volts.of(-1.0));
-  }
-
-  /**
    * Moves the belts in reverse to dump fuel out of the hopper.
    *
    * @return A command that runs the belt floor motor to dump fuel.
