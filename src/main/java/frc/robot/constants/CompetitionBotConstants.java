@@ -269,7 +269,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     new Translation3d(
                         Inches.of(-10.282993).in(Meters),
                         Inches.of(-7.725981).in(Meters),
-                        Inches.of(20.606557).in(Meters)),
+                        Inches.of(20.606557 - 0.125).in(Meters)),
                     new Rotation3d(
                         Degrees.of(-19.804560).in(Radians),
                         Degrees.of(-26.25).in(Radians),
@@ -280,7 +280,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                     new Translation3d(
                         Inches.of(-10.282993).in(Meters),
                         Inches.of(-12.274019).in(Meters),
-                        Inches.of(20.606557).in(Meters)),
+                        Inches.of(20.606557 - 0.125).in(Meters)),
                     new Rotation3d(
                         Degrees.of(19.804560).in(Radians),
                         Degrees.of(-26.25).in(Radians),
