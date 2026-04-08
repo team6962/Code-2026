@@ -4,8 +4,8 @@ import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.hopper.floor.BeltFloor;
 import frc.robot.subsystems.hopper.floor.HopperFloor;
+import frc.robot.subsystems.hopper.floor.RollerFloor;
 import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.hopper.sensors.HopperSensors;
 
@@ -25,7 +25,7 @@ public class Hopper extends SubsystemBase {
    * Constructor for the Hopper subsystem, which initializes the hopper floor, kicker, and sensors
    */
   public Hopper() {
-    floor = new BeltFloor();
+    floor = new RollerFloor();
     kicker = new Kicker();
     sensors = new HopperSensors();
 
