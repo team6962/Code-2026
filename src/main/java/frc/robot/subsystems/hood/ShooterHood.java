@@ -89,7 +89,7 @@ public class ShooterHood extends SubsystemBase {
     positionSignal = hoodMotor.getPosition();
     statorCurrentSignal = hoodMotor.getStatorCurrent();
     supplyCurrentSignal = hoodMotor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS2Closed();
+    hallSensorTriggeredSignal = candi.getS1Closed();
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
 
     DogLog.tunable(

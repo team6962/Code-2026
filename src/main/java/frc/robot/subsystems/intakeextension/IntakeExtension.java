@@ -102,7 +102,7 @@ public class IntakeExtension extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS1Closed();
+    hallSensorTriggeredSignal = candi.getS2Closed();
     closedLoopReferenceSignal = motor.getClosedLoopReference();
 
     DogLog.tunable(
