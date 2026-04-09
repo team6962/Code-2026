@@ -141,6 +141,10 @@ public class RobotContainer {
         new AutoChooserOption(autonomous.moveBackwardAndShoot(), true));
 
     autoChooser.addOption(
+        "Center from Bump", new AutoChooserOption(autonomous.center(false), true));
+    autoChooser.addOption("Center from Hub", new AutoChooserOption(autonomous.center(true), true));
+
+    autoChooser.addOption(
         "Drive Straight", new AutoChooserOption(driveStraightAuto.getCommand(), true));
 
     autoChooser.addOption(

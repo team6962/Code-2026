@@ -40,23 +40,8 @@ public class ShootFuel {
             Commands.waitUntil(
                     () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
                 .andThen(robot.getHopper().feed().repeatedly()),
-            Commands.sequence(
-                pulseIntake(),
-                Commands.sequence(
-                        robot.getIntakeExtension().retract(), robot.getIntakeExtension().extend())
-                    .repeatedly()),
             robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
-  }
-
-  private Command pulseIntake() {
-    return Commands.sequence(
-        Commands.waitSeconds(2),
-        Commands.sequence(
-                robot.getIntakeExtension().retractSlow().withTimeout(0.5),
-                Commands.waitSeconds(0.25),
-                robot.getIntakeExtension().extendSlow().withTimeout(0.5))
-            .repeatedly());
   }
 
   /**
@@ -71,8 +56,7 @@ public class ShootFuel {
         autoShoot,
         Commands.waitUntil(
                 () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-            .andThen(robot.getHopper().feed().repeatedly()),
-        pulseIntake());
+            .andThen(robot.getHopper().feed().repeatedly()));
   }
 
   public Command shootOnTheMove() {
@@ -107,11 +91,8 @@ public class ShootFuel {
                                 autoShoot.isReadyToShoot().getAsBoolean()
                                     || RobotBase.isSimulation())
                         .repeatedly()),
-            Commands.sequence(
-                pulseIntake(),
-                Commands.sequence(
-                        robot.getIntakeExtension().retract(), robot.getIntakeExtension().extend())
-                    .repeatedly()),
+            robot.getIntakeExtension().retract(),
+            robot.getIntakeExtension().extend().repeatedly(),
             robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
   }
