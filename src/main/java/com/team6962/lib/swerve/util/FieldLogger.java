@@ -87,12 +87,13 @@ public class FieldLogger implements SwerveComponent {
 
         modulePoses[i] = robotPose.plus(relativePose.minus(new Pose2d()));
       }
+
+      field.getObject("Swerve Modules").setPoses(modulePoses);
     }
 
     previousRobotPose = robotPose;
 
     field.setRobotPose(robotPose);
-    field.getObject("Swerve Modules").setPoses(modulePoses);
   }
 
   /**
