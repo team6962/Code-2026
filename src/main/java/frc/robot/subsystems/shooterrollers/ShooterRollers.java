@@ -109,7 +109,7 @@ public class ShooterRollers extends SubsystemBase {
               .getConfigurator()
               .apply(ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.withKP(value));
         });
-    
+
     DogLog.tunable(
         "Shooter Rollers/kD",
         ShooterRollersConstants.MOTOR_CONFIGURATION.Slot0.kD,
