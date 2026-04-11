@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.auto.AutoChooserOption;
 import frc.robot.auto.AutoLowerHood;
@@ -95,6 +96,9 @@ public class RobotContainer {
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
+
+    // Warm up the path following pipeline
+    CommandScheduler.getInstance().schedule(swerveDrive.followPath("center.0").withTimeout(3).until(RobotState::isEnabled).ignoringDisable(true));
   }
 
   private void configureAutonomousChooser() {
