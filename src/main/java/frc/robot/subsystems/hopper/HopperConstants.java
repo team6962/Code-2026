@@ -27,7 +27,7 @@ public class HopperConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(120)) // everything needs to be tuned
-                  .withSupplyCurrentLimit(Amps.of(40))
+                  .withSupplyCurrentLimit(Amps.of(30))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true));
 
