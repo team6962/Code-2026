@@ -3,6 +3,9 @@ package com.team6962.lib.swerve.pathplanner;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Newtons;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -12,6 +15,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.motion.VelocityMotion;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,8 +27,6 @@ import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PathPlanner {
   private CommandSwerveDrive drivetrain;
@@ -126,7 +129,7 @@ public class PathPlanner {
       return Commands.print("Attempting to follow null path: " + pathName).withName(commandName);
     }
 
-    Command pathPlannerCommand = AutoBuilder.followPath(path);
+    Command pathPlannerCommand = DogLog.time("Commands/Follow " + pathName + " (inner)", AutoBuilder.followPath(path));
     Command wrapperCommand =
         new Command() {
           @Override
@@ -164,7 +167,7 @@ public class PathPlanner {
       wrapperCommand.addRequirements(drivetrain.useTranslation());
     }
 
-    return wrapperCommand;
+    return DogLog.time("Commands/Follow " + pathName + " (wrapper)", wrapperCommand);
   }
 
   public PathPlannerPath loadChoreoPath(String pathName, boolean mirrorPath) {
@@ -201,6 +204,8 @@ public class PathPlanner {
 
   public PathPlannerPath loadChoreoPath(String pathName, int splitIndex, boolean mirrorPath) {
     try {
+      System.out.println("Attempting to load path: " + pathName + "." + splitIndex + " (split, " + (mirrorPath ? "mirrored" : "unmirrored") + ")");
+
       PathPlannerPath unmirroredPath = PathPlannerPath.fromChoreoTrajectory(pathName, splitIndex);
 
       if (mirrorPath) {
