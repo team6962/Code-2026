@@ -50,22 +50,22 @@ public class Localization implements SwerveComponent {
   private Odometry odometry;
 
   /** The current field-relative velocity of the robot as a ChassisSpeeds object. */
-  private ChassisSpeeds velocity;
+  private ChassisSpeeds velocity = new ChassisSpeeds();
 
   /**
    * The current field-relative translation velocity of the robot as a TranslationalVelocity object.
    */
-  private TranslationalVelocity translationalVelocity;
+  private TranslationalVelocity translationalVelocity = new TranslationalVelocity();
 
   /** The most recent twist (change in position along a circular arc) computed by the odometry. */
-  private Twist2d twist;
+  private Twist2d twist = new Twist2d();
 
   /**
    * The velocity along a circular arc, computed from odometry data. This is stored in a Twist2d
    * object, where dx, dy, and dtheta represent the velocities in the x, y, and angular directions,
    * respectively, instead of changes in position.
    */
-  private Twist2d arcVelocity;
+  private Twist2d arcVelocity = new Twist2d();
 
   /**
    * The current yaw of the robot, stored as a continuous angle to prevent discontinuities when
@@ -201,6 +201,8 @@ public class Localization implements SwerveComponent {
    */
   public synchronized void addVisionMeasurement(
       Pose3d pose, double timestampSeconds, Matrix<N4, N1> stdDevs) {
+    if (poseEstimator == null) return;
+
     poseEstimator.addVisionMeasurement(pose, timestampSeconds, stdDevs);
   }
 
@@ -225,6 +227,8 @@ public class Localization implements SwerveComponent {
    */
   public synchronized void addVisionMeasurement(
       Pose2d pose, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+    if (poseEstimator == null) return;
+
     Vector<N4> stdDevs3d = new Vector<N4>(Nat.N4());
 
     stdDevs3d.set(0, 0, stdDevs.get(0, 0));
@@ -246,6 +250,8 @@ public class Localization implements SwerveComponent {
    *     source.
    */
   public synchronized void addVisionMeasurement(Pose3d pose, double timestampSeconds) {
+    if (poseEstimator == null) return;
+
     poseEstimator.addVisionMeasurement(pose, timestampSeconds);
   }
 
@@ -260,6 +266,8 @@ public class Localization implements SwerveComponent {
    *     source.
    */
   public synchronized void addVisionMeasurement(Pose2d pose, double timestampSeconds) {
+    if (poseEstimator == null) return;
+
     poseEstimator.addVisionMeasurement(new Pose3d(pose), timestampSeconds);
   }
 
@@ -271,6 +279,8 @@ public class Localization implements SwerveComponent {
    *     deviations.
    */
   public synchronized void addVisionMeasurement(AprilTagVisionMeasurement measurement) {
+    if (poseEstimator == null) return;
+
     addVisionMeasurement(
         measurement.getPose(), measurement.getTimestamp(), measurement.getStdDevs());
   }
@@ -281,6 +291,8 @@ public class Localization implements SwerveComponent {
    * @param pose The new estimated Pose3d of the robot.
    */
   public synchronized void resetPosition(Pose3d pose) {
+    if (poseEstimator == null) return;
+
     poseEstimator.resetPose(pose);
   }
 
@@ -290,6 +302,8 @@ public class Localization implements SwerveComponent {
    * @param pose The new estimated Pose2d of the robot.
    */
   public synchronized void resetPosition(Pose2d pose) {
+    if (poseEstimator == null) return;
+
     poseEstimator.resetPose(new Pose3d(pose));
   }
 
@@ -299,6 +313,8 @@ public class Localization implements SwerveComponent {
    * @param yaw The new yaw angle for the robot.
    */
   public synchronized void resetYaw(Angle yaw) {
+    if (poseEstimator == null) return;
+
     Pose3d currentPose = poseEstimator.getEstimatedPosition();
     Pose3d newPose =
         new Pose3d(
@@ -323,6 +339,8 @@ public class Localization implements SwerveComponent {
    * @return The current estimated Pose2d of the robot.
    */
   public synchronized Pose2d getPosition2d() {
+    if (poseEstimator == null) return new Pose2d();
+  
     return poseEstimator.getEstimatedPosition().toPose2d();
   }
 
@@ -332,6 +350,8 @@ public class Localization implements SwerveComponent {
    * @return The current estimated Pose3d of the robot.
    */
   public synchronized Pose3d getPosition3d() {
+    if (poseEstimator == null) return new Pose3d();
+
     return poseEstimator.getEstimatedPosition();
   }
 
@@ -341,6 +361,8 @@ public class Localization implements SwerveComponent {
    * @return
    */
   public synchronized Angle getHeading() {
+    if (poseEstimator == null) return Radians.of(0);
+
     return AngleMath.toContinuous(
         poseEstimator.getEstimatedPosition().getRotation().getMeasureZ(), gyroscope.getYaw());
   }
@@ -351,6 +373,8 @@ public class Localization implements SwerveComponent {
    * @return The current rotation of the robot.
    */
   public synchronized Rotation3d getRotation3d() {
+    if (poseEstimator == null) return new Rotation3d();
+
     return poseEstimator.getEstimatedPosition().getRotation();
   }
 
@@ -360,6 +384,8 @@ public class Localization implements SwerveComponent {
    * @return The current pitch of the robot.
    */
   public synchronized Angle getPitch() {
+    if (poseEstimator == null) return Radians.of(0);
+
     return poseEstimator.getEstimatedPosition().getRotation().getMeasureX();
   }
 
@@ -369,6 +395,8 @@ public class Localization implements SwerveComponent {
    * @return The current roll of the robot.
    */
   public synchronized Angle getRoll() {
+    if (poseEstimator == null) return Radians.of(0);
+
     return poseEstimator.getEstimatedPosition().getRotation().getMeasureY();
   }
 
