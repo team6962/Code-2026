@@ -28,16 +28,16 @@ public class Odometry implements SwerveComponent {
   private SwerveModule[] modules;
 
   /** The last recorded positions of the swerve modules. */
-  private SwerveModulePosition[] lastPositions;
+  private SwerveModulePosition[] lastPositions = zeroPositions();
 
   /** The current recorded positions of the swerve modules. */
-  private SwerveModulePosition[] currentPositions;
+  private SwerveModulePosition[] currentPositions = zeroPositions();
 
   /** The current recorded states of the swerve modules. */
-  private SwerveModuleState[] currentStates;
+  private SwerveModuleState[] currentStates = zeroStates();
 
   /** The change in position of the swerve modules since the last update. */
-  private SwerveModulePosition[] positionDeltas;
+  private SwerveModulePosition[] positionDeltas = zeroPositions();
 
   /** The twist the robot has undergone since the last update. */
   private Twist2d twist = new Twist2d();
@@ -234,5 +234,19 @@ public class Odometry implements SwerveComponent {
     positionDeltas = computePositionDeltas();
     twist = computeTwist();
     robotRelativeVelocity = computeRobotRelativeVelocity();
+  }
+
+  private static SwerveModulePosition[] zeroPositions() {
+    return new SwerveModulePosition[] {
+      new SwerveModulePosition(), new SwerveModulePosition(),
+      new SwerveModulePosition(), new SwerveModulePosition(),
+    };
+  }
+
+  private static SwerveModuleState[] zeroStates() {
+    return new SwerveModuleState[] {
+      new SwerveModuleState(), new SwerveModuleState(),
+      new SwerveModuleState(), new SwerveModuleState(),
+    };
   }
 }
