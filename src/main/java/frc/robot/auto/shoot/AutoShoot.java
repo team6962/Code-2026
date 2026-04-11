@@ -99,7 +99,7 @@ public class AutoShoot extends Command {
   private double predictionTime = 0.09;
 
   /** The error between the turret's position and the release angle. */
-  private Angle turretError = Degrees.of(2);
+  private Angle turretError = Degrees.of(0);
 
   private Angle hoodOffset = Degrees.of(0);
   private Angle turretOffset = Degrees.of(0);
