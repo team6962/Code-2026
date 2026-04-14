@@ -212,8 +212,10 @@ public class Autonomous {
                     .getSwerveDrive()
                     .getLocalization()
                     .resetPosition(
-                        fromHub ? new Pose2d(3.6155219078063965, 4.211485385894775, Rotation2d.k180deg) :
-                        new Pose2d(3.616589307785034, 5.050553798675537, Rotation2d.k180deg))),
+                        fromHub
+                            ? new Pose2d(3.6155219078063965, 4.211485385894775, Rotation2d.k180deg)
+                            : new Pose2d(
+                                3.616589307785034, 5.050553798675537, Rotation2d.k180deg))),
         Commands.parallel(
             Commands.sequence(
                 robot

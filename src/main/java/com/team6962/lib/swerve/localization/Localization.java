@@ -340,7 +340,7 @@ public class Localization implements SwerveComponent {
    */
   public synchronized Pose2d getPosition2d() {
     if (poseEstimator == null) return new Pose2d();
-  
+
     return poseEstimator.getEstimatedPosition().toPose2d();
   }
 

@@ -98,7 +98,13 @@ public class RobotContainer {
     visualizer = new RobotVisualizer(this);
 
     // Warm up the path following pipeline
-    CommandScheduler.getInstance().schedule(swerveDrive.followPath("center.0").withTimeout(3).until(RobotState::isEnabled).ignoringDisable(true));
+    CommandScheduler.getInstance()
+        .schedule(
+            swerveDrive
+                .followPath("center.0")
+                .withTimeout(3)
+                .until(RobotState::isEnabled)
+                .ignoringDisable(true));
   }
 
   private void configureAutonomousChooser() {
