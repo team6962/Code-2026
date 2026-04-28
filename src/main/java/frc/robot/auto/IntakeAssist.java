@@ -45,7 +45,8 @@ public class IntakeAssist {
 
           if (!robot.getIntakeExtension().isExtended()) return Commands.none();
 
-          double assist = Math.max(-maxAssist, Math.min(maxAssist, kP * perpendicularDistanceToFuel));
+          double assist =
+              Math.max(-maxAssist, Math.min(maxAssist, kP * perpendicularDistanceToFuel));
 
           double correctedVelocityX = (-velocityY / robotSpeed) * assist;
           double correctedVelocityY = (velocityX / robotSpeed) * assist;

@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
+import frc.robot.auto.IntakeAssist;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
@@ -59,6 +60,7 @@ public class TeleopControls extends SubsystemBase {
   private double hubMaxAngularAcceleration = 0.25;
   private double passMaxLinearVelocity = 1.5;
   private double passMaxAngularVelocity = 0.5;
+  private IntakeAssist intakeAssist;
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
@@ -185,7 +187,8 @@ public class TeleopControls extends SubsystemBase {
             this.robot
                 .getIntakeRollers()
                 .intake()
-                .alongWith(robot.getIntakeExtension().requestExtend()));
+                .alongWith(robot.getIntakeExtension().requestExtend())
+                .alongWith(intakeAssist.adjustVelocity()));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
