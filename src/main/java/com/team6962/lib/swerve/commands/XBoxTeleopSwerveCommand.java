@@ -242,7 +242,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The desired field-relative chassis speeds
    */
   @Override
-  protected ChassisSpeeds getDrivenVelocity() {
+  public ChassisSpeeds getDrivenVelocity() {
     if (constants.EnableFineControl && isFineControlling()) {
       Translation2d robotRelativeVelocity = getFineControlInput();
 

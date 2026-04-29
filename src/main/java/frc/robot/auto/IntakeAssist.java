@@ -1,5 +1,6 @@
 package frc.robot.auto;
 
+import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -8,6 +9,7 @@ import frc.robot.RobotContainer;
 
 public class IntakeAssist {
   private RobotContainer robot;
+  private XBoxTeleopSwerveCommand xboxTeleopSwerveCommand;
 
   public IntakeAssist(RobotContainer robot) {
     this.robot = robot;
@@ -15,77 +17,70 @@ public class IntakeAssist {
 
   /** Adjusts the robot's velocity to assist with intake alignment */
   public Command adjustVelocity() {
-    return Commands.runOnce(
-            () -> {
-              robot
-                  .getSwerveDrive()
-                  .driveVelocity(
-                      () -> {
-                        Translation2d fuelPosition = robot.getFuelLocalization().getClumpPosition();
+    return Commands.run(
+        () -> {
+          robot
+              .getSwerveDrive()
+              .driveVelocity(
+                  () -> {
+                    Translation2d fuelPosition = robot.getFuelLocalization().getClumpPosition();
 
-                        ChassisSpeeds robotVelocity = robot.getSwerveDrive().getVelocity();
+                    Translation2d error =
+                        fuelPosition.minus(robot.getSwerveDrive().getPosition2d().getTranslation());
 
-                        Translation2d error =
-                            fuelPosition.minus(
-                                robot.getSwerveDrive().getPosition2d().getTranslation());
+                    double errorX = error.getX();
+                    double errorY = error.getY();
+                    double errorNorm = error.getNorm();
 
-                        double errorX = error.getX();
-                        double errorY = error.getY();
+                    ChassisSpeeds robotVelocity = xboxTeleopSwerveCommand.getDrivenVelocity();
 
-                        double velocityX = robotVelocity.vxMetersPerSecond;
-                        double velocityY = robotVelocity.vyMetersPerSecond;
+                    double velocityX = robotVelocity.vxMetersPerSecond;
+                    double velocityY = robotVelocity.vyMetersPerSecond;
+                    double robotSpeed = Math.hypot(velocityX, velocityY);
 
-                        double kP = 0.5; // Not tuned
+                    double kP = 0.5; // Not tuned
 
-                        double maxAssist = 1.0; // Not tuned
+                    double maxAssist = 1.0; // Not tuned
 
-                        double robotSpeed = Math.hypot(velocityX, velocityY);
+                    if (errorNorm < 1e-3) return robotVelocity;
+                    if (robotSpeed < 1e-3) return robotVelocity;
+                    if (!robot.getIntakeExtension().isExtended()) return robotVelocity;
 
-                        double errorNorm = error.getNorm();
+                    double perpendicularDistanceToFuel =
+                        (errorX * velocityY - errorY * velocityX) / robotSpeed;
 
-                        if (robotSpeed < 1e-3) return robotVelocity;
+                    double assistScale =
+                        Math.max(0, errorX * velocityX + errorY * velocityY)
+                            / (robotSpeed * errorNorm);
 
-                        if (errorNorm < 1e-3) return robotVelocity;
+                    assistScale *=
+                        assistScale; // Square to make it more aggressive when aligned and less when
+                    // not
 
-                        if (!robot.getIntakeExtension().isExtended()) return robotVelocity;
+                    double speedScale =
+                        Math.min(
+                            1.0,
+                            robotSpeed
+                                / 2.0); // 2.0 m/s should be tuned to the speed at where the assist
+                    // should be at full strength
 
-                        double perpendicularDistanceToFuel =
-                            (errorX * velocityY - errorY * velocityX) / robotSpeed;
-
-                        double assistScale =
-                            Math.max(0, errorX * velocityX + errorY * velocityY)
-                                / (robotSpeed * errorNorm);
-
-                        assistScale *=
-                            assistScale; // Square to make it more aggressive when aligned and less
-                        // when not
-
-                        double speedScale =
+                    double assist =
+                        Math.max(
+                            -maxAssist,
                             Math.min(
-                                1.0,
-                                robotSpeed
-                                    / 2.0); // 2.0 m/s should be tuned to the speed at where the
-                        // assist should be at full strength
+                                maxAssist,
+                                kP * perpendicularDistanceToFuel * assistScale * speedScale));
 
-                        double assist =
-                            Math.max(
-                                -maxAssist,
-                                Math.min(
-                                    maxAssist,
-                                    kP * perpendicularDistanceToFuel * assistScale * speedScale));
+                    double correctedVelocityX = (-velocityY / robotSpeed) * assist;
+                    double correctedVelocityY = (velocityX / robotSpeed) * assist;
 
-                        double correctedVelocityX = (-velocityY / robotSpeed) * assist;
-                        double correctedVelocityY = (velocityX / robotSpeed) * assist;
-                        return new ChassisSpeeds(
-                            velocityX + correctedVelocityX,
-                            velocityY + correctedVelocityY,
-                            robotVelocity.omegaRadiansPerSecond);
-                      });
-            },
-            robot.getSwerveDrive().useTranslation(),
-            robot.getSwerveDrive().useRotation())
-        .andThen(
-            Commands.idle(
-                robot.getSwerveDrive().useTranslation(), robot.getSwerveDrive().useRotation()));
+                    return new ChassisSpeeds(
+                        velocityX + correctedVelocityX,
+                        velocityY + correctedVelocityY,
+                        robotVelocity.omegaRadiansPerSecond);
+                  });
+        },
+        robot.getSwerveDrive().useTranslation(),
+        robot.getSwerveDrive().useRotation());
   }
 }
