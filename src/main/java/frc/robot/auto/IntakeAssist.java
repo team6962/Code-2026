@@ -1,6 +1,8 @@
 package frc.robot.auto;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,9 +13,9 @@ public class IntakeAssist {
   private RobotContainer robot;
   private XBoxTeleopSwerveCommand xBoxTeleopSwerveCommand;
 
-  public IntakeAssist(RobotContainer robot, XBoxTeleopSwerveCommand xBoxTeleopSwerveCommand) {
+  public IntakeAssist(RobotContainer robot) {
     this.robot = robot;
-    this.xBoxTeleopSwerveCommand = xBoxTeleopSwerveCommand;
+    this.xBoxTeleopSwerveCommand = new XBoxTeleopSwerveCommand(robot.getSwerveDrive(), robot.getConstants().getTeleopSwerveConstants());
   }
 
   /** Adjusts the robot's velocity to assist with intake alignment
@@ -86,11 +88,15 @@ public class IntakeAssist {
                     double correctedVelocityY = (velocityX / robotSpeed) * assist;
                     // The assist is applied perpendicular to the velocity vector, in the direction
                     // that reduces the error
-
+                    DogLog.log("IntakeAssist/VelocityAdjustment", new ChassisSpeeds(
+                        velocityX + correctedVelocityX,
+                        velocityY + correctedVelocityY,
+                        robotVelocity.omegaRadiansPerSecond));
                     return new ChassisSpeeds(
                         velocityX + correctedVelocityX,
                         velocityY + correctedVelocityY,
                         robotVelocity.omegaRadiansPerSecond);
+
                   });
         },
         robot.getSwerveDrive().useTranslation(),

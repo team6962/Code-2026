@@ -64,6 +64,7 @@ public class TeleopControls extends SubsystemBase {
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
+    this.intakeAssist = new IntakeAssist(robot);
     // this.autoClimb = new AutoClimb(robot);
     // this.shootFuel = new ShootFuel(robot);
     // this.autoOutpost = new AutoOutpost(robot, shootFuel);
