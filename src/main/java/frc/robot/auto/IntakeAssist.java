@@ -10,10 +10,11 @@ import java.util.Set;
 
 public class IntakeAssist {
   private RobotContainer robot;
-  private XBoxTeleopSwerveCommand xboxTeleopSwerveCommand;
+  private XBoxTeleopSwerveCommand xBoxTeleopSwerveCommand;
 
-  public IntakeAssist(RobotContainer robot) {
+  public IntakeAssist(RobotContainer robot, XBoxTeleopSwerveCommand xBoxTeleopSwerveCommand) {
     this.robot = robot;
+    this.xBoxTeleopSwerveCommand = xBoxTeleopSwerveCommand;
   }
 
   /** Adjusts the robot's velocity to assist with intake alignment */
@@ -37,7 +38,7 @@ public class IntakeAssist {
                           double errorY = error.getY();
                           double errorNorm = error.getNorm();
 
-                          ChassisSpeeds robotVelocity = xboxTeleopSwerveCommand.getDrivenVelocity();
+                          ChassisSpeeds robotVelocity = xBoxTeleopSwerveCommand.getDrivenVelocity();
 
                           double velocityX = robotVelocity.vxMetersPerSecond;
                           double velocityY = robotVelocity.vyMetersPerSecond;
@@ -57,11 +58,6 @@ public class IntakeAssist {
                           double assistScale =
                               Math.max(0, errorX * velocityX + errorY * velocityY)
                                   / (robotSpeed * errorNorm);
-
-                          assistScale *=
-                              assistScale; // Square to make it more aggressive when aligned and
-                          // less when
-                          // not
 
                           double speedScale =
                               Math.min(
