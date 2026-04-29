@@ -5,7 +5,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
-import java.util.Set;
 
 public class IntakeAssist {
   private RobotContainer robot;
@@ -14,48 +13,79 @@ public class IntakeAssist {
     this.robot = robot;
   }
 
+  /** Adjusts the robot's velocity to assist with intake alignment */
   public Command adjustVelocity() {
-    return Commands.defer(
-        () -> {
-          Translation2d fuelPosition = robot.getFuelLocalization().getClumpPosition();
+    return Commands.runOnce(
+            () -> {
+              robot
+                  .getSwerveDrive()
+                  .driveVelocity(
+                      () -> {
+                        Translation2d fuelPosition = robot.getFuelLocalization().getClumpPosition();
 
-          ChassisSpeeds robotVelocity = robot.getSwerveDrive().getVelocity();
+                        ChassisSpeeds robotVelocity = robot.getSwerveDrive().getVelocity();
 
-          Translation2d error =
-              fuelPosition.minus(robot.getSwerveDrive().getPosition2d().getTranslation());
+                        Translation2d error =
+                            fuelPosition.minus(
+                                robot.getSwerveDrive().getPosition2d().getTranslation());
 
-          double errorX = error.getX();
-          double errorY = error.getY();
+                        double errorX = error.getX();
+                        double errorY = error.getY();
 
-          double velocityX = robotVelocity.vxMetersPerSecond;
-          double velocityY = robotVelocity.vyMetersPerSecond;
+                        double velocityX = robotVelocity.vxMetersPerSecond;
+                        double velocityY = robotVelocity.vyMetersPerSecond;
 
-          double kP = 0.5; // Not tuned
+                        double kP = 0.5; // Not tuned
 
-          double maxAssist = 1.0; // Max speed correction in m/s, not tuned
+                        double maxAssist = 1.0; // Not tuned
 
-          double robotSpeed = Math.hypot(velocityX, velocityY);
+                        double robotSpeed = Math.hypot(velocityX, velocityY);
 
-          double perpendicularDistanceToFuel =
-              (errorX * velocityY - errorY * velocityX) / robotSpeed;
+                        double errorNorm = error.getNorm();
 
-          if (robotSpeed < 1e-6) return Commands.none();
+                        if (robotSpeed < 1e-3) return robotVelocity;
 
-          if (errorX * velocityX + errorY * velocityY <= 0) return Commands.none();
+                        if (errorNorm < 1e-3) return robotVelocity;
 
-          if (!robot.getIntakeExtension().isExtended()) return Commands.none();
+                        if (!robot.getIntakeExtension().isExtended()) return robotVelocity;
 
-          double assist =
-              Math.max(-maxAssist, Math.min(maxAssist, kP * perpendicularDistanceToFuel));
+                        double perpendicularDistanceToFuel =
+                            (errorX * velocityY - errorY * velocityX) / robotSpeed;
 
-          double correctedVelocityX = (-velocityY / robotSpeed) * assist;
-          double correctedVelocityY = (velocityX / robotSpeed) * assist;
+                        double assistScale =
+                            Math.max(0, errorX * velocityX + errorY * velocityY)
+                                / (robotSpeed * errorNorm);
 
-          ChassisSpeeds correctedVelocity =
-              new ChassisSpeeds(correctedVelocityX, correctedVelocityY, 0);
+                        assistScale *=
+                            assistScale; // Square to make it more aggressive when aligned and less
+                        // when not
 
-          return Commands.run(() -> robot.getSwerveDrive().driveVelocity(() -> correctedVelocity));
-        },
-        Set.of(robot.getSwerveDrive().useTranslation(), robot.getSwerveDrive().useRotation()));
+                        double speedScale =
+                            Math.min(
+                                1.0,
+                                robotSpeed
+                                    / 2.0); // 2.0 m/s should be tuned to the speed at where the
+                        // assist should be at full strength
+
+                        double assist =
+                            Math.max(
+                                -maxAssist,
+                                Math.min(
+                                    maxAssist,
+                                    kP * perpendicularDistanceToFuel * assistScale * speedScale));
+
+                        double correctedVelocityX = (-velocityY / robotSpeed) * assist;
+                        double correctedVelocityY = (velocityX / robotSpeed) * assist;
+                        return new ChassisSpeeds(
+                            velocityX + correctedVelocityX,
+                            velocityY + correctedVelocityY,
+                            robotVelocity.omegaRadiansPerSecond);
+                      });
+            },
+            robot.getSwerveDrive().useTranslation(),
+            robot.getSwerveDrive().useRotation())
+        .andThen(
+            Commands.idle(
+                robot.getSwerveDrive().useTranslation(), robot.getSwerveDrive().useRotation()));
   }
 }
