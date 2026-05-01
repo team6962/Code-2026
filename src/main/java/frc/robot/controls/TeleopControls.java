@@ -189,7 +189,13 @@ public class TeleopControls extends SubsystemBase {
                 .getIntakeRollers()
                 .intake()
                 .alongWith(robot.getIntakeExtension().requestExtend())
-                .alongWith(intakeAssist.adjustVelocity()));
+                .alongWith(
+                    Commands.startEnd(
+                        // Use a lambda (speeds -> ...) instead of a method reference
+                        () ->
+                            teleopSwerveCommand.setAssistFunction(
+                                speeds -> intakeAssist.calculateAdjustedVelocity(speeds)),
+                        () -> teleopSwerveCommand.setAssistFunction(null))));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb

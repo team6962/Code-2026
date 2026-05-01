@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import java.util.function.UnaryOperator;
 
 /**
  * A teleop swerve command that uses an Xbox controller for driver input. This command provides
@@ -62,6 +63,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private SlewRateLimiter xSlewRateLimiter;
   private SlewRateLimiter ySlewRateLimiter;
   private SlewRateLimiter angularSlewRateLimiter;
+
+  /** Velocity assist for the driver to help with intaking */
+  private UnaryOperator<ChassisSpeeds> assistFunction = null;
 
   /**
    * Constructs an XBoxTeleopSwerveCommand with the specified swerve drive and configuration
@@ -153,6 +157,15 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     return Commands.startEnd(
         () -> addDynamicAccelerationLimits(linearAccelerationLimit, angularAccelerationLimit),
         this::removeDynamicAccelerationLimits);
+  }
+
+  /**
+   * Sets a function to modify the driven velocity (e.g., for intake assistance).
+   *
+   * @param assistFunction A function that takes driver speeds and returns assisted speeds.
+   */
+  public void setAssistFunction(UnaryOperator<ChassisSpeeds> assistFunction) {
+    this.assistFunction = assistFunction;
   }
 
   /**
@@ -264,10 +277,16 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
 
       double angularVelocity = getMappedRotationInput() * getNonFineControlAngularScalar();
 
-      return reorientInSimulation(
+      ChassisSpeeds driverInput =
           outputPowerToVelocity(
               new ChassisSpeeds(
-                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity)));
+                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity));
+
+      if (assistFunction != null) {
+        driverInput = assistFunction.apply(driverInput);
+      }
+
+      return reorientInSimulation(driverInput);
     }
   }
 
