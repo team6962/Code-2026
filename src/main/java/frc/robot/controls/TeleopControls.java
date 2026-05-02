@@ -191,7 +191,6 @@ public class TeleopControls extends SubsystemBase {
                 .alongWith(robot.getIntakeExtension().requestExtend())
                 .alongWith(
                     Commands.startEnd(
-                        // Use a lambda (speeds -> ...) instead of a method reference
                         () ->
                             teleopSwerveCommand.setAssistFunction(
                                 speeds -> intakeAssist.calculateAdjustedVelocity(speeds)),
