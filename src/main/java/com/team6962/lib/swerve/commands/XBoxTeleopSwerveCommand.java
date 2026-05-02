@@ -160,7 +160,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
-   * Sets a function to modify the driven velocity for driver assistance (e.g., to intake more effectively).
+   * Sets a function to modify the driven velocity for driver assistance (e.g., to intake more
+   * effectively).
    *
    * @param assistFunction A function that takes driver speeds and returns assisted speeds.
    */
