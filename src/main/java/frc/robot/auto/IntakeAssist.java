@@ -1,14 +1,22 @@
 package frc.robot.auto;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.RobotContainer;
 
 public class IntakeAssist {
   private RobotContainer robot;
+  private double kP = 0.5; // Not tuned
+  private double maxAssist = 1.0; // Not tuned
+  private double maxAssistSpeed =
+      2.0; // Not tuned, the speed at which the assist should be at full strength
 
   public IntakeAssist(RobotContainer robot) {
     this.robot = robot;
+    DogLog.tunable("IntakeAssist/kP", kP, value -> value = kP);
+    DogLog.tunable("IntakeAssist/maxAssist", maxAssist, value -> value = maxAssist);
+    DogLog.tunable("IntakeAssist/maxAssistSpeed", maxAssistSpeed, value -> value = maxAssistSpeed);
   }
 
   /**
@@ -32,10 +40,6 @@ public class IntakeAssist {
     double velocityY = currentVelocity.vyMetersPerSecond;
     double robotSpeed = Math.hypot(velocityX, velocityY);
 
-    double kP = 0.5; // Not tuned
-
-    double maxAssist = 1.0; // Not tuned
-
     if (errorNorm < 1e-3 || robotSpeed < 1e-3) return currentVelocity;
 
     double distanceToFuelPerpendicularToVelocity =
@@ -47,9 +51,7 @@ public class IntakeAssist {
     // towards the fuel, so that it doesn't assist when
     // the robot is moving away from the fuel
 
-    double speedScale =
-        Math.min(1.0, robotSpeed / 2.0); // 2.0 m/s should be tuned to the speed at where the assist
-    // should be at full strength
+    double speedScale = Math.min(1.0, robotSpeed / maxAssistSpeed);
 
     double assist =
         Math.max(
@@ -65,13 +67,13 @@ public class IntakeAssist {
     // and the overall speed of the robot, and
     // capped at maxAssist
 
-    double correctedVelocityX = (-velocityY / robotSpeed) * assist;
-    double correctedVelocityY = (velocityX / robotSpeed) * assist;
+    double correctionVelocityX = (-velocityY / robotSpeed) * assist;
+    double correctionVelocityY = (velocityX / robotSpeed) * assist;
     // The assist is applied perpendicular to the velocity vector, in the direction
     // that reduces the error
     return new ChassisSpeeds(
-        velocityX + correctedVelocityX,
-        velocityY + correctedVelocityY,
+        velocityX + correctionVelocityX,
+        velocityY + correctionVelocityY,
         currentVelocity.omegaRadiansPerSecond); // Return the original velocity plus the assist
   }
 }

@@ -180,7 +180,7 @@ public class TeleopControls extends SubsystemBase {
     // Intake and drive to fuel clump
     // driver.start().whileTrue(driveToClump.driveToClump());
 
-    // Intake without driving - WORKS
+    // Intake with assistance - NOT FULLY TESTED
     driver
         .rightStick()
         .and(RobotState::isEnabled)
@@ -190,11 +190,7 @@ public class TeleopControls extends SubsystemBase {
                 .intake()
                 .alongWith(robot.getIntakeExtension().requestExtend())
                 .alongWith(
-                    Commands.startEnd(
-                        () ->
-                            teleopSwerveCommand.setAssistFunction(
-                                speeds -> intakeAssist.calculateAdjustedVelocity(speeds)),
-                        () -> teleopSwerveCommand.setAssistFunction(null))));
+                    teleopSwerveCommand.runWithAssist(intakeAssist::calculateAdjustedVelocity)));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb

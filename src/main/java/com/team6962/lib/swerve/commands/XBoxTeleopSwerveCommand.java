@@ -170,6 +170,18 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
+   * Returns a command that applies a driver assist function while active, and clears it when the
+   * command ends.
+   *
+   * @param assistFunction The function to apply to the chassis speeds.
+   * @return A command that manages the lifecycle of the assist function.
+   */
+  public Command runWithAssist(UnaryOperator<ChassisSpeeds> assistFunction) {
+    return Commands.startEnd(
+        () -> setAssistFunction(assistFunction), () -> setAssistFunction(null));
+  }
+
+  /**
    * Converts fractional power values (0.0 to 1.0) to actual velocities based on the configured
    * maximum velocities.
    *
