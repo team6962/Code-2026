@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import java.util.function.UnaryOperator;
 
 /**
  * A teleop swerve command that uses an Xbox controller for driver input. This command provides
@@ -62,6 +63,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private SlewRateLimiter xSlewRateLimiter;
   private SlewRateLimiter ySlewRateLimiter;
   private SlewRateLimiter angularSlewRateLimiter;
+
+  /** Velocity assist for the driver to help with intaking */
+  private UnaryOperator<ChassisSpeeds> assistFunction = null;
 
   /**
    * Constructs an XBoxTeleopSwerveCommand with the specified swerve drive and configuration
@@ -156,6 +160,28 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   }
 
   /**
+   * Sets a function to modify the driven velocity for driver assistance (e.g., to intake more
+   * effectively).
+   *
+   * @param assistFunction A function that takes driver speeds and returns assisted speeds.
+   */
+  public void setAssistFunction(UnaryOperator<ChassisSpeeds> assistFunction) {
+    this.assistFunction = assistFunction;
+  }
+
+  /**
+   * Returns a command that applies a driver assist function while active, and clears it when the
+   * command ends.
+   *
+   * @param assistFunction The function to apply to the chassis speeds.
+   * @return A command that manages the lifecycle of the assist function.
+   */
+  public Command runWithAssist(UnaryOperator<ChassisSpeeds> assistFunction) {
+    return Commands.startEnd(
+        () -> setAssistFunction(assistFunction), () -> setAssistFunction(null));
+  }
+
+  /**
    * Converts fractional power values (0.0 to 1.0) to actual velocities based on the configured
    * maximum velocities.
    *
@@ -242,7 +268,7 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    * @return The desired field-relative chassis speeds
    */
   @Override
-  protected ChassisSpeeds getDrivenVelocity() {
+  public ChassisSpeeds getDrivenVelocity() {
     if (constants.EnableFineControl && isFineControlling()) {
       Translation2d robotRelativeVelocity = getFineControlInput();
 
@@ -264,10 +290,16 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
 
       double angularVelocity = getMappedRotationInput() * getNonFineControlAngularScalar();
 
-      return reorientInSimulation(
+      ChassisSpeeds driverInput =
           outputPowerToVelocity(
               new ChassisSpeeds(
-                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity)));
+                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity));
+
+      if (assistFunction != null) {
+        driverInput = assistFunction.apply(driverInput);
+      }
+
+      return reorientInSimulation(driverInput);
     }
   }
 
