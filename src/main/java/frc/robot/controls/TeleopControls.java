@@ -293,7 +293,7 @@ public class TeleopControls extends SubsystemBase {
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
     // Intake extension and retraction - WORKS
-    Trigger intakeRetract = operator.rightStick().and(driver.start());
+    Trigger intakeRetract = operator.rightStick().or(driver.start());
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
