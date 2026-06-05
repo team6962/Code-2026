@@ -476,7 +476,7 @@ public class TeleopControls extends SubsystemBase {
 
       return Degrees.of(
           Math.signum(joystickInput)
-              * Math.pow(Math.abs(joystickInput), 2)
+              * (joystickInput * joystickInput)
               * maxOffset.in(Degrees));
     }
   }
@@ -490,7 +490,7 @@ public class TeleopControls extends SubsystemBase {
 
       return RotationsPerSecond.of(
           Math.signum(joystickInput)
-              * Math.pow(Math.abs(joystickInput), 2)
+              * (joystickInput * joystickInput)
               * maxOffset.in(RotationsPerSecond));
     }
   }
