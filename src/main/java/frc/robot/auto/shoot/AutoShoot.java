@@ -484,7 +484,10 @@ public class AutoShoot extends Command {
 
     DogLog.log("AutoShoot/HoodOffset", hoodOffset.in(Degrees), Degrees);
     DogLog.log("AutoShoot/TurretOffset", turretOffset.in(Degrees), Degrees);
-    DogLog.log("AutoShoot/FlywheelSpeedOffset", flywheelSpeedOffset.in(RotationsPerSecond), RotationsPerSecond);
+    DogLog.log(
+        "AutoShoot/FlywheelSpeedOffset",
+        flywheelSpeedOffset.in(RotationsPerSecond),
+        RotationsPerSecond);
 
     // Calculate the ideal shooting angles and roller speed to hit the target
     ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
