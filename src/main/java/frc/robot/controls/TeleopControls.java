@@ -174,10 +174,7 @@ public class TeleopControls extends SubsystemBase {
             Commands.parallel(
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
-    // Intake and drive to fuel clump
-    // driver.start().whileTrue(driveToClump.driveToClump());
-
-    // Intake without driving - WORKS
+    // Intake - WORKS
     driver
         .rightStick()
         .and(RobotState::isEnabled)
@@ -205,7 +202,7 @@ public class TeleopControls extends SubsystemBase {
                 robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
 
     // Unjam hopper - WORKS
-    operator.leftBumper().whileTrue(robot.getHopper().unjam());
+    operator.leftBumper().or(driver.leftBumper()).whileTrue(robot.getHopper().unjam());
 
     // Backup shoot
     operator.leftTrigger().and(RobotState::isEnabled).whileTrue(robot.getHopper().feed());
@@ -296,7 +293,7 @@ public class TeleopControls extends SubsystemBase {
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
     // Intake extension and retraction - WORKS
-    Trigger intakeRetract = operator.rightStick();
+    Trigger intakeRetract = operator.rightStick().or(driver.start());
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
@@ -456,9 +453,11 @@ public class TeleopControls extends SubsystemBase {
     if (!fineControl) {
       autoShoot.setHoodOffset(mapOffset(operator.getLeftY(), Degrees.of(5)));
       autoShoot.setTurretOffset(mapOffset(-operator.getLeftX(), Degrees.of(10)));
+      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(1)));
     } else {
       autoShoot.setHoodOffset(Degrees.of(0));
       autoShoot.setTurretOffset(Degrees.of(0));
+      autoShoot.setFlywheelSpeedOffset(RotationsPerSecond.of(0));
     }
 
     ControllerLogging.logInputs(driver.getHID());
@@ -476,9 +475,21 @@ public class TeleopControls extends SubsystemBase {
       joystickInput /= 0.9;
 
       return Degrees.of(
+          Math.signum(joystickInput) * (joystickInput * joystickInput) * maxOffset.in(Degrees));
+    }
+  }
+
+  private AngularVelocity mapOffset(double joystickInput, AngularVelocity maxOffset) {
+    if (Math.abs(joystickInput) < 0.1) {
+      return RotationsPerSecond.of(0);
+    } else {
+      joystickInput -= Math.signum(joystickInput) * 0.1;
+      joystickInput /= 0.9;
+
+      return RotationsPerSecond.of(
           Math.signum(joystickInput)
-              * Math.pow(Math.abs(joystickInput), 2)
-              * maxOffset.in(Degrees));
+              * (joystickInput * joystickInput)
+              * maxOffset.in(RotationsPerSecond));
     }
   }
 }

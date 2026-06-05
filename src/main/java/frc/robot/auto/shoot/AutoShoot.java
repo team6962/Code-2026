@@ -103,6 +103,7 @@ public class AutoShoot extends Command {
 
   private Angle hoodOffset = Degrees.of(0);
   private Angle turretOffset = Degrees.of(0);
+  private AngularVelocity flywheelSpeedOffset = RotationsPerSecond.of(0);
 
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
@@ -249,6 +250,11 @@ public class AutoShoot extends Command {
   public Angle setTurretOffset(Angle offset) {
     this.turretOffset = offset;
     return turretOffset;
+  }
+
+  public AngularVelocity setFlywheelSpeedOffset(AngularVelocity offset) {
+    this.flywheelSpeedOffset = offset;
+    return flywheelSpeedOffset;
   }
 
   @Override
@@ -478,6 +484,10 @@ public class AutoShoot extends Command {
 
     DogLog.log("AutoShoot/HoodOffset", hoodOffset.in(Degrees), Degrees);
     DogLog.log("AutoShoot/TurretOffset", turretOffset.in(Degrees), Degrees);
+    DogLog.log(
+        "AutoShoot/FlywheelSpeedOffset",
+        flywheelSpeedOffset.in(RotationsPerSecond),
+        RotationsPerSecond);
 
     // Calculate the ideal shooting angles and roller speed to hit the target
     ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
@@ -492,7 +502,7 @@ public class AutoShoot extends Command {
     // Set the target angles and roller speed
     turretAngleTarget = appliedShootingParameters.turretAngle.plus(turretOffset);
     hoodAngleTarget = appliedShootingParameters.hoodAngle.plus(hoodOffset);
-    rollerSpeedTarget = appliedShootingParameters.rollerSpeed;
+    rollerSpeedTarget = appliedShootingParameters.rollerSpeed.plus(flywheelSpeedOffset);
 
     if (previousTurretAngleTarget != null && previousHoodAngleTarget != null) {
       double timeSinceLastPeriodic = Timer.getFPGATimestamp() - previousPeriodicTimestamp;
