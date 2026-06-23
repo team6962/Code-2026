@@ -61,9 +61,10 @@ public class Autonomous {
       new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d());
 
   private Command singleNeutralCycle(boolean rightSide) {
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
+    String pathName = "left_neutral";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
 
     return Commands.sequence(
         Commands.runOnce(
@@ -74,25 +75,26 @@ public class Autonomous {
                     .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.0", rightSide)
+            .followPath(pathName + ".0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.1", rightSide)
+            .followPath(pathName + ".1", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
+        robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
         shootFuel.shoot());
   }
 
   private Command doubleNeutralCycle(boolean rightSide) {
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.0");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.1");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.2");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.3");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.4");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral.5");
+    String pathName = "left_neutral";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
 
     return Commands.sequence(
         Commands.runOnce(
@@ -103,41 +105,42 @@ public class Autonomous {
                     .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.0", rightSide)
+            .followPath(pathName + ".0", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.1", rightSide)
+            .followPath(pathName + ".1", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
-        shootFuel.shootAllFuelStationary().withTimeout(20.0 - 13.2),
+        robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
+        shootFuel.shootAllFuelStationary().withTimeout(20 - 13.2),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.3", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-        robot
-            .getSwerveDrive()
-            .followPath("left_neutral.4", rightSide)
+            .followPath(pathName + ".3", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral.5", rightSide)
+            .followPath(pathName + ".4", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".5", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
         shootFuel.shoot());
   }
 
   public Command bump(boolean rightSide) {
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.0");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.1");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.2");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.3");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.4");
-    robot.getSwerveDrive().loadChoreoPath("left_neutral_bump.5");
+    String pathName = "left_neutral_bump";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
 
     return Commands.sequence(
             Commands.runOnce(
@@ -148,27 +151,27 @@ public class Autonomous {
                         .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
             robot
                 .getSwerveDrive()
-                .followPath("left_neutral_bump.0", rightSide)
+                .followPath(pathName + ".0", rightSide)
                 .deadlineFor(
                     robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
             robot
                 .getSwerveDrive()
-                .followPath("left_neutral_bump.1", rightSide)
+                .followPath(pathName + ".1", rightSide)
                 .deadlineFor(
                     robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot.getSwerveDrive().followPath("left_neutral_bump.2", rightSide),
+            robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
             shootFuel.shootAllFuelStationary().withTimeout(5),
             robot
                 .getSwerveDrive()
-                .followPath("left_neutral_bump.3", rightSide)
+                .followPath(pathName + ".3", rightSide)
                 .deadlineFor(
                     robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
             robot
                 .getSwerveDrive()
-                .followPath("left_neutral_bump.4", rightSide)
+                .followPath(pathName + "4", rightSide)
                 .deadlineFor(
                     robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
-            robot.getSwerveDrive().followPath("left_neutral_bump.5", rightSide),
+            robot.getSwerveDrive().followPath(pathName + ".5", rightSide),
             shootFuel.shoot())
         .withTimeout(20);
   }
@@ -183,6 +186,13 @@ public class Autonomous {
   }
 
   public Command doubleSweepBump(boolean rightSide) {
+    String pathName = "double_sweep_bump";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
 
     return Commands.sequence(
     Commands.runOnce(
@@ -193,9 +203,39 @@ public class Autonomous {
                 .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
         robot
             .getSwerveDrive()
-            .followPath("left_neutral_bump.2", rightSide)
+            .followPath(pathName + ".0", rightSide)
             .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast())
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".1", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().retract()),
+
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".2", rightSide)
+            .deadlineFor(
+                shootFuel.shootOnTheMove()),
+
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".3", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+        
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".4", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().retract()),
+
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".5", rightSide)
+            .deadlineFor(
+                shootFuel.shootAllFuelOnTheMove())
     );
   }
 
