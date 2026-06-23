@@ -255,6 +255,15 @@ public class Autonomous {
     return doubleNeutralCycle(true);
   }
 
+  public Command leftDoubleSweepBump() {
+    return doubleSweepBump(false);
+  }
+
+  public Command rightDoubleSweepBump() {
+    return doubleSweepBump(true);
+  }
+
+
   public Command preload() {
     return shootFuel.shoot();
   }
