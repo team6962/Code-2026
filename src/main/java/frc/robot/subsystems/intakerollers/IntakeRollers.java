@@ -14,7 +14,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -42,23 +41,18 @@ public class IntakeRollers extends SubsystemBase {
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
     IntakeRollerMotor1 =
-        new TalonFX(
-            IntakeRollersConstants.DEVICE_ID_1,
-            IntakeRollersConstants.CANBUS);
+        new TalonFX(IntakeRollersConstants.DEVICE_ID_1, IntakeRollersConstants.CANBUS);
 
     IntakeRollerMotor1.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
 
     IntakeRollerMotor2 =
-        new TalonFX(
-            IntakeRollersConstants.DEVICE_ID_2,
-            IntakeRollersConstants.CANBUS);
+        new TalonFX(IntakeRollersConstants.DEVICE_ID_2, IntakeRollersConstants.CANBUS);
 
     IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
         IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
                 == InvertedValue.Clockwise_Positive
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
-
 
     this.velocitySignal = IntakeRollerMotor1.getVelocity();
     this.statorCurrentSignal = IntakeRollerMotor1.getStatorCurrent();
