@@ -182,6 +182,23 @@ public class Autonomous {
             shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
+  public Command doubleSweepBump(boolean rightSide) {
+
+    return Commands.sequence(
+    Commands.runOnce(
+        () ->
+            robot
+                .getSwerveDrive()
+                .getLocalization()
+                .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath("left_neutral_bump.2", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast())
+    );
+  }
+
   public Command leftSingleNeutralCycle() {
     return singleNeutralCycle(false);
   }
