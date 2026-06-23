@@ -27,16 +27,16 @@ public final class IntakeExtensionConstants {
 
   public static final int MOTOR_CAN_ID = 40;
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44Foc(1);
-  public static final Mass MOVING_MASS = Pounds.of(12);
+  public static final Mass MOVING_MASS = Pounds.of(14.5); //Subject to Change
   public static final Distance MAX_POSITION = Inches.of(10.1);
   public static final Distance MIN_POSITION = Inches.of(0);
   public static final Distance RETRACT_POSITION = Inches.of(3);
-  public static final Angle ANGLE = Degrees.of(-18.5);
-  public static final Distance PINION_RADIUS = Inches.of(0.75);
+  public static final Angle ANGLE = Degrees.of(-18.6196233);
+  public static final Distance PINION_RADIUS = Inches.of(1.5);
   public static final int CANDI_DEVICE_ID = 20;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(1.0);
-  public static final double GEAR_RATIO = 7.2;
+  public static final double GEAR_RATIO = 7;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
