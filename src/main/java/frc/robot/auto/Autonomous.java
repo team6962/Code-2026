@@ -217,7 +217,7 @@ public class Autonomous {
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
             .deadlineFor(
-                shootFuel.shootOnTheMove()),
+                shootFuel.shootAllFuelOnTheMove()),
 
         robot
             .getSwerveDrive()
