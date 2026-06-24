@@ -95,6 +95,16 @@ public class AutoShoot extends Command {
   /** The last time that periodic() was executed. */
   private double previousPeriodicTimestamp = -1.0;
 
+  /** The prediction time used for calculating future positions of the robot. */
+  private double predictionTime = 0.09;
+
+  /** The error between the turret's position and the release angle. */
+  private Angle turretError = Degrees.of(0);
+
+  private Angle hoodOffset = Degrees.of(0);
+  private Angle turretOffset = Degrees.of(0);
+  private AngularVelocity flywheelSpeedOffset = RotationsPerSecond.of(0);
+
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
    * shoot at the hub.
@@ -199,6 +209,10 @@ public class AutoShoot extends Command {
     this.targetSupplier = targetSupplier;
     this.shooterFunctions = shooterFunctions;
 
+    DogLog.tunable("AutoShoot/PredictionTime", predictionTime, value -> value = predictionTime);
+    DogLog.tunable(
+        "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
     Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
@@ -226,6 +240,21 @@ public class AutoShoot extends Command {
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(rollers, rollersCommand))
         .whileTrue(rollersCommand);
+  }
+
+  public Angle setHoodOffset(Angle offset) {
+    this.hoodOffset = offset;
+    return hoodOffset;
+  }
+
+  public Angle setTurretOffset(Angle offset) {
+    this.turretOffset = offset;
+    return turretOffset;
+  }
+
+  public AngularVelocity setFlywheelSpeedOffset(AngularVelocity offset) {
+    this.flywheelSpeedOffset = offset;
+    return flywheelSpeedOffset;
   }
 
   @Override
@@ -321,9 +350,10 @@ public class AutoShoot extends Command {
    * @param shooterVelocity the velocity of the shooter
    * @param rollersAngularVelocity the angular velocity of the shooter rollers
    * @param target the target position
-   * @return a pair containing the azimuth and hood angles
+   * @return a ShootOnTheMoveOptimizationResults containing the azimuth and hood angles, and the
+   *     imaginary target used to compensate for motion
    */
-  private Pair<Angle, Angle> getMovingShootingAngles(
+  private ShootOnTheMoveOptimizationResults getMovingShootingAngles(
       Pose2d shooterPose, TranslationalVelocity shooterVelocity, Translation2d target) {
     Pair<Angle, Angle> angles = getStaticShootingAngles(shooterPose, target);
     Translation2d adjustedTarget = target;
@@ -348,10 +378,29 @@ public class AutoShoot extends Command {
       angles = getStaticShootingAngles(shooterPose, adjustedTarget);
     }
 
-    return angles;
+    return new ShootOnTheMoveOptimizationResults(
+        angles.getFirst(), angles.getSecond(), adjustedTarget);
   }
 
-  private static class ShootingParameters {
+  private class ShootOnTheMoveOptimizationResults {
+    /** The field-relative azimuth angle target */
+    public final Angle azimuthAngle;
+
+    /** The hood angle target */
+    public final Angle hoodAngle;
+
+    /** The imaginary target aimed towards instead of the hub when compensating for motion */
+    public final Translation2d imaginaryTarget;
+
+    public ShootOnTheMoveOptimizationResults(
+        Angle azimuthAngle, Angle hoodAngle, Translation2d imaginaryTarget) {
+      this.azimuthAngle = azimuthAngle;
+      this.hoodAngle = hoodAngle;
+      this.imaginaryTarget = imaginaryTarget;
+    }
+  }
+
+  private class ShootingParameters {
     public Angle turretAngle;
     public Angle hoodAngle;
     public AngularVelocity rollerSpeed;
@@ -363,7 +412,11 @@ public class AutoShoot extends Command {
     }
 
     public void log(String path) {
-      DogLog.log(path + "/TurretAngle", turretAngle.in(Radians), Radians);
+      DogLog.log(
+          path + "/TurretAngle",
+          AngleMath.toContinuous(AngleMath.toDiscrete(turretAngle), turret.getPosition())
+              .in(Radians),
+          Radians);
       DogLog.log(path + "/HoodAngle", hoodAngle.in(Degrees), Degrees);
       DogLog.log(path + "/RollerSpeed", rollerSpeed.in(RotationsPerSecond), RotationsPerSecond);
     }
@@ -377,12 +430,14 @@ public class AutoShoot extends Command {
    *
    * @return the shooter's translational velocity at the point of projectile exit
    */
-  private TranslationalVelocity calculateShooterVelocity() {
+  private TranslationalVelocity calculateShooterVelocity(Pose2d robotPose) {
     return swerveDrive
         .getTranslationalVelocity()
         .plus(
             new TranslationalVelocity(
-                AutoShootConstants.shooterTransform.getTranslation(),
+                AutoShootConstants.shooterTransform
+                    .getTranslation()
+                    .rotateBy(robotPose.getRotation()),
                 swerveDrive.getYawVelocity()));
   }
 
@@ -396,20 +451,27 @@ public class AutoShoot extends Command {
     twist.dtheta *= poseExtrapolationTime.in(Seconds);
     Pose2d shooterPose =
         swerveDrive.getPosition2d().exp(twist).plus(AutoShootConstants.shooterTransform);
-    TranslationalVelocity shooterVelocity = calculateShooterVelocity();
+    TranslationalVelocity shooterVelocity =
+        calculateShooterVelocity(swerveDrive.getPosition2d().exp(twist));
 
     DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
 
     // Calculate the ideal shooting angles and roller speed to hit the target
-    Pair<Angle, Angle> idealAngles = getMovingShootingAngles(shooterPose, shooterVelocity, target);
+    ShootOnTheMoveOptimizationResults optimizationResults =
+        getMovingShootingAngles(shooterPose, shooterVelocity, target);
 
-    Angle turretAngleTarget = idealAngles.getFirst().minus(shooterPose.getRotation().getMeasure());
-    Angle hoodAngleTarget = idealAngles.getSecond();
+    Angle turretAngleTarget =
+        optimizationResults.azimuthAngle.minus(shooterPose.getRotation().getMeasure());
+    Angle hoodAngleTarget = optimizationResults.hoodAngle;
     AngularVelocity rollerSpeedTarget =
         shooterFunctions.getFlywheelVelocity(
-            Meters.of(target.getDistance(shooterPose.getTranslation())));
+            Meters.of(
+                optimizationResults.imaginaryTarget.getDistance(shooterPose.getTranslation())));
 
-    return new ShootingParameters(turretAngleTarget, hoodAngleTarget, rollerSpeedTarget);
+    return new ShootingParameters(
+        turretAngleTarget.plus(turretError.times(-Math.cos(turretAngleTarget.in(Radians)))),
+        hoodAngleTarget,
+        rollerSpeedTarget);
   }
 
   @Override
@@ -420,8 +482,15 @@ public class AutoShoot extends Command {
     DogLog.log("AutoShoot/TargetX", target.getX());
     DogLog.log("AutoShoot/TargetY", target.getY());
 
+    DogLog.log("AutoShoot/HoodOffset", hoodOffset.in(Degrees), Degrees);
+    DogLog.log("AutoShoot/TurretOffset", turretOffset.in(Degrees), Degrees);
+    DogLog.log(
+        "AutoShoot/FlywheelSpeedOffset",
+        flywheelSpeedOffset.in(RotationsPerSecond),
+        RotationsPerSecond);
+
     // Calculate the ideal shooting angles and roller speed to hit the target
-    ShootingParameters appliedShootingParameters = calculate(Seconds.of(0.1));
+    ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
     appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
@@ -431,9 +500,9 @@ public class AutoShoot extends Command {
     Angle previousHoodAngleTarget = hoodAngleTarget;
 
     // Set the target angles and roller speed
-    turretAngleTarget = appliedShootingParameters.turretAngle;
-    hoodAngleTarget = appliedShootingParameters.hoodAngle;
-    rollerSpeedTarget = appliedShootingParameters.rollerSpeed;
+    turretAngleTarget = appliedShootingParameters.turretAngle.plus(turretOffset);
+    hoodAngleTarget = appliedShootingParameters.hoodAngle.plus(hoodOffset);
+    rollerSpeedTarget = appliedShootingParameters.rollerSpeed.plus(flywheelSpeedOffset);
 
     if (previousTurretAngleTarget != null && previousHoodAngleTarget != null) {
       double timeSinceLastPeriodic = Timer.getFPGATimestamp() - previousPeriodicTimestamp;

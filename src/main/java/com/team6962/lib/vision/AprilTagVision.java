@@ -41,6 +41,9 @@ public class AprilTagVision extends SubsystemBase {
   /** Vision simulation system for testing in simulation mode. */
   private VisionSystemSim visionSystemSim;
 
+  /** Whether an AprilTag has been seen by any camera. */
+  private boolean seenAprilTag = false;
+
   /** The AprilTag field layout used for pose estimation. Loaded from WPILib's built-in layouts. */
   private static AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
@@ -69,6 +72,7 @@ public class AprilTagVision extends SubsystemBase {
     }
 
     DogLog.log("Vision/Cameras/Count", visionConstants.Cameras.size());
+    DogLog.forceNt.log("Vision/SeenAprilTag", false);
 
     notifier.setName("AprilTagVision");
     notifier.startPeriodic(0.02);
@@ -105,6 +109,10 @@ public class AprilTagVision extends SubsystemBase {
     // Collect and integrate vision measurements from all cameras
     for (AprilTagCamera camera : cameras.values()) {
       for (AprilTagVisionMeasurement measurement : camera.getRobotPoseEstimates()) {
+        if (!seenAprilTag) {
+          DogLog.forceNt.log("Vision/SeenAprilTag", true);
+          seenAprilTag = true;
+        }
 
         // Adjust the measurement to be relative to the field origin based on alliance color
         measurement = measurement.relativeTo(originPose);

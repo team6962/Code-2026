@@ -4,55 +4,94 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.team6962.lib.swerve.commands.XBoxTeleopSwerveCommand;
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
-// import frc.robot.auto.AutoClimb;
-import frc.robot.auto.AutoDepot;
-import frc.robot.auto.AutoOutpost;
-import frc.robot.auto.ShootFuel;
 import frc.robot.auto.TrenchDriving;
 import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.subsystems.hood.ShooterHoodConstants;
 import frc.robot.subsystems.intakeextension.IntakeExtensionConstants;
 import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.TurretConstants;
+import java.util.List;
+import java.util.Set;
 
-public class TeleopControls {
+public class TeleopControls extends SubsystemBase {
   private RobotContainer robot;
   // private AutoClimb autoClimb;
-  private ShootFuel shootFuel;
-  private AutoOutpost autoOutpost;
+  //   private ShootFuel shootFuel;
+  //   private AutoOutpost autoOutpost;
   private CommandXboxController driver = new CommandXboxController(0);
   private CommandXboxController operator = new CommandXboxController(1);
   private Distance shootingTestDistance = Inches.of(206);
-  private AutoDepot autoDepot;
+  //   private AutoDepot autoDepot;
+  //   private AutoZoneDefense autoZoneDefense = new AutoZoneDefense(robot);
+  private AutoShoot autoShoot;
+
+  private ControllerRumble driverRumble = new ControllerRumble(driver);
+  private ControllerRumble operatorRumble = new ControllerRumble(operator);
 
   private boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
   private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
+  private double hubMaxLinearVelocity = 1;
+  private double hubMaxAngularVelocity = 0.25;
+  private double hubMaxLinearAcceleration = 2;
+  private double hubMaxAngularAcceleration = 0.25;
+  private double passMaxLinearVelocity = 1.5;
+  private double passMaxAngularVelocity = 0.5;
+
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
-    this.shootFuel = new ShootFuel(robot);
-    this.autoOutpost = new AutoOutpost(robot, shootFuel);
-    this.autoDepot = new AutoDepot(robot);
+    // this.shootFuel = new ShootFuel(robot);
+    // this.autoOutpost = new AutoOutpost(robot, shootFuel);
+    // this.autoDepot = new AutoDepot(robot);
+    // this.autoZoneDefense = new AutoZoneDefense(robot);
+
+    DogLog.tunable(
+        "TeleopControls/hubMaxLinearVelocity",
+        hubMaxLinearVelocity,
+        value -> hubMaxLinearVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxAngularVelocity",
+        hubMaxAngularVelocity,
+        value -> hubMaxAngularVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxLinearAcceleration",
+        hubMaxLinearAcceleration,
+        value -> hubMaxLinearAcceleration = value);
+    DogLog.tunable(
+        "TeleopControls/hubMaxAngularAcceleration",
+        hubMaxAngularAcceleration,
+        value -> hubMaxAngularAcceleration = value);
+    DogLog.tunable(
+        "TeleopControls/passMaxLinearVelocity",
+        passMaxLinearVelocity,
+        value -> passMaxLinearVelocity = value);
+    DogLog.tunable(
+        "TeleopControls/passMaxAngularVelocity",
+        passMaxAngularVelocity,
+        value -> passMaxAngularVelocity = value);
 
     DogLog.forceNt.log(
         "TeleopControls/FineControl", fineControl); // Initial log so that the folder shows up
@@ -105,8 +144,7 @@ public class TeleopControls {
 
     // Configure operator controls and automated driver controls
 
-    // Driver A is unused
-    // Driver Y resets heading (configured by XBoxTeleopSwerveCommand)
+    // Driver left bumper resets heading (configured by XBoxTeleopSwerveCommand)
     // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
     // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
 
@@ -114,12 +152,20 @@ public class TeleopControls {
     // driver.b().onTrue(autoClimb.climb());
     // driver.x().onTrue(autoClimb.unclimb());
 
-    // Auto Depot
-    driver.leftBumper().whileTrue(autoDepot.autoDepot());
+    // Auto Defense
+    // driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
+    // driver
+    //     .b()
+    //     .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
+    // driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
+    // driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
 
-    driver // Auto Drive to Outpost
-        .rightBumper()
-        .whileTrue(autoOutpost.autoOutpost());
+    // Auto Depot
+    // driver.leftBumper().whileTrue(autoDepot.autoDepot());
+
+    // driver // Auto Drive to Outpost
+    //     .rightBumper()
+    //     .whileTrue(autoOutpost.autoOutpost());
 
     // Dump fuel - WORKS
     driver
@@ -128,23 +174,20 @@ public class TeleopControls {
             Commands.parallel(
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
-    // Intake and drive to fuel clump
-    // driver.start().whileTrue(driveToClump.driveToClump());
-
-    // Intake without driving - WORKS
+    // Intake - WORKS
     driver
         .rightStick()
-        .whileTrue(this.robot.getIntakeRollers().intake()); // this might be switched with back
+        .and(RobotState::isEnabled)
+        .whileTrue(
+            this.robot
+                .getIntakeRollers()
+                .intake()
+                .alongWith(robot.getIntakeExtension().requestExtend()));
 
     // Manual climb controls
     // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
     // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
     // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
-
-    operator
-        .b()
-        .and(RobotState::isDisabled)
-        .onTrue(Commands.runOnce(() -> robot.getTurret().zero()).ignoringDisable(true));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
@@ -159,10 +202,10 @@ public class TeleopControls {
                 robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
 
     // Unjam hopper - WORKS
-    operator.leftBumper().whileTrue(robot.getHopper().unjam());
+    operator.leftBumper().or(driver.leftBumper()).whileTrue(robot.getHopper().unjam());
 
-    // Disable shooting
-    operator.leftTrigger().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
+    // Backup shoot
+    operator.leftTrigger().and(RobotState::isEnabled).whileTrue(robot.getHopper().feed());
 
     // Toggle fine control mode - WORKS
     operator
@@ -178,8 +221,8 @@ public class TeleopControls {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // Shooting
-    operator.x().whileTrue(robot.getHopper().feed());
+    // stop Shooting
+    operator.x().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
     operator
@@ -197,8 +240,24 @@ public class TeleopControls {
                 .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     // Backup zero
-    SmartDashboard.putData(
-        "Shooter Hood Zeroing", this.robot.getShooterHood().zero().onlyIf(RobotState::isDisabled));
+    SmartDashboard.putData("Zero Shooter Hood", this.robot.getShooterHood().zero());
+    SmartDashboard.putData("Zero Turret", robot.getTurret().zero());
+    SmartDashboard.putData("Zero Intake Retracted", robot.getIntakeExtension().zeroRetracted());
+    SmartDashboard.putData("Zero Intake Extended", robot.getIntakeExtension().zeroExtended());
+
+    operator
+        .povUp()
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot.getShooterHood().moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE));
+
+    operator
+        .povDown()
+        .and(() -> fineControl)
+        .whileTrue(
+            this.robot
+                .getShooterHood()
+                .moveAtVoltage(ShooterHoodConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
 
     operator
         .povLeft()
@@ -206,7 +265,7 @@ public class TeleopControls {
         .whileTrue(this.robot.getTurret().moveAtVoltage(TurretConstants.FINE_CONTROL_VOLTAGE));
 
     operator
-        .povLeft()
+        .povRight()
         .and(() -> fineControl)
         .whileTrue(
             this.robot
@@ -233,39 +292,13 @@ public class TeleopControls {
                     .getIntakeExtension()
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
-    // operator
-    //     .axisGreaterThan(Axis.kRightY.value, 0.5)
-    //     .and(() -> fineControl)
-    //     .whileTrue(this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE));
-
-    // operator
-    //     .axisLessThan(Axis.kRightY.value, -0.5)
-    //     .and(() -> fineControl)
-    //     .whileTrue(
-    //
-    // this.robot.getClimb().moveAtVoltage(ClimbConstants.FINE_CONTROL_VOLTAGE.unaryMinus()));
-
     // Intake extension and retraction - WORKS
-    Trigger intakeRetract = operator.rightStick().or(driver.back());
+    Trigger intakeRetract = operator.rightStick().or(driver.start());
     Trigger intakeExtend =
         intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
 
     intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
     intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
-
-    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
-    // fully tested
-    Trigger load =
-        new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
-            .and(() -> !fineControl)
-            .and(driver.leftStick().negate())
-            .and(operator.leftBumper().negate())
-            .and(operator.rightTrigger().negate())
-            .and(driver.a().negate())
-            .and(() -> !robot.getHopper().getSensors().isKickerFull())
-            .and(() -> !robot.getHopper().isEmpty());
-
-    load.whileTrue(robot.getHopper().load());
 
     // Climb retraction
     // Command autodescend = robot.getClimb().descend();
@@ -276,7 +309,7 @@ public class TeleopControls {
 
     // climbRetract.onTrue(robot.getClimb().descend());
 
-    AutoShoot autoShoot =
+    autoShoot =
         new AutoShoot(
             robot.getSwerveDrive(),
             robot.getTurret(),
@@ -297,8 +330,7 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone)
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
@@ -321,20 +353,58 @@ public class TeleopControls {
         new Trigger(RobotState::isTeleop)
             .and(RobotState::isEnabled)
             .and(inAllianceZone.negate())
-            .and(operator.a().negate())
-            .and(operator.y().negate())
+            .and(operator.leftTrigger().negate())
+            .and(operator.x().negate())
             .and(() -> !fineControl);
 
     autoPassTrigger.whileTrue(autoPass);
 
-    operator
-        .rightTrigger()
-        .or(driver.a())
+    // operator
+    //     .rightTrigger()
+    Trigger shootButtonsTrigger =
+        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
+
+    shootButtonsTrigger
+        .and(inAllianceZone)
         .whileTrue(
-            teleopSwerveCommand.limitVelocity(
-                MetersPerSecond.of(0.25), RotationsPerSecond.of(0.125))) // Temporary values
-        .and(autoShoot.isReadyToShoot().or(autoPass.isReadyToShoot()))
+            Commands.defer(
+                () ->
+                    teleopSwerveCommand
+                        .limitVelocity(
+                            MetersPerSecond.of(hubMaxLinearVelocity),
+                            RotationsPerSecond.of(hubMaxAngularVelocity))
+                        .alongWith(
+                            teleopSwerveCommand.limitAcceleration(
+                                MetersPerSecondPerSecond.of(hubMaxLinearAcceleration),
+                                RotationsPerSecondPerSecond.of(hubMaxAngularAcceleration))),
+                Set.of()))
+        .and(autoShoot.isReadyToShoot())
         .whileTrue(robot.getHopper().feed());
+
+    shootButtonsTrigger
+        .and(inAllianceZone.negate())
+        .whileTrue(
+            Commands.defer(
+                () ->
+                    teleopSwerveCommand.limitVelocity(
+                        MetersPerSecond.of(passMaxLinearVelocity),
+                        RotationsPerSecond.of(passMaxAngularVelocity)),
+                Set.of()))
+        .and(autoPass.isReadyToShoot())
+        .whileTrue(robot.getHopper().feed()); // Temporary values
+
+    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
+    // fully tested
+    Trigger load =
+        new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
+            .and(() -> !fineControl)
+            .and(shootButtonsTrigger.negate())
+            .and(operator.x().negate())
+            .and(operator.leftTrigger().negate())
+            .and(() -> !robot.getHopper().getSensors().isKickerFull())
+            .and(() -> !robot.getHopper().isEmpty());
+
+    load.whileTrue(robot.getHopper().load());
 
     // ShooterFunctions functions = robot.getHubFunctions();
 
@@ -363,23 +433,63 @@ public class TeleopControls {
     //                                     functions.getHoodAngle(shootingTestDistance),
     //                                     Degrees.of(1))),
     //                 robot.getHopper().feed())));
-  }
 
-  private Command rumble(
-      CommandXboxController controller, RumbleType rumbleType, double intensity) {
-    return Commands.startEnd(
-        () -> controller.setRumble(rumbleType, intensity),
-        () -> controller.setRumble(rumbleType, 0.0));
+    new ShiftFeedback(List.of(driverRumble, operatorRumble));
   }
 
   private Command fineControlEnableRumble() {
     return Commands.sequence(
-        rumble(operator, RumbleType.kLeftRumble, 1).withTimeout(1.0 / 3.0),
+        operatorRumble.rumble(1, 0).withTimeout(1.0 / 3.0),
         Commands.waitSeconds(1.0 / 3.0),
-        rumble(operator, RumbleType.kRightRumble, 1).withTimeout(1.0 / 3.0));
+        operatorRumble.rumble(0, 1).withTimeout(1.0 / 3.0));
   }
 
   private Command fineControlDisableRumble() {
-    return Commands.sequence(rumble(operator, RumbleType.kBothRumble, 1).withTimeout(1.0));
+    return operatorRumble.rumble(1, 1).withTimeout(1.0);
+  }
+
+  @Override
+  public void periodic() {
+    if (!fineControl) {
+      autoShoot.setHoodOffset(mapOffset(operator.getLeftY(), Degrees.of(5)));
+      autoShoot.setTurretOffset(mapOffset(-operator.getLeftX(), Degrees.of(10)));
+      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(2)));
+    } else {
+      autoShoot.setHoodOffset(Degrees.of(0));
+      autoShoot.setTurretOffset(Degrees.of(0));
+      autoShoot.setFlywheelSpeedOffset(RotationsPerSecond.of(0));
+    }
+
+    ControllerLogging.logInputs(driver.getHID());
+    ControllerLogging.logInputs(operator.getHID());
+
+    DogLog.forceNt.log("TeleopControls/DriverConnected", driver.isConnected());
+    DogLog.forceNt.log("TeleopControls/OperatorConnected", operator.isConnected());
+  }
+
+  private Angle mapOffset(double joystickInput, Angle maxOffset) {
+    if (Math.abs(joystickInput) < 0.1) {
+      return Degrees.of(0);
+    } else {
+      joystickInput -= Math.signum(joystickInput) * 0.1;
+      joystickInput /= 0.9;
+
+      return Degrees.of(
+          Math.signum(joystickInput) * (joystickInput * joystickInput) * maxOffset.in(Degrees));
+    }
+  }
+
+  private AngularVelocity mapOffset(double joystickInput, AngularVelocity maxOffset) {
+    if (Math.abs(joystickInput) < 0.1) {
+      return RotationsPerSecond.of(0);
+    } else {
+      joystickInput -= Math.signum(joystickInput) * 0.1;
+      joystickInput /= 0.9;
+
+      return RotationsPerSecond.of(
+          Math.signum(joystickInput)
+              * (joystickInput * joystickInput)
+              * maxOffset.in(RotationsPerSecond));
+    }
   }
 }

@@ -3,6 +3,7 @@ package com.team6962.lib.swerve.localization;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
@@ -10,6 +11,7 @@ import com.team6962.lib.swerve.module.SwerveModule;
 import com.team6962.lib.swerve.util.SwerveComponent;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -26,19 +28,22 @@ public class Odometry implements SwerveComponent {
   private SwerveModule[] modules;
 
   /** The last recorded positions of the swerve modules. */
-  private SwerveModulePosition[] lastPositions;
+  private SwerveModulePosition[] lastPositions = zeroPositions();
 
   /** The current recorded positions of the swerve modules. */
-  private SwerveModulePosition[] currentPositions;
+  private SwerveModulePosition[] currentPositions = zeroPositions();
 
   /** The current recorded states of the swerve modules. */
-  private SwerveModuleState[] currentStates;
+  private SwerveModuleState[] currentStates = zeroStates();
 
   /** The change in position of the swerve modules since the last update. */
-  private SwerveModulePosition[] positionDeltas;
+  private SwerveModulePosition[] positionDeltas = zeroPositions();
 
   /** The twist the robot has undergone since the last update. */
   private Twist2d twist = new Twist2d();
+
+  /** The current chassis speeds of the robot. */
+  private ChassisSpeeds robotRelativeVelocity = new ChassisSpeeds();
 
   /**
    * Constructs a new Odometry object with the specified kinematics and swerve modules.
@@ -154,6 +159,25 @@ public class Odometry implements SwerveComponent {
     return twist;
   }
 
+  /**
+   * Computes the current chassis speeds of the robot based on the swerve module states. This method
+   * should only be called internally to refresh the velocity data.
+   *
+   * @return A ChassisSpeeds object representing the current chassis speeds of the robot.
+   */
+  private ChassisSpeeds computeRobotRelativeVelocity() {
+    return kinematics.toChassisSpeeds(currentStates);
+  }
+
+  /**
+   * Gets the current chassis speeds of the robot based on the swerve module states.
+   *
+   * @return A ChassisSpeeds object representing the current chassis speeds of the robot.
+   */
+  public synchronized ChassisSpeeds getRobotRelativeVelocity() {
+    return robotRelativeVelocity;
+  }
+
   @Override
   public synchronized void logTelemetry(String basePath) {
     basePath = LoggingUtil.ensureEndsWithSlash(basePath);
@@ -188,6 +212,18 @@ public class Odometry implements SwerveComponent {
     DogLog.log(basePath + "Twist/dx", twist.dx, Meters);
     DogLog.log(basePath + "Twist/dy", twist.dy, Meters);
     DogLog.log(basePath + "Twist/dtheta", twist.dtheta, Radians);
+    DogLog.log(
+        basePath + "Robot Relative Velocity/vx",
+        robotRelativeVelocity.vxMetersPerSecond,
+        MetersPerSecond);
+    DogLog.log(
+        basePath + "Robot Relative Velocity/vy",
+        robotRelativeVelocity.vyMetersPerSecond,
+        MetersPerSecond);
+    DogLog.log(
+        basePath + "Robot Relative Velocity/omega",
+        robotRelativeVelocity.omegaRadiansPerSecond,
+        RadiansPerSecond);
   }
 
   @Override
@@ -197,5 +233,20 @@ public class Odometry implements SwerveComponent {
     currentStates = computeStates();
     positionDeltas = computePositionDeltas();
     twist = computeTwist();
+    robotRelativeVelocity = computeRobotRelativeVelocity();
+  }
+
+  private static SwerveModulePosition[] zeroPositions() {
+    return new SwerveModulePosition[] {
+      new SwerveModulePosition(), new SwerveModulePosition(),
+      new SwerveModulePosition(), new SwerveModulePosition(),
+    };
+  }
+
+  private static SwerveModuleState[] zeroStates() {
+    return new SwerveModuleState[] {
+      new SwerveModuleState(), new SwerveModuleState(),
+      new SwerveModuleState(), new SwerveModuleState(),
+    };
   }
 }

@@ -39,7 +39,8 @@ public class ShootFuel {
             autoShoot,
             Commands.waitUntil(
                     () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .andThen(robot.getHopper().feed().repeatedly()))
+                .andThen(robot.getHopper().feed().repeatedly()),
+            robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
   }
 
@@ -56,5 +57,43 @@ public class ShootFuel {
         Commands.waitUntil(
                 () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
             .andThen(robot.getHopper().feed().repeatedly()));
+  }
+
+  public Command shootOnTheMove() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+        autoShoot,
+        Commands.waitUntil(
+                () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+            .andThen(
+                robot
+                    .getHopper()
+                    .feed()
+                    .onlyWhile(
+                        () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                    .repeatedly()));
+  }
+
+  public Command shootAllFuelOnTheMove() {
+    AutoShoot autoShoot = new AutoShoot(robot);
+
+    return Commands.parallel(
+            autoShoot,
+            Commands.waitUntil(
+                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                .andThen(
+                    robot
+                        .getHopper()
+                        .feed()
+                        .onlyWhile(
+                            () ->
+                                autoShoot.isReadyToShoot().getAsBoolean()
+                                    || RobotBase.isSimulation())
+                        .repeatedly()),
+            robot.getIntakeExtension().retract(),
+            robot.getIntakeExtension().extend().repeatedly(),
+            robot.getIntakeRollers().intake())
+        .until(() -> robot.getHopper().isEmpty());
   }
 }

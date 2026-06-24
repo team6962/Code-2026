@@ -16,8 +16,10 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
+import java.util.function.Supplier;
 
 /** The kicker class is responsible for controlling the kicker */
 public class Kicker extends SubsystemBase {
@@ -27,6 +29,9 @@ public class Kicker extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<AngularVelocity> motorVelocitySignal;
   private KickerSim simulation;
+
+  private Voltage feedVoltage = Volts.of(12);
+  private Voltage slowFeedVoltage = Volts.of(2);
 
   public Kicker() {
 
@@ -39,6 +44,27 @@ public class Kicker extends SubsystemBase {
     supplyCurrentSignal = kickerMotor.getSupplyCurrent();
     appliedVoltageSignal = kickerMotor.getMotorVoltage();
 
+    DogLog.tunable(
+        "Hopper/Kicker/AppliedVoltage",
+        0,
+        (double newVoltageDouble) -> {
+          CommandScheduler.getInstance().schedule(move(Volts.of(newVoltageDouble)));
+        });
+
+    DogLog.tunable(
+        "Hopper/Kicker/FeedVoltage",
+        feedVoltage.in(Volts),
+        newVoltageDouble -> {
+          feedVoltage = Volts.of(newVoltageDouble);
+        });
+
+    DogLog.tunable(
+        "Hopper/Kicker/SlowFeedVoltage",
+        slowFeedVoltage.in(Volts),
+        newVoltageDouble -> {
+          slowFeedVoltage = Volts.of(newVoltageDouble);
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new KickerSim(kickerMotor);
     }
@@ -49,17 +75,27 @@ public class Kicker extends SubsystemBase {
   /**
    * Returns command to make the motor move and stop
    *
-   * @param voltage target voltage
+   * @param voltage supplier returning the target voltage
    * @return Command that runs at target voltage
    */
-  private Command move(Voltage voltage) {
+  private Command move(Supplier<Voltage> voltage) {
     return startEnd(
         () -> {
-          kickerMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
+          kickerMotor.setControl(new VoltageOut(voltage.get()).withEnableFOC(false));
         },
         () -> {
           kickerMotor.setControl(new NeutralOut());
         });
+  }
+
+  /**
+   * Returns command to make the motor move and stop
+   *
+   * @param voltage target voltage
+   * @return Command that runs at target voltage
+   */
+  private Command move(Voltage voltage) {
+    return move(() -> voltage);
   }
 
   /**
@@ -68,7 +104,7 @@ public class Kicker extends SubsystemBase {
    * @return command that feeds fuel
    */
   public Command feed() {
-    return move(Volts.of(12));
+    return move(() -> feedVoltage);
   }
 
   /**
@@ -77,16 +113,7 @@ public class Kicker extends SubsystemBase {
    * @return A command that slowly feeds fuel towards the shooter
    */
   public Command slowFeed() {
-    return move(Volts.of(2));
-  }
-
-  /**
-   * passes fuel back to intake
-   *
-   * @return command that passes fuel back
-   */
-  public Command reverse() {
-    return move(Volts.of(-12));
+    return move(() -> slowFeedVoltage);
   }
 
   /**

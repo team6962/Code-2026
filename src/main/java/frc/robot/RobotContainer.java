@@ -10,16 +10,20 @@ import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoChooserOption;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
@@ -31,7 +35,6 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intakeextension.IntakeExtension;
 import frc.robot.subsystems.intakerollers.IntakeRollers;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
-import frc.robot.subsystems.shooterrollers.ShooterRollersConstants;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.visualizer.RobotVisualizer;
 
@@ -50,13 +53,15 @@ public class RobotContainer {
   // private final Climb climb;
   private final Hopper hopper;
   private final RobotVisualizer visualizer;
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private final SendableChooser<AutoChooserOption> autoChooser = new SendableChooser<>();
   private final ShooterFunctions hubFunctions;
   private final ShooterFunctions passFunctions;
   private final Autonomous autonomous;
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
+    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
+
     LoggingUtil.logGitProperties();
     RobotController.setBrownoutVoltage(4.6);
 
@@ -91,55 +96,93 @@ public class RobotContainer {
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
+
+    // Warm up the path following pipeline
+    CommandScheduler.getInstance()
+        .schedule(
+            swerveDrive
+                .followPath("center.0")
+                .withTimeout(3)
+                .until(RobotState::isEnabled)
+                .ignoringDisable(true));
   }
 
   private void configureAutonomousChooser() {
     // Set "Do Nothing" as the default option
-    autoChooser.setDefaultOption("Do Nothing", noneAutonomous);
-    // Add the Drive Straight auto as an optional selection
-    autoChooser.addOption("Drive Straight", driveStraightAuto.getCommand());
-    autoChooser.addOption(
-        "Test Drive To Pose",
-        swerveDrive
-            .driveTo(
-                new Pose2d(3, 4.03463125, Rotation2d.fromDegrees(0)), new ChassisSpeeds(0, 0, 0))
-            .repeatedly());
+    autoChooser.setDefaultOption("Do Nothing", new AutoChooserOption(noneAutonomous, false));
 
     if (RobotBase.isSimulation()) {
       autoChooser.addOption(
+          "Test Drive To Pose",
+          new AutoChooserOption(
+              swerveDrive
+                  .driveTo(
+                      new Pose2d(3, 4.03463125, Rotation2d.fromDegrees(0)),
+                      new ChassisSpeeds(0, 0, 0))
+                  .repeatedly(),
+              false));
+
+      autoChooser.addOption(
           "Test Drive To Pose with Final Velocity",
-          swerveDrive
-              .driveTo(new Pose2d(10, 5, Rotation2d.fromDegrees(0)), new ChassisSpeeds(-2, 2, 0))
-              .andThen(swerveDrive.drive(new ChassisSpeeds(-2, 2, 0))));
+          new AutoChooserOption(
+              swerveDrive
+                  .driveTo(
+                      new Pose2d(10, 5, Rotation2d.fromDegrees(0)), new ChassisSpeeds(-2, 2, 0))
+                  .andThen(swerveDrive.drive(new ChassisSpeeds(-2, 2, 0))),
+              false));
     }
 
-    autoChooser.addOption("Calibrate Wheel Size", swerveDrive.calibrateWheelSize());
+    autoChooser.addOption(
+        "Left Single Neutral Cycle",
+        new AutoChooserOption(autonomous.leftSingleNeutralCycle(), true));
+    autoChooser.addOption(
+        "Left Double Neutral Cycle",
+        new AutoChooserOption(autonomous.leftDoubleNeutralCycle(), true));
+    autoChooser.addOption(
+        "Right Single Neutral Cycle",
+        new AutoChooserOption(autonomous.rightSingleNeutralCycle(), true));
+    autoChooser.addOption(
+        "Right Double Neutral Cycle",
+        new AutoChooserOption(autonomous.rightDoubleNeutralCycle(), true));
+
+    autoChooser.addOption("Shoot Preload", new AutoChooserOption(autonomous.preload(), true));
+    autoChooser.addOption(
+        "Back Up and Shoot Preload",
+        new AutoChooserOption(autonomous.moveBackwardAndShoot(), true));
 
     autoChooser.addOption(
-        "Shoot Preload",
-        Commands.parallel(
-            getShooterRollers().shoot(() -> ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY),
-            getHopper().feed(),
-            getIntakeExtension().extend().repeatedly()));
-
-    autoChooser.addOption("Left Single Neutral Cycle", autonomous.leftSingleNeutralCycle());
-    autoChooser.addOption("Left Double Neutral Cycle", autonomous.leftDoubleNeutralCycle());
-    autoChooser.addOption("Right Single Neutral Cycle", autonomous.rightSingleNeutralCycle());
-    autoChooser.addOption("Right Double Neutral Cycle", autonomous.rightDoubleNeutralCycle());
-    autoChooser.addOption("Preload", autonomous.preload());
+        "Center from Bump", new AutoChooserOption(autonomous.center(false), true));
+    autoChooser.addOption("Center from Hub", new AutoChooserOption(autonomous.center(true), true));
 
     autoChooser.addOption(
-        "SysId Front Left Steer", swerveDrive.getModules()[0].getSteerMechanism().sysId());
+        "Drive Straight", new AutoChooserOption(driveStraightAuto.getCommand(), true));
+
     autoChooser.addOption(
-        "SysId Front Right Steer", swerveDrive.getModules()[1].getSteerMechanism().sysId());
+        "SysId Shooter Rollers", new AutoChooserOption(shooterRollers.sysId(), false));
+
     autoChooser.addOption(
-        "SysId Back Left Steer", swerveDrive.getModules()[2].getSteerMechanism().sysId());
+        "SysId Front Left Steer",
+        new AutoChooserOption(swerveDrive.getModules()[0].getSteerMechanism().sysId(), false));
     autoChooser.addOption(
-        "SysId Back Right Steer", swerveDrive.getModules()[3].getSteerMechanism().sysId());
+        "SysId Front Right Steer",
+        new AutoChooserOption(swerveDrive.getModules()[1].getSteerMechanism().sysId(), false));
     autoChooser.addOption(
-        "SysId Front Drive", swerveDrive.driveSysId("Front Drive", true, true, false, false, 0));
+        "SysId Back Left Steer",
+        new AutoChooserOption(swerveDrive.getModules()[2].getSteerMechanism().sysId(), false));
     autoChooser.addOption(
-        "SysId Back Drive", swerveDrive.driveSysId("Back Drive", false, false, true, true, 2));
+        "SysId Back Right Steer",
+        new AutoChooserOption(swerveDrive.getModules()[3].getSteerMechanism().sysId(), false));
+    autoChooser.addOption(
+        "SysId Front Drive",
+        new AutoChooserOption(
+            swerveDrive.driveSysId("Front Drive", true, true, false, false, 0), false));
+    autoChooser.addOption(
+        "SysId Back Drive",
+        new AutoChooserOption(
+            swerveDrive.driveSysId("Back Drive", false, false, true, true, 2), false));
+    autoChooser.addOption(
+        "Calibrate Wheel Size", new AutoChooserOption(swerveDrive.calibrateWheelSize(), false));
+
     SmartDashboard.putData("Select Autonomous Routine", autoChooser);
   }
 
@@ -164,14 +207,18 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return autoChooser.getSelected() != null ? autoChooser.getSelected().command : Commands.none();
   }
 
   public void periodic() {
     DogLog.forceNt.log("BatteryVoltage", RobotController.getBatteryVoltage());
+    DogLog.forceNt.log("FMSConnected", DriverStation.isFMSAttached());
+    DogLog.forceNt.log("VoltageHigh", RobotController.getBatteryVoltage() > 12.5);
 
     if (RobotState.isDisabled()) {
-      DogLog.forceNt.log("Auto Routine Selected", autoChooser.getSelected() != noneAutonomous);
+      DogLog.forceNt.log(
+          "Auto Routine Selected",
+          autoChooser.getSelected() != null && autoChooser.getSelected().recommended);
     }
   }
 

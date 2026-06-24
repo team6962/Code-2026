@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 
@@ -634,7 +635,12 @@ public class Turret extends SubsystemBase {
         .onlyIf(() -> isZeroed());
   }
 
-  public void zero() {
-    motor.setPosition(Degrees.of(180));
+  public Command zero() {
+    return Commands.runOnce(
+            () -> {
+              motor.setPosition(Degrees.of(180));
+              isZeroed = true;
+            })
+        .ignoringDisable(true);
   }
 }
