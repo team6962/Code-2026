@@ -193,6 +193,7 @@ public class Autonomous {
     robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".6");
 
     return Commands.sequence(
     Commands.runOnce(
@@ -213,16 +214,16 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
 
-        Commands.parallel(
-            robot.getSwerveDrive()
-            .followPath(pathName + ".2", rightSide),
-                shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
-
         robot
             .getSwerveDrive()
-            .followPath(pathName + ".3", rightSide)
+            .followPath(pathName + ".2", rightSide)
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+
+        Commands.parallel(
+            robot.getSwerveDrive()
+            .followPath(pathName + ".3", rightSide),
+                shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
         
         robot
             .getSwerveDrive()
@@ -230,10 +231,20 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
 
-                Commands.parallel(
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".5", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+
+        Commands.parallel(
             robot.getSwerveDrive()
-            .followPath(pathName + ".5", rightSide),
-                shootFuel.shootAllFuelOnTheMove().withTimeout(6))
+            .followPath(pathName + ".6", rightSide),
+                shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
+
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".7", rightSide)
     );
   }
 
