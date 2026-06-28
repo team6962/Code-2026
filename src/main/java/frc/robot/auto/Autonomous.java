@@ -211,13 +211,12 @@ public class Autonomous {
             .getSwerveDrive()
             .followPath(pathName + ".1", rightSide)
             .deadlineFor(
-                robot.getIntakeExtension().retract()),
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
 
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".2", rightSide)
-            .deadlineFor(
-                shootFuel.shootOnTheMove().withTimeout(6)),
+        Commands.parallel(
+            robot.getSwerveDrive()
+            .followPath(pathName + ".2", rightSide),
+                shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
 
         robot
             .getSwerveDrive()
@@ -229,13 +228,12 @@ public class Autonomous {
             .getSwerveDrive()
             .followPath(pathName + ".4", rightSide)
             .deadlineFor(
-                robot.getIntakeExtension().retract()),
+                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
 
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".5", rightSide)
-            .deadlineFor(
-                shootFuel.shootOnTheMove().withTimeout(6))
+                Commands.parallel(
+            robot.getSwerveDrive()
+            .followPath(pathName + ".5", rightSide),
+                shootFuel.shootAllFuelOnTheMove().withTimeout(6))
     );
   }
 

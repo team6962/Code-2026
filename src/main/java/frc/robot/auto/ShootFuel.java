@@ -91,8 +91,6 @@ public class ShootFuel {
                                 autoShoot.isReadyToShoot().getAsBoolean()
                                     || RobotBase.isSimulation())
                         .repeatedly()),
-            robot.getIntakeExtension().retract(),
-            robot.getIntakeExtension().extend().repeatedly(),
             robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
   }
