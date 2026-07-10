@@ -14,7 +14,7 @@ public class IntakeRollersConstants {
   public static final double GEAR_RATIO = 15 / 27;
   public static final double MOMENT_OF_INERTIA = 0.00074271944;
   public static final int DEVICE_ID_1 = 41;
-  public static final int DEVICE_ID_2 = 42; // Prob not Right
+  public static final int DEVICE_ID_2 = 42;
   public static final CANBus CANBUS = new CANBus("subsystems");
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
