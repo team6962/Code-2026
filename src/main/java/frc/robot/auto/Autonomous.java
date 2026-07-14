@@ -300,7 +300,7 @@ public class Autonomous {
                     .getSwerveDrive()
                     .followPath(pathName + ".1")
                     .deadlineFor(
-                        shootFuel.shootOnTheMove()), // Drive while shooting preload to depot setup
+                        shootFuel.shootOnTheMove() ), // Drive while shooting preload to depot setup
                 // position
                 shootFuel.shootAllFuelStationary().withTimeout(2) // Shoot any remaining fuel
                 ),
@@ -315,17 +315,7 @@ public class Autonomous {
             .getSwerveDrive()
             .followPath(pathName + ".3")
             .deadlineFor(
-                shootFuel.shootOnTheMove()), // Drive to near outpost while shooting on the move
-        robot.getSwerveDrive().followPath(pathName + ".4"),
-        shootFuel
-            .shoot()
-            .withDeadline(
-                Commands.race(
-                    Commands.waitSeconds(3),
-                    Commands.waitUntil(() -> !robot.getHopper().getSensors().isHopperEmpty())
-                        .andThen(Commands.waitSeconds(1)))),
-        robot.getSwerveDrive().followPath(pathName + ".5").deadlineFor(shootFuel.shootOnTheMove()),
-        shootFuel.shoot());
+                shootFuel.shootOnTheMove()));
   }
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
