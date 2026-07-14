@@ -23,7 +23,9 @@ public class ShootFuel {
                 .feed()
                 .onlyWhile(
                     () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .repeatedly())
+                .repeatedly(),
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().agitate())
         .until(() -> robot.getHopper().isEmpty());
   }
 
@@ -40,7 +42,8 @@ public class ShootFuel {
             Commands.waitUntil(
                     () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
                 .andThen(robot.getHopper().feed().repeatedly()),
-            robot.getIntakeRollers().intake())
+            robot.getIntakeRollers().intake(),
+            robot.getIntakeExtension().agitate())
         .until(() -> robot.getHopper().isEmpty());
   }
 
@@ -91,8 +94,7 @@ public class ShootFuel {
                                 autoShoot.isReadyToShoot().getAsBoolean()
                                     || RobotBase.isSimulation())
                         .repeatedly()),
-            robot.getIntakeExtension().retract(),
-            robot.getIntakeExtension().extend().repeatedly(),
+            robot.getIntakeExtension().agitate(),
             robot.getIntakeRollers().intake())
         .until(() -> robot.getHopper().isEmpty());
   }

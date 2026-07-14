@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -37,12 +38,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 /** This subsystem controls the extension of the intake out of the robot and back in. */
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
   private CANdi candi;
+  private RobotContainer robot;
 
   // The status signals' rotations actually represent meters of mechanism motion
   private StatusSignal<Angle> positionSignal;
@@ -259,6 +262,32 @@ public class IntakeExtension extends SubsystemBase {
                     .isNear(
                         IntakeExtensionConstants.RETRACT_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE));
+  }
+
+  public Command agitate() {
+    return Commands.sequence(
+        startEnd(
+                () -> {
+                  motor.setControl(
+                      new MotionMagicVoltage(
+                          IntakeExtensionConstants.AGITATED_POSITION.in(Meters)));
+                },
+                () -> {
+                  if (!getPosition()
+                      .isNear(
+                          IntakeExtensionConstants.AGITATED_POSITION,
+                          IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                    motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                  }
+                })
+            .until(
+                () ->
+                    getPosition()
+                        .isNear(
+                            IntakeExtensionConstants.AGITATED_POSITION,
+                            IntakeExtensionConstants.POSITION_TOLERANCE)),
+        Commands.waitTime(Seconds.of(0.75)),
+        robot.getIntakeExtension().extend());
   }
 
   public Command extendSlow() {
