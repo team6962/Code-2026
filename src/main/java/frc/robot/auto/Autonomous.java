@@ -313,9 +313,11 @@ public class Autonomous {
                 robot.getIntakeRollers().intake()), // Intake from depot
         robot
             .getSwerveDrive()
-            .followPath(pathName + ".3")
-            .deadlineFor(
-                shootFuel.shootOnTheMove()));
+            .followPath(pathName + ".3"),
+        shootFuel.shootAllFuelStationary(),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".4"));
   }
 
   private static Pose2d mirrorPose(Pose2d pose, boolean mirrored) {
