@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeRollers extends SubsystemBase {
-  private TalonFX IntakeRollerMotor1;
-  private TalonFX IntakeRollerMotor2;
+  private TalonFX intakeMotorLeader;
+  private TalonFX intakeMotorFollower;
   private TalonFX intakeMotor;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<Current> statorCurrentSignal;
@@ -40,12 +40,12 @@ public class IntakeRollers extends SubsystemBase {
 
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
-    IntakeRollerMotor1 =
+    intakeMotorLeader =
         new TalonFX(IntakeRollersConstants.DEVICE_ID_1, IntakeRollersConstants.CANBUS);
 
-    IntakeRollerMotor1.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
+    intakeMotorLeader.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
 
-    IntakeRollerMotor2 =
+    intakeMotorFollower =
         new TalonFX(IntakeRollersConstants.DEVICE_ID_2, IntakeRollersConstants.CANBUS);
 
     IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
@@ -54,10 +54,10 @@ public class IntakeRollers extends SubsystemBase {
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
 
-    this.velocitySignal = IntakeRollerMotor1.getVelocity();
-    this.statorCurrentSignal = IntakeRollerMotor1.getStatorCurrent();
-    this.supplyCurrentSignal = IntakeRollerMotor2.getSupplyCurrent();
-    this.appliedVoltageSignal = IntakeRollerMotor1.getMotorVoltage();
+    this.velocitySignal = intakeMotorLeader.getVelocity();
+    this.statorCurrentSignal = intakeMotorLeader.getStatorCurrent();
+    this.supplyCurrentSignal = intakeMotorFollower.getSupplyCurrent();
+    this.appliedVoltageSignal = intakeMotorLeader.getMotorVoltage();
     if (RobotBase.isSimulation()) {
       simulation = new IntakeRollerSim(intakeMotor);
     }
@@ -78,10 +78,10 @@ public class IntakeRollers extends SubsystemBase {
 
     CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
 
-    IntakeRollerMotor2.setControl(
-        new Follower(IntakeRollerMotor1.getDeviceID(), MotorAlignmentValue.Opposed));
+    intakeMotorFollower.setControl(
+        new Follower(intakeMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
     if (RobotBase.isSimulation()) {
-      simulation = new IntakeRollerSim(IntakeRollerMotor1);
+      simulation = new IntakeRollerSim(intakeMotorLeader);
     }
   }
 

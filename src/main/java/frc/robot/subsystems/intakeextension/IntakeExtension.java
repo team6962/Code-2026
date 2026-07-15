@@ -285,7 +285,8 @@ public class IntakeExtension extends SubsystemBase {
                     getPosition()
                         .isNear(
                             IntakeExtensionConstants.AGITATED_POSITION,
-                            IntakeExtensionConstants.POSITION_TOLERANCE)),
+                            IntakeExtensionConstants.POSITION_TOLERANCE))
+            .withTimeout(1),
         Commands.waitTime(Seconds.of(0.75)),
         robot.getIntakeExtension().extend());
   }
