@@ -211,9 +211,11 @@ public class Autonomous {
                                 3.616589307785034, 5.050553798675537, Rotation2d.k180deg))),
         Commands.parallel(
             Commands.sequence(
-                robot
-                    .getSwerveDrive()
-                    .followPath(pathName + ".0"), // Drive away from hub to where shooting can start
+                Commands.parallel(
+                    robot.getSwerveDrive().followPath(pathName + ".0"),
+                    robot
+                        .getIntakeExtension()
+                        .extend()), // Drive away from hub to where shooting can start
                 robot
                     .getSwerveDrive()
                     .followPath(pathName + ".1")
@@ -221,8 +223,7 @@ public class Autonomous {
                         shootFuel.shootOnTheMove()), // Drive while shooting preload to depot setup
                 // position
                 shootFuel.shootAllFuelStationary().withTimeout(2) // Shoot any remaining fuel
-                ),
-            robot.getIntakeExtension().extend()),
+                )),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2")

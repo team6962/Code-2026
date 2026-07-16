@@ -38,14 +38,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 
 /** This subsystem controls the extension of the intake out of the robot and back in. */
 public class IntakeExtension extends SubsystemBase {
 
   private TalonFX motor;
   private CANdi candi;
-  private RobotContainer robot;
 
   // The status signals' rotations actually represent meters of mechanism motion
   private StatusSignal<Angle> positionSignal;
@@ -288,7 +286,7 @@ public class IntakeExtension extends SubsystemBase {
                             IntakeExtensionConstants.POSITION_TOLERANCE))
             .withTimeout(1),
         Commands.waitTime(Seconds.of(0.75)),
-        robot.getIntakeExtension().extend());
+        extend());
   }
 
   public Command extendSlow() {

@@ -25,9 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeRollers extends SubsystemBase {
-  private TalonFX intakeMotorLeader;
-  private TalonFX intakeMotorFollower;
-  private TalonFX intakeMotor;
+  private TalonFX leaderMotor;
+  private TalonFX followerMotor;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
@@ -40,13 +39,12 @@ public class IntakeRollers extends SubsystemBase {
 
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
-    intakeMotorLeader =
-        new TalonFX(IntakeRollersConstants.DEVICE_ID_1, IntakeRollersConstants.CANBUS);
+    leaderMotor = new TalonFX(IntakeRollersConstants.LEADER_ID_1, IntakeRollersConstants.CANBUS);
 
-    intakeMotorLeader.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
+    leaderMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
 
-    intakeMotorFollower =
-        new TalonFX(IntakeRollersConstants.DEVICE_ID_2, IntakeRollersConstants.CANBUS);
+    followerMotor =
+        new TalonFX(IntakeRollersConstants.FOLLOWER_ID_2, IntakeRollersConstants.CANBUS);
 
     IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
         IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
@@ -54,12 +52,14 @@ public class IntakeRollers extends SubsystemBase {
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
 
-    this.velocitySignal = intakeMotorLeader.getVelocity();
-    this.statorCurrentSignal = intakeMotorLeader.getStatorCurrent();
-    this.supplyCurrentSignal = intakeMotorFollower.getSupplyCurrent();
-    this.appliedVoltageSignal = intakeMotorLeader.getMotorVoltage();
-    if (RobotBase.isSimulation()) {
-      simulation = new IntakeRollerSim(intakeMotor);
+    followerMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
+
+    this.velocitySignal = leaderMotor.getVelocity();
+    this.statorCurrentSignal = leaderMotor.getStatorCurrent();
+    this.supplyCurrentSignal = followerMotor.getSupplyCurrent();
+    this.appliedVoltageSignal = leaderMotor.getMotorVoltage();
+    if(RobotBase.isSimulation()) {
+      simulation = new IntakeRollerSim(leaderMotor);
     }
 
     DogLog.tunable(
@@ -78,10 +78,10 @@ public class IntakeRollers extends SubsystemBase {
 
     CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
 
-    intakeMotorFollower.setControl(
-        new Follower(intakeMotorLeader.getDeviceID(), MotorAlignmentValue.Opposed));
+    followerMotor.setControl(
+        new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     if (RobotBase.isSimulation()) {
-      simulation = new IntakeRollerSim(intakeMotorLeader);
+      simulation = new IntakeRollerSim(leaderMotor);
     }
   }
 
@@ -90,10 +90,10 @@ public class IntakeRollers extends SubsystemBase {
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
+          leaderMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
@@ -105,11 +105,11 @@ public class IntakeRollers extends SubsystemBase {
   public Command intake() {
     return runEnd(
         () -> {
-          intakeMotor.setControl(
+          leaderMotor.setControl(
               new VoltageOut(stalling ? intakeStallVoltage : intakeVoltage).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
@@ -121,10 +121,10 @@ public class IntakeRollers extends SubsystemBase {
   public Command outtake() {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new DutyCycleOut(-1).withEnableFOC(false));
+          leaderMotor.setControl(new DutyCycleOut(-1).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 

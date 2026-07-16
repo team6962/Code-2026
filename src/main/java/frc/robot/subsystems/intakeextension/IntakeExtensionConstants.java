@@ -37,7 +37,7 @@ public final class IntakeExtensionConstants {
   public static final int CANDI_DEVICE_ID = 20;
   public static final Distance POSITION_TOLERANCE = Inches.of(0.125);
   public static final Voltage FINE_CONTROL_VOLTAGE = Volts.of(1.0);
-  public static final double GEAR_RATIO = 7;
+  public static final double GEAR_RATIO = 17.5;
 
   public static final TalonFXConfiguration MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
@@ -53,12 +53,12 @@ public final class IntakeExtensionConstants {
                   .withMotionMagicJerk(0))
           .withSlot0(
               new Slot0Configs()
-                  .withKA(0.035)
+                  .withKA(0.0377)
                   .withKD(0.0)
                   .withKP(100.0)
-                  .withKG(-0.045)
-                  .withKV(5.878)
-                  .withKS(0.315)
+                  .withKG(-0.118)
+                  .withKV(6.785)
+                  .withKS(0)
                   .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
@@ -68,7 +68,7 @@ public final class IntakeExtensionConstants {
                   .withStatorCurrentLimitEnable(true))
           .withMotorOutput(
               new MotorOutputConfigs()
-                  .withInverted(InvertedValue.CounterClockwise_Positive)
+                  .withInverted(InvertedValue.Clockwise_Positive)
                   .withNeutralMode(NeutralModeValue.Coast));
 
   public static final CANdiConfiguration CANDI_CONFIGURATION = new CANdiConfiguration();
