@@ -58,7 +58,7 @@ public class IntakeRollers extends SubsystemBase {
     this.statorCurrentSignal = leaderMotor.getStatorCurrent();
     this.supplyCurrentSignal = followerMotor.getSupplyCurrent();
     this.appliedVoltageSignal = leaderMotor.getMotorVoltage();
-    if(RobotBase.isSimulation()) {
+    if (RobotBase.isSimulation()) {
       simulation = new IntakeRollerSim(leaderMotor);
     }
 
@@ -78,8 +78,7 @@ public class IntakeRollers extends SubsystemBase {
 
     CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
 
-    followerMotor.setControl(
-        new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+    followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     if (RobotBase.isSimulation()) {
       simulation = new IntakeRollerSim(leaderMotor);
     }
