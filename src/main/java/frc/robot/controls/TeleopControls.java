@@ -379,7 +379,12 @@ public class TeleopControls extends SubsystemBase {
                                 RotationsPerSecondPerSecond.of(hubMaxAngularAcceleration))),
                 Set.of()))
         .and(autoShoot.isReadyToShoot())
-        .whileTrue(robot.getHopper().feed());
+        .whileTrue(
+            robot
+                .getHopper()
+                .feed()
+                .alongWith(
+                    robot.getIntakeExtension().agitate().onlyWhile(driver.rightStick().negate())));
 
     shootButtonsTrigger
         .and(inAllianceZone.negate())
