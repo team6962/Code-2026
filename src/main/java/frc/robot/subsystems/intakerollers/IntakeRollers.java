@@ -146,8 +146,8 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
-   * Returns the total supply current draw of the mechanism.
-   * It is multiplied by 2 to account for the second intake roller motor.
+   * Returns the total supply current draw of the mechanism. It is multiplied by 2 to account for
+   * the second intake roller motor.
    *
    * @return Current
    */
