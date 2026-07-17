@@ -75,13 +75,11 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath("left_neutral.0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.1", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
         shootFuel.shoot());
   }
@@ -104,30 +102,25 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath("left_neutral.0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.1", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot.getSwerveDrive().followPath("left_neutral.2", rightSide),
         shootFuel.shootAllFuelStationary().withTimeout(20.0 - 13.2),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.3", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.4", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath("left_neutral.5", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         shootFuel.shoot());
   }
 
@@ -150,24 +143,24 @@ public class Autonomous {
                 .getSwerveDrive()
                 .followPath("left_neutral_bump.0", rightSide)
                 .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
             robot
                 .getSwerveDrive()
                 .followPath("left_neutral_bump.1", rightSide)
                 .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
             robot.getSwerveDrive().followPath("left_neutral_bump.2", rightSide),
             shootFuel.shootAllFuelStationary().withTimeout(5),
             robot
                 .getSwerveDrive()
                 .followPath("left_neutral_bump.3", rightSide)
                 .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
             robot
                 .getSwerveDrive()
                 .followPath("left_neutral_bump.4", rightSide)
                 .deadlineFor(
-                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intakeFast()),
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
             robot.getSwerveDrive().followPath("left_neutral_bump.5", rightSide),
             shootFuel.shoot())
         .withTimeout(20);
@@ -218,9 +211,11 @@ public class Autonomous {
                                 3.616589307785034, 5.050553798675537, Rotation2d.k180deg))),
         Commands.parallel(
             Commands.sequence(
-                robot
-                    .getSwerveDrive()
-                    .followPath(pathName + ".0"), // Drive away from hub to where shooting can start
+                Commands.parallel(
+                    robot.getSwerveDrive().followPath(pathName + ".0"),
+                    robot
+                        .getIntakeExtension()
+                        .extend()), // Drive away from hub to where shooting can start
                 robot
                     .getSwerveDrive()
                     .followPath(pathName + ".1")
@@ -228,8 +223,7 @@ public class Autonomous {
                         shootFuel.shootOnTheMove()), // Drive while shooting preload to depot setup
                 // position
                 shootFuel.shootAllFuelStationary().withTimeout(2) // Shoot any remaining fuel
-                ),
-            robot.getIntakeExtension().extend()),
+                )),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2")

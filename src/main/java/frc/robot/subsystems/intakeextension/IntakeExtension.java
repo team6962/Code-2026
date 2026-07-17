@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -259,6 +260,33 @@ public class IntakeExtension extends SubsystemBase {
                     .isNear(
                         IntakeExtensionConstants.RETRACT_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE));
+  }
+
+  public Command agitate() {
+    return Commands.repeatingSequence(
+        startEnd(
+                () -> {
+                  motor.setControl(
+                      new MotionMagicVoltage(
+                          IntakeExtensionConstants.AGITATED_POSITION.in(Meters)));
+                },
+                () -> {
+                  if (!getPosition()
+                      .isNear(
+                          IntakeExtensionConstants.AGITATED_POSITION,
+                          IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                    motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
+                  }
+                })
+            .until(
+                () ->
+                    getPosition()
+                        .isNear(
+                            IntakeExtensionConstants.AGITATED_POSITION,
+                            IntakeExtensionConstants.POSITION_TOLERANCE))
+            .withTimeout(0.25),
+        Commands.waitTime(Seconds.of(0.5)),
+        extend().withTimeout(0.25));
   }
 
   public Command extendSlow() {
