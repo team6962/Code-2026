@@ -146,12 +146,13 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
-   * Takes status signal Supply Current and returns it as a Current
+   * Returns the total supply current draw of the mechanism.
+   * It is multiplied by 2 to account for the second intake roller motor.
    *
    * @return Current
    */
   public Current getSupplyCurrent() {
-    return supplyCurrentSignal.getValue();
+    return Amps.of((2 * supplyCurrentSignal.getValueAsDouble()));
   }
 
   /**
