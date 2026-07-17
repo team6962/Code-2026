@@ -263,7 +263,7 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   public Command agitate() {
-    return Commands.sequence(
+    return Commands.repeatingSequence(
         startEnd(
                 () -> {
                   motor.setControl(
@@ -284,9 +284,9 @@ public class IntakeExtension extends SubsystemBase {
                         .isNear(
                             IntakeExtensionConstants.AGITATED_POSITION,
                             IntakeExtensionConstants.POSITION_TOLERANCE))
-            .withTimeout(1),
-        Commands.waitTime(Seconds.of(0.75)),
-        extend());
+            .withTimeout(0.25),
+        Commands.waitTime(Seconds.of(0.5)),
+        extend().withTimeout(0.25));
   }
 
   public Command extendSlow() {

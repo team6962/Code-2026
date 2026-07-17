@@ -292,14 +292,6 @@ public class TeleopControls extends SubsystemBase {
                     .getIntakeExtension()
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
-    // Intake extension and retraction - WORKS
-    Trigger intakeRetract = operator.rightStick().or(driver.start());
-    Trigger intakeExtend =
-        intakeRetract.negate().and(RobotState::isTeleop).and(RobotState::isEnabled);
-
-    intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
-    intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
-
     // Climb retraction
     // Command autodescend = robot.getClimb().descend();
     // Trigger climbRetract =
@@ -384,7 +376,11 @@ public class TeleopControls extends SubsystemBase {
                 .getHopper()
                 .feed()
                 .alongWith(
-                    robot.getIntakeExtension().agitate().onlyWhile(driver.rightStick().negate())));
+                    robot
+                        .getIntakeExtension()
+                        .agitate()
+                        .alongWith(robot.getIntakeRollers().intake())
+                        .onlyWhile(driver.rightStick().negate())));
 
     shootButtonsTrigger
         .and(inAllianceZone.negate())
@@ -438,6 +434,18 @@ public class TeleopControls extends SubsystemBase {
     //                                     functions.getHoodAngle(shootingTestDistance),
     //                                     Degrees.of(1))),
     //                 robot.getHopper().feed())));
+
+    // Intake extension and retraction - WORKS
+    Trigger intakeRetract = operator.rightStick().or(driver.start());
+    Trigger intakeExtend =
+        intakeRetract
+            .negate()
+            .and(RobotState::isTeleop)
+            .and(RobotState::isEnabled)
+            .and(shootButtonsTrigger.and(inAllianceZone).and(autoShoot.isReadyToShoot()).negate());
+
+    intakeRetract.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().retract());
+    intakeExtend.and(() -> !fineControl).whileTrue(robot.getIntakeExtension().extend());
 
     new ShiftFeedback(List.of(driverRumble, operatorRumble));
   }
