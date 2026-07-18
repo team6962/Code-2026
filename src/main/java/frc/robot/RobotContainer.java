@@ -63,7 +63,7 @@ public class RobotContainer {
     DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
 
     LoggingUtil.logGitProperties();
-    RobotController.setBrownoutVoltage(4.6);
+    RobotController.setBrownoutVoltage(5.4);
 
     CurrentDrawLogger.start();
 
