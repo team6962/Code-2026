@@ -29,6 +29,7 @@ public final class IntakeExtensionConstants {
   public static final DCMotor MOTOR_PHYSICS = DCMotor.getKrakenX44(1);
   public static final Mass MOVING_MASS = Pounds.of(13.25);
   public static final Distance MAX_POSITION = Inches.of(10.1);
+  public static final Distance EXTEND_POSITION = Inches.of(9.8);
   public static final Distance MIN_POSITION = Inches.of(0);
   public static final Distance RETRACT_POSITION = Inches.of(3);
   public static final Distance AGITATED_POSITION = Inches.of(8);

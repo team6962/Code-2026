@@ -379,7 +379,7 @@ public class TeleopControls extends SubsystemBase {
                     robot
                         .getIntakeExtension()
                         .agitate()
-                        .alongWith(robot.getIntakeRollers().intake())
+                        .alongWith(robot.getIntakeRollers().intakeSlow())
                         .onlyWhile(driver.rightStick().negate())));
 
     shootButtonsTrigger
