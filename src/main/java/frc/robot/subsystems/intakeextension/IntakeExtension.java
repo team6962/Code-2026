@@ -222,8 +222,6 @@ public class IntakeExtension extends SubsystemBase {
                       IntakeExtensionConstants.EXTEND_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
                 motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              } else {
-                motor.setControl(new CoastOut());
               }
             })
         .until(
@@ -275,7 +273,8 @@ public class IntakeExtension extends SubsystemBase {
                       .isNear(
                           IntakeExtensionConstants.AGITATED_POSITION,
                           IntakeExtensionConstants.POSITION_TOLERANCE)) {
-                    motor.setControl(new DynamicMotionMagicVoltage(getPosition().in(Meters), 2.0, 5.0));
+                    motor.setControl(
+                        new DynamicMotionMagicVoltage(getPosition().in(Meters), 2.0, 5.0));
                   }
                 })
             .until(
@@ -435,7 +434,8 @@ public class IntakeExtension extends SubsystemBase {
    */
   public boolean isExtended() {
     return getPosition()
-        .isNear(IntakeExtensionConstants.EXTEND_POSITION, IntakeExtensionConstants.POSITION_TOLERANCE);
+        .isNear(
+            IntakeExtensionConstants.EXTEND_POSITION, IntakeExtensionConstants.POSITION_TOLERANCE);
   }
 
   /**
