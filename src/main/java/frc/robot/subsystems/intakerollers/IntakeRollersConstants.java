@@ -11,7 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 public class IntakeRollersConstants {
-  public static final double GEAR_RATIO = 15 / 27;
+  public static final double GEAR_RATIO = 15.0 / 27.0;
   public static final double MOMENT_OF_INERTIA = 0.00022826;
   public static final int LEADER_ID_1 = 41;
   public static final int FOLLOWER_ID_2 = 42;
