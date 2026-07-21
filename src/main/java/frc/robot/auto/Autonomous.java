@@ -76,13 +76,11 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".1", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
         shootFuel.shoot());
   }
@@ -106,30 +104,25 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".1", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
         shootFuel.shootAllFuelStationary().withTimeout(20 - 13.2),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".3", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".4", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".5", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         shootFuel.shoot());
   }
 
@@ -205,31 +198,26 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".0", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".1", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".4", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".5", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
