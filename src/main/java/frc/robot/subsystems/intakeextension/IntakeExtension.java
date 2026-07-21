@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -213,23 +214,21 @@ public class IntakeExtension extends SubsystemBase {
     return startEnd(
             () -> {
               motor.setControl(
-                  new MotionMagicVoltage(IntakeExtensionConstants.MAX_POSITION.in(Meters)));
+                  new MotionMagicVoltage(IntakeExtensionConstants.EXTEND_POSITION.in(Meters)));
             },
             () -> {
               if (!getPosition()
                   .isNear(
-                      IntakeExtensionConstants.MAX_POSITION,
+                      IntakeExtensionConstants.EXTEND_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
                 motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
-              } else {
-                motor.setControl(new CoastOut());
               }
             })
         .until(
             () ->
                 getPosition()
                     .isNear(
-                        IntakeExtensionConstants.MAX_POSITION,
+                        IntakeExtensionConstants.EXTEND_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE))
         .onlyIf(() -> isZeroed);
   }
@@ -261,17 +260,46 @@ public class IntakeExtension extends SubsystemBase {
                         IntakeExtensionConstants.POSITION_TOLERANCE));
   }
 
+  public Command agitate() {
+    return Commands.repeatingSequence(
+        startEnd(
+                () -> {
+                  motor.setControl(
+                      new DynamicMotionMagicVoltage(
+                          IntakeExtensionConstants.AGITATED_POSITION.in(Meters), 2.0, 5.0));
+                },
+                () -> {
+                  if (!getPosition()
+                      .isNear(
+                          IntakeExtensionConstants.AGITATED_POSITION,
+                          IntakeExtensionConstants.POSITION_TOLERANCE)) {
+                    motor.setControl(
+                        new DynamicMotionMagicVoltage(getPosition().in(Meters), 2.0, 5.0));
+                  }
+                })
+            .until(
+                () ->
+                    getPosition()
+                        .isNear(
+                            IntakeExtensionConstants.AGITATED_POSITION,
+                            IntakeExtensionConstants.POSITION_TOLERANCE))
+            .withTimeout(0.5),
+        Commands.waitTime(Seconds.of(0.25)),
+        extendSlow().withTimeout(0.5),
+        Commands.waitTime(Seconds.of(0.25)));
+  }
+
   public Command extendSlow() {
     return startEnd(
             () -> {
               motor.setControl(
                   new DynamicMotionMagicVoltage(
-                      IntakeExtensionConstants.MAX_POSITION.in(Meters), 3.0, 6.0));
+                      IntakeExtensionConstants.EXTEND_POSITION.in(Meters), 2.0, 5.0));
             },
             () -> {
               if (!getPosition()
                   .isNear(
-                      IntakeExtensionConstants.MAX_POSITION,
+                      IntakeExtensionConstants.EXTEND_POSITION,
                       IntakeExtensionConstants.POSITION_TOLERANCE)) {
                 motor.setControl(new MotionMagicVoltage(getPosition().in(Meters)));
               } else {
@@ -282,7 +310,7 @@ public class IntakeExtension extends SubsystemBase {
             () ->
                 getPosition()
                     .isNear(
-                        IntakeExtensionConstants.MAX_POSITION,
+                        IntakeExtensionConstants.EXTEND_POSITION,
                         IntakeExtensionConstants.POSITION_TOLERANCE))
         .onlyIf(() -> isZeroed);
   }
@@ -398,15 +426,16 @@ public class IntakeExtension extends SubsystemBase {
   /**
    * Determines whether the intake extension is considered fully extended.
    *
-   * <p>This method compares the current extension position to the configured MAX_POSITION using
+   * <p>This method compares the current extension position to the configured EXTEND_POSITION using
    * POSITION_TOLERANCE to allow for small deviations.
    *
-   * @return true if the current position is within POSITION_TOLERANCE of MAX_POSITION; false
+   * @return true if the current position is within POSITION_TOLERANCE of EXTEND_POSITION; false
    *     otherwise
    */
   public boolean isExtended() {
     return getPosition()
-        .isNear(IntakeExtensionConstants.MAX_POSITION, IntakeExtensionConstants.POSITION_TOLERANCE);
+        .isNear(
+            IntakeExtensionConstants.EXTEND_POSITION, IntakeExtensionConstants.POSITION_TOLERANCE);
   }
 
   /**

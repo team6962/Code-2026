@@ -4,12 +4,14 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
@@ -23,7 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeRollers extends SubsystemBase {
-  private TalonFX intakeMotor;
+  private TalonFX leaderMotor;
+  private TalonFX followerMotor;
   private StatusSignal<AngularVelocity> velocitySignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
@@ -36,16 +39,27 @@ public class IntakeRollers extends SubsystemBase {
 
   /** Intializes motor and status signals Class for Intake Rollers */
   public IntakeRollers() {
-    this.intakeMotor =
-        new TalonFX(IntakeRollersConstants.DEVICE_ID, new CANBus("subsystems")); // temporary
+    leaderMotor = new TalonFX(IntakeRollersConstants.LEADER_ID_1, IntakeRollersConstants.CANBUS);
 
-    intakeMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
-    this.velocitySignal = intakeMotor.getVelocity();
-    this.statorCurrentSignal = intakeMotor.getStatorCurrent();
-    this.supplyCurrentSignal = intakeMotor.getSupplyCurrent();
-    this.appliedVoltageSignal = intakeMotor.getMotorVoltage();
+    leaderMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
+
+    followerMotor =
+        new TalonFX(IntakeRollersConstants.FOLLOWER_ID_2, IntakeRollersConstants.CANBUS);
+
+    IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+    followerMotor.getConfigurator().apply(IntakeRollersConstants.MOTOR_CONFIGURATION);
+
+    this.velocitySignal = leaderMotor.getVelocity();
+    this.statorCurrentSignal = leaderMotor.getStatorCurrent();
+    this.supplyCurrentSignal = followerMotor.getSupplyCurrent();
+    this.appliedVoltageSignal = leaderMotor.getMotorVoltage();
     if (RobotBase.isSimulation()) {
-      simulation = new IntakeRollerSim(intakeMotor);
+      simulation = new IntakeRollerSim(leaderMotor);
     }
 
     DogLog.tunable(
@@ -63,6 +77,11 @@ public class IntakeRollers extends SubsystemBase {
         });
 
     CurrentDrawLogger.add("Intake Rollers", this::getSupplyCurrent);
+
+    followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+    if (RobotBase.isSimulation()) {
+      simulation = new IntakeRollerSim(leaderMotor);
+    }
   }
 
   /** Returns command to make the motor move and stop */
@@ -70,10 +89,10 @@ public class IntakeRollers extends SubsystemBase {
   private Command move(Voltage voltage) {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
+          leaderMotor.setControl(new VoltageOut(voltage).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
@@ -85,27 +104,21 @@ public class IntakeRollers extends SubsystemBase {
   public Command intake() {
     return runEnd(
         () -> {
-          intakeMotor.setControl(
+          leaderMotor.setControl(
               new VoltageOut(stalling ? intakeStallVoltage : intakeVoltage).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
-  /**
-   * Returns command where motor intakes fuel at full speed. This should only be used when shooting
-   * fuel out of the robot with the intake is not a concern.
-   *
-   * @return The command to intake fuel at full speed.
-   */
-  public Command intakeFast() {
-    return startEnd(
+  public Command intakeSlow() {
+    return runEnd(
         () -> {
-          intakeMotor.setControl(new VoltageOut(12.0).withEnableFOC(false));
+          leaderMotor.setControl(new VoltageOut(3));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
@@ -117,10 +130,10 @@ public class IntakeRollers extends SubsystemBase {
   public Command outtake() {
     return startEnd(
         () -> {
-          intakeMotor.setControl(new DutyCycleOut(-1).withEnableFOC(false));
+          leaderMotor.setControl(new DutyCycleOut(-1).withEnableFOC(false));
         },
         () -> {
-          intakeMotor.setControl(new CoastOut());
+          leaderMotor.setControl(new CoastOut());
         });
   }
 
@@ -143,12 +156,13 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
-   * Takes status signal Supply Current and returns it as a Current
+   * Returns the total supply current draw of the mechanism. It is multiplied by 2 to account for
+   * the second intake roller motor.
    *
    * @return Current
    */
   public Current getSupplyCurrent() {
-    return supplyCurrentSignal.getValue();
+    return Amps.of((2 * supplyCurrentSignal.getValueAsDouble()));
   }
 
   /**
