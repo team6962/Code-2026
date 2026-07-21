@@ -26,9 +26,9 @@ public class ShootFuel {
                             () ->
                                 autoShoot.isReadyToShoot().getAsBoolean()
                                     || RobotBase.isSimulation())
-                        .repeatedly(),
-                    robot.getIntakeRollers().intake(),
-                    robot.getIntakeExtension().agitate())
+                        .repeatedly())
+                .deadlineFor(
+                    robot.getIntakeRollers().intakeSlow(), robot.getIntakeExtension().agitate())
                 .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
             robot
                 .getHopper()
@@ -47,12 +47,23 @@ public class ShootFuel {
   public Command shootAllFuelStationary() {
     AutoShoot autoShoot = new AutoShoot(robot);
 
-    return Commands.parallel(
-            autoShoot,
-            Commands.waitUntil(
-                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .andThen(robot.getHopper().feed().repeatedly()))
-        .deadlineFor(robot.getIntakeRollers().intakeSlow(), robot.getIntakeExtension().agitate())
+    return Commands.either(
+            Commands.parallel(
+                    autoShoot,
+                    Commands.waitUntil(
+                            () ->
+                                autoShoot.isReadyToShoot().getAsBoolean()
+                                    || RobotBase.isSimulation())
+                        .andThen(robot.getHopper().feed().repeatedly()))
+                .deadlineFor(
+                    robot.getIntakeRollers().intakeSlow(), robot.getIntakeExtension().agitate())
+                .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
+            robot
+                .getHopper()
+                .unjam()
+                .until(() -> robot.getHopper().getSensors().isFeedingSuccessfully()),
+            (() -> robot.getHopper().getSensors().isFeedingSuccessfully()))
+        .repeatedly()
         .until(() -> robot.getHopper().isEmpty());
   }
 
@@ -64,46 +75,73 @@ public class ShootFuel {
   public Command shoot() {
     AutoShoot autoShoot = new AutoShoot(robot);
 
-    return Commands.parallel(
-        autoShoot,
-        Commands.waitUntil(
-                () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-            .andThen(robot.getHopper().feed().repeatedly()));
+    return Commands.either(
+        Commands.parallel(
+                autoShoot,
+                Commands.waitUntil(
+                        () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
+                    .andThen(robot.getHopper().feed().repeatedly()))
+            .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
+        robot
+            .getHopper()
+            .unjam()
+            .until(() -> robot.getHopper().getSensors().isFeedingSuccessfully()),
+        (() -> robot.getHopper().getSensors().isFeedingSuccessfully()));
   }
 
   public Command shootOnTheMove() {
     AutoShoot autoShoot = new AutoShoot(robot);
 
-    return Commands.parallel(
-        autoShoot,
-        Commands.waitUntil(
-                () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-            .andThen(
-                robot
-                    .getHopper()
-                    .feed()
-                    .onlyWhile(
+    return Commands.either(
+        Commands.parallel(
+                autoShoot,
+                Commands.waitUntil(
                         () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                    .repeatedly()));
+                    .andThen(
+                        robot
+                            .getHopper()
+                            .feed()
+                            .onlyWhile(
+                                () ->
+                                    autoShoot.isReadyToShoot().getAsBoolean()
+                                        || RobotBase.isSimulation())
+                            .repeatedly()))
+            .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
+        robot
+            .getHopper()
+            .unjam()
+            .until(() -> robot.getHopper().getSensors().isFeedingSuccessfully()),
+        (() -> robot.getHopper().getSensors().isFeedingSuccessfully()));
   }
 
   public Command shootAllFuelOnTheMove() {
     AutoShoot autoShoot = new AutoShoot(robot);
 
-    return Commands.parallel(
-            autoShoot,
-            Commands.waitUntil(
-                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .andThen(
-                    robot
-                        .getHopper()
-                        .feed()
-                        .onlyWhile(
+    return Commands.either(
+            Commands.parallel(
+                    autoShoot,
+                    Commands.waitUntil(
                             () ->
                                 autoShoot.isReadyToShoot().getAsBoolean()
                                     || RobotBase.isSimulation())
-                        .repeatedly()))
-        .deadlineFor(robot.getIntakeExtension().agitate(), robot.getIntakeRollers().intakeSlow())
+                        .andThen(
+                            robot
+                                .getHopper()
+                                .feed()
+                                .onlyWhile(
+                                    () ->
+                                        autoShoot.isReadyToShoot().getAsBoolean()
+                                            || RobotBase.isSimulation())
+                                .repeatedly()))
+                .deadlineFor(
+                    robot.getIntakeExtension().agitate(), robot.getIntakeRollers().intakeSlow())
+                .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
+            robot
+                .getHopper()
+                .unjam()
+                .until(() -> robot.getHopper().getSensors().isFeedingSuccessfully()),
+            (() -> robot.getHopper().getSensors().isFeedingSuccessfully()))
+        .repeatedly()
         .until(() -> robot.getHopper().isEmpty());
   }
 }
