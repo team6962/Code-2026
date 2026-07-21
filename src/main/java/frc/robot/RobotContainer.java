@@ -134,18 +134,18 @@ public class RobotContainer {
 
     autoChooser.addOption(
         "Left Single Neutral Cycle",
-        new AutoChooserOption(autonomous.leftSingleNeutralCycle(), true));
+        new AutoChooserOption(autonomous.leftSingleNeutralCycle(), false));
     autoChooser.addOption(
         "Left Double Neutral Cycle",
-        new AutoChooserOption(autonomous.leftDoubleNeutralCycle(), true));
+        new AutoChooserOption(autonomous.leftDoubleNeutralCycle(), false));
     autoChooser.addOption(
         "Left Double Sweep Bump", new AutoChooserOption(autonomous.leftDoubleSweepBump(), true));
     autoChooser.addOption(
         "Right Single Neutral Cycle",
-        new AutoChooserOption(autonomous.rightSingleNeutralCycle(), true));
+        new AutoChooserOption(autonomous.rightSingleNeutralCycle(), false));
     autoChooser.addOption(
         "Right Double Neutral Cycle",
-        new AutoChooserOption(autonomous.rightDoubleNeutralCycle(), true));
+        new AutoChooserOption(autonomous.rightDoubleNeutralCycle(), false));
     autoChooser.addOption(
         "Right Double Sweep Bump", new AutoChooserOption(autonomous.rightDoubleSweepBump(), true));
 
