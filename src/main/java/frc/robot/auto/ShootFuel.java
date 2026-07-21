@@ -16,15 +16,26 @@ public class ShootFuel {
   public Command shootAllFuel() {
     AutoShoot autoShoot = new AutoShoot(robot);
 
-    return Commands.parallel(
-            autoShoot,
+    return Commands.either(
+            Commands.parallel(
+                    autoShoot,
+                    robot
+                        .getHopper()
+                        .feed()
+                        .onlyWhile(
+                            () ->
+                                autoShoot.isReadyToShoot().getAsBoolean()
+                                    || RobotBase.isSimulation())
+                        .repeatedly(),
+                    robot.getIntakeRollers().intake(),
+                    robot.getIntakeExtension().agitate())
+                .until(() -> !robot.getHopper().getSensors().isFeedingSuccessfully()),
             robot
                 .getHopper()
-                .feed()
-                .onlyWhile(
-                    () -> autoShoot.isReadyToShoot().getAsBoolean() || RobotBase.isSimulation())
-                .repeatedly())
-        .deadlineFor(robot.getIntakeRollers().intakeSlow(), robot.getIntakeExtension().agitate())
+                .unjam()
+                .until(() -> robot.getHopper().getSensors().isFeedingSuccessfully()),
+            () -> robot.getHopper().getSensors().isFeedingSuccessfully())
+        .repeatedly()
         .until(() -> robot.getHopper().isEmpty());
   }
 
