@@ -1,5 +1,6 @@
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -59,6 +60,8 @@ public class Autonomous {
 
   private static Pose2d LEFT_START_POSE =
       new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d());
+  private static Pose2d LEFT_START_POSE_ROTATED =
+      new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d(Degrees.of(-90)));
 
   private Command singleNeutralCycle(boolean rightSide) {
     String pathName = "left_neutral";
@@ -178,8 +181,8 @@ public class Autonomous {
             shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
-  public Command doubleSweepBump(boolean rightSide) {
-    String pathName = "double_sweep_bump";
+  public Command greedyDoubleSweepBump(boolean rightSide) {
+    String pathName = "greedy_double_sweep_bump";
     robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
@@ -194,7 +197,53 @@ public class Autonomous {
                 robot
                     .getSwerveDrive()
                     .getLocalization()
-                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+                    .resetPosition(mirrorPose(LEFT_START_POSE_ROTATED, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".0", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".1", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".2", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+        Commands.parallel(
+            robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
+            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".5", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+        Commands.parallel(
+            robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
+            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
+        robot.getSwerveDrive().followPath(pathName + ".7", rightSide));
+  }
+
+  public Command safeDoubleSweepBump(boolean rightSide) {
+    String pathName = "safe_double_sweep_bump";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".6");
+
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE_ROTATED, rightSide))),
         robot
             .getSwerveDrive()
             .followPath(pathName + ".0", rightSide)
@@ -240,12 +289,20 @@ public class Autonomous {
     return doubleNeutralCycle(true);
   }
 
-  public Command leftDoubleSweepBump() {
-    return doubleSweepBump(false);
+  public Command greedyLeftDoubleSweepBump() {
+    return greedyDoubleSweepBump(false);
   }
 
-  public Command rightDoubleSweepBump() {
-    return doubleSweepBump(true);
+  public Command greedyRightDoubleSweepBump() {
+    return greedyDoubleSweepBump(true);
+  }
+
+  public Command safeLeftDoubleSweepBump() {
+    return safeDoubleSweepBump(false);
+  }
+
+  public Command safeRightDoubleSweepBump() {
+    return safeDoubleSweepBump(true);
   }
 
   public Command preload() {
