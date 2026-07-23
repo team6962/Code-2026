@@ -15,7 +15,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
@@ -39,18 +38,14 @@ import java.util.function.Supplier;
 
 /**
  * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
- * The turret uses a TalonFX motor controller and a hall effect sensor connected to a CANdi for
- * absolute position zeroing. The turret can be controlled using Motion Magic position control to
- * move to specific angles, and includes safety features to prevent movement before zeroing and to
- * clamp target angles within a safe range. The subsystem also includes extensive logging of status
- * signals and control requests for debugging and tuning purposes.
+ * The turret can be controlled using Motion Magic position control to move to specific angles, and
+ * includes safety features to prevent movement before zeroing and to clamp target angles within a
+ * safe range. The subsystem also includes extensive logging of status signals and control requests
+ * for debugging and tuning purposes.
  */
 public class Turret extends SubsystemBase {
   /** The motor that controls the turret */
   private TalonFX motor;
-
-  /** The CANdi that connects the hall effect sensor to the CAN bus */
-  private CANdi candi;
 
   // Status signals for logging and control purposes
   private StatusSignal<Angle> positionSignal;
@@ -59,7 +54,6 @@ public class Turret extends SubsystemBase {
   private StatusSignal<Voltage> voltageSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
-  private StatusSignal<Boolean> hallSensorTriggeredSignal;
   private StatusSignal<Double> profilePositionSignal;
 
   /** The simulation object that simulates the turret's behavior */
@@ -71,12 +65,6 @@ public class Turret extends SubsystemBase {
    */
   private boolean isZeroed = false;
 
-  /**
-   * Indicates whether the hall sensor has been triggered. Used to detect when the turret has
-   * finished being zeroed.
-   */
-  private boolean hasHallSensorBeenTriggered = false;
-
   /** The current motor configuration */
   private TalonFXConfiguration config;
 
@@ -84,11 +72,6 @@ public class Turret extends SubsystemBase {
   public Turret() {
     // Assigns PID values and sets motor config
     motor = new TalonFX(TurretConstants.MOTOR_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
-
-    // Initialize hall effect sensor connected to the CANdi DIO port
-    candi =
-        new CANdi(
-            TurretConstants.HALL_SENSOR_CANDI_CAN_ID, new CANBus(TurretConstants.CAN_BUS_NAME));
 
     // Configure the TalonFX motor controller
     config = new TalonFXConfiguration();
@@ -128,7 +111,6 @@ public class Turret extends SubsystemBase {
     voltageSignal = motor.getMotorVoltage();
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
-    hallSensorTriggeredSignal = candi.getS2Closed();
     profilePositionSignal = motor.getClosedLoopReference();
 
     // Tunable angle input, PID values, Motion Magic constraints
@@ -228,11 +210,7 @@ public class Turret extends SubsystemBase {
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        hallSensorTriggeredSignal,
         profilePositionSignal);
-
-    // Check hall effect sensor and handle zeroing
-    updateTurretAbsolutePosition();
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
@@ -242,7 +220,6 @@ public class Turret extends SubsystemBase {
     DogLog.log("Turret/AppliedVoltage", getAppliedVoltage());
     DogLog.log("Turret/StatorCurrent", getStatorCurrent());
     DogLog.log("Turret/SupplyCurrent", getSupplyCurrent());
-    DogLog.log("Turret/HallSensorTriggered", isHallSensorTriggered());
     DogLog.forceNt.log("Turret/IsZeroed", isZeroed());
     DogLog.log(
         "Turret/ProfilePosition",
@@ -253,77 +230,6 @@ public class Turret extends SubsystemBase {
 
     if (motor.getAppliedControl() instanceof MotionMagicVoltage control) {
       setPositionControl(control.getPositionMeasure());
-    }
-  }
-
-  /**
-   * Checks the hall effect sensor and updates the motor position and zeroing status accordingly.
-   * This method should be called periodically to ensure the turret can zero itself using the hall
-   * effect sensor.
-   */
-  private void updateTurretAbsolutePosition() {
-    // Don't attempt to zero using the hall sensor if the robot is enabled or
-    // if the turret has already been zeroed (which is always true in simulation),
-    // to avoid interfering with normal operation
-    if (RobotState.isEnabled()) {
-      return;
-    }
-
-    // If the hall sensor is triggered but hasn't been triggered at all before, set the
-    // motor position to the hall sensor angle
-    if (isHallSensorTriggered() && !hasHallSensorBeenTriggered) {
-      hasHallSensorBeenTriggered = true;
-
-      // Determine which angle to use for initial zeroing
-      Angle initialZeroAngle;
-      if (TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE == null
-          && TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
-        throw new IllegalStateException(
-            "At least one of MINIMUM_HALL_SENSOR_TRIGGER_ANGLE or MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE must be non-null for hall sensor zeroing to work.");
-      } else if (TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
-        initialZeroAngle = TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE;
-      } else if (TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE == null) {
-        initialZeroAngle = TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE;
-      } else {
-        initialZeroAngle =
-            TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE
-                .plus(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)
-                .div(2);
-      }
-
-      motor.setPosition(initialZeroAngle);
-
-      DogLog.log("Turret/SetPositionToInitial", getPosition());
-    }
-
-    // If hall sensor is triggered at a lesser angle than ever before, set the
-    // motor position to the minimum angle that can trigger the hall sensor
-    if (isHallSensorTriggered()
-        && TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
-        && getPosition().lt(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE)
-        && (getPosition().isNear(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
-            || !hasHallSensorBeenTriggered)) {
-      motor.setPosition(TurretConstants.MINIMUM_HALL_SENSOR_TRIGGER_ANGLE);
-
-      DogLog.log("Turret/SetPositionToMin", getPosition());
-    }
-
-    // If hall sensor is triggered at a greater angle than ever before, set the
-    // motor position to the maximum angle that can trigger the hall sensor
-    if (isHallSensorTriggered()
-        && TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE != null
-        && getPosition().gt(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE)
-        && (getPosition().isNear(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE, Degrees.of(180))
-            || !hasHallSensorBeenTriggered)) {
-      motor.setPosition(TurretConstants.MAXIMUM_HALL_SENSOR_TRIGGER_ANGLE);
-
-      DogLog.log("Turret/SetPositionToMax", getPosition());
-    }
-
-    // If the hall sensor has exited the triggered range after being in it before,
-    // the zeroing process is complete
-    if (!isHallSensorTriggered() && hasHallSensorBeenTriggered) {
-      isZeroed = true;
     }
   }
 
@@ -387,16 +293,6 @@ public class Turret extends SubsystemBase {
    */
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
-  }
-
-  /**
-   * Gets whether the hall sensor is currently triggered. This can be used to detect when the turret
-   * is passing through the hall sensor range during zeroing.
-   *
-   * @return true if the hall sensor is triggered, false otherwise
-   */
-  public boolean isHallSensorTriggered() {
-    return hallSensorTriggeredSignal.getValue();
   }
 
   /**
