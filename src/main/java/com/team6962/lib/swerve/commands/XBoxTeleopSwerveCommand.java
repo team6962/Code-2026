@@ -273,18 +273,10 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
       double angularVelocity = getMappedRotationInput() * getNonFineControlAngularScalar();
 
       return reorientInSimulation(
-          reorient180Deg(
-              outputPowerToVelocity(
-                  new ChassisSpeeds(
-                      robotRelativeVelocity.getX(),
-                      robotRelativeVelocity.getY(),
-                      angularVelocity))));
+          outputPowerToVelocity(
+              new ChassisSpeeds(
+                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity)));
     }
-  }
-
-  private ChassisSpeeds reorient180Deg(ChassisSpeeds speeds) {
-    return new ChassisSpeeds(
-        -speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
   }
 
   private ChassisSpeeds babyMode(ChassisSpeeds speeds) {
