@@ -115,7 +115,7 @@ public class IntakeRollers extends SubsystemBase {
   public Command intakeSlow() {
     return runEnd(
         () -> {
-          leaderMotor.setControl(new VoltageOut(3));
+          leaderMotor.setControl(new VoltageOut(2));
         },
         () -> {
           leaderMotor.setControl(new CoastOut());

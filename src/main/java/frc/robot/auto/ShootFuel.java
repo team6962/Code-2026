@@ -78,7 +78,6 @@ public class ShootFuel {
 
   public Command shootAllFuelOnTheMove() {
     AutoShoot autoShoot = new AutoShoot(robot);
-
     return Commands.parallel(
             autoShoot,
             Commands.waitUntil(
@@ -93,6 +92,8 @@ public class ShootFuel {
                                     || RobotBase.isSimulation())
                         .repeatedly()))
         .deadlineFor(robot.getIntakeExtension().agitate(), robot.getIntakeRollers().intakeSlow())
-        .until(() -> robot.getHopper().isEmpty());
+        .withDeadline(
+            Commands.sequence(
+                Commands.waitSeconds(2.4), Commands.waitUntil(() -> robot.getHopper().isEmpty())));
   }
 }

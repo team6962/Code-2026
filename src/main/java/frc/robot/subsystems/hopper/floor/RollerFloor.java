@@ -34,7 +34,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
   private StatusSignal<Voltage> voltageSignal;
   private RollerFloorSim simulation;
 
-  private Voltage feedVoltage = Volts.of(8);
+  private Voltage feedVoltage = Volts.of(7);
   private Voltage dumpVoltage = Volts.of(-8);
 
   public RollerFloor() {
