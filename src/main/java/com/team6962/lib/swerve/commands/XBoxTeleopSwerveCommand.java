@@ -9,6 +9,7 @@ import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Joystick;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Trigger;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -63,6 +64,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
   private SlewRateLimiter ySlewRateLimiter;
   private SlewRateLimiter angularSlewRateLimiter;
 
+  private boolean babyMode = false;
+  private double babyFactor = 0.25;
+
   /**
    * Constructs an XBoxTeleopSwerveCommand with the specified swerve drive and configuration
    * constants.
@@ -88,6 +92,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
               Commands.run(() -> getSwerveDrive().getLocalization().resetYaw())
                   .ignoringDisable(true));
     }
+
+    DogLog.tunable("BabyMode", babyMode, value -> babyMode = value);
+    DogLog.tunable("BabyFactor", babyFactor, value -> babyFactor = value);
   }
 
   /**
@@ -169,10 +176,11 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
         getSwerveDrive().getConstants().Driving.MaxAngularVelocity.in(RadiansPerSecond);
 
     ChassisSpeeds targetVelocity =
-        new ChassisSpeeds(
-            fractionMaxSpeeds.vxMetersPerSecond * maxLinearVelocity,
-            fractionMaxSpeeds.vyMetersPerSecond * maxLinearVelocity,
-            fractionMaxSpeeds.omegaRadiansPerSecond * maxAngularVelocity);
+        babyMode(
+            new ChassisSpeeds(
+                fractionMaxSpeeds.vxMetersPerSecond * maxLinearVelocity,
+                fractionMaxSpeeds.vyMetersPerSecond * maxLinearVelocity,
+                fractionMaxSpeeds.omegaRadiansPerSecond * maxAngularVelocity));
 
     // Apply dynamic velocity limits if they are set
     double dynamicLinearVelocityLimitMetersPerSecond =
@@ -265,9 +273,28 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
       double angularVelocity = getMappedRotationInput() * getNonFineControlAngularScalar();
 
       return reorientInSimulation(
-          outputPowerToVelocity(
-              new ChassisSpeeds(
-                  robotRelativeVelocity.getX(), robotRelativeVelocity.getY(), angularVelocity)));
+          reorient180Deg(
+              outputPowerToVelocity(
+                  new ChassisSpeeds(
+                      robotRelativeVelocity.getX(),
+                      robotRelativeVelocity.getY(),
+                      angularVelocity))));
+    }
+  }
+
+  private ChassisSpeeds reorient180Deg(ChassisSpeeds speeds) {
+    return new ChassisSpeeds(
+        -speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+  }
+
+  private ChassisSpeeds babyMode(ChassisSpeeds speeds) {
+    if (babyMode) {
+      return new ChassisSpeeds(
+          speeds.vxMetersPerSecond * babyFactor,
+          speeds.vyMetersPerSecond * babyFactor,
+          speeds.omegaRadiansPerSecond * babyFactor);
+    } else {
+      return speeds;
     }
   }
 
