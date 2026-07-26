@@ -123,6 +123,18 @@ public class TeleopControls extends SubsystemBase {
         value -> {
           tunableRollerVelocity = value;
         });
+    
+    DogLog.tunable(
+        "Lower Current Limits",
+        false,
+        value -> {
+            if (value) {
+                robot.getSwerveDrive().lowerCurrentLimits();
+            } else {
+                robot.getSwerveDrive().raiseCurrentLimits();
+            }
+        }
+    );
   }
 
   public void configureBindings() {
@@ -460,7 +472,7 @@ public class TeleopControls extends SubsystemBase {
     if (!fineControl) {
       autoShoot.setHoodOffset(mapOffset(operator.getLeftY(), Degrees.of(5)));
       autoShoot.setTurretOffset(mapOffset(-operator.getLeftX(), Degrees.of(10)));
-      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(2)));
+      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(2)).plus(RotationsPerSecond.of(1.5)));
     } else {
       autoShoot.setHoodOffset(Degrees.of(0));
       autoShoot.setTurretOffset(Degrees.of(0));

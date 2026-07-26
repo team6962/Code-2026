@@ -61,6 +61,14 @@ public class SwerveModule implements SwerveComponent, AutoCloseable {
     steerMechanism = new SteerMechanism(corner, constants);
   }
 
+  public void lowerCurrentLimits() {
+    driveMechanism.lowerCurrentLimits();
+  }
+
+  public void raiseCurrentLimits() {
+    driveMechanism.raiseCurrentLimits();
+  }
+
   /**
    * Gets the status signals used by this swerve module. These signals will be periodically
    * refreshed by the containing class.

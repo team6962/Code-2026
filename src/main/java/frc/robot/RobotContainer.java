@@ -60,7 +60,7 @@ public class RobotContainer {
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
-    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
+    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation).withNtTunables(() -> true));
 
     LoggingUtil.logGitProperties();
     RobotController.setBrownoutVoltage(5.4);
