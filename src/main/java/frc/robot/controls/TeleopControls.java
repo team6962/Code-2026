@@ -472,7 +472,7 @@ public class TeleopControls extends SubsystemBase {
     if (!fineControl) {
       autoShoot.setHoodOffset(mapOffset(operator.getLeftY(), Degrees.of(5)));
       autoShoot.setTurretOffset(mapOffset(-operator.getLeftX(), Degrees.of(10)));
-      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(2)).plus(RotationsPerSecond.of(0.25)));
+      autoShoot.setFlywheelSpeedOffset(mapOffset(-operator.getRightY(), RotationsPerSecond.of(2)).plus(RotationsPerSecond.of(0)));
     } else {
       autoShoot.setHoodOffset(Degrees.of(0));
       autoShoot.setTurretOffset(Degrees.of(0));
