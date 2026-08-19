@@ -595,4 +595,16 @@ public class MotionSwerveDrive implements AutoCloseable {
   public void applyLockMotion() {
     applyMotion(new LockMotion(this));
   }
+
+  public void lowerCurrentLimits() {
+    for (SwerveModule module : modules) {
+      module.lowerCurrentLimits();
+    }
+  }
+
+  public void raiseCurrentLimits() {
+    for (SwerveModule module : modules) {
+      module.raiseCurrentLimits();
+    }
+  }
 }

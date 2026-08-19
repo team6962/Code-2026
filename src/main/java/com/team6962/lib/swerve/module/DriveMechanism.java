@@ -81,6 +81,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
   private Voltage appliedVoltage = Volts.of(0);
   private Current statorCurrent = Amps.of(0);
   private Current supplyCurrent = Amps.of(0);
+  private TalonFXConfiguration config;
 
   /** The last control request sent to the motor, for logging. */
   private ControlRequest lastControlRequest;
@@ -102,10 +103,10 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
 
     motor = new TalonFX(constants.getSwerveModule(corner.getIndex()).DriveMotorCANId, bus);
 
-    TalonFXConfiguration motorConfig = constants.getDriveMotorConfig(corner.getIndex()).clone();
-    motorConfig.Feedback.SensorToMechanismRatio = constants.DriveMotor.GearReduction;
+    config = constants.getDriveMotorConfig(corner.getIndex()).clone();
+    config.Feedback.SensorToMechanismRatio = constants.DriveMotor.GearReduction;
 
-    StatusUtil.check(motor.getConfigurator().apply(motorConfig));
+    StatusUtil.check(motor.getConfigurator().apply(config));
 
     positionSignal = motor.getPosition(false);
     velocitySignal = motor.getVelocity(false);
@@ -115,6 +116,16 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     supplyCurrentSignal = motor.getSupplyCurrent(false);
 
     CurrentDrawLogger.add(corner.getName() + " Drive Motor", this::getSupplyCurrent);
+  }
+
+  public void lowerCurrentLimits() {
+    var newConfig = config.clone();
+    newConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    motor.getConfigurator().apply(newConfig);
+  }
+
+  public void raiseCurrentLimits() {
+    motor.getConfigurator().apply(config);
   }
 
   /**

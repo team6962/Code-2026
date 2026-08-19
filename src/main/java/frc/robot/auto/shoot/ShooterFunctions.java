@@ -50,7 +50,11 @@ public class ShooterFunctions {
   /** The function that maps distance to flight time. */
   private UnivariateFunction flightTimeFunction;
 
-  public ShooterFunctions(String filePath) {
+  public double additionalVelocity = 0;
+
+  public ShooterFunctions(String filePath, double additionalVelocity) {
+    this.additionalVelocity = additionalVelocity;
+
     try {
       LinearInterpolator interpolator = new LinearInterpolator();
       double[][] data = CSVLoader.loadCSV(filePath);
@@ -141,11 +145,11 @@ public class ShooterFunctions {
    */
   public AngularVelocity getFlywheelVelocity(Distance distance) {
     if (isDistanceWithinValidRange(distance)) {
-      return RotationsPerSecond.of(flywheelVelocityFunction.value(distance.in(Inches)));
+      return RotationsPerSecond.of(flywheelVelocityFunction.value(distance.in(Inches)) + additionalVelocity);
     } else
       return RotationsPerSecond.of(
           flywheelVelocityFunction.value(
-              MeasureUtil.clamp(distance, minDistance, maxDistance).in(Inches)));
+              MeasureUtil.clamp(distance, minDistance, maxDistance).in(Inches)) + additionalVelocity);
   }
 
   /**

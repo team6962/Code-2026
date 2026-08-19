@@ -60,7 +60,7 @@ public class RobotContainer {
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
-    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
+    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation).withNtTunables(() -> true));
 
     LoggingUtil.logGitProperties();
     RobotController.setBrownoutVoltage(5.4);
@@ -85,8 +85,8 @@ public class RobotContainer {
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
     hubFunctions =
         new ShooterFunctions(
-            RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv");
-    passFunctions = new ShooterFunctions("shooter_pass_data.csv");
+            RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv", 0);
+    passFunctions = new ShooterFunctions("shooter_pass_data.csv", 0);
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 
