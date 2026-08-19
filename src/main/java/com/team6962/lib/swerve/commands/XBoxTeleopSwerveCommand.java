@@ -8,9 +8,9 @@ import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants;
 import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Joystick;
-import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Trigger;
+// import com.team6962.lib.swerve.config.XBoxTeleopSwerveConstants.Trigger;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -254,9 +254,9 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
     if (constants.EnableFineControl && isFineControlling()) {
       Translation2d robotRelativeVelocity = getFineControlInput();
 
-      robotRelativeVelocity = robotRelativeVelocity.times(getFineControlTranslationScalar());
+      // robotRelativeVelocity = robotRelativeVelocity.times(getFineControlTranslationScalar());
 
-      double angularVelocity = getMappedRotationInput() * getFineControlAngularScalar();
+      double angularVelocity = getMappedRotationInput() /* * getFineControlAngularScalar() */;
 
       return reorientInSimulation(
           outputPowerToVelocity(
@@ -266,11 +266,11 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
                   angularVelocity,
                   new Rotation2d(getSwerveDrive().getHeading()))));
     } else {
-      Translation2d robotRelativeVelocity = getMappedTranslationInput();
+      Translation2d robotRelativeVelocity = getMappedTranslationInput() /* * getNonFineControlAngularScalar() */;
 
       robotRelativeVelocity = robotRelativeVelocity.times(getNonFineControlTranslationScalar());
 
-      double angularVelocity = getMappedRotationInput() * getNonFineControlAngularScalar();
+      double angularVelocity = getMappedRotationInput();
 
       return reorientInSimulation(
           outputPowerToVelocity(
@@ -306,10 +306,10 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    *
    * @return The angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
-  private double getNonFineControlAngularScalar() {
-    return MathUtil.interpolate(
-        constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost());
-  }
+  // private double getNonFineControlAngularScalar() {
+  //   return MathUtil.interpolate(
+  //       constants.DefaultAngularSpeed, constants.BoostAngularSpeed, getBoost());
+  // }
 
   /**
    * Gets the translation speed scalar for fine control mode, interpolated between fine control and
@@ -317,12 +317,12 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    *
    * @return The fine control translation speed scalar (0.0 to 1.0)
    */
-  private double getFineControlTranslationScalar() {
-    return MathUtil.interpolate(
-        constants.FineControlTranslationalSpeed,
-        constants.BoostedFineControlTranslationalSpeed,
-        getBoost());
-  }
+  // private double getFineControlTranslationScalar() {
+  //   return MathUtil.interpolate(
+  //       constants.FineControlTranslationalSpeed,
+  //       constants.BoostedFineControlTranslationalSpeed,
+  //       getBoost());
+  // }
 
   /**
    * Gets the angular speed scalar for fine control mode, interpolated based on boost and super
@@ -330,39 +330,39 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    *
    * @return The fine control angular speed scalar (0.0 to 1.0, or higher with super boost)
    */
-  private double getFineControlAngularScalar() {
-    return MathUtil.interpolate(
-        MathUtil.interpolate(
-            constants.FineControlAngularSpeed,
-            constants.BoostedFineControlAngularSpeed,
-            getBoost()),
-        Math.signum(constants.FineControlAngularSpeed),
-        getAngularSuperBoost());
-  }
+  // private double getFineControlAngularScalar() {
+  //   return MathUtil.interpolate(
+  //       MathUtil.interpolate(
+  //           constants.FineControlAngularSpeed,
+  //           constants.BoostedFineControlAngularSpeed,
+  //           getBoost()),
+  //       Math.signum(constants.FineControlAngularSpeed),
+  //       getAngularSuperBoost());
+  // }
 
   /**
    * Gets the current boost value from the configured boost trigger axis.
    *
    * @return The boost value (0.0 when not pressed, up to 1.0 when fully pressed)
    */
-  private double getBoost() {
-    return constants.BoostAxis == Trigger.LeftTrigger
-        ? controller.getLeftTriggerAxis()
-        : // Axis 2
-        controller.getRightTriggerAxis(); // Axis 3
-  }
+  // private double getBoost() {
+  //   return constants.BoostAxis == Trigger.LeftTrigger
+  //       ? controller.getLeftTriggerAxis()
+  //       : // Axis 2
+  //       controller.getRightTriggerAxis(); // Axis 3
+  // }
 
   /**
    * Gets the current angular super boost value from the configured trigger axis.
    *
    * @return The super boost value (0.0 when not pressed, up to 1.0 when fully pressed)
    */
-  private double getAngularSuperBoost() {
-    return constants.AngularSuperBoostAxis == Trigger.LeftTrigger
-        ? controller.getLeftTriggerAxis()
-        : // Axis 3
-        controller.getRightTriggerAxis(); // Axis 2
-  }
+  // private double getAngularSuperBoost() {
+  //   return constants.AngularSuperBoostAxis == Trigger.LeftTrigger
+  //       ? controller.getLeftTriggerAxis()
+  //       : // Axis 3
+  //       controller.getRightTriggerAxis(); // Axis 2
+  // }
 
   /**
    * Gets the mapped translation input from the configured translation joystick, with deadband and

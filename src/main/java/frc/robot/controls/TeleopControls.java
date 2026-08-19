@@ -188,7 +188,7 @@ public class TeleopControls extends SubsystemBase {
 
     // Intake - WORKS
     driver
-        .rightStick()
+        .leftTrigger()
         .and(RobotState::isEnabled)
         .whileTrue(
             this.robot
@@ -366,7 +366,7 @@ public class TeleopControls extends SubsystemBase {
     // operator
     //     .rightTrigger()
     Trigger shootButtonsTrigger =
-        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
+        operator.rightTrigger().or(driver.rightTrigger()).and(RobotState::isEnabled);
 
     shootButtonsTrigger
         .and(inAllianceZone)
