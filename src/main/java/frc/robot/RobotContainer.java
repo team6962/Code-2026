@@ -156,7 +156,12 @@ public class RobotContainer {
     autoChooser.addOption(
         "Safe Left Double Sweep Bump",
         new AutoChooserOption(autonomous.safeLeftDoubleSweepBump(), true));
-
+     autoChooser.addOption(
+      "tutorial",
+      new AutoChooserOption(autonomous.tutorial(true), true));
+      autoChooser.addOption(
+      "tutorial2",
+      new AutoChooserOption(autonomous.tutorial2(true), true));
     autoChooser.addOption("Shoot Preload", new AutoChooserOption(autonomous.preload(), true));
     autoChooser.addOption(
         "Back Up and Shoot Preload",

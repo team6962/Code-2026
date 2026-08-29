@@ -180,6 +180,49 @@ public class Autonomous {
         Commands.parallel(
             shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
+  
+  public Command tutorial(boolean rightSide) {
+    String pathName = "tutorial";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".0")
+            .deadlineFor(
+                    robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake())
+    );
+  }
+
+  public Command tutorial2(boolean rightSide) {
+    String pathName = "tutorial2";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".0", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".1", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot.getSwerveDrive().followPath(pathName + ".2", rightSide),
+        shootFuel.shoot());
+  }
 
   public Command greedyDoubleSweepBump(boolean rightSide) {
     String pathName = "greedy_double_sweep_bump";
