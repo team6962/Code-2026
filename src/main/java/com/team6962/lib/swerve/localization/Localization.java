@@ -11,6 +11,7 @@ import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.simulation.SwerveDriveSim;
 import com.team6962.lib.swerve.util.SwerveComponent;
 import com.team6962.lib.vision.AprilTagVisionMeasurement;
 import dev.doglog.DogLog;
@@ -73,11 +74,14 @@ public class Localization implements SwerveComponent {
    */
   private Angle yaw = Radians.of(0);
 
+  private SwerveDriveSim simulation;
+
   public Localization(
-      DrivetrainConstants constants, Pose3d initialPose, Odometry odometry, Gyroscope gyroscope) {
+      DrivetrainConstants constants, Pose3d initialPose, Odometry odometry, Gyroscope gyroscope, SwerveDriveSim simulation) {
     this.constants = constants;
     this.gyroscope = gyroscope;
     this.odometry = odometry;
+    this.simulation = simulation;
 
     this.poseEstimator =
         new SwerveDrivePoseEstimator3d(
@@ -294,6 +298,7 @@ public class Localization implements SwerveComponent {
     if (poseEstimator == null) return;
 
     poseEstimator.resetPose(pose);
+    // simulation.setRobotPosition(pose.toPose2d());
   }
 
   /**
@@ -305,6 +310,7 @@ public class Localization implements SwerveComponent {
     if (poseEstimator == null) return;
 
     poseEstimator.resetPose(new Pose3d(pose));
+    // simulation.setRobotPosition(pose);
   }
 
   /**

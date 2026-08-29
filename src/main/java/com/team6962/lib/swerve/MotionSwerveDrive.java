@@ -106,16 +106,17 @@ public class MotionSwerveDrive implements AutoCloseable {
 
     odometry = new Odometry(constants, modules);
     gyroscope = new Gyroscope(constants, odometry);
-    localization = new Localization(constants, new Pose3d(), odometry, gyroscope);
-
-    // Initialize the kinematics object for converting between chassis
-    // speeds and module states
-    this.kinematics = constants.Structure.getKinematics();
 
     // Initialize the simulation, if we are running in simulation mode
     if (RobotBase.isSimulation()) {
       simulation = new SwerveDriveSim(constants, modules, gyroscope);
     }
+
+    localization = new Localization(constants, new Pose3d(), odometry, gyroscope, simulation);
+
+    // Initialize the kinematics object for converting between chassis
+    // speeds and module states
+    this.kinematics = constants.Structure.getKinematics();
 
     // Initialize the control loop, which will periodically call the
     // update() method, either in a thread or during the subsystem periodic

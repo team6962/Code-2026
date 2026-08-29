@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
@@ -23,10 +27,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutoChooserOption;
 import frc.robot.auto.AutoLowerHood;
 import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
+import frc.robot.auto.TrenchDriving;
+import frc.robot.auto.shoot.AutoShoot;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
 import frc.robot.controls.TeleopControls;
@@ -59,6 +66,11 @@ public class RobotContainer {
   private final Autonomous autonomous;
   private final Command noneAutonomous = Commands.none();
 
+  private boolean autoShoot = false;
+  private boolean autoIntake = false;
+
+  private Pose2d startPose;
+
   public RobotContainer() {
     DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase::isSimulation));
 
@@ -69,6 +81,14 @@ public class RobotContainer {
 
     constants = RobotConstants.generate();
 
+    intakeExtension = new IntakeExtension();
+    NamedCommands.registerCommand("startIntake", Commands.runOnce(() -> autoIntake = true));
+    NamedCommands.registerCommand("stopIntake", Commands.runOnce(() -> autoIntake = false));
+    NamedCommands.registerCommand("startShoot", Commands.runOnce(() -> autoShoot = true));
+    NamedCommands.registerCommand("stopShoot", Commands.runOnce(() -> autoShoot = false));
+    NamedCommands.registerCommand("extendIntake", intakeExtension.extend());
+    NamedCommands.registerCommand("retractIntake", intakeExtension.retract());
+
     swerveDrive = new CommandSwerveDrive(constants.getDrivetrainConstants());
 
     // climb = new Climb();
@@ -77,7 +97,6 @@ public class RobotContainer {
     intakeRollers = new IntakeRollers();
     shooterRollers = new ShooterRollers();
     turret = new Turret();
-    intakeExtension = new IntakeExtension();
     hopper = new Hopper();
 
     aprilTagVision = new AprilTagVision(swerveDrive, constants.getAprilTagVisionConstants());
@@ -105,6 +124,38 @@ public class RobotContainer {
                 .withTimeout(3)
                 .until(RobotState::isEnabled)
                 .ignoringDisable(true));
+
+    Trigger intakeTrigger = new Trigger(() -> autoIntake);
+    intakeTrigger.whileTrue(intakeRollers.intake());
+
+    Trigger inAllianceZone =
+        new Trigger(
+            () ->
+                swerveDrive.getPosition2d().getX()
+                    < TrenchDriving.OBSTACLES_CENTER_X.in(Meters));
+    Trigger aimTrigger = new Trigger(() -> autoShoot);
+    AutoShoot autoShootCommand = new AutoShoot(
+            swerveDrive,
+            turret,
+            shooterHood,
+            shooterRollers,
+            hubFunctions,
+            () -> AutoShoot.HUB_TRANSLATION,
+            () -> null,
+            () -> null);
+    aimTrigger.whileTrue(autoShootCommand);
+    Trigger shootTrigger = aimTrigger.and(inAllianceZone).and(autoShootCommand.isReadyToShoot());
+    shootTrigger.whileTrue(hopper.feed());
+    
+    PathPlannerPath path = swerveDrive.loadChoreoPath("auto");
+
+    if (path.getPathPoses().size() == 0) {
+      throw new RuntimeException("Path has no poses defined.");
+    }
+
+    startPose = path.getPathPoses().get(0);
+
+    swerveDrive.getLocalization().resetPosition(startPose);
   }
 
   private void configureAutonomousChooser() {
@@ -219,7 +270,12 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected() != null ? autoChooser.getSelected().command : Commands.none();
+    // return autoChooser.getSelected() != null ? autoChooser.getSelected().command : Commands.none();
+
+    return Commands.sequence(
+      Commands.runOnce(() -> swerveDrive.getLocalization().resetPosition(startPose)),
+      swerveDrive.followPath("auto")
+    );
   }
 
   public void periodic() {

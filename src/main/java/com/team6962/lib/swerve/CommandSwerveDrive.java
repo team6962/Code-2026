@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
@@ -419,12 +420,12 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
     return pathPlanner.followPathTranslation(pathName, mirrorPath);
   }
 
-  public void loadChoreoPath(String pathName) {
-    pathPlanner.loadChoreoPath(pathName);
+  public PathPlannerPath loadChoreoPath(String pathName) {
+    return pathPlanner.loadChoreoPath(pathName);
   }
 
-  public void loadChoreoPath(String pathName, int splitIndex) {
-    pathPlanner.loadChoreoPath(pathName, splitIndex);
+  public PathPlannerPath loadChoreoPath(String pathName, int splitIndex) {
+    return pathPlanner.loadChoreoPath(pathName, splitIndex);
   }
 
   /**

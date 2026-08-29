@@ -3,6 +3,7 @@ package com.team6962.lib.swerve.simulation;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -112,6 +113,14 @@ public class MapleSim {
     Supplier<SwerveModuleSimulation>[] moduleSuppliersArray =
         moduleSuppliers.toArray(new Supplier[0]);
 
+    Pose2d initialPose = drivetrainConstants.Simulation.InitialPose;
+
+    try {
+      initialPose = PathPlannerPath.fromChoreoTrajectory("auto").getPathPoses().get(0);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to load initial pose from PathPlanner trajectory: " + e.getMessage(), e);
+    }
+
     // Create the swerve drive simulation with the robot's specific configuration
     swerveSim =
         new SwerveDriveSimulation(
@@ -131,7 +140,7 @@ public class MapleSim {
                     drivetrainConstants.Structure.OuterWidth,
                     drivetrainConstants.Structure.OuterLength),
             // Set the initial pose of the robot on the field
-            drivetrainConstants.Simulation.InitialPose);
+            initialPose);
 
     // Register the swerve drive with the arena so it participates in physics simulation
     arena.addDriveTrainSimulation(swerveSim);

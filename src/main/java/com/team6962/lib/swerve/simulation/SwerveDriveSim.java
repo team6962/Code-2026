@@ -72,6 +72,16 @@ public class SwerveDriveSim {
     }
   }
 
+  public Pose2d setRobotPosition(Pose2d newPose) {
+    try {
+      arenaLock.lock();
+      mapleSim.getSwerveSim().setSimulationWorldPose(newPose);
+      return newPose;
+    } finally {
+      arenaLock.unlock();
+    }
+  }
+
   /**
    * Returns the poses of all fuel game pieces currently in the arena simulation.
    *
