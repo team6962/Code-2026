@@ -326,13 +326,13 @@ public class TeleopControls extends SubsystemBase {
             .and(() -> !fineControl);
 
     autoshootTrigger.whileTrue(autoShoot);
-    
+
     Trigger shouldLowerHoodPassing =
         new Trigger(RobotState::isTeleop)
             .and(inAllianceZone.negate())
             .and(operator.rightTrigger().negate())
             .and(driver.back().negate());
-        
+
     Trigger shouldLowerHoodAutoShoot =
         new Trigger(RobotState::isTeleop)
             .and(inAllianceZone)
@@ -340,7 +340,8 @@ public class TeleopControls extends SubsystemBase {
             .and(driver.back().negate());
 
     shouldLowerHoodPassing.whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
-    shouldLowerHoodAutoShoot.whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
+    shouldLowerHoodAutoShoot.whileTrue(
+        robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
 
     AutoShoot autoPass =
         new AutoShoot(
@@ -390,7 +391,6 @@ public class TeleopControls extends SubsystemBase {
         .and(driver.rightStick().negate())
         .whileTrue(
             robot.getIntakeExtension().agitate().alongWith(robot.getIntakeRollers().intakeSlow()));
-        
 
     shootButtonsTrigger
         .and(inAllianceZone.negate())
