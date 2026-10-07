@@ -60,6 +60,8 @@ public class TeleopControls extends SubsystemBase {
   private double passMaxLinearVelocity = 1.5;
   private double passMaxAngularVelocity = 0.5;
 
+  private Trigger shootButtonsTrigger;
+
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
     // this.autoClimb = new AutoClimb(robot);
@@ -353,7 +355,7 @@ public class TeleopControls extends SubsystemBase {
 
     // operator
     //     .rightTrigger()
-    Trigger shootButtonsTrigger =
+    shootButtonsTrigger =
         operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
 
     shootButtonsTrigger
@@ -465,6 +467,16 @@ public class TeleopControls extends SubsystemBase {
       autoShoot.setHoodOffset(Degrees.of(0));
       autoShoot.setTurretOffset(Degrees.of(0));
       autoShoot.setFlywheelSpeedOffset(RotationsPerSecond.of(0));
+    }
+
+    if (RobotState.isTeleop()) {
+        if (driver.a().getAsBoolean()) {
+            robot.getPowerManager().setState(PowerManager.State.TURBO);
+        } else if (shootButtonsTrigger.or(operator.a()).or(operator.leftTrigger()).getAsBoolean()) {
+            robot.getPowerManager().setState(PowerManager.State.SHOOTING);
+        } else {
+            robot.getPowerManager().setState(PowerManager.State.TELEOP);
+        }
     }
 
     ControllerLogging.logInputs(driver.getHID());

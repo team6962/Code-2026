@@ -29,6 +29,7 @@ import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
+import frc.robot.controls.PowerManager;
 import frc.robot.controls.TeleopControls;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.hopper.Hopper;
@@ -39,6 +40,7 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.visualizer.RobotVisualizer;
 
 public class RobotContainer {
+  private final PowerManager powerManager;
   private final RobotConstants constants;
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
@@ -96,6 +98,16 @@ public class RobotContainer {
     configureAutonomousChooser();
 
     visualizer = new RobotVisualizer(this);
+
+    powerManager = new PowerManager();
+    powerManager.addListener(state -> swerveDrive.setCurrentLimit(state.driveCurrentLimit));
+    // powerManager.addListener(state -> shooterHood.setCurrentLimit(state.shooterHoodCurrentLimit));
+    // powerManager.addListener(state -> hopper.getFloor().setCurrentLimit(state.hopperCurrentLimit));
+    // powerManager.addListener(state -> hopper.getKicker().setCurrentLimit(state.queueCurrentLimit));
+    // powerManager.addListener(state -> intakeExtension.setCurrentLimit(state.intakeExtensionCurrentLimit));
+    // powerManager.addListener(state -> intakeRollers.setCurrentLimit(state.intakeRollerCurrentLimit));
+    // powerManager.addListener(state -> turret.setCurrentLimit(state.shooterTurretCurrentLimit));
+    // powerManager.addListener(state -> shooterRollers.setCurrentLimit(state.shooterRollerCurrentLimit));
 
     // Warm up the path following pipeline
     CommandScheduler.getInstance()
@@ -252,6 +264,10 @@ public class RobotContainer {
 
   public ShooterRollers getShooterRollers() {
     return shooterRollers;
+  }
+
+  public PowerManager getPowerManager() {
+    return powerManager;
   }
 
   // public Climb getClimb() {

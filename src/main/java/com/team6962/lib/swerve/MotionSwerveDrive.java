@@ -150,6 +150,17 @@ public class MotionSwerveDrive implements AutoCloseable {
     controlLoop.start(this::update, constants.Timing.ControlLoopFrequency);
   }
 
+  /**
+   * Sets the current limit for all swerve motors.
+   *
+   * @param currentLimitAmps The current limit in amps
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    for (SwerveModule module : modules) {
+      module.setCurrentLimit(currentLimitAmps);
+    }
+  }
+
   private void update(double deltaTimeSeconds) {
     if (simulation != null) {
       simulation.update(deltaTimeSeconds);

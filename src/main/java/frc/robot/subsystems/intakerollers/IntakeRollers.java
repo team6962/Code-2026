@@ -192,4 +192,31 @@ public class IntakeRollers extends SubsystemBase {
         stallDebouncer.calculate(
             getVelocity().abs(RotationsPerSecond) < 1.0 && getStatorCurrent().abs(Amps) > 100.0);
   }
+
+  /**
+   * Sets the current limit for the intake rollers motors.
+   * 
+   * @param currentLimitAmps The desired current limit in amps.
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+    leaderMotor
+            .getConfigurator()
+            .apply(IntakeRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+
+    IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+        followerMotor
+            .getConfigurator()
+            .apply(IntakeRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+  }
 }

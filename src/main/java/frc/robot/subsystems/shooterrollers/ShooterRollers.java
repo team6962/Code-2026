@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -17,6 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -30,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
@@ -256,5 +258,28 @@ public class ShooterRollers extends SubsystemBase {
         routine.dynamic(Direction.kForward),
         Commands.waitSeconds(5),
         routine.dynamic(Direction.kReverse));
+  }
+
+  /**
+   * Sets the current limit for both shooter roller motors.
+   * 
+   * @param currentLimitAmps The desired current limit in amps.
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+
+    ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
+        ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
+                == InvertedValue.Clockwise_Positive
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
+
+    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
   }
 }

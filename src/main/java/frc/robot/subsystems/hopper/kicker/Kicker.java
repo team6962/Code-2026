@@ -166,4 +166,18 @@ public class Kicker extends SubsystemBase {
     DogLog.log("Hopper/Kicker/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hopper/Kicker/AppliedVoltage", getAppliedVoltage());
   }
+
+  /**
+   * Sets the current limit for the kicker motor.
+   * 
+   * @param currentLimitAmps The desired current limit in amps.
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    kickerMotor
+            .getConfigurator()
+            .apply(
+                HopperConstants.KICKER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                    currentLimitAmps),
+                0.001);
+  }
 }

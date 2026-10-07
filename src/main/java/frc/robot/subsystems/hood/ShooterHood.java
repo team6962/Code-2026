@@ -6,6 +6,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -18,6 +20,7 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.MeasureUtil;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
@@ -32,7 +35,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.function.Supplier;
 
 public class ShooterHood extends SubsystemBase {
   private final TalonFX hoodMotor;
@@ -516,5 +518,14 @@ public class ShooterHood extends SubsystemBase {
               isZeroed = true;
             })
         .ignoringDisable(true);
+  }
+
+  /**
+   * Sets the current limit for the hood motor.
+   * 
+   * @param currentLimitAmps The desired current limit in amps.
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
   }
 }

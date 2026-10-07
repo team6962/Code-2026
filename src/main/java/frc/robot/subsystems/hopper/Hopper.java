@@ -4,7 +4,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.hopper.floor.HopperFloor;
 import frc.robot.subsystems.hopper.floor.RollerFloor;
 import frc.robot.subsystems.hopper.kicker.Kicker;
 import frc.robot.subsystems.hopper.sensors.HopperSensors;
@@ -14,7 +13,7 @@ import frc.robot.subsystems.hopper.sensors.HopperSensors;
  * their respective subsystem file
  */
 public class Hopper extends SubsystemBase {
-  private final HopperFloor floor;
+  private final RollerFloor floor;
   private final Kicker kicker;
   private final HopperSensors sensors;
 
@@ -89,9 +88,9 @@ public class Hopper extends SubsystemBase {
   /**
    * Gets the hopper floor subsystem.
    *
-   * @return The hopper floor subsystem, which could either be a floor or a roller floor.
+   * @return The hopper floor subsystem.
    */
-  public HopperFloor getFloor() {
+  public RollerFloor getFloor() {
     return floor;
   }
 

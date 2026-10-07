@@ -14,6 +14,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -356,5 +357,17 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
   @Override
   public void close() {
     motor.close();
+  }
+
+  /**
+   * Sets the current limit for the drive motor.
+   * 
+   * @param currentLimitAmps The current limit in amps
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    CurrentLimitsConfigs configs = constants.getDriveMotorConfig(corner.getIndex()).CurrentLimits.clone();
+    System.out.println("Setting current limit for " + corner.getName() + " drive motor to " + currentLimitAmps + " amps");
+    configs.SupplyCurrentLimit = currentLimitAmps;
+    StatusUtil.check(motor.getConfigurator().apply(configs));
   }
 }

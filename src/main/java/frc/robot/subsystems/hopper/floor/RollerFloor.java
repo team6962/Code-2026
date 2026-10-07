@@ -5,12 +5,15 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,9 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
-import java.util.function.Supplier;
 
-public class RollerFloor extends SubsystemBase implements HopperFloor {
+public class RollerFloor extends SubsystemBase {
   private TalonFX rollerFloorMotor;
 
   private StatusSignal<AngularVelocity> velocitySignal;
@@ -117,7 +119,6 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    *
    * @return A command that runs the roller floor motor to feed fuel.
    */
-  @Override
   public Command feed() {
     return move(() -> feedVoltage);
   }
@@ -127,7 +128,6 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
    *
    * @return A command that runs the roller floor motor to dump fuel.
    */
-  @Override
   public Command dump() {
     return move(() -> dumpVoltage);
   }
@@ -187,5 +187,14 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
   /** gets the motor voltage */
   public Voltage getMotorVoltage() {
     return voltageSignal.getValue();
+  }
+
+  /**
+   * Sets the current limit for the roller floor motor.
+   *
+   * @param currentLimitAmps The desired current limit in amps.
+   */
+  public void setCurrentLimit(double currentLimitAmps) {
+    rollerFloorMotor.getConfigurator().apply(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
   }
 }
