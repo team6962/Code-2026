@@ -23,16 +23,16 @@ public class AutoLowerHood {
   public boolean shouldLowerHood() {
     Distance robotX =
         swerveDrive.getPosition2d().plus(AutoShootConstants.shooterTransform).getMeasureX();
-    
+
     if (operator.rightBumper().getAsBoolean()) {
-     fineControl = true;
+      fineControl = true;
     }
-  
+
     return !(!robotX.isNear(NEAR_OBSTACLES_X, HOOD_LOWERING_DISTANCE)
-        && !robotX.isNear(FAR_OBSTACLES_X, HOOD_LOWERING_DISTANCE) 
-        && (driver.back().getAsBoolean() 
-        || operator.rightTrigger().getAsBoolean()
-        || operator.a().getAsBoolean()
-        || fineControl));  
+        && !robotX.isNear(FAR_OBSTACLES_X, HOOD_LOWERING_DISTANCE)
+        && (driver.back().getAsBoolean()
+            || operator.rightTrigger().getAsBoolean()
+            || operator.a().getAsBoolean()
+            || fineControl));
   }
 }
