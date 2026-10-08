@@ -62,7 +62,7 @@ public class XBoxTeleopSwerveConstants implements Cloneable {
    *   <li><b>Maximum Value:</b> 1.0
    * </ul>
    */
-  public double DefaultAngularSpeed = 0.75;
+  public double DefaultAngularSpeed = 0.85;
 
   public double BoostAngularSpeed = 1.0;
 
