@@ -60,9 +60,9 @@ public class TeleopControls extends SubsystemBase {
   private double passMaxLinearVelocity = 1.5;
   private double passMaxAngularVelocity = 0.5;
 
-    public static boolean isFineControlOn() {
-        return fineControl;
-    }
+  public static boolean isFineControlOn() {
+    return fineControl;
+  }
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
