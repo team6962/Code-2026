@@ -54,7 +54,12 @@ public class Hopper extends SubsystemBase {
    * @return
    */
   public Command load() {
-    return floor.feed().alongWith(kicker.slowFeed()).until(() -> !sensors.isKickerEmpty());
+    return floor
+        .feed()
+        .alongWith(kicker.slowFeed())
+        .until(() -> !sensors.isKickerEmpty())
+        .onlyIf(() -> !sensors.isKickerEmpty())
+        .repeatedly();
   }
 
   /**

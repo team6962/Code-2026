@@ -155,7 +155,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withWheelBase(Inches.of(21.75))
                 .withRobotMass(Pounds.of(135)) // Estimated
                 .withRobotMomentOfInertia(KilogramSquareMeters.of(6)) // Estimated
-                .withWheelRadius(Inches.of(1.946)))
+                .withWheelRadius(Inches.of(1.940)))
         .withSwerveModules(
             new SwerveModuleConstants[] {
               new SwerveModuleConstants()
@@ -196,7 +196,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
             baseConstants
                 .Driving
                 .clone()
-                .withMaxLinearVelocity(MetersPerSecond.of(4))
+                .withMaxLinearVelocity(MetersPerSecond.of(5.5))
                 .withMaxLinearAcceleration(MetersPerSecondPerSecond.of(4.5))
                 .withMaxAngularVelocity(RotationsPerSecond.of(1))
                 .withMaxAngularAcceleration(RotationsPerSecondPerSecond.of(1))
@@ -215,7 +215,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                 .withDeviceConfiguration(baseDriveMotorConfig)
                 .withGearReduction(5.9)
                 .withOutputType(ControlOutputType.Voltage)
-                .withVelocityControlMotionProfile(VelocityMotionProfileType.Trapezoidal)
+                .withVelocityControlMotionProfile(VelocityMotionProfileType.None)
                 .withVelocitySlot(0)
                 .withSimulatedMotor(DCMotor.getKrakenX60Foc(1))
                 .withSimulatedMomentOfInertia(KilogramSquareMeters.of(0.000307))

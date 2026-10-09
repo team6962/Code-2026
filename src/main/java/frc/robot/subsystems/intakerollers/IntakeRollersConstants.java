@@ -17,7 +17,7 @@ public class IntakeRollersConstants {
   public static final int FOLLOWER_ID_2 = 42;
   public static final CANBus CANBUS = new CANBus("subsystems");
 
-  public static final TalonFXConfiguration MOTOR_CONFIGURATION =
+  public static final TalonFXConfiguration LEADER_MOTOR_CONFIGURATION =
       new TalonFXConfiguration()
           .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive))
           .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(GEAR_RATIO))
@@ -29,4 +29,10 @@ public class IntakeRollersConstants {
                   .withSupplyCurrentLimit(Amps.of(40))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true));
+
+  public static final TalonFXConfiguration FOLLOWER_MOTOR_CONFIGURATION =
+      LEADER_MOTOR_CONFIGURATION
+          .clone()
+          .withMotorOutput(
+              new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
 }
