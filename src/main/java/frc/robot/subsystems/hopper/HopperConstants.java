@@ -62,7 +62,7 @@ public class HopperConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)
-                  .withStatorCurrentLimit(80)
+                  .withStatorCurrentLimit(200)
                   .withSupplyCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(40));
   // dummy

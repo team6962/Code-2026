@@ -38,8 +38,14 @@ public class AutoShootConstants {
   /** Maximum allowable hood angle error to shoot. */
   public static final Angle hoodAngleTolerance = Degrees.of(4);
 
+  /** Maximum allowable hood angle error to pass. */
+  public static final Angle hoodAnglePassTolerance = Degrees.of(10);
+
   /** Maximum allowable turret angle error to shoot. */
   public static final Angle turretAngleTolerance = Degrees.of(4);
+
+  /** Maximum allowable turret angle error to pass. */
+  public static final Angle turretAnglePassTolerance = Degrees.of(10);
 
   /** Transform representing the shooter's position and orientation relative to the robot. */
   public static final Transform2d shooterTransform =

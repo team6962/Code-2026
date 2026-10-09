@@ -2,17 +2,21 @@ package frc.robot.auto.shoot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.function.Supplier;
+
+import org.apache.commons.math3.util.Pair;
+
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,8 +34,6 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
-import java.util.function.Supplier;
-import org.apache.commons.math3.util.Pair;
 
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
@@ -96,7 +98,8 @@ public class AutoShoot extends Command {
   private double previousPeriodicTimestamp = -1.0;
 
   /** The prediction time used for calculating future positions of the robot. */
-  private double predictionTime = 0.09;
+  private double predictionTime = 0.06;
+  private double initialVelocityDisplacementScalar = 1.0;
 
   /** The error between the turret's position and the release angle. */
   private Angle turretError = Degrees.of(0);
@@ -104,6 +107,11 @@ public class AutoShoot extends Command {
   private Angle hoodOffset = Degrees.of(0);
   private Angle turretOffset = Degrees.of(0);
   private AngularVelocity flywheelSpeedOffset = RotationsPerSecond.of(0);
+
+  private AngularVelocity flywheelVelocityTolerance = AutoShootConstants.flywheelVelocityTolerance;
+  private Angle hoodAngleTolerance;
+  private Angle turretAngleTolerance;
+  private String loggingName;
 
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
@@ -209,9 +217,33 @@ public class AutoShoot extends Command {
     this.targetSupplier = targetSupplier;
     this.shooterFunctions = shooterFunctions;
 
-    DogLog.tunable("AutoShoot/PredictionTime", predictionTime, value -> value = predictionTime);
+    loggingName = "Auto" + (shooterFunctions.isPassing() ? "Pass" : "Shoot");
+
+    if (shooterFunctions.isPassing()) {
+      hoodAngleTolerance = AutoShootConstants.hoodAnglePassTolerance;
+      turretAngleTolerance = AutoShootConstants.turretAnglePassTolerance;
+    } else {
+      hoodAngleTolerance = AutoShootConstants.hoodAngleTolerance;
+      turretAngleTolerance = AutoShootConstants.turretAngleTolerance;
+    }
+
+    DogLog.tunable(loggingName + "/PredictionTime", predictionTime, value -> value = predictionTime);
     DogLog.tunable(
-        "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+        loggingName + "/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+    DogLog.tunable(
+        loggingName + "/InitialVelocityDisplacementScalar", initialVelocityDisplacementScalar, value -> initialVelocityDisplacementScalar = value);
+    DogLog.tunable(
+        loggingName + "/FlywheelVelocityTolerance",
+        flywheelVelocityTolerance.in(RotationsPerSecond),
+        value -> flywheelVelocityTolerance = RotationsPerSecond.of(value));
+    DogLog.tunable(
+        loggingName + "/HoodAngleTolerance",
+        hoodAngleTolerance.in(Degrees),
+        value -> hoodAngleTolerance = Degrees.of(value));
+    DogLog.tunable(
+        loggingName + "/TurretAngleTolerance",
+        turretAngleTolerance.in(Degrees),
+        value -> turretAngleTolerance = Degrees.of(value));
 
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
@@ -317,9 +349,7 @@ public class AutoShoot extends Command {
         displacement.plus(
             shooterVelocity
                 .times(flightTime)
-                .times(
-                    AutoShootConstants.initialVelocityDisplacementScalarFunction.value(
-                        new double[] {distance.in(Inches), hoodAngle.in(Degrees)})));
+                .times(initialVelocityDisplacementScalar));
 
     // Calculate the final destination of the projectile
     return shooterPose.getTranslation().plus(displacement);
@@ -457,7 +487,7 @@ public class AutoShoot extends Command {
     TranslationalVelocity shooterVelocity =
         calculateShooterVelocity(swerveDrive.getPosition2d().exp(twist));
 
-    DogLog.log("AutoShoot/Distance", shooterPose.getTranslation().getDistance(target));
+    DogLog.log(loggingName + "/Distance", shooterPose.getTranslation().getDistance(target));
 
     // Calculate the ideal shooting angles and roller speed to hit the target
     ShootOnTheMoveOptimizationResults optimizationResults =
@@ -482,13 +512,13 @@ public class AutoShoot extends Command {
     // Get the target position and initial shooter state
     Translation2d target = targetSupplier.get();
 
-    DogLog.log("AutoShoot/TargetX", target.getX());
-    DogLog.log("AutoShoot/TargetY", target.getY());
+    DogLog.log(loggingName + "/TargetX", target.getX());
+    DogLog.log(loggingName + "/TargetY", target.getY());
 
-    DogLog.log("AutoShoot/HoodOffset", hoodOffset.in(Degrees), Degrees);
-    DogLog.log("AutoShoot/TurretOffset", turretOffset.in(Degrees), Degrees);
+    DogLog.log(loggingName + "/HoodOffset", hoodOffset.in(Degrees), Degrees);
+    DogLog.log(loggingName + "/TurretOffset", turretOffset.in(Degrees), Degrees);
     DogLog.log(
-        "AutoShoot/FlywheelSpeedOffset",
+        loggingName + "/FlywheelSpeedOffset",
         flywheelSpeedOffset.in(RotationsPerSecond),
         RotationsPerSecond);
 
@@ -496,8 +526,8 @@ public class AutoShoot extends Command {
     ShootingParameters appliedShootingParameters = calculate(Seconds.of(predictionTime));
     ShootingParameters currentShootingParameters = calculate(Seconds.of(0));
 
-    appliedShootingParameters.log("AutoShoot/AppliedShootingParameters");
-    currentShootingParameters.log("AutoShoot/CurrentShootingParameters");
+    appliedShootingParameters.log(loggingName + "/AppliedShootingParameters");
+    currentShootingParameters.log(loggingName + "/CurrentShootingParameters");
 
     Angle previousTurretAngleTarget = turretAngleTarget;
     Angle previousHoodAngleTarget = hoodAngleTarget;
@@ -528,11 +558,11 @@ public class AutoShoot extends Command {
                       .in(RotationsPerSecond)));
 
       DogLog.log(
-          "AutoShoot/AppliedShootingParameters/TurretVelocity",
+          loggingName + "/AppliedShootingParameters/TurretVelocity",
           turretVelocityTarget.in(RadiansPerSecond),
           RadiansPerSecond);
       DogLog.log(
-          "AutoShoot/AppliedShootingParameters/HoodVelocity",
+          loggingName + "/AppliedShootingParameters/HoodVelocity",
           hoodVelocityTarget.in(DegreesPerSecond),
           DegreesPerSecond);
     }
@@ -545,14 +575,14 @@ public class AutoShoot extends Command {
     readyToShoot =
         rollers
                 .getAngularVelocity()
-                .isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance)
-            && hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance)
+                .isNear(rollerSpeedTarget, flywheelVelocityTolerance)
+            && hood.getPosition().isNear(hoodAngleTarget, hoodAngleTolerance)
             && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
-                .isNear(turretAngleTarget, AutoShootConstants.turretAngleTolerance);
+                .isNear(turretAngleTarget, turretAngleTolerance);
 
     thisCommandRunning = true;
 
-    DogLog.log("AutoShoot/Running", true);
-    DogLog.log("AutoShoot/ReadyToShoot", readyToShoot);
+    DogLog.log(loggingName + "/Running", true);
+    DogLog.log(loggingName + "/ReadyToShoot", readyToShoot);
   }
 }
