@@ -217,7 +217,8 @@ public class AutoShoot extends Command {
     // subsystem setpoints while this command is running.
     Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
 
-    Command turretCommand = turret.track(() -> turretAngleTarget, () -> turretVelocityTarget).repeatedly();
+    Command turretCommand =
+        turret.track(() -> turretAngleTarget, () -> turretVelocityTarget).repeatedly();
     Command hoodCommand =
         hood.track(
                 () -> hoodAngleOverride.get() != null ? hoodAngleOverride.get() : hoodAngleTarget,
@@ -234,8 +235,8 @@ public class AutoShoot extends Command {
             .repeatedly();
 
     runningTrigger
-      .and(() -> CommandUtil.isClearToOverride(turret, turretCommand))
-      .whileTrue(turretCommand);
+        .and(() -> CommandUtil.isClearToOverride(turret, turretCommand))
+        .whileTrue(turretCommand);
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(hood, hoodCommand))
         .whileTrue(hoodCommand);

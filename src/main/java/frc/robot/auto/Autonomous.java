@@ -209,7 +209,9 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam().withTimeout(0.3).andThen(robot.getHopper().load())),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.3).andThen(robot.getHopper().load())),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
@@ -255,7 +257,9 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam().withTimeout(0.3).andThen(robot.getHopper().load())),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.3).andThen(robot.getHopper().load())),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
