@@ -76,6 +76,14 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
           dumpVoltage = Volts.of(newVoltageDouble);
         });
 
+    DogLog.tunable(
+        "Hopper/RollerFloor/StatorCurrentLimit",
+        HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimit,
+        newValue -> {
+          HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimit = newValue;
+          rollerFloorMotor.getConfigurator().apply(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG);
+        });
+
     if (RobotBase.isSimulation()) {
       simulation = new RollerFloorSim(rollerFloorMotor);
     }

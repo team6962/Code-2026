@@ -209,7 +209,10 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
@@ -220,7 +223,10 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".5", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
@@ -255,7 +261,10 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".2", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
@@ -266,7 +275,10 @@ public class Autonomous {
         robot
             .getSwerveDrive()
             .followPath(pathName + ".5", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getHopper().unjam()),
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),

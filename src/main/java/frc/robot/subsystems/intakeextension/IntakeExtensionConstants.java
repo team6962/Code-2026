@@ -64,7 +64,7 @@ public final class IntakeExtensionConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(Amps.of(60))
-                  .withSupplyCurrentLimit(Amps.of(60))
+                  .withSupplyCurrentLimit(Amps.of(10))
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(true))
           .withMotorOutput(

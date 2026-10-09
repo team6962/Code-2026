@@ -29,9 +29,9 @@ public final class ShooterRollersConstants {
           .withFeedback(new FeedbackConfigs())
           .withSlot0(
               new Slot0Configs()
-                  .withKV(0.12)
-                  .withKS(0.215)
-                  .withKP(0.3)) // 2.890 - 22.781, 3.22 - 25.126
+                  .withKV(0.1160466408)
+                  .withKS(0.1975702388 + 0.005802332038)
+                  .withKP(0.4))
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimitEnable(true)
