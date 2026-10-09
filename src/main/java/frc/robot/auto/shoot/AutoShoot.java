@@ -2,17 +2,21 @@ package frc.robot.auto.shoot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.function.Supplier;
+
+import org.apache.commons.math3.util.Pair;
+
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,8 +34,6 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
-import java.util.function.Supplier;
-import org.apache.commons.math3.util.Pair;
 
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
@@ -96,7 +98,8 @@ public class AutoShoot extends Command {
   private double previousPeriodicTimestamp = -1.0;
 
   /** The prediction time used for calculating future positions of the robot. */
-  private double predictionTime = 0.09;
+  private double predictionTime = 0.06;
+  private double initialVelocityDisplacementScalar = 0.9;
 
   /** The error between the turret's position and the release angle. */
   private Angle turretError = Degrees.of(0);
@@ -212,6 +215,8 @@ public class AutoShoot extends Command {
     DogLog.tunable("AutoShoot/PredictionTime", predictionTime, value -> value = predictionTime);
     DogLog.tunable(
         "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+    DogLog.tunable(
+        "AutoShoot/InitialVelocityDisplacementScalar", initialVelocityDisplacementScalar, value -> initialVelocityDisplacementScalar = value);
 
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
@@ -316,9 +321,7 @@ public class AutoShoot extends Command {
         displacement.plus(
             shooterVelocity
                 .times(flightTime)
-                .times(
-                    AutoShootConstants.initialVelocityDisplacementScalarFunction.value(
-                        new double[] {distance.in(Inches), hoodAngle.in(Degrees)})));
+                .times(initialVelocityDisplacementScalar));
 
     // Calculate the final destination of the projectile
     return shooterPose.getTranslation().plus(displacement);
