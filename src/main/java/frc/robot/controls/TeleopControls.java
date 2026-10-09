@@ -48,7 +48,7 @@ public class TeleopControls extends SubsystemBase {
   private ControllerRumble driverRumble = new ControllerRumble(driver);
   private ControllerRumble operatorRumble = new ControllerRumble(operator);
 
-  private boolean fineControl = false;
+  private static boolean fineControl = false;
   private AngularVelocity flywheelVelocity = ShooterRollersConstants.FIXED_FLYWHEEL_VELOCITY;
   private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
@@ -59,6 +59,10 @@ public class TeleopControls extends SubsystemBase {
   private double hubMaxAngularAcceleration = 0.25;
   private double passMaxLinearVelocity = 2;
   private double passMaxAngularVelocity = 0.5;
+
+  public static boolean isFineControlOn() {
+    return fineControl;
+  }
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
