@@ -8,15 +8,10 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import java.util.function.Supplier;
-
-import org.apache.commons.math3.util.Pair;
-
 import com.team6962.lib.commands.CommandUtil;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +29,8 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.hood.ShooterHood;
 import frc.robot.subsystems.shooterrollers.ShooterRollers;
 import frc.robot.subsystems.turret.Turret;
+import java.util.function.Supplier;
+import org.apache.commons.math3.util.Pair;
 
 /** A command that automatically aims and spins up the shooter rollers to shoot at a target. */
 public class AutoShoot extends Command {
@@ -99,6 +96,7 @@ public class AutoShoot extends Command {
 
   /** The prediction time used for calculating future positions of the robot. */
   private double predictionTime = 0.06;
+
   private double initialVelocityDisplacementScalar = 1.0;
 
   /** The error between the turret's position and the release angle. */
@@ -227,11 +225,16 @@ public class AutoShoot extends Command {
       turretAngleTolerance = AutoShootConstants.turretAngleTolerance;
     }
 
-    DogLog.tunable(loggingName + "/PredictionTime", predictionTime, value -> value = predictionTime);
     DogLog.tunable(
-        loggingName + "/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
+        loggingName + "/PredictionTime", predictionTime, value -> value = predictionTime);
     DogLog.tunable(
-        loggingName + "/InitialVelocityDisplacementScalar", initialVelocityDisplacementScalar, value -> initialVelocityDisplacementScalar = value);
+        loggingName + "/TurretError",
+        turretError.in(Degrees),
+        value -> turretError = Degrees.of(value));
+    DogLog.tunable(
+        loggingName + "/InitialVelocityDisplacementScalar",
+        initialVelocityDisplacementScalar,
+        value -> initialVelocityDisplacementScalar = value);
     DogLog.tunable(
         loggingName + "/FlywheelVelocityTolerance",
         flywheelVelocityTolerance.in(RotationsPerSecond),
@@ -249,7 +252,8 @@ public class AutoShoot extends Command {
     // subsystem setpoints while this command is running.
     Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
 
-    Command turretCommand = turret.track(() -> turretAngleTarget, () -> turretVelocityTarget).repeatedly();
+    Command turretCommand =
+        turret.track(() -> turretAngleTarget, () -> turretVelocityTarget).repeatedly();
     Command hoodCommand =
         hood.track(
                 () -> hoodAngleOverride.get() != null ? hoodAngleOverride.get() : hoodAngleTarget,
@@ -266,8 +270,8 @@ public class AutoShoot extends Command {
             .repeatedly();
 
     runningTrigger
-      .and(() -> CommandUtil.isClearToOverride(turret, turretCommand))
-      .whileTrue(turretCommand);
+        .and(() -> CommandUtil.isClearToOverride(turret, turretCommand))
+        .whileTrue(turretCommand);
     runningTrigger
         .and(() -> CommandUtil.isClearToOverride(hood, hoodCommand))
         .whileTrue(hoodCommand);
@@ -346,9 +350,7 @@ public class AutoShoot extends Command {
     Time flightTime = shooterFunctions.getFlightTime(distance);
     displacement =
         displacement.plus(
-            shooterVelocity
-                .times(flightTime)
-                .times(initialVelocityDisplacementScalar));
+            shooterVelocity.times(flightTime).times(initialVelocityDisplacementScalar));
 
     // Calculate the final destination of the projectile
     return shooterPose.getTranslation().plus(displacement);
@@ -572,9 +574,7 @@ public class AutoShoot extends Command {
     // angles
     // and roller speed
     readyToShoot =
-        rollers
-                .getAngularVelocity()
-                .isNear(rollerSpeedTarget, flywheelVelocityTolerance)
+        rollers.getAngularVelocity().isNear(rollerSpeedTarget, flywheelVelocityTolerance)
             && hood.getPosition().isNear(hoodAngleTarget, hoodAngleTolerance)
             && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
                 .isNear(turretAngleTarget, turretAngleTolerance);

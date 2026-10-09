@@ -76,6 +76,10 @@ public class ShootFuel {
                     .repeatedly()));
   }
 
+  public Command aim() {
+    return new AutoShoot(robot);
+  }
+
   public Command shootAllFuelOnTheMove() {
     AutoShoot autoShoot = new AutoShoot(robot);
     return Commands.parallel(
