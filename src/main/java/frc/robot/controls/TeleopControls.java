@@ -53,11 +53,11 @@ public class TeleopControls extends SubsystemBase {
   private double tunableHoodAngle = 0;
   private double tunableRollerVelocity = 0;
 
-  private double hubMaxLinearVelocity = 1;
+  private double hubMaxLinearVelocity = 1.75;
   private double hubMaxAngularVelocity = 0.25;
   private double hubMaxLinearAcceleration = 2;
   private double hubMaxAngularAcceleration = 0.25;
-  private double passMaxLinearVelocity = 1.5;
+  private double passMaxLinearVelocity = 2;
   private double passMaxAngularVelocity = 0.5;
 
   public TeleopControls(RobotContainer robot) {
