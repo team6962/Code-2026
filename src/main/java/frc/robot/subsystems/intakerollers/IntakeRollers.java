@@ -108,34 +108,10 @@ public class IntakeRollers extends SubsystemBase {
   public Command intakeSlow() {
     return runEnd(
         () -> {
-          StatusUtil.check(
-              leaderMotor
-                  .getConfigurator()
-                  .apply(
-                      IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION
-                          .CurrentLimits
-                          .clone()
-                          .withSupplyCurrentLimit(10)));
-          StatusUtil.check(
-              followerMotor
-                  .getConfigurator()
-                  .apply(
-                      IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION
-                          .CurrentLimits
-                          .clone()
-                          .withSupplyCurrentLimit(10)));
           leaderMotor.setControl(new VoltageOut(2));
         },
         () -> {
           leaderMotor.setControl(new CoastOut());
-          StatusUtil.check(
-              leaderMotor
-                  .getConfigurator()
-                  .apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits));
-          StatusUtil.check(
-              followerMotor
-                  .getConfigurator()
-                  .apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits));
         });
   }
 
@@ -216,24 +192,12 @@ public class IntakeRollers extends SubsystemBase {
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
-        IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
-                == InvertedValue.Clockwise_Positive
-            ? InvertedValue.CounterClockwise_Positive
-            : InvertedValue.Clockwise_Positive;
-
     leaderMotor
             .getConfigurator()
-            .apply(IntakeRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
-
-    IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
-        IntakeRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
-                == InvertedValue.Clockwise_Positive
-            ? InvertedValue.CounterClockwise_Positive
-            : InvertedValue.Clockwise_Positive;
+            .apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
 
         followerMotor
             .getConfigurator()
-            .apply(IntakeRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+            .apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
   }
 }

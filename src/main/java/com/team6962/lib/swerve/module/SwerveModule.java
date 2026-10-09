@@ -209,6 +209,5 @@ public class SwerveModule implements SwerveComponent, AutoCloseable {
    */
   public void setCurrentLimit(double currentLimitAmps) {
     driveMechanism.setCurrentLimit(currentLimitAmps);
-    steerMechanism.setCurrentLimit(currentLimitAmps);
   }
 }

@@ -474,7 +474,7 @@ public class TeleopControls extends SubsystemBase {
     }
 
     if (RobotState.isTeleop()) {
-        if (driver.a().getAsBoolean()) {
+        if (driver.rightTrigger().getAsBoolean()) {
             robot.getPowerManager().setState(PowerManager.State.TURBO);
         } else if (shootButtonsTrigger.or(operator.a()).or(operator.leftTrigger()).getAsBoolean()) {
             robot.getPowerManager().setState(PowerManager.State.SHOOTING);
