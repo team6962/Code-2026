@@ -108,6 +108,10 @@ public class AutoShoot extends Command {
   private Angle turretOffset = Degrees.of(0);
   private AngularVelocity flywheelSpeedOffset = RotationsPerSecond.of(0);
 
+  private AngularVelocity flywheelVelocityTolerance = AutoShootConstants.flywheelVelocityTolerance;
+  private Angle hoodAngleTolerance = AutoShootConstants.hoodAngleTolerance;
+  private Angle turretAngleTolerance = AutoShootConstants.turretAngleTolerance;
+
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
    * shoot at the hub.
@@ -217,6 +221,18 @@ public class AutoShoot extends Command {
         "AutoShoot/TurretError", turretError.in(Degrees), value -> turretError = Degrees.of(value));
     DogLog.tunable(
         "AutoShoot/InitialVelocityDisplacementScalar", initialVelocityDisplacementScalar, value -> initialVelocityDisplacementScalar = value);
+    DogLog.tunable(
+        "AutoShoot/FlywheelVelocityTolerance",
+        flywheelVelocityTolerance.in(RotationsPerSecond),
+        value -> flywheelVelocityTolerance = RotationsPerSecond.of(value));
+    DogLog.tunable(
+        "AutoShoot/HoodAngleTolerance",
+        hoodAngleTolerance.in(Degrees),
+        value -> hoodAngleTolerance = Degrees.of(value));
+    DogLog.tunable(
+        "AutoShoot/TurretAngleTolerance",
+        turretAngleTolerance.in(Degrees),
+        value -> turretAngleTolerance = Degrees.of(value));
 
     // Create triggers and bind commands to them in order to continuously update
     // subsystem setpoints while this command is running.
@@ -547,10 +563,10 @@ public class AutoShoot extends Command {
     readyToShoot =
         rollers
                 .getAngularVelocity()
-                .isNear(rollerSpeedTarget, AutoShootConstants.flywheelVelocityTolerance)
-            && hood.getPosition().isNear(hoodAngleTarget, AutoShootConstants.hoodAngleTolerance)
+                .isNear(rollerSpeedTarget, flywheelVelocityTolerance)
+            && hood.getPosition().isNear(hoodAngleTarget, hoodAngleTolerance)
             && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
-                .isNear(turretAngleTarget, AutoShootConstants.turretAngleTolerance);
+                .isNear(turretAngleTarget, turretAngleTolerance);
 
     thisCommandRunning = true;
 
