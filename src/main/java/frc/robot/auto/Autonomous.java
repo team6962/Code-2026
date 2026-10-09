@@ -226,8 +226,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
-                shootFuel.aim()
-            ),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
@@ -279,8 +278,7 @@ public class Autonomous {
             .deadlineFor(
                 robot.getIntakeExtension().extend(),
                 robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
-                shootFuel.aim()
-            ),
+                shootFuel.aim()),
         Commands.parallel(
             robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
             shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
