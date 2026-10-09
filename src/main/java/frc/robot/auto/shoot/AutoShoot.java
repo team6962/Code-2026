@@ -99,7 +99,7 @@ public class AutoShoot extends Command {
 
   /** The prediction time used for calculating future positions of the robot. */
   private double predictionTime = 0.06;
-  private double initialVelocityDisplacementScalar = 0.9;
+  private double initialVelocityDisplacementScalar = 1.0;
 
   /** The error between the turret's position and the release angle. */
   private Angle turretError = Degrees.of(0);
