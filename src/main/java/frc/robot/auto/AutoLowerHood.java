@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 
 import com.team6962.lib.swerve.CommandSwerveDrive;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.auto.shoot.AutoShootConstants;
 import frc.robot.controls.TeleopControls;
