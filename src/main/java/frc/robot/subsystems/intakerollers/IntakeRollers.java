@@ -13,7 +13,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.phoenix.StatusUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -109,14 +108,34 @@ public class IntakeRollers extends SubsystemBase {
   public Command intakeSlow() {
     return runEnd(
         () -> {
-          StatusUtil.check(leaderMotor.getConfigurator().apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.clone().withSupplyCurrentLimit(10)));
-          StatusUtil.check(followerMotor.getConfigurator().apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits.clone().withSupplyCurrentLimit(10)));
+          StatusUtil.check(
+              leaderMotor
+                  .getConfigurator()
+                  .apply(
+                      IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION
+                          .CurrentLimits
+                          .clone()
+                          .withSupplyCurrentLimit(10)));
+          StatusUtil.check(
+              followerMotor
+                  .getConfigurator()
+                  .apply(
+                      IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION
+                          .CurrentLimits
+                          .clone()
+                          .withSupplyCurrentLimit(10)));
           leaderMotor.setControl(new VoltageOut(2));
         },
         () -> {
           leaderMotor.setControl(new CoastOut());
-          StatusUtil.check(leaderMotor.getConfigurator().apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits));
-          StatusUtil.check(followerMotor.getConfigurator().apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits));
+          StatusUtil.check(
+              leaderMotor
+                  .getConfigurator()
+                  .apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits));
+          StatusUtil.check(
+              followerMotor
+                  .getConfigurator()
+                  .apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits));
         });
   }
 

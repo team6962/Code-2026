@@ -31,5 +31,8 @@ public class IntakeRollersConstants {
                   .withStatorCurrentLimitEnable(true));
 
   public static final TalonFXConfiguration FOLLOWER_MOTOR_CONFIGURATION =
-    LEADER_MOTOR_CONFIGURATION.clone().withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
+      LEADER_MOTOR_CONFIGURATION
+          .clone()
+          .withMotorOutput(
+              new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
 }
