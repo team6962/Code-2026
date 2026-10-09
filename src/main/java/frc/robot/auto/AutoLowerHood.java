@@ -29,6 +29,7 @@ public class AutoLowerHood {
         && (driver.back().getAsBoolean()
             || operator.rightTrigger().getAsBoolean()
             || operator.a().getAsBoolean()
-            || TeleopControls.isFineControlOn()));
+            || TeleopControls.isFineControlOn()
+            || RobotState.isAutonomous()));
   }
 }
