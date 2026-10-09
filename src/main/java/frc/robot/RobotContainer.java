@@ -85,8 +85,8 @@ public class RobotContainer {
         new SphereClumpLocalization(swerveDrive, constants.getSphereCameraConstants());
     hubFunctions =
         new ShooterFunctions(
-            RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv");
-    passFunctions = new ShooterFunctions("shooter_pass_data.csv");
+            RobotBase.isSimulation() ? "sim_shooter_hub_data.csv" : "shooter_hub_data.csv", false);
+    passFunctions = new ShooterFunctions("shooter_pass_data.csv", true);
     teleopControls = new TeleopControls(this);
     teleopControls.configureBindings();
 

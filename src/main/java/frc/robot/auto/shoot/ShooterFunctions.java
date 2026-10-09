@@ -50,7 +50,12 @@ public class ShooterFunctions {
   /** The function that maps distance to flight time. */
   private UnivariateFunction flightTimeFunction;
 
-  public ShooterFunctions(String filePath) {
+  /** Indicates whether the shooter is in passing mode. */
+  private boolean isPassing;
+
+  public ShooterFunctions(String filePath, boolean isPassing) {
+    this.isPassing = isPassing;
+
     try {
       LinearInterpolator interpolator = new LinearInterpolator();
       double[][] data = CSVLoader.loadCSV(filePath);
@@ -103,6 +108,11 @@ public class ShooterFunctions {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  /** Indicates whether the shooter is in passing mode. */
+  public boolean isPassing() {
+    return isPassing;
   }
 
   /**
