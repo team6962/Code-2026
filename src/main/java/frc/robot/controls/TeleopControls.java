@@ -379,7 +379,8 @@ public class TeleopControls extends SubsystemBase {
             .and(operator.x().negate())
             .and(operator.leftTrigger().negate())
             .and(() -> !robot.getHopper().getSensors().isKickerFull())
-            .and(() -> !robot.getHopper().isEmpty());
+            .and(() -> !robot.getHopper().isEmpty())
+            .and(intakeTrigger.negate());
 
     load.whileTrue(robot.getHopper().load());
 
