@@ -66,11 +66,6 @@ public class TeleopControls extends SubsystemBase {
 
   public TeleopControls(RobotContainer robot) {
     this.robot = robot;
-    // this.autoClimb = new AutoClimb(robot);
-    // this.shootFuel = new ShootFuel(robot);
-    // this.autoOutpost = new AutoOutpost(robot, shootFuel);
-    // this.autoDepot = new AutoDepot(robot);
-    // this.autoZoneDefense = new AutoZoneDefense(robot);
 
     DogLog.tunable(
         "TeleopControls/hubMaxLinearVelocity",
