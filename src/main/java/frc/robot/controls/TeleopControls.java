@@ -165,9 +165,8 @@ public class TeleopControls extends SubsystemBase {
     intakeTrigger
         .and(shootButtonsTrigger.negate())
         .whileTrue(
-            Commands.sequence(
-                Commands.waitSeconds(3.0),
-                robot.getHopper().getFloor().agitate().withTimeout(0.5)));
+            Commands.sequence(robot.getHopper().getFloor().agitate().withTimeout(0.5),  
+                Commands.waitSeconds(3.0)));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
