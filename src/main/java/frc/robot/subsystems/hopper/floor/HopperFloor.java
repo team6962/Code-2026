@@ -6,4 +6,6 @@ public interface HopperFloor {
   public Command feed();
 
   public Command dump();
+
+  public Command agitate();
 }

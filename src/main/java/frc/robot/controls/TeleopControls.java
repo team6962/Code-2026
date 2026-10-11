@@ -146,52 +146,29 @@ public class TeleopControls extends SubsystemBase {
 
     teleopEnabledTrigger.whileTrue(teleopSwerveCommand);
 
-    // Configure operator controls and automated driver controls
-
-    // Driver left bumper resets heading (configured by XBoxTeleopSwerveCommand)
-    // Driver right trigger is boost (configured by XBoxTeleopSwerveCommand)
-    // Driver left trigger is super boost (configured by XBoxTeleopSwerveCommand)
-
-    // Auto Climb and Unclimb
-    // driver.b().onTrue(autoClimb.climb());
-    // driver.x().onTrue(autoClimb.unclimb());
-
-    // Auto Defense
-    // driver.a().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_BUMP_Y));
-    // driver
-    //     .b()
-    //     .whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.RIGHT_TRENCH_Y));
-    // driver.x().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_TRENCH_Y));
-    // driver.y().whileTrue(autoZoneDefense.defendObstacle(FieldPositions.OpposingSide.LEFT_BUMP_Y));
-
-    // Auto Depot
-    // driver.leftBumper().whileTrue(autoDepot.autoDepot());
-
-    // driver // Auto Drive to Outpost
-    //     .rightBumper()
-    //     .whileTrue(autoOutpost.autoOutpost());
-
-    // Dump fuel - WORKS
+    // Dump fuel
     driver
         .leftStick()
         .whileTrue(
             Commands.parallel(
                 this.robot.getIntakeRollers().outtake(), this.robot.getHopper().dump()));
 
-    // Intake - WORKS
-    driver
-        .rightStick()
-        .and(RobotState::isEnabled)
-        .whileTrue(
-            this.robot
-                .getIntakeRollers()
-                .intake()
-                .alongWith(robot.getIntakeExtension().requestExtend()));
+    // Set up triggers for shooting and intake controls
+    Trigger shootButtonsTrigger =
+        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
 
-    // Manual climb controls
-    // operator.a().onTrue(robot.getClimb().descend()); // Lower climb
-    // operator.b().onTrue(robot.getClimb().pullUp()); // Lift robot
-    // operator.y().onTrue(robot.getClimb().elevate()); // Raise climb
+    Trigger intakeTrigger = 
+        driver.rightStick().and(RobotState::isEnabled);
+
+    // Intakes fuel, agitates roller floor when not shooting
+
+    intakeTrigger.whileTrue(
+        this.robot.getIntakeRollers().intake()
+            .alongWith(robot.getIntakeExtension().requestExtend()));
+
+    intakeTrigger
+        .and(shootButtonsTrigger.negate())
+        .whileTrue(robot.getHopper().getFloor().agitate());
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
@@ -205,13 +182,13 @@ public class TeleopControls extends SubsystemBase {
                 robot.getTurret().moveTo(Degrees.of(180)),
                 robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
 
-    // Unjam hopper - WORKS
+    // Unjam hopper
     operator.leftBumper().or(driver.leftBumper()).whileTrue(robot.getHopper().unjam());
 
     // Backup shoot
     operator.leftTrigger().and(RobotState::isEnabled).whileTrue(robot.getHopper().feed());
 
-    // Toggle fine control mode - WORKS
+    // Toggle fine control mode
     operator
         .rightBumper()
         .onTrue(
@@ -225,7 +202,7 @@ public class TeleopControls extends SubsystemBase {
                         fineControlEnableRumble(), fineControlDisableRumble(), () -> fineControl))
                 .ignoringDisable(true));
 
-    // stop Shooting
+    // Stop Shooting
     operator.x().whileTrue(robot.getShooterRollers().shoot(RotationsPerSecond.of(0)));
 
     // Fine control
@@ -296,15 +273,6 @@ public class TeleopControls extends SubsystemBase {
                     .getIntakeExtension()
                     .moveAtVoltage(IntakeExtensionConstants.FINE_CONTROL_VOLTAGE.unaryMinus())));
 
-    // Climb retraction
-    // Command autodescend = robot.getClimb().descend();
-    // Trigger climbRetract =
-    //     new Trigger(() -> CommandUtil.isClearToOverride(robot.getClimb(), autodescend))
-    //         .and(RobotState::isTeleop)
-    //         .and(RobotState::isEnabled);
-
-    // climbRetract.onTrue(robot.getClimb().descend());
-
     autoShoot =
         new AutoShoot(
             robot.getSwerveDrive(),
@@ -355,11 +323,6 @@ public class TeleopControls extends SubsystemBase {
 
     autoPassTrigger.whileTrue(autoPass);
 
-    // operator
-    //     .rightTrigger()
-    Trigger shootButtonsTrigger =
-        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
-
     shootButtonsTrigger
         .and(inAllianceZone)
         .whileTrue(
@@ -390,10 +353,10 @@ public class TeleopControls extends SubsystemBase {
                         RotationsPerSecond.of(passMaxAngularVelocity)),
                 Set.of()))
         .and(autoPass.isReadyToShoot())
-        .whileTrue(robot.getHopper().feed()); // Temporary values
+        .whileTrue(robot.getHopper().feed()); 
 
-    // Automatically load fuel into the kicker when there is fuel in the hopper - WORKS, but not
-    // fully tested
+    // Automatically load fuel into the kicker when there is fuel in the hopper 
+
     Trigger load =
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
             .and(() -> !fineControl)
@@ -405,35 +368,7 @@ public class TeleopControls extends SubsystemBase {
 
     load.whileTrue(robot.getHopper().load());
 
-    // ShooterFunctions functions = robot.getHubFunctions();
-
-    // driver
-    //     .a()
-    //     .whileTrue(
-    //         Commands.parallel(
-    //             robot
-    //                 .getShooterRollers()
-    //                 .shoot(() -> functions.getFlywheelVelocity(shootingTestDistance)),
-    //             robot.getShooterHood().moveTo(() ->
-    // functions.getHoodAngle(shootingTestDistance)),
-    //             Commands.sequence(
-    //                 Commands.waitUntil(
-    //                     () ->
-    //                         robot
-    //                                 .getShooterRollers()
-    //                                 .getAngularVelocity()
-    //                                 .isNear(
-    //                                     functions.getFlywheelVelocity(shootingTestDistance),
-    //                                     RotationsPerSecond.of(1))
-    //                             && robot
-    //                                 .getShooterHood()
-    //                                 .getPosition()
-    //                                 .isNear(
-    //                                     functions.getHoodAngle(shootingTestDistance),
-    //                                     Degrees.of(1))),
-    //                 robot.getHopper().feed())));
-
-    // Intake extension and retraction - WORKS
+    // Intake extension and retraction
     Trigger intakeRetract = operator.rightStick().or(driver.start());
     Trigger intakeExtend =
         intakeRetract

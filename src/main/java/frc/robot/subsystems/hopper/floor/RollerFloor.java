@@ -36,6 +36,7 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
 
   private Voltage feedVoltage = Volts.of(7);
   private Voltage dumpVoltage = Volts.of(-8);
+  private Voltage agitateVoltage = Volts.of(-1);
 
   public RollerFloor() {
     rollerFloorMotor =
@@ -138,6 +139,16 @@ public class RollerFloor extends SubsystemBase implements HopperFloor {
   @Override
   public Command dump() {
     return move(() -> dumpVoltage);
+  }
+
+  /**
+   * Agitates the rollers to prevent fuel from jamming.
+   *
+   * @return A command that runs the roller floor motor at an agitating voltage.
+   */
+  @Override
+  public Command agitate() {
+    return move(() -> agitateVoltage);
   }
 
   @Override

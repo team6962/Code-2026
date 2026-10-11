@@ -112,6 +112,11 @@ public class BeltFloor extends SubsystemBase implements HopperFloor {
   }
 
   @Override
+  public Command agitate() {
+    return feedDump(Volts.of(-1.0));
+  }
+
+  @Override
   public void periodic() {
     if (simulation != null) {
       simulation.update();
