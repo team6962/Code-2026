@@ -59,6 +59,8 @@ public class TeleopControls extends SubsystemBase {
   private double hubMaxAngularAcceleration = 0.25;
   private double passMaxLinearVelocity = 2;
   private double passMaxAngularVelocity = 0.5;
+  private double agitationWaitTime = 3.0;
+  private double agitationOnTime = 0.5;
 
   public static boolean isFineControlOn() {
     return fineControl;
@@ -122,6 +124,20 @@ public class TeleopControls extends SubsystemBase {
         value -> {
           tunableRollerVelocity = value;
         });
+
+    DogLog.tunable(
+        "TeleopControls/Agitation Wait Time",
+        agitationWaitTime,
+        value -> {
+          agitationWaitTime = value;
+        });
+
+    DogLog.tunable(
+        "TeleopControls/Agitation On Time",
+        agitationOnTime,
+        value -> {
+          agitationOnTime = value;
+        });
   }
 
   public void configureBindings() {
@@ -165,8 +181,9 @@ public class TeleopControls extends SubsystemBase {
     intakeTrigger
         .and(shootButtonsTrigger.negate())
         .whileTrue(
-            Commands.sequence(robot.getHopper().getFloor().agitate().withTimeout(0.5),  
-                Commands.waitSeconds(3.0)));
+            Commands.sequence(
+                robot.getHopper().getFloor().agitate().withTimeout(agitationOnTime),
+                Commands.waitSeconds(agitationWaitTime)));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
