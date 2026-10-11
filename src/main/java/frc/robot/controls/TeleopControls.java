@@ -152,18 +152,22 @@ public class TeleopControls extends SubsystemBase {
     Trigger shootButtonsTrigger =
         operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
 
-    Trigger intakeTrigger = 
-        driver.rightStick().and(RobotState::isEnabled);
+    Trigger intakeTrigger = driver.rightStick().and(RobotState::isEnabled);
 
     // Intakes fuel, agitates roller floor when not shooting
 
     intakeTrigger.whileTrue(
-        this.robot.getIntakeRollers().intake()
+        this.robot
+            .getIntakeRollers()
+            .intake()
             .alongWith(robot.getIntakeExtension().requestExtend()));
 
     intakeTrigger
         .and(shootButtonsTrigger.negate())
-        .whileTrue(robot.getHopper().getFloor().agitate());
+        .whileTrue(
+            Commands.sequence(
+                Commands.waitSeconds(3.0),
+                robot.getHopper().getFloor().agitate().withTimeout(0.5)));
 
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
@@ -348,9 +352,9 @@ public class TeleopControls extends SubsystemBase {
                         RotationsPerSecond.of(passMaxAngularVelocity)),
                 Set.of()))
         .and(autoPass.isReadyToShoot())
-        .whileTrue(robot.getHopper().feed()); 
+        .whileTrue(robot.getHopper().feed());
 
-    // Automatically load fuel into the kicker when there is fuel in the hopper 
+    // Automatically load fuel into the kicker when there is fuel in the hopper
 
     Trigger load =
         new Trigger(() -> RobotState.isTeleop() && RobotState.isEnabled())
