@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.config.DynamicSwerveLimits;
 import com.team6962.lib.swerve.config.SwerveModuleConstants.Corner;
 import com.team6962.lib.swerve.localization.Gyroscope;
 import com.team6962.lib.swerve.localization.Localization;
@@ -82,6 +83,7 @@ public class MotionSwerveDrive implements AutoCloseable {
   private BaseStatusSignal[] statusSignals;
   private SwerveDriveKinematics kinematics;
   private SwerveMotionManager motionManager;
+  private DynamicSwerveLimits dynamicLimits;
 
   /**
    * Creates a new MotionSwerveDrive with the specified drivetrain configuration.
@@ -94,6 +96,11 @@ public class MotionSwerveDrive implements AutoCloseable {
   public MotionSwerveDrive(DrivetrainConstants constants) {
     // Store the drivetrain constants for later use
     this.constants = constants;
+
+    this.dynamicLimits =
+        new DynamicSwerveLimits(
+            constants.Driving.MaxLinearVelocity,
+            constants.DriveMotor.VelocityControlMotionProfile);
 
     // Initialize the swerve modules, odometry, gyroscope, and localization
     // objects, which each handle a different aspect of the swerve
@@ -148,6 +155,16 @@ public class MotionSwerveDrive implements AutoCloseable {
     motionManager = new SwerveMotionManager(new NeutralMotion(this));
 
     controlLoop.start(this::update, constants.Timing.ControlLoopFrequency);
+  }
+
+  /**
+   * Gets the current dynamic limits for the swerve drive, which can be updated at runtime to
+   * change the maximum linear velocity and motion profile type.
+   *
+   * @return The current dynamic limits for the swerve drive
+   */
+  public DynamicSwerveLimits getDynamicLimits() {
+    return dynamicLimits;
   }
 
   /**

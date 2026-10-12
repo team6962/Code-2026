@@ -15,6 +15,7 @@ import com.team6962.lib.math.SwerveKinematicsUtil;
 import com.team6962.lib.math.WheelMath;
 import com.team6962.lib.phoenix.control.PositionControlRequest;
 import com.team6962.lib.phoenix.control.VelocityControlRequest;
+import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
 import com.team6962.lib.swerve.MotionSwerveDrive;
 import com.team6962.lib.swerve.config.DriveMotorConstants;
 import com.team6962.lib.swerve.config.SteerMotorConstants;
@@ -148,13 +149,16 @@ public class VelocityMotion implements SwerveMotion {
       return;
     }
 
+    LinearVelocity maxLinearVelocity = swerveDrive.getDynamicLimits().getMaxLinearVelocity();
+    VelocityMotionProfileType velocityProfileType = swerveDrive.getDynamicLimits().getMotionProfileType();
+
     ChassisSpeeds robotRelativeVelocity =
         ChassisSpeeds.fromFieldRelativeSpeeds(velocity, new Rotation2d(swerveDrive.getHeading()));
 
     SwerveModuleState[] states =
         swerveDrive.getKinematics().toSwerveModuleStates(robotRelativeVelocity);
 
-    if (!swerveDrive.getConstants().Driving.MaxLinearVelocity.isEquivalent(MetersPerSecond.of(0))
+    if (!maxLinearVelocity.isEquivalent(MetersPerSecond.of(0))
         && !swerveDrive
             .getConstants()
             .Driving
@@ -202,7 +206,7 @@ public class VelocityMotion implements SwerveMotion {
           new VelocityControlRequest(
                   WheelMath.toAngular(driveVelocity, swerveDrive.getConstants().getWheelRadius(i))
                       .in(RotationsPerSecond))
-              .withMotionProfileType(driveConstants.VelocityControlMotionProfile)
+              .withMotionProfileType(velocityProfileType)
               .withOutputType(driveConstants.OutputType)
               .withSlot(driveConstants.VelocitySlot)
               .withUpdateFreqHz(updateFrequencyHz)
