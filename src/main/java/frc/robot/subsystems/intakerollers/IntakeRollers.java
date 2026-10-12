@@ -188,16 +188,20 @@ public class IntakeRollers extends SubsystemBase {
 
   /**
    * Sets the current limit for the intake rollers motors.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
     leaderMotor
-            .getConfigurator()
-            .apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+        .getConfigurator()
+        .apply(
+            IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
 
-        followerMotor
-            .getConfigurator()
-            .apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    followerMotor
+        .getConfigurator()
+        .apply(
+            IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits
+                .withSupplyCurrentLimit(currentLimitAmps));
   }
 }

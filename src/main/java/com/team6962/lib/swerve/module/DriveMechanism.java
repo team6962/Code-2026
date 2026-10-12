@@ -361,12 +361,18 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
 
   /**
    * Sets the current limit for the drive motor.
-   * 
+   *
    * @param currentLimitAmps The current limit in amps
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    CurrentLimitsConfigs configs = constants.getDriveMotorConfig(corner.getIndex()).CurrentLimits.clone();
-    System.out.println("Setting current limit for " + corner.getName() + " drive motor to " + currentLimitAmps + " amps");
+    CurrentLimitsConfigs configs =
+        constants.getDriveMotorConfig(corner.getIndex()).CurrentLimits.clone();
+    System.out.println(
+        "Setting current limit for "
+            + corner.getName()
+            + " drive motor to "
+            + currentLimitAmps
+            + " amps");
     configs.SupplyCurrentLimit = currentLimitAmps;
     StatusUtil.check(motor.getConfigurator().apply(configs));
   }

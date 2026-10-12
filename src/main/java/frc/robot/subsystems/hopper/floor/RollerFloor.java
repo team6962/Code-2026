@@ -5,15 +5,12 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -25,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
+import java.util.function.Supplier;
 
 public class RollerFloor extends SubsystemBase {
   private TalonFX rollerFloorMotor;
@@ -203,6 +201,10 @@ public class RollerFloor extends SubsystemBase {
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    rollerFloorMotor.getConfigurator().apply(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    rollerFloorMotor
+        .getConfigurator()
+        .apply(
+            HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }

@@ -95,10 +95,7 @@ public class Tunable implements AutoCloseable {
   }
 
   public DoubleArraySubscriber create(
-      String key,
-      double[] defaultValue,
-      String unit,
-      Consumer<double[]> onChange) {
+      String key, double[] defaultValue, String unit, Consumer<double[]> onChange) {
     startNotifier();
     var topic = TUNABLE_TABLE.getDoubleArrayTopic(key);
     var entry = topic.getEntry(defaultValue);
@@ -139,8 +136,7 @@ public class Tunable implements AutoCloseable {
         entry, defaultValue, () -> options.ntTunables().getAsBoolean());
   }
 
-  public BooleanSubscriber create(
-      String key, boolean defaultValue, BooleanConsumer onChange) {
+  public BooleanSubscriber create(String key, boolean defaultValue, BooleanConsumer onChange) {
     startNotifier();
     var entry = TUNABLE_TABLE.getBooleanTopic(key).getEntry(defaultValue);
 
@@ -155,8 +151,7 @@ public class Tunable implements AutoCloseable {
         entry, defaultValue, () -> options.ntTunables().getAsBoolean());
   }
 
-  public StringSubscriber create(
-      String key, String defaultValue, Consumer<String> onChange) {
+  public StringSubscriber create(String key, String defaultValue, Consumer<String> onChange) {
     startNotifier();
     var entry = TUNABLE_TABLE.getStringTopic(key).getEntry(defaultValue);
 
