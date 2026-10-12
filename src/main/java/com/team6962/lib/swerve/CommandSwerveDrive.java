@@ -1,6 +1,7 @@
 package com.team6962.lib.swerve;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
@@ -9,8 +10,10 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team6962.lib.math.TranslationalVelocity;
+import com.team6962.lib.phoenix.control.VelocityMotionProfileType;
 import com.team6962.lib.swerve.commands.DriveToStateCommand;
 import com.team6962.lib.swerve.config.DrivetrainConstants;
+import com.team6962.lib.swerve.config.DynamicSwerveLimits;
 import com.team6962.lib.swerve.motion.DriveSysIdMotion;
 import com.team6962.lib.swerve.motion.SwerveMotion;
 import com.team6962.lib.swerve.pathplanner.PathPlanner;
@@ -50,6 +53,8 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
 
   private PathPlanner pathPlanner;
 
+  private final DynamicSwerveLimits dynamicLimits;
+
   /**
    * Creates a new CommandSwerveDrive with the given configuration constants.
    *
@@ -59,6 +64,18 @@ public class CommandSwerveDrive extends MotionSwerveDrive {
     super(constants);
 
     pathPlanner = new PathPlanner(this);
+    dynamicLimits =
+        new DynamicSwerveLimits(MetersPerSecond.of(5.5), VelocityMotionProfileType.None);
+  }
+
+  /**
+   * Gets the dynamic limits for the drivetrain, which can be updated at runtime to change the
+   * maximum linear velocity and motion profile type.
+   *
+   * @return The dynamic limits for the drivetrain
+   */
+  public DynamicSwerveLimits getDynamicLimits() {
+    return dynamicLimits;
   }
 
   /**

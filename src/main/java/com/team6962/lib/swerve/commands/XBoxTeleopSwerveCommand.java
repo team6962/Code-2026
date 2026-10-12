@@ -164,7 +164,8 @@ public class XBoxTeleopSwerveCommand extends TeleopSwerveCommand {
    */
   private ChassisSpeeds outputPowerToVelocity(ChassisSpeeds fractionMaxSpeeds) {
     double maxLinearVelocity =
-        getSwerveDrive().getConstants().Driving.MaxLinearVelocity.in(MetersPerSecond);
+        getSwerveDrive().getDynamicLimits().getMaxLinearVelocity().in(MetersPerSecond);
+
     double maxAngularVelocity =
         getSwerveDrive().getConstants().Driving.MaxAngularVelocity.in(RadiansPerSecond);
 

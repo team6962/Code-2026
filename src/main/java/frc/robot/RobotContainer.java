@@ -7,8 +7,6 @@ package frc.robot;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.logging.LoggingUtil;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-import com.team6962.lib.swerve.config.DriveMotorConstants;
-import com.team6962.lib.swerve.config.DrivingConstants;
 import com.team6962.lib.vision.AprilTagVision;
 import com.team6962.lib.vision.SphereClumpLocalization;
 import dev.doglog.DogLog;
@@ -31,7 +29,7 @@ import frc.robot.auto.Autonomous;
 import frc.robot.auto.DriveStraightAuto;
 import frc.robot.auto.shoot.ShooterFunctions;
 import frc.robot.constants.RobotConstants;
-import frc.robot.constants.SwerveMotionProfileConfigurer;
+import frc.robot.constants.SwerveMotionProfileConfigurator;
 import frc.robot.controls.PowerManager;
 import frc.robot.controls.TeleopControls;
 import frc.robot.subsystems.hood.ShooterHood;
@@ -44,7 +42,7 @@ import frc.robot.subsystems.visualizer.RobotVisualizer;
 
 public class RobotContainer {
   private final PowerManager powerManager;
-  private final SwerveMotionProfileConfigurer swerveMotionProfileConfigurer;
+  private final SwerveMotionProfileConfigurator swerveMotionProfileConfigurator;
   private final RobotConstants constants;
   private final CommandSwerveDrive swerveDrive;
   private final TeleopControls teleopControls;
@@ -119,17 +117,10 @@ public class RobotContainer {
     // powerManager.addListener(state ->
     // shooterRollers.setCurrentLimit(state.shooterRollerCurrentLimit));
 
-    swerveMotionProfileConfigurer = new SwerveMotionProfileConfigurer();
-    swerveMotionProfileConfigurer.addListener(
+    swerveMotionProfileConfigurator = new SwerveMotionProfileConfigurator();
+    swerveMotionProfileConfigurator.addListener(
         state -> {
-          swerveDrive
-              .getConstants()
-              .withDriving(new DrivingConstants().withMaxLinearVelocity(state.maxLinearVelocity));
-          swerveDrive
-              .getConstants()
-              .withDriveMotor(
-                  new DriveMotorConstants()
-                      .withVelocityControlMotionProfile(state.motionProfileType));
+          swerveDrive.getDynamicLimits().update(state.maxLinearVelocity, state.motionProfileType);
         });
 
     // Warm up the path following pipeline
@@ -293,8 +284,8 @@ public class RobotContainer {
     return powerManager;
   }
 
-  public SwerveMotionProfileConfigurer getSwerveMotionProfileConfigurer() {
-    return swerveMotionProfileConfigurer;
+  public SwerveMotionProfileConfigurator getSwerveMotionProfileConfigurator() {
+    return swerveMotionProfileConfigurator;
   }
 
   // public Climb getClimb() {
