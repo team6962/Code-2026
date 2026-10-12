@@ -2,14 +2,8 @@ package com.team6962.lib.vision;
 
 import static edu.wpi.first.units.Units.InchesPerSecond;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.photonvision.simulation.VisionSystemSim;
-
 import com.team6962.lib.math.TranslationalVelocity;
 import com.team6962.lib.swerve.CommandSwerveDrive;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -18,9 +12,13 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.HashMap;
+import java.util.Map;
+import org.photonvision.simulation.VisionSystemSim;
 
 /**
  * Subsystem that manages AprilTag-based vision systems for robot localization. This class
@@ -28,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * drive's odometry.
  */
 public class AprilTagVision extends SubsystemBase {
+  /** Notifier for periodic vision updates. */
+  private final Notifier notifier = new Notifier(this::update);
+
   /** The swerve drive subsystem to provide vision measurements to. */
   private final CommandSwerveDrive swerveDrive;
 
@@ -72,6 +73,9 @@ public class AprilTagVision extends SubsystemBase {
 
     DogLog.log("Vision/Cameras/Count", visionConstants.Cameras.size());
     DogLog.forceNt.log("Vision/SeenAprilTag", false);
+
+    notifier.setName("AprilTagVision");
+    notifier.startPeriodic(0.02);
   }
 
   /**
@@ -83,8 +87,7 @@ public class AprilTagVision extends SubsystemBase {
     cameras.put(camera.getName(), camera);
   }
 
-  @Override
-  public void periodic() {
+  private void update() {
     DogLog.time("Timing/AprilTagVision");
 
     // Update vision simulation with current robot pose
