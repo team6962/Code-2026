@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
@@ -162,7 +163,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                   .withDriveMotorCANId(10)
                   .withSteerMotorCANId(11)
                   .withSteerEncoderCANId(10)
-                  .withSteerEncoderOffset(Radians.of(-1.9325))
+                  .withSteerEncoderOffset(Rotations.of(-0.09737))
                   .withUniqueModuleConstants(mk4nBConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(12)
