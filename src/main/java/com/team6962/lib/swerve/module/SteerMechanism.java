@@ -391,12 +391,14 @@ public class SteerMechanism implements SwerveComponent, AutoCloseable {
 
   /**
    * Sets the current limit for the steer motor.
-   * 
-   * @param currentLimitAmps The desired current limit in amps. The actual limit will be the minimum of this value and the configured limit in the drivetrain constants.
+   *
+   * @param currentLimitAmps The desired current limit in amps. The actual limit will be the minimum
+   *     of this value and the configured limit in the drivetrain constants.
    */
   public void setCurrentLimit(double currentLimitAmps) {
     TalonFXConfiguration motorConfig = constants.getSteerMotorConfig(corner).clone();
-    motorConfig.CurrentLimits.SupplyCurrentLimit = Math.min(currentLimitAmps, motorConfig.CurrentLimits.SupplyCurrentLimit);
+    motorConfig.CurrentLimits.SupplyCurrentLimit =
+        Math.min(currentLimitAmps, motorConfig.CurrentLimits.SupplyCurrentLimit);
     StatusUtil.check(motor.getConfigurator().apply(motorConfig));
   }
 }

@@ -24,7 +24,7 @@ public class DogLogForceNt {
   }
 
   /** Log a boolean array to DataLog and NetworkTables. */
-  public void log(String key, boolean [] value) {
+  public void log(String key, boolean[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -44,7 +44,7 @@ public class DogLogForceNt {
   }
 
   /** Log a double array to DataLog and NetworkTables. */
-  public void log(String key, double [] value) {
+  public void log(String key, double[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -54,7 +54,7 @@ public class DogLogForceNt {
   }
 
   /** Log a double array with unit metadata to DataLog and NetworkTables. */
-  public void log(String key, double [] value, String unit) {
+  public void log(String key, double[] value, String unit) {
     if (!enabled) {
       return;
     }
@@ -71,7 +71,7 @@ public class DogLogForceNt {
   }
 
   /** Log a double array with unit metadata to DataLog and NetworkTables. */
-  public void log(String key, double [] value, Unit unit) {
+  public void log(String key, double[] value, Unit unit) {
     if (!enabled) {
       return;
     }
@@ -130,7 +130,7 @@ public class DogLogForceNt {
   }
 
   /** Log a float array to DataLog and NetworkTables. */
-  public void log(String key, float [] value) {
+  public void log(String key, float[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -140,7 +140,7 @@ public class DogLogForceNt {
   }
 
   /** Log a float array with unit metadata to DataLog and NetworkTables. */
-  public void log(String key, float [] value, String unit) {
+  public void log(String key, float[] value, String unit) {
     if (!enabled) {
       return;
     }
@@ -181,7 +181,7 @@ public class DogLogForceNt {
   }
 
   /** Log an int array to DataLog and NetworkTables. */
-  public void log(String key, int [] value) {
+  public void log(String key, int[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -191,7 +191,7 @@ public class DogLogForceNt {
   }
 
   /** Log a long array to DataLog and NetworkTables. */
-  public void log(String key, long [] value) {
+  public void log(String key, long[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -201,7 +201,7 @@ public class DogLogForceNt {
   }
 
   /** Log a long array with unit metadata to DataLog and NetworkTables. */
-  public void log(String key, long [] value, String unit) {
+  public void log(String key, long[] value, String unit) {
     if (!enabled) {
       return;
     }
