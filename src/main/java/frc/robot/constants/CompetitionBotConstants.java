@@ -163,7 +163,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
                   .withDriveMotorCANId(10)
                   .withSteerMotorCANId(11)
                   .withSteerEncoderCANId(10)
-                  .withSteerEncoderOffset(Rotations.of(-0.09737))
+                  .withSteerEncoderOffset(Rotations.of(0.40263))
                   .withUniqueModuleConstants(mk4nBConstants),
               new SwerveModuleConstants()
                   .withDriveMotorCANId(12)
