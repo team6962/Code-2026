@@ -51,8 +51,7 @@ public class FaultLogger {
    * @param alertType The type of alert to create for the fault, or <code>null</code> if it should
    *     not create an alert
    */
-  public static void addFault(
-      LogWriterHighLevel logger, String faultName, AlertType alertType) {
+  public static void addFault(LogWriterHighLevel logger, String faultName, AlertType alertType) {
     addFault(logger, faultName);
     if (alertType != null) {
       FAULT_ALERTS.computeIfAbsent(faultName, k -> new Alert(faultName, alertType)).set(true);

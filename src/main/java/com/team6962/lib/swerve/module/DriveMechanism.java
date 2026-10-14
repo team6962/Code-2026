@@ -36,6 +36,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
@@ -71,6 +72,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
   private StatusSignal<Voltage> appliedVoltageSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
 
   // Cached state of the mechanism
   private Angle angularPosition = Radians.of(0);
@@ -114,6 +116,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
     appliedVoltageSignal = motor.getMotorVoltage(false);
     statorCurrentSignal = motor.getStatorCurrent(false);
     supplyCurrentSignal = motor.getSupplyCurrent(false);
+    deviceHeatSignal = motor.getDeviceTemp(false);
 
     CurrentDrawLogger.add(corner.getName() + " Drive Motor", this::getSupplyCurrent);
   }
@@ -141,7 +144,8 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
       accelerationSignal,
       appliedVoltageSignal,
       statorCurrentSignal,
-      supplyCurrentSignal
+      supplyCurrentSignal,
+      deviceHeatSignal
     };
   }
 
@@ -217,6 +221,7 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
       DogLog.log(
           basePath + "DataTimestamp",
           StatusUtil.toFPGATimestamp(positionSignal.getTimestamp().getTime()));
+      DogLog.log(basePath + "Hood/Temperature", getDeviceTemp());
 
       // LoggingUtil.log(basePath + "ControlRequest", lastControlRequest);
     }
@@ -278,6 +283,15 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
    */
   public synchronized Distance getPosition() {
     return linearPosition;
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
   }
 
   /**
@@ -361,12 +375,18 @@ public class DriveMechanism implements SwerveComponent, AutoCloseable {
 
   /**
    * Sets the current limit for the drive motor.
-   * 
+   *
    * @param currentLimitAmps The current limit in amps
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    CurrentLimitsConfigs configs = constants.getDriveMotorConfig(corner.getIndex()).CurrentLimits.clone();
-    System.out.println("Setting current limit for " + corner.getName() + " drive motor to " + currentLimitAmps + " amps");
+    CurrentLimitsConfigs configs =
+        constants.getDriveMotorConfig(corner.getIndex()).CurrentLimits.clone();
+    System.out.println(
+        "Setting current limit for "
+            + corner.getName()
+            + " drive motor to "
+            + currentLimitAmps
+            + " amps");
     configs.SupplyCurrentLimit = currentLimitAmps;
     StatusUtil.check(motor.getConfigurator().apply(configs));
   }

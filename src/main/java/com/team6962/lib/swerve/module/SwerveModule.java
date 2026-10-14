@@ -204,7 +204,7 @@ public class SwerveModule implements SwerveComponent, AutoCloseable {
 
   /**
    * Sets the current limit for both the drive and steer motors.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {

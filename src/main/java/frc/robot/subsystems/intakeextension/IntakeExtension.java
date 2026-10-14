@@ -31,6 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -58,6 +59,8 @@ public class IntakeExtension extends SubsystemBase {
   private StatusSignal<Boolean> hallSensorTriggeredSignal;
 
   private StatusSignal<Double> closedLoopReferenceSignal;
+
+  private StatusSignal<Temperature> deviceHeatSignal;
 
   private IntakeExtensionSim simulation;
 
@@ -105,6 +108,7 @@ public class IntakeExtension extends SubsystemBase {
     supplyCurrentSignal = motor.getSupplyCurrent();
     hallSensorTriggeredSignal = candi.getS2Closed();
     closedLoopReferenceSignal = motor.getClosedLoopReference();
+    deviceHeatSignal = motor.getDeviceTemp();
 
     DogLog.tunable(
         "IntakeExtension/kP",
@@ -498,7 +502,8 @@ public class IntakeExtension extends SubsystemBase {
         positionSignal,
         linearAccelerationSignal,
         hallSensorTriggeredSignal,
-        closedLoopReferenceSignal);
+        closedLoopReferenceSignal,
+        deviceHeatSignal);
 
     DogLog.log("Intake/Position", getPosition());
     DogLog.log("Intake/Velocity", getVelocity());
@@ -508,7 +513,17 @@ public class IntakeExtension extends SubsystemBase {
     DogLog.log("Intake/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Intake/HallSensorTriggered", isHallSensorTriggered());
     DogLog.log("Intake/ClosedLoopReference", getClosedLoopReference());
+    DogLog.log("Intake/Temperature", getDeviceTemp());
     DogLog.forceNt.log("Intake/IsZeroed", isZeroed);
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
   }
 
   public Command zeroRetracted() {
@@ -535,6 +550,10 @@ public class IntakeExtension extends SubsystemBase {
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    motor
+        .getConfigurator()
+        .apply(
+            IntakeExtensionConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }

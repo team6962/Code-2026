@@ -6,8 +6,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -20,13 +18,13 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.MeasureUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -35,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 public class ShooterHood extends SubsystemBase {
   private final TalonFX hoodMotor;
@@ -54,6 +53,7 @@ public class ShooterHood extends SubsystemBase {
   private final StatusSignal<Current> supplyCurrentSignal;
   private final StatusSignal<Current> statorCurrentSignal;
   private final StatusSignal<Boolean> hallSensorTriggeredSignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
 
   private ShooterHoodSim simulation;
   private boolean isZeroed = false;
@@ -93,6 +93,7 @@ public class ShooterHood extends SubsystemBase {
     supplyCurrentSignal = hoodMotor.getSupplyCurrent();
     hallSensorTriggeredSignal = candi.getS1Closed();
     profileReferenceSignal = hoodMotor.getClosedLoopReference();
+    deviceHeatSignal = hoodMotor.getDeviceTemp();
 
     DogLog.tunable(
         "Hood/Hood Target Angle (Degrees)",
@@ -215,7 +216,8 @@ public class ShooterHood extends SubsystemBase {
         statorCurrentSignal,
         supplyCurrentSignal,
         profileReferenceSignal,
-        hallSensorTriggeredSignal);
+        hallSensorTriggeredSignal,
+        deviceHeatSignal);
     DogLog.log("Hood/Position", getPosition().in(Degrees), Degrees);
     DogLog.log("Hood/Velocity", getVelocity());
     DogLog.log("Hood/Acceleration", getAcceleration());
@@ -229,6 +231,7 @@ public class ShooterHood extends SubsystemBase {
         "Hood/ProfileReferenceAngle",
         Rotations.of(profileReferenceSignal.getValue()).in(Degrees),
         Degrees);
+    DogLog.log("Hood/Temperature", getDeviceTemp());
 
     // LoggingUtil.log("Hood/ControlRequest", hoodMotor.getAppliedControl());
 
@@ -325,6 +328,15 @@ public class ShooterHood extends SubsystemBase {
    */
   public boolean isHallSensorTriggered() {
     return hallSensorTriggeredSignal.getValue();
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
   }
 
   /**
@@ -522,10 +534,14 @@ public class ShooterHood extends SubsystemBase {
 
   /**
    * Sets the current limit for the hood motor.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    hoodMotor.getConfigurator().apply(ShooterHoodConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    hoodMotor
+        .getConfigurator()
+        .apply(
+            ShooterHoodConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }

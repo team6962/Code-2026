@@ -49,19 +49,20 @@ public class ThreadedLogWriter implements LogWriterHighLevel {
     queueFullMessageLock.lock();
     try {
       if (queueFullMessageCount++ == 0) {
-        System.out.println("[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for " + key);
+        System.out.println(
+            "[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for " + key);
       }
 
       if (queueFullMessageCount == MAX_QUEUE_FULL_MESSAGES) {
-      DriverStation.reportWarning(
-          "[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for "
-              + key
-              + " (additional messages will not be printed)",
-          true);
-    } else if (queueFullMessageCount < MAX_QUEUE_FULL_MESSAGES) {
-      DriverStation.reportWarning(
-          "[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for " + key, false);
-    }
+        DriverStation.reportWarning(
+            "[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for "
+                + key
+                + " (additional messages will not be printed)",
+            true);
+      } else if (queueFullMessageCount < MAX_QUEUE_FULL_MESSAGES) {
+        DriverStation.reportWarning(
+            "[DogLog] MAX_QUEUED_LOGS: Log queue is full, dropping log entry for " + key, false);
+      }
     } finally {
       queueFullMessageLock.unlock();
     }

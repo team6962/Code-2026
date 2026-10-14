@@ -18,6 +18,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +31,7 @@ public class IntakeRollers extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Voltage> appliedVoltageSignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
   private IntakeRollerSim simulation;
   private double intakeVoltage = 12.0;
   private double intakeStallVoltage = 12.0;
@@ -51,6 +53,7 @@ public class IntakeRollers extends SubsystemBase {
     this.statorCurrentSignal = leaderMotor.getStatorCurrent();
     this.supplyCurrentSignal = followerMotor.getSupplyCurrent();
     this.appliedVoltageSignal = leaderMotor.getMotorVoltage();
+    this.deviceHeatSignal = leaderMotor.getDeviceTemp();
     if (RobotBase.isSimulation()) {
       simulation = new IntakeRollerSim(leaderMotor);
     }
@@ -174,11 +177,16 @@ public class IntakeRollers extends SubsystemBase {
     }
     StatusUtil.check(
         BaseStatusSignal.refreshAll(
-            velocitySignal, statorCurrentSignal, supplyCurrentSignal, appliedVoltageSignal));
+            velocitySignal,
+            statorCurrentSignal,
+            supplyCurrentSignal,
+            appliedVoltageSignal,
+            deviceHeatSignal));
     DogLog.log("intakeRollers/velocity", getVelocity());
     DogLog.log("intakeRollers/statorCurrent", getStatorCurrent());
     DogLog.log("intakeRollers/supplyCurrent", getSupplyCurrent());
     DogLog.log("intakeRollers/appliedVoltage", getAppliedVoltage());
+    DogLog.log("intakeRollers/temperature", getDeviceTemp());
     DogLog.log("intakeRollers/stalling", stalling);
 
     stalling =
@@ -187,17 +195,30 @@ public class IntakeRollers extends SubsystemBase {
   }
 
   /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
+  }
+
+  /**
    * Sets the current limit for the intake rollers motors.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
     leaderMotor
-            .getConfigurator()
-            .apply(IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+        .getConfigurator()
+        .apply(
+            IntakeRollersConstants.LEADER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
 
-        followerMotor
-            .getConfigurator()
-            .apply(IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    followerMotor
+        .getConfigurator()
+        .apply(
+            IntakeRollersConstants.FOLLOWER_MOTOR_CONFIGURATION.CurrentLimits
+                .withSupplyCurrentLimit(currentLimitAmps));
   }
 }

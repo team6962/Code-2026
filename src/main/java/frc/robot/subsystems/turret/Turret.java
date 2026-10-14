@@ -6,8 +6,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -22,13 +20,13 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
 import com.team6962.lib.math.AngleMath;
 import com.team6962.lib.math.MeasureUtil;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotState;
@@ -37,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 
 /**
  * Subsystem for controlling the turret mechanism, which rotates the shooter around a vertical axis.
@@ -57,6 +56,7 @@ public class Turret extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Double> profilePositionSignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
 
   /** The simulation object that simulates the turret's behavior */
   private TurretSim simulation;
@@ -114,6 +114,7 @@ public class Turret extends SubsystemBase {
     statorCurrentSignal = motor.getStatorCurrent();
     supplyCurrentSignal = motor.getSupplyCurrent();
     profilePositionSignal = motor.getClosedLoopReference();
+    deviceHeatSignal = motor.getDeviceTemp();
 
     // Tunable angle input, PID values, Motion Magic constraints
     DogLog.tunable(
@@ -212,7 +213,8 @@ public class Turret extends SubsystemBase {
         voltageSignal,
         statorCurrentSignal,
         supplyCurrentSignal,
-        profilePositionSignal);
+        profilePositionSignal,
+        deviceHeatSignal);
 
     // Log all status signals and the current control request to NetworkTables
     DogLog.log("Turret/Position", getPosition());
@@ -227,6 +229,7 @@ public class Turret extends SubsystemBase {
         "Turret/ProfilePosition",
         Rotations.of(profilePositionSignal.getValue()).in(Radians),
         Radians);
+    DogLog.log("Turret/Temperature", getDeviceTemp());
 
     // LoggingUtil.log("Turret/ControlRequest", motor.getAppliedControl());
 
@@ -295,6 +298,15 @@ public class Turret extends SubsystemBase {
    */
   public Current getSupplyCurrent() {
     return supplyCurrentSignal.getValue();
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
   }
 
   /**

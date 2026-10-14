@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -19,12 +17,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.team6962.lib.logging.CurrentDrawLogger;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import java.util.function.Supplier;
 
 /** this is the subsystem for the flywheels that both makes the motor go and records motor values */
 public class ShooterRollers extends SubsystemBase {
@@ -45,6 +44,8 @@ public class ShooterRollers extends SubsystemBase {
   private StatusSignal<Current> otherSupplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
+  private StatusSignal<Temperature> shooterRoller1deviceHeatSignal;
+  private StatusSignal<Temperature> shooterRoller2deviceHeatSignal;
   private ShooterRollersSim simulation;
 
   public ShooterRollers() {
@@ -77,6 +78,8 @@ public class ShooterRollers extends SubsystemBase {
     supplyCurrentSignal = shooterRollerMotor1.getSupplyCurrent();
     statorCurrentSignal = shooterRollerMotor1.getStatorCurrent();
     otherSupplyCurrentSignal = shooterRollerMotor2.getSupplyCurrent();
+    shooterRoller1deviceHeatSignal = shooterRollerMotor1.getDeviceTemp();
+    shooterRoller2deviceHeatSignal = shooterRollerMotor2.getDeviceTemp();
 
     DogLog.tunable(
         "Shooter Rollers/TargetVelocity",
@@ -201,12 +204,16 @@ public class ShooterRollers extends SubsystemBase {
         supplyCurrentSignal,
         otherSupplyCurrentSignal,
         statorCurrentSignal,
-        accelerationSignal);
+        accelerationSignal,
+        shooterRoller1deviceHeatSignal,
+        shooterRoller2deviceHeatSignal);
     DogLog.log("Shooter Rollers/voltage", getMotorVoltage());
     DogLog.log("Shooter Rollers/angularVelocity", getAngularVelocity());
     DogLog.log("Shooter Rollers/statorCurrent", getStatorCurrent());
     DogLog.log("Shooter Rollers/angularAcceleration", getAngularAcceleration());
     DogLog.log("Shooter Rollers/supplyCurrent", getSupplyCurrent());
+    DogLog.log("Shooter Roller 1/temperature", getShooterRoller1Temperature());
+    DogLog.log("Shooter Roller 2/temperature", getShooterRoller2Temperature());
   }
 
   /** gets the angular velocity */
@@ -232,6 +239,24 @@ public class ShooterRollers extends SubsystemBase {
   /** gets the motor voltage */
   public Voltage getMotorVoltage() {
     return voltageSignal.getValue();
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getShooterRoller1Temperature() {
+    return shooterRoller1deviceHeatSignal.getValue();
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getShooterRoller2Temperature() {
+    return shooterRoller2deviceHeatSignal.getValue();
   }
 
   public Command sysId() {
@@ -262,7 +287,7 @@ public class ShooterRollers extends SubsystemBase {
 
   /**
    * Sets the current limit for both shooter roller motors.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
@@ -272,7 +297,11 @@ public class ShooterRollers extends SubsystemBase {
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
 
-    shooterRollerMotor1.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    shooterRollerMotor1
+        .getConfigurator()
+        .apply(
+            ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
 
     ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted =
         ShooterRollersConstants.MOTOR_CONFIGURATION.MotorOutput.Inverted
@@ -280,6 +309,10 @@ public class ShooterRollers extends SubsystemBase {
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
 
-    shooterRollerMotor2.getConfigurator().apply(ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    shooterRollerMotor2
+        .getConfigurator()
+        .apply(
+            ShooterRollersConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }

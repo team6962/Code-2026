@@ -359,8 +359,7 @@ public class TeleopControls extends SubsystemBase {
 
     // operator
     //     .rightTrigger()
-    shootButtonsTrigger =
-        operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
+    shootButtonsTrigger = operator.rightTrigger().or(driver.back()).and(RobotState::isEnabled);
 
     shootButtonsTrigger
         .and(inAllianceZone)
@@ -474,13 +473,13 @@ public class TeleopControls extends SubsystemBase {
     }
 
     if (RobotState.isTeleop()) {
-        if (driver.rightTrigger().getAsBoolean()) {
-            robot.getPowerManager().setState(PowerManager.State.TURBO);
-        } else if (shootButtonsTrigger.or(operator.a()).or(operator.leftTrigger()).getAsBoolean()) {
-            robot.getPowerManager().setState(PowerManager.State.SHOOTING);
-        } else {
-            robot.getPowerManager().setState(PowerManager.State.TELEOP);
-        }
+      if (driver.rightTrigger().getAsBoolean()) {
+        robot.getPowerManager().setState(PowerManager.State.TURBO);
+      } else if (shootButtonsTrigger.or(operator.a()).or(operator.leftTrigger()).getAsBoolean()) {
+        robot.getPowerManager().setState(PowerManager.State.SHOOTING);
+      } else {
+        robot.getPowerManager().setState(PowerManager.State.TELEOP);
+      }
     }
 
     ControllerLogging.logInputs(driver.getHID());

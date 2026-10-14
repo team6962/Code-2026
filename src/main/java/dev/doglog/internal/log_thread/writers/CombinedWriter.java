@@ -177,8 +177,7 @@ public class CombinedWriter {
   public <T extends StructSerializable> void log(
       long timestamp, String key, boolean forceNt, T[] value) {
     @SuppressWarnings("unchecked")
-    var maybeStruct =
-        structRegistry.getStruct((Class<T>) value.getClass().getComponentType());
+    var maybeStruct = structRegistry.getStruct((Class<T>) value.getClass().getComponentType());
 
     if (maybeStruct.isPresent()) {
       @SuppressWarnings("unchecked")
@@ -209,8 +208,7 @@ public class CombinedWriter {
 
   @SuppressWarnings("unchecked")
   public <E extends Enum<E>> void log(long timestamp, String key, boolean forceNt, E value) {
-    var struct =
-        (Struct<E>) structRegistry.getEnumStruct((Class<E>) value.getDeclaringClass());
+    var struct = (Struct<E>) structRegistry.getEnumStruct((Class<E>) value.getDeclaringClass());
 
     if (struct.getSize() == 0) {
       // The struct is empty, just log the enum name as a string
@@ -224,8 +222,7 @@ public class CombinedWriter {
   @SuppressWarnings("unchecked")
   public <E extends Enum<E>> void log(long timestamp, String key, boolean forceNt, E[] value) {
     var struct =
-        (Struct<E>)
-            structRegistry.getEnumStruct((Class<E>) value.getClass().getComponentType());
+        (Struct<E>) structRegistry.getEnumStruct((Class<E>) value.getClass().getComponentType());
 
     if (struct.getSize() == 0) {
       // The struct is empty, just log the enum names as a string array

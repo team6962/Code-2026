@@ -13,6 +13,7 @@ import com.team6962.lib.phoenix.StatusUtil;
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +29,7 @@ public class Kicker extends SubsystemBase {
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<AngularVelocity> motorVelocitySignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
   private KickerSim simulation;
 
   private Voltage feedVoltage = Volts.of(12);
@@ -43,6 +45,7 @@ public class Kicker extends SubsystemBase {
     statorCurrentSignal = kickerMotor.getStatorCurrent();
     supplyCurrentSignal = kickerMotor.getSupplyCurrent();
     appliedVoltageSignal = kickerMotor.getMotorVoltage();
+    deviceHeatSignal = kickerMotor.getDeviceTemp();
 
     DogLog.tunable(
         "Hopper/Kicker/AppliedVoltage",
@@ -160,24 +163,38 @@ public class Kicker extends SubsystemBase {
 
     StatusUtil.check(
         BaseStatusSignal.refreshAll(
-            motorVelocitySignal, statorCurrentSignal, supplyCurrentSignal, appliedVoltageSignal));
+            motorVelocitySignal,
+            statorCurrentSignal,
+            supplyCurrentSignal,
+            appliedVoltageSignal,
+            deviceHeatSignal));
     DogLog.log("Hopper/Kicker/AngularVelocity", getVelocity());
     DogLog.log("Hopper/Kicker/StatorCurrent", getStatorCurrent());
     DogLog.log("Hopper/Kicker/SupplyCurrent", getSupplyCurrent());
     DogLog.log("Hopper/Kicker/AppliedVoltage", getAppliedVoltage());
+    DogLog.log("Hopper/Kicker/Temperature", getDeviceTemp());
+  }
+
+  /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
   }
 
   /**
    * Sets the current limit for the kicker motor.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
     kickerMotor
-            .getConfigurator()
-            .apply(
-                HopperConstants.KICKER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
-                    currentLimitAmps),
-                0.001);
+        .getConfigurator()
+        .apply(
+            HopperConstants.KICKER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps),
+            0.001);
   }
 }

@@ -5,26 +5,25 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
+import java.util.function.Supplier;
 
 public class RollerFloor extends SubsystemBase {
   private TalonFX rollerFloorMotor;
@@ -34,6 +33,7 @@ public class RollerFloor extends SubsystemBase {
   private StatusSignal<Current> supplyCurrentSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private StatusSignal<Voltage> voltageSignal;
+  private StatusSignal<Temperature> deviceHeatSignal;
   private RollerFloorSim simulation;
 
   private Voltage feedVoltage = Volts.of(7);
@@ -54,6 +54,7 @@ public class RollerFloor extends SubsystemBase {
     accelerationSignal = rollerFloorMotor.getAcceleration();
     supplyCurrentSignal = rollerFloorMotor.getSupplyCurrent();
     statorCurrentSignal = rollerFloorMotor.getStatorCurrent();
+    deviceHeatSignal = rollerFloorMotor.getDeviceTemp();
 
     // Setup tunable dashboard control for testing
     DogLog.tunable(
@@ -154,13 +155,15 @@ public class RollerFloor extends SubsystemBase {
         voltageSignal,
         supplyCurrentSignal,
         statorCurrentSignal,
-        accelerationSignal);
+        accelerationSignal,
+        deviceHeatSignal);
     DogLog.log("Hopper/RollerFloor/Voltage", getMotorVoltage());
     DogLog.log("Hopper/RollerFloor/AngularVelocity", getAngularVelocity());
     DogLog.log("Hopper/RollerFloor/BeltVelocity", getLinearVelocity());
     DogLog.log("Hopper/RollerFloor/StatorCurrent", getStatorCurrent());
     DogLog.log("Hopper/RollerFloor/AngularAcceleration", getAngularAcceleration());
     DogLog.log("Hopper/RollerFloor/SupplyCurrent", getSupplyCurrent());
+    DogLog.log("Hopper/RollerFloor/Temperature", getDeviceTemp());
   }
 
   /** gets the angular velocity */
@@ -198,11 +201,24 @@ public class RollerFloor extends SubsystemBase {
   }
 
   /**
+   * Gets the motor tempreture
+   *
+   * @return the motor temperature
+   */
+  public Temperature getDeviceTemp() {
+    return deviceHeatSignal.getValue();
+  }
+
+  /**
    * Sets the current limit for the roller floor motor.
    *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    rollerFloorMotor.getConfigurator().apply(HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    rollerFloorMotor
+        .getConfigurator()
+        .apply(
+            HopperConstants.ROLLER_FLOOR_MOTOR_CONFIG.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }
