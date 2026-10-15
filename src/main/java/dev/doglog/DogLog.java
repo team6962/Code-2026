@@ -135,7 +135,7 @@ public class DogLog {
   }
 
   /** Log a boolean array. */
-  public static void log(String key, boolean [] value) {
+  public static void log(String key, boolean[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -155,7 +155,7 @@ public class DogLog {
   }
 
   /** Log a double array. */
-  public static void log(String key, double [] value) {
+  public static void log(String key, double[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -165,7 +165,7 @@ public class DogLog {
   }
 
   /** Log a double array with unit metadata. */
-  public static void log(String key, double [] value, String unit) {
+  public static void log(String key, double[] value, String unit) {
     if (!enabled) {
       return;
     }
@@ -182,7 +182,7 @@ public class DogLog {
   }
 
   /** Log a double array with unit metadata. */
-  public static void log(String key, double [] value, Unit unit) {
+  public static void log(String key, double[] value, Unit unit) {
     if (!enabled) {
       return;
     }
@@ -241,7 +241,7 @@ public class DogLog {
   }
 
   /** Log a float array. */
-  public static void log(String key, float [] value) {
+  public static void log(String key, float[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -251,7 +251,7 @@ public class DogLog {
   }
 
   /** Log a float array with unit metadata. */
-  public static void log(String key, float [] value, String unit) {
+  public static void log(String key, float[] value, String unit) {
     if (!enabled) {
       return;
     }
@@ -292,7 +292,7 @@ public class DogLog {
   }
 
   /** Log an int array. */
-  public static void log(String key, int [] value) {
+  public static void log(String key, int[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -302,7 +302,7 @@ public class DogLog {
   }
 
   /** Log a long array. */
-  public static void log(String key, long [] value) {
+  public static void log(String key, long[] value) {
     if (!enabled || value == null) {
       return;
     }
@@ -312,7 +312,7 @@ public class DogLog {
   }
 
   /** Log a long array with unit metadata. */
-  public static void log(String key, long [] value, String unit) {
+  public static void log(String key, long[] value, String unit) {
     if (!enabled) {
       return;
     }
@@ -624,8 +624,7 @@ public class DogLog {
    * @param onChange A function to call when the tunable value changes.
    * @return A {@link DoubleSubscriber} used to retrieve the tunable value.
    */
-  public static DoubleSubscriber tunable(
-      String key, double defaultValue, DoubleConsumer onChange) {
+  public static DoubleSubscriber tunable(String key, double defaultValue, DoubleConsumer onChange) {
     return tunable.create(key, defaultValue, null, onChange);
   }
 
@@ -743,8 +742,7 @@ public class DogLog {
    * @param unit The unit for the tunable value.
    * @return A {@link DoubleArraySubscriber} used to retrieve the tunable value.
    */
-  public static DoubleArraySubscriber tunable(
-      String key, double[] defaultValue, String unit) {
+  public static DoubleArraySubscriber tunable(String key, double[] defaultValue, String unit) {
     return tunable(key, defaultValue, unit, (Consumer<double[]>) null);
   }
 
@@ -758,10 +756,7 @@ public class DogLog {
    * @return A {@link DoubleArraySubscriber} used to retrieve the tunable value.
    */
   public static DoubleArraySubscriber tunable(
-      String key,
-      double[] defaultValue,
-      String unit,
-      Consumer<double[]> onChange) {
+      String key, double[] defaultValue, String unit, Consumer<double[]> onChange) {
     return tunable.create(key, defaultValue, unit, onChange);
   }
 
@@ -773,8 +768,7 @@ public class DogLog {
    * @param unit The unit for the tunable value.
    * @return A {@link DoubleArraySubscriber} used to retrieve the tunable value.
    */
-  public static DoubleArraySubscriber tunable(
-      String key, double[] defaultValue, Unit unit) {
+  public static DoubleArraySubscriber tunable(String key, double[] defaultValue, Unit unit) {
     return tunable(key, defaultValue, unit, (Consumer<double[]>) null);
   }
 
@@ -788,10 +782,7 @@ public class DogLog {
    * @return A {@link DoubleArraySubscriber} used to retrieve the tunable value.
    */
   public static DoubleArraySubscriber tunable(
-      String key,
-      double[] defaultValue,
-      Unit unit,
-      Consumer<double[]> onChange) {
+      String key, double[] defaultValue, Unit unit, Consumer<double[]> onChange) {
     if (unit == null) {
       return tunable(key, defaultValue, onChange);
     }
@@ -817,8 +808,7 @@ public class DogLog {
    * @param onChange A function to call when the tunable value changes.
    * @return A {@link FloatSubscriber} used to retrieve the tunable value.
    */
-  public static FloatSubscriber tunable(
-      String key, float defaultValue, FloatConsumer onChange) {
+  public static FloatSubscriber tunable(String key, float defaultValue, FloatConsumer onChange) {
     return tunable.create(key, defaultValue, null, onChange);
   }
 
@@ -944,8 +934,7 @@ public class DogLog {
    * @param onChange A function to call when the tunable value changes.
    * @return An {@link IntegerSubscriber} used to retrieve the tunable value.
    */
-  public static IntegerSubscriber tunable(
-      String key, long defaultValue, LongConsumer onChange) {
+  public static IntegerSubscriber tunable(String key, long defaultValue, LongConsumer onChange) {
     return tunable.create(key, defaultValue, null, onChange);
   }
 

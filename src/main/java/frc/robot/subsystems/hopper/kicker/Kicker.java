@@ -169,15 +169,15 @@ public class Kicker extends SubsystemBase {
 
   /**
    * Sets the current limit for the kicker motor.
-   * 
+   *
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
     kickerMotor
-            .getConfigurator()
-            .apply(
-                HopperConstants.KICKER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
-                    currentLimitAmps),
-                0.001);
+        .getConfigurator()
+        .apply(
+            HopperConstants.KICKER_MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps),
+            0.001);
   }
 }

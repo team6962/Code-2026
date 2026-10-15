@@ -101,13 +101,19 @@ public class RobotContainer {
 
     powerManager = new PowerManager();
     powerManager.addListener(state -> swerveDrive.setCurrentLimit(state.driveCurrentLimit));
-    // powerManager.addListener(state -> shooterHood.setCurrentLimit(state.shooterHoodCurrentLimit));
-    // powerManager.addListener(state -> hopper.getFloor().setCurrentLimit(state.hopperCurrentLimit));
-    // powerManager.addListener(state -> hopper.getKicker().setCurrentLimit(state.queueCurrentLimit));
-    // powerManager.addListener(state -> intakeExtension.setCurrentLimit(state.intakeExtensionCurrentLimit));
-    // powerManager.addListener(state -> intakeRollers.setCurrentLimit(state.intakeRollerCurrentLimit));
+    // powerManager.addListener(state ->
+    // shooterHood.setCurrentLimit(state.shooterHoodCurrentLimit));
+    // powerManager.addListener(state ->
+    // hopper.getFloor().setCurrentLimit(state.hopperCurrentLimit));
+    // powerManager.addListener(state ->
+    // hopper.getKicker().setCurrentLimit(state.queueCurrentLimit));
+    // powerManager.addListener(state ->
+    // intakeExtension.setCurrentLimit(state.intakeExtensionCurrentLimit));
+    // powerManager.addListener(state ->
+    // intakeRollers.setCurrentLimit(state.intakeRollerCurrentLimit));
     // powerManager.addListener(state -> turret.setCurrentLimit(state.shooterTurretCurrentLimit));
-    // powerManager.addListener(state -> shooterRollers.setCurrentLimit(state.shooterRollerCurrentLimit));
+    // powerManager.addListener(state ->
+    // shooterRollers.setCurrentLimit(state.shooterRollerCurrentLimit));
 
     // Warm up the path following pipeline
     CommandScheduler.getInstance()
@@ -156,6 +162,12 @@ public class RobotContainer {
     autoChooser.addOption(
         "Safe Left Double Sweep Bump",
         new AutoChooserOption(autonomous.safeLeftDoubleSweepBump(), true));
+    autoChooser.addOption(
+        "Sunset Showdown Auto Right",
+        new AutoChooserOption(autonomous.sunsetShowdownAutoRight(), true));
+    autoChooser.addOption(
+        "Sunset Showdown Auto Left",
+        new AutoChooserOption(autonomous.sunsetShowdownAutoLeft(), true));
 
     autoChooser.addOption(
         "Back Up and Shoot Preload",

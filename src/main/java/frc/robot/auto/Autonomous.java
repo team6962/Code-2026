@@ -61,8 +61,6 @@ public class Autonomous {
   private static Pose2d LEFT_START_POSE =
       new Pose2d(4.396968364715576, 7.652250289916992, new Rotation2d(Degrees.of(-90)));
 
-
-
   // Auto starting at the Mid-Hub position, moving backwards and then shooting.
   public Command moveBackwardAndShoot() {
     AutoShoot autoShoot = new AutoShoot(robot);
@@ -176,6 +174,58 @@ public class Autonomous {
         robot.getSwerveDrive().followPath(pathName + ".7", rightSide));
   }
 
+  public Command sunsetShowdownAuto(boolean rightSide) {
+    String pathName = "sunset_showdown_auto";
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
+    robot.getSwerveDrive().loadChoreoPath(pathName + ".6");
+
+    return Commands.sequence(
+        Commands.runOnce(
+            () ->
+                robot
+                    .getSwerveDrive()
+                    .getLocalization()
+                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".0", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".1", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".2", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
+        Commands.parallel(
+            robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
+            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".4", rightSide)
+            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
+        robot
+            .getSwerveDrive()
+            .followPath(pathName + ".5", rightSide)
+            .deadlineFor(
+                robot.getIntakeExtension().extend(),
+                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
+                shootFuel.aim()),
+        Commands.parallel(
+            robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
+            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
+        robot.getSwerveDrive().followPath(pathName + ".7", rightSide));
+  }
+
   public Command greedyLeftDoubleSweepBump() {
     return greedyDoubleSweepBump(false);
   }
@@ -190,6 +240,14 @@ public class Autonomous {
 
   public Command safeRightDoubleSweepBump() {
     return safeDoubleSweepBump(true);
+  }
+
+  public Command sunsetShowdownAutoLeft() {
+    return sunsetShowdownAuto(false);
+  }
+
+  public Command sunsetShowdownAutoRight() {
+    return sunsetShowdownAuto(true);
   }
 
   public Command preload() {

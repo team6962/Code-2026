@@ -535,6 +535,10 @@ public class IntakeExtension extends SubsystemBase {
    * @param currentLimitAmps The desired current limit in amps.
    */
   public void setCurrentLimit(double currentLimitAmps) {
-    motor.getConfigurator().apply(IntakeExtensionConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(currentLimitAmps));
+    motor
+        .getConfigurator()
+        .apply(
+            IntakeExtensionConstants.MOTOR_CONFIGURATION.CurrentLimits.withSupplyCurrentLimit(
+                currentLimitAmps));
   }
 }
