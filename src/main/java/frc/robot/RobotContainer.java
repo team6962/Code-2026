@@ -145,20 +145,8 @@ public class RobotContainer {
     }
 
     autoChooser.addOption(
-        "Left Single Neutral Cycle",
-        new AutoChooserOption(autonomous.leftSingleNeutralCycle(), false));
-    autoChooser.addOption(
-        "Left Double Neutral Cycle",
-        new AutoChooserOption(autonomous.leftDoubleNeutralCycle(), false));
-    autoChooser.addOption(
         "Greedy Left Double Sweep Bump",
         new AutoChooserOption(autonomous.greedyLeftDoubleSweepBump(), true));
-    autoChooser.addOption(
-        "Right Single Neutral Cycle",
-        new AutoChooserOption(autonomous.rightSingleNeutralCycle(), false));
-    autoChooser.addOption(
-        "Right Double Neutral Cycle",
-        new AutoChooserOption(autonomous.rightDoubleNeutralCycle(), false));
     autoChooser.addOption(
         "Greedy Right Double Sweep Bump",
         new AutoChooserOption(autonomous.greedyRightDoubleSweepBump(), true));
@@ -169,7 +157,6 @@ public class RobotContainer {
         "Safe Left Double Sweep Bump",
         new AutoChooserOption(autonomous.safeLeftDoubleSweepBump(), true));
 
-    autoChooser.addOption("Shoot Preload", new AutoChooserOption(autonomous.preload(), true));
     autoChooser.addOption(
         "Back Up and Shoot Preload",
         new AutoChooserOption(autonomous.moveBackwardAndShoot(), true));
@@ -179,7 +166,7 @@ public class RobotContainer {
     autoChooser.addOption("Center from Hub", new AutoChooserOption(autonomous.center(true), true));
 
     autoChooser.addOption(
-        "Drive Straight", new AutoChooserOption(driveStraightAuto.getCommand(), true));
+        "Drive Straight", new AutoChooserOption(driveStraightAuto.getCommand(), false));
 
     autoChooser.addOption(
         "SysId Shooter Rollers", new AutoChooserOption(shooterRollers.sysId(), false));
