@@ -151,22 +151,16 @@ public class RobotContainer {
     }
 
     autoChooser.addOption(
-        "Greedy Left Double Sweep Bump",
-        new AutoChooserOption(autonomous.greedyLeftDoubleSweepBump(), true));
+        "Right Madtown Auto",
+        new AutoChooserOption(autonomous.leftMadtownAuto(), true));
     autoChooser.addOption(
-        "Greedy Right Double Sweep Bump",
-        new AutoChooserOption(autonomous.greedyRightDoubleSweepBump(), true));
+        "Left Madtown Auto",
+        new AutoChooserOption(autonomous.rightMadtownAuto(), true));
     autoChooser.addOption(
-        "Safe Right Double Sweep Bump",
-        new AutoChooserOption(autonomous.safeRightDoubleSweepBump(), true));
-    autoChooser.addOption(
-        "Safe Left Double Sweep Bump",
-        new AutoChooserOption(autonomous.safeLeftDoubleSweepBump(), true));
-    autoChooser.addOption(
-        "Sunset Showdown Auto Right",
+        "Right Sunset Showdown Auto",
         new AutoChooserOption(autonomous.sunsetShowdownAutoRight(), true));
     autoChooser.addOption(
-        "Sunset Showdown Auto Left",
+        "Left Sunset Showdown Auto",
         new AutoChooserOption(autonomous.sunsetShowdownAutoLeft(), true));
 
     autoChooser.addOption(

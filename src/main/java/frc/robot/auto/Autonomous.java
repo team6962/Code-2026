@@ -70,60 +70,8 @@ public class Autonomous {
             shootFuel.shoot().onlyWhile(autoShoot.isReadyToShoot()).repeatedly(), autoShoot));
   }
 
-  public Command greedyDoubleSweepBump(boolean rightSide) {
-    String pathName = "greedy_double_sweep_bump";
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".3");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".4");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".5");
-    robot.getSwerveDrive().loadChoreoPath(pathName + ".6");
-
-    return Commands.sequence(
-        Commands.runOnce(
-            () ->
-                robot
-                    .getSwerveDrive()
-                    .getLocalization()
-                    .resetPosition(mirrorPose(LEFT_START_POSE, rightSide))),
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".0", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".1", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".2", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(),
-                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
-                shootFuel.aim()),
-        Commands.parallel(
-            robot.getSwerveDrive().followPath(pathName + ".3", rightSide),
-            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".4", rightSide)
-            .deadlineFor(robot.getIntakeExtension().extend(), robot.getIntakeRollers().intake()),
-        robot
-            .getSwerveDrive()
-            .followPath(pathName + ".5", rightSide)
-            .deadlineFor(
-                robot.getIntakeExtension().extend(),
-                robot.getHopper().unjam().withTimeout(0.1).andThen(robot.getHopper().load()),
-                shootFuel.aim()),
-        Commands.parallel(
-            robot.getSwerveDrive().followPath(pathName + ".6", rightSide),
-            shootFuel.shootAllFuelOnTheMove().withTimeout(6)),
-        robot.getSwerveDrive().followPath(pathName + ".7", rightSide));
-  }
-
-  public Command safeDoubleSweepBump(boolean rightSide) {
-    String pathName = "safe_double_sweep_bump";
+  public Command madtownAuto(boolean rightSide) {
+    String pathName = "madtown_auto";
     robot.getSwerveDrive().loadChoreoPath(pathName + ".0");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".1");
     robot.getSwerveDrive().loadChoreoPath(pathName + ".2");
@@ -226,20 +174,12 @@ public class Autonomous {
         robot.getSwerveDrive().followPath(pathName + ".7", rightSide));
   }
 
-  public Command greedyLeftDoubleSweepBump() {
-    return greedyDoubleSweepBump(false);
+  public Command rightMadtownAuto() {
+    return madtownAuto(false);
   }
 
-  public Command greedyRightDoubleSweepBump() {
-    return greedyDoubleSweepBump(true);
-  }
-
-  public Command safeLeftDoubleSweepBump() {
-    return safeDoubleSweepBump(false);
-  }
-
-  public Command safeRightDoubleSweepBump() {
-    return safeDoubleSweepBump(true);
+  public Command leftMadtownAuto() {
+    return madtownAuto(true);
   }
 
   public Command sunsetShowdownAutoLeft() {
