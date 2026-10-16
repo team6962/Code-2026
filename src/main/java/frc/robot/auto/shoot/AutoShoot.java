@@ -110,6 +110,9 @@ public class AutoShoot extends Command {
   private Angle hoodAngleTolerance;
   private Angle turretAngleTolerance;
   private String loggingName;
+  private Supplier<Angle> turretAngleOverride;
+  private Supplier<Angle> hoodAngleOverride;
+  private Supplier<AngularVelocity> rollerVelocityOverride;
 
   /**
    * Creates a new AutoShoot command, which automatically aims and spins up the shooter rollers to
@@ -186,6 +189,7 @@ public class AutoShoot extends Command {
         shooterFunctions,
         targetSupplier,
         () -> null,
+        () -> null,
         () -> null);
   }
 
@@ -206,8 +210,12 @@ public class AutoShoot extends Command {
       ShooterRollers rollers,
       ShooterFunctions shooterFunctions,
       Supplier<Translation2d> targetSupplier,
+      Supplier<Angle> turretAngleOverride,
       Supplier<Angle> hoodAngleOverride,
       Supplier<AngularVelocity> rollerVelocityOverride) {
+    this.turretAngleOverride = turretAngleOverride;
+    this.hoodAngleOverride = hoodAngleOverride;
+    this.rollerVelocityOverride = rollerVelocityOverride;
     this.swerveDrive = swerveDrive;
     this.turret = turret;
     this.hood = hood;
@@ -253,7 +261,17 @@ public class AutoShoot extends Command {
     Trigger runningTrigger = new Trigger(() -> thisCommandRunning);
 
     Command turretCommand =
-        turret.track(() -> turretAngleTarget, () -> turretVelocityTarget).repeatedly();
+        turret
+            .track(
+                () ->
+                    turretAngleOverride.get() != null
+                        ? turretAngleOverride.get()
+                        : turretAngleTarget,
+                () ->
+                    turretAngleOverride.get() != null
+                        ? RotationsPerSecond.of(0)
+                        : turretVelocityTarget)
+            .repeatedly();
     Command hoodCommand =
         hood.track(
                 () -> hoodAngleOverride.get() != null ? hoodAngleOverride.get() : hoodAngleTarget,
@@ -574,10 +592,14 @@ public class AutoShoot extends Command {
     // angles
     // and roller speed
     readyToShoot =
-        rollers.getAngularVelocity().isNear(rollerSpeedTarget, flywheelVelocityTolerance)
-            && hood.getPosition().isNear(hoodAngleTarget, hoodAngleTolerance)
-            && AngleMath.toContinuous(AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
-                .isNear(turretAngleTarget, turretAngleTolerance);
+        (rollers.getAngularVelocity().isNear(rollerSpeedTarget, flywheelVelocityTolerance)
+                || rollerVelocityOverride.get() != null)
+            && (hood.getPosition().isNear(hoodAngleTarget, hoodAngleTolerance)
+                || hoodAngleOverride.get() != null)
+            && (AngleMath.toContinuous(
+                        AngleMath.toDiscrete(turret.getPosition()), turretAngleTarget)
+                    .isNear(turretAngleTarget, turretAngleTolerance)
+                || turretAngleOverride.get() != null);
 
     thisCommandRunning = true;
 

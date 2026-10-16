@@ -62,7 +62,7 @@ public class RobotContainer {
   private final Command noneAutonomous = Commands.none();
 
   public RobotContainer() {
-    DogLog.setOptions(new DogLogOptions().withNtPublish(false));
+    DogLog.setOptions(new DogLogOptions().withNtPublish(RobotBase.isSimulation()));
 
     LoggingUtil.logGitProperties();
     RobotController.setBrownoutVoltage(5.4);
@@ -151,11 +151,9 @@ public class RobotContainer {
     }
 
     autoChooser.addOption(
-        "Right Madtown Auto",
-        new AutoChooserOption(autonomous.leftMadtownAuto(), true));
+        "Right Madtown Auto", new AutoChooserOption(autonomous.leftMadtownAuto(), true));
     autoChooser.addOption(
-        "Left Madtown Auto",
-        new AutoChooserOption(autonomous.rightMadtownAuto(), true));
+        "Left Madtown Auto", new AutoChooserOption(autonomous.rightMadtownAuto(), true));
     autoChooser.addOption(
         "Right Sunset Showdown Auto",
         new AutoChooserOption(autonomous.sunsetShowdownAutoRight(), true));

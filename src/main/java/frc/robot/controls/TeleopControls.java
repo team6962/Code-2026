@@ -61,6 +61,7 @@ public class TeleopControls extends SubsystemBase {
   private double passMaxAngularVelocity = 0.5;
 
   private Trigger shootButtonsTrigger;
+  private boolean backupShoot;
 
   public static boolean isFineControlOn() {
     return fineControl;
@@ -198,14 +199,16 @@ public class TeleopControls extends SubsystemBase {
     // Manual lower hood
     operator.y().whileTrue(robot.getShooterHood().moveTo(ShooterHoodConstants.MIN_ANGLE));
 
-    // Fixed backup shoot
+    // Backup shoot
     operator
         .a()
-        .whileTrue(
-            Commands.parallel(
-                robot.getShooterHood().moveTo(Degrees.of(22.5)),
-                robot.getTurret().moveTo(Degrees.of(180)),
-                robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
+        .onTrue(Commands.runOnce(() -> backupShoot = true).ignoringDisable(true))
+        .onFalse(Commands.runOnce(() -> backupShoot = false).ignoringDisable(true));
+    // .whileTrue(
+    //     Commands.parallel(
+    //         robot.getShooterHood().moveTo(Degrees.of(22.5)),
+    //         robot.getTurret().moveTo(Degrees.of(180)),
+    //         robot.getShooterRollers().shoot(RotationsPerSecond.of(22.5))));
 
     // Unjam hopper - WORKS
     operator.leftBumper().or(driver.leftBumper()).whileTrue(robot.getHopper().unjam());
@@ -315,8 +318,15 @@ public class TeleopControls extends SubsystemBase {
             robot.getShooterRollers(),
             robot.getHubFunctions(),
             () -> AutoShoot.HUB_TRANSLATION,
-            () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
-            () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
+            () -> backupShoot ? Degrees.of(180) : null,
+            () ->
+                tunableHoodAngle == 0
+                    ? (backupShoot ? Degrees.of(22.5) : null)
+                    : Degrees.of(tunableHoodAngle),
+            () ->
+                tunableRollerVelocity == 0
+                    ? (backupShoot ? RotationsPerSecond.of(22.5) : null)
+                    : RotationsPerSecond.of(tunableRollerVelocity));
 
     Trigger inAllianceZone =
         new Trigger(
@@ -344,6 +354,7 @@ public class TeleopControls extends SubsystemBase {
                 robot.getSwerveDrive().getPosition2d().getY() > AutoShoot.HUB_TRANSLATION.getY()
                     ? AutoShoot.PASS_RIGHT_TRANSLATION
                     : AutoShoot.PASS_LEFT_TRANSLATION,
+            () -> null,
             () -> tunableHoodAngle == 0 ? null : Degrees.of(tunableHoodAngle),
             () -> tunableRollerVelocity == 0 ? null : RotationsPerSecond.of(tunableRollerVelocity));
 
@@ -475,7 +486,7 @@ public class TeleopControls extends SubsystemBase {
     if (RobotState.isTeleop()) {
       if (driver.rightTrigger().getAsBoolean()) {
         robot.getPowerManager().setState(PowerManager.State.TURBO);
-      } else if (shootButtonsTrigger.or(operator.a()).or(operator.leftTrigger()).getAsBoolean()) {
+      } else if (shootButtonsTrigger.or(operator.leftTrigger()).getAsBoolean()) {
         robot.getPowerManager().setState(PowerManager.State.SHOOTING);
       } else {
         robot.getPowerManager().setState(PowerManager.State.TELEOP);
