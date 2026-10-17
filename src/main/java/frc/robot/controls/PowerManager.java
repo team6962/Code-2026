@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class PowerManager extends SubsystemBase {
   public static enum State {
-    TELEOP(35, 60, 60, 20, 40, 40, 30, 40),
+    TELEOP(40, 60, 60, 20, 40, 40, 30, 40),
     SHOOTING(15, 60, 40, 20, 40, 40, 10, 20),
     TURBO(70, 60, 60, 40, 40, 40, 60, 60),
     AUTO(70, 60, 40, 20, 40, 40, 30, 60);
