@@ -146,7 +146,7 @@ public class CompetitionBotConstants extends BaseRobotConstants {
 
     return baseConstants
         .withCANBusName("drivetrain")
-        .withGyroscope(new GyroscopeConstants().withCANId(10))
+        .withGyroscope(new GyroscopeConstants().withCANId(0))
         .withStructure(
             baseConstants
                 .Structure
